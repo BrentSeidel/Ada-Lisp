@@ -31,3 +31,10 @@
 
 (defun hello (var) ((print "Hello " var) (new-line)))
 
+(defun range (val upper lower)
+   ((if (< val upper)
+      (if (> val lower)
+        (print "In range")
+        (print "Below range"))
+      (print "Above range"))
+     (new-line)))

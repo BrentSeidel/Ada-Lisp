@@ -233,15 +233,15 @@ package body ada_main is
 
 --  BEGIN Object file/option list
    --   /Volumes/Brent Local/Development/GitHub/BBS-Ada/bbs.o
-   --   /Volumes/Brent Local/Development/Ada/lisp/obj/bbs-lisp-memory.o
-   --   /Volumes/Brent Local/Development/Ada/lisp/obj/bbs-lisp-parser.o
-   --   /Volumes/Brent Local/Development/Ada/lisp/obj/bbs-lisp.o
-   --   /Volumes/Brent Local/Development/Ada/lisp/obj/bbs-lisp-utilities.o
-   --   /Volumes/Brent Local/Development/Ada/lisp/obj/bbs-lisp-evaluate.o
-   --   /Volumes/Brent Local/Development/Ada/lisp/obj/bbs-lisp-strings.o
-   --   /Volumes/Brent Local/Development/Ada/lisp/obj/lisp.o
-   --   -L/Volumes/Brent Local/Development/Ada/lisp/obj/
-   --   -L/Volumes/Brent Local/Development/Ada/lisp/obj/
+   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/bbs-lisp-memory.o
+   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/bbs-lisp-parser.o
+   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/bbs-lisp.o
+   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/bbs-lisp-utilities.o
+   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/bbs-lisp-evaluate.o
+   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/bbs-lisp-strings.o
+   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/lisp.o
+   --   -L/Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/
+   --   -L/Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/
    --   -L/Volumes/Brent Local/Development/GitHub/BBS-Ada/
    --   -L/volumes/brent local/opt/gnat/2018/lib/gcc/x86_64-apple-darwin16.7.0/7.3.1/adalib/
    --   -static

@@ -303,31 +303,6 @@ package body bbs.lisp.evaluate is
                error("eval_comp", "Unable to allocate return value.");
                return NIL_ELEM;
             end if;
---         elsif atom_table(t1.pa).kind = ATOM_SYMBOL and
---           atom_table(t2.pa).kind = ATOM_SYMBOL then
---            flag := find_symb(s, "t");
---            flag := bbs.lisp.memory.alloc(a);
---            if flag then
---               case b is
---                  when SYM_EQ =>
---                     if atom_table(t1.pa).sym = atom_table(t2.pa).sym then
---                        atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
---                        return (Kind => ATOM_TYPE, pa => a);
---                     end if;
---                  when SYM_NE =>
---                     if atom_table(t1.pa).sym /= atom_table(t2.pa).sym then
---                        atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
---                        return (Kind => ATOM_TYPE, pa => a);
---                     end if;
---                  when others =>
---                     error("eval_comp", "Unknown comparison type.");
---               end case;
---               bbs.lisp.memory.deref(a);
---               return NIL_ELEM;
---            else
---               error("eval_comp", "Unable to allocate return value.");
---               return NIL_ELEM;
---            end if;
          elsif atom_table(t1.pa).kind = ATOM_STRING and
            atom_table(t2.pa).kind = ATOM_STRING then
             flag := find_symb(s, "t");
@@ -727,12 +702,9 @@ package body bbs.lisp.evaluate is
       else
          temp := cons_table(e.ps).cdr;
          cons_table(e.ps).cdr := NIL_ELEM;
---         bbs.lisp.memory.deref(e);
          symb_table(symb) := (ref => 1, str => symb_table(symb).str,
                               kind => LAMBDA, ps => temp.ps);
          bbs.lisp.memory.ref(temp.ps);
-         Ada.Text_IO.Put("Procedure list is: ");
-         print(temp, False, True);
       end if;
       return NIL_ELEM;
    end;
@@ -750,21 +722,15 @@ package body bbs.lisp.evaluate is
       func_body : element_type;
       t1 : element_type;
       t2 : element_type;
+      ret_val : element_type;
       supplied : Integer := 0;
       requested : Integer := 0;
    begin
-      Ada.Text_IO.Put("Function definition: ");
-      print(s);
-      Ada.Text_IO.New_Line;
-      Ada.Text_IO.Put("Parameter list: ");
-      print(e, False, True);
       params := cons_table(s).car;
       func_body := cons_table(s).cdr;
       if e.kind = CONS_TYPE then
          supplied := bbs.lisp.utilities.count(e.ps);
       end if;
-      Ada.Text_IO.Put("Parameters supplied: ");
-      print(params, false, True);
       if params.kind = CONS_TYPE then
          requested := bbs.lisp.utilities.count(params.ps);
       elsif params.kind = ATOM_TYPE then
@@ -782,8 +748,6 @@ package body bbs.lisp.evaluate is
       t2 := e;
       while t2.kind = CONS_TYPE loop
          if cons_table(t1.ps).car.kind = ATOM_TYPE then
-            Ada.Text_IO.put("Assigning: ");
-            print(cons_table(t1.ps).car, False, True);
             atom_table(cons_table(t1.ps).car.pa).p_value := cons_table(t2.ps).car;
             bbs.lisp.memory.ref(cons_table(t1.ps).car);
          end if;
@@ -793,15 +757,12 @@ package body bbs.lisp.evaluate is
       --
       --  Evaluate the function
       --
-      Ada.Text_IO.Put("Evaluating: ");
-      print(cons_table(func_body.ps).car.ps);
-      Ada.Text_IO.New_Line;
       t1 := cons_table(func_body.ps).car;
-      t2 := NIL_ELEM;
+      ret_val := NIL_ELEM;
       while t1.kind = CONS_TYPE loop
          bbs.lisp.memory.deref(t2);
          if cons_table(t1.ps).car.kind = CONS_TYPE then
-            t2 := eval_dispatch(cons_table(t1.ps).car.ps);
+            ret_val := eval_dispatch(cons_table(t1.ps).car.ps);
          end if;
          t1 := cons_table(t1.ps).cdr;
       end loop;
@@ -816,7 +777,7 @@ package body bbs.lisp.evaluate is
          end if;
          t1 := cons_table(t1.ps).cdr;
       end loop;
-      return NIL_ELEM;
+      return ret_val;
    end;
    --
 end;

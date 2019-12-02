@@ -225,7 +225,7 @@ package ada_main is
    pragma Export (C, u00093, "system__bit_opsS");
    u00094 : constant Version_32 := 16#92f05f13#;
    pragma Export (C, u00094, "ada__strings__maps__constantsS");
-   u00095 : constant Version_32 := 16#dfa186e3#;
+   u00095 : constant Version_32 := 16#b40b1137#;
    pragma Export (C, u00095, "bbs__lisp__evaluateB");
    u00096 : constant Version_32 := 16#1a9229b5#;
    pragma Export (C, u00096, "bbs__lisp__evaluateS");
