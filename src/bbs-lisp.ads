@@ -76,6 +76,10 @@ package bbs.lisp is
    --  This function checks if the lisp read-eval-print loop should exit
    --
    function exit_lisp return Boolean;
+   --
+   --  For ease of embedding, this implements the full read-evaluate-print loop.
+   --
+   procedure repl;
 
 private
    --
@@ -105,19 +109,6 @@ private
    --  This indicates what kind of data is in a symbol
    --
    type symbol_type is (BUILTIN, LAMBDA, VARIABLE, EMPTY);
-   --
-   --  This is an enumeration for all the builtin functions.  This list is
-   --  expected to grow with time.
-   --
-   --  The following are currently implemented:
-   --    CAR, CDR, PLUS, MINUS, MUL, DIV, SETQ, SYM_EQ, SYM_NE, SYM_LT, SYM_GT,
-   --    QUIT_LISP, DUMP, RESET, SYM_TRUE, SYM_IF, DOWHILE, QUOTE, NEWLINE
-   --
-   --
-   type builtins is (CAR, CDR, PRINT, PLUS, MINUS, MUL, DIV, SETQ, SYM_EQ, SYM_NE,
-                     SYM_LT, SYM_GT, SYM_AND, SYM_OR, SYM_NOT, QUIT_LISP, DUMP,
-                     RESET, SYM_TRUE, SYM_IF, SYM_COND, DEFUN, DOWHILE, DOTIMES,
-                     QUOTE, SYM_EVAL, NEWLINE);
    --
    --  Define the contents of records.
    --
@@ -163,6 +154,10 @@ private
          end case;
       end record;
    --
+   --  Type for access to function that implements lisp words.
+   --
+   type execute_function is access function(e : element_type) return element_type;
+   --
    --  A cons cell contains two element_type pointers.
    --
    type cons is
@@ -180,7 +175,8 @@ private
          str : string_index;
          case kind is
             when BUILTIN =>
-               i : builtins;
+--               i : builtins; -- This will become an access to the function
+               f : execute_function;
             when LAMBDA =>
                ps : cons_index;
             when VARIABLE =>
@@ -233,6 +229,15 @@ private
    --  Local functions and procedures
    --
    --
+   --  Replacements for Text_IO to make porting to embedded systems easier.
+   --  When on a system without Ada.Text_IO, these will need to be changed to
+   --  whatever routines are used.
+   --
+   procedure put_line(s : String);
+   procedure put(s : String);
+   procedure new_line;
+   procedure Get_Line(Item : out String; Last : out Natural);
+   --
    --  Functions for symbols.
    --
    --  If a symbol exists, return it, otherwise create a new symbol.  Returns
@@ -250,7 +255,10 @@ private
    --  during initialization to identify the builtin operations.  Once created,
    --  these should never be changed.  No value is returned.
    --
-   procedure add_builtin(n : String; b : builtins);
+   --  This will change to add a function access instead of builtins.
+   --
+--   procedure add_builtin(n : String; b : builtins);
+   procedure add_builtin(n : String; f : execute_function);
    --
    --  If a temporary symbol exists, return it, otherwise create a new temporary
    --  symbol.  Returns false if symbol doesn't exist and can't be created.
@@ -269,5 +277,10 @@ private
    --
    procedure error(f : String; m : String);
    procedure msg(f : String; m : String);
+   --
+   --  Operations for math and comparisons
+   --
+   type mathops is (PLUS, MINUS, MUL, DIV);
+   type compops is (SYM_EQ, SYM_NE, SYM_LT, SYM_GT);
 
 end bbs.lisp;

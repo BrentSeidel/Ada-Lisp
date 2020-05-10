@@ -5,6 +5,7 @@ with BBS.lisp.parser;
 with BBS.lisp.evaluate;
 with BBS.lisp.memory;
 with BBS.lisp.strings;
+with BBS.lisp.evaluate;
 --
 package body bbs.lisp is
    --
@@ -15,31 +16,33 @@ package body bbs.lisp is
    begin
       bbs.lisp.memory.reset_tables;
       --
-      add_builtin("car", CAR);
-      add_builtin("cdr", CDR);
-      add_builtin("print", PRINT);
-      add_builtin("setq", SETQ);
-      add_builtin("=", SYM_EQ);
-      add_builtin("/=", SYM_NE);
-      add_builtin("<", SYM_LT);
-      add_builtin(">", SYM_GT);
-      add_builtin("+", PLUS);
-      add_builtin("-", MINUS);
-      add_builtin("*", MUL);
-      add_builtin("/", DIV);
-      add_builtin("exit", QUIT_LISP);
-      add_builtin("dump", DUMP);
-      add_builtin("reset", RESET);
-      add_builtin("t", SYM_TRUE);
-      add_builtin("if", SYM_IF);
-      add_builtin("cond", SYM_COND);
-      add_builtin("defun", DEFUN);
-      add_builtin("print", PRINT);
-      add_builtin("dowhile", DOWHILE);
-      add_builtin("dotimes", DOTIMES);
-      add_builtin("quote", QUOTE);
-      add_builtin("eval", SYM_EVAL);
-      add_builtin("new-line", NEWLINE);
+      add_builtin("car", BBS.lisp.evaluate.eval_car'Access);
+      add_builtin("cdr", BBS.lisp.evaluate.eval_cdr'Access);
+      add_builtin("print", BBS.lisp.evaluate.eval_print'Access);
+      add_builtin("setq", BBS.lisp.evaluate.eval_setq'Access);
+      add_builtin("if", BBS.lisp.evaluate.eval_if'Access);
+      add_builtin("dowhile", BBS.lisp.evaluate.eval_dowhile'Access);
+      add_builtin("dotimes", BBS.lisp.evaluate.eval_dotimes'Access);
+      add_builtin("defun", BBS.lisp.evaluate.eval_defun'Access);
+      add_builtin("+", BBS.lisp.evaluate.eval_add'Access);
+      add_builtin("-", BBS.lisp.evaluate.eval_sub'Access);
+      add_builtin("*", BBS.lisp.evaluate.eval_mul'Access);
+      add_builtin("/", BBS.lisp.evaluate.eval_div'Access);
+      add_builtin("exit", BBS.lisp.evaluate.eval_quit'Access);
+      add_builtin("=", BBS.lisp.evaluate.eval_eq'Access);
+      add_builtin("/=", BBS.lisp.evaluate.eval_ne'Access);
+      add_builtin("<", BBS.lisp.evaluate.eval_lt'Access);
+      add_builtin(">", BBS.lisp.evaluate.eval_gt'Access);
+      add_builtin("dump", BBS.lisp.evaluate.eval_dump'Access);
+      add_builtin("t", BBS.lisp.evaluate.eval_true'Access);
+      add_builtin("reset", BBS.lisp.evaluate.eval_reset'Access);
+      add_builtin("quote", BBS.lisp.evaluate.eval_quote'Access);
+      add_builtin("new-line", BBS.lisp.evaluate.eval_newline'Access);
+      --
+      --  The following need functions of the proper form created.
+      --
+--      add_builtin("cond", SYM_COND);
+--      add_builtin("eval", SYM_EVAL);
    end;
    --
    --  The read procedure reads text from an input device and parses it into
@@ -290,6 +293,20 @@ package body bbs.lisp is
       return exit_flag;
    end;
    --
+   --  For ease of embedding, this implements the full read-evaluate-print loop.
+   --
+   procedure repl is
+      e : element_type;
+      r : element_type;
+   begin
+      while True loop
+         e := read;
+         r := eval(e);
+         print(r, True, True);
+         exit when exit_lisp;
+      end loop;
+   end;
+   --
    --  Private functions and procedures
    --
    --
@@ -384,6 +401,32 @@ package body bbs.lisp is
          end if;
       end loop;
    end;
+   --
+   --  Replacements for Text_IO to make porting to embedded systems easier.
+   --  When on a system without Ada.Text_IO, these will need to be changed to
+   --  whatever routines are used.
+   --
+   procedure put_line(s : String) is
+   begin
+      Ada.Text_IO.Put_Line(s);
+   end;
+   --
+   procedure put(s : String) is
+   begin
+      Ada.Text_IO.Put(s);
+   end;
+   --
+   procedure new_line is
+   begin
+      Ada.Text_IO.New_Line;
+   end;
+   --
+   procedure Get_Line(Item : out String; Last : out Natural) is
+   begin
+      Ada.Text_IO.Get_Line(Item, Last);
+   end;
+   --
+   --  Functions for symbols.
    --
    --  Find a symbol in the symbol table or create a new entry if the name does
    --  not exist.  Return false if name not found and unable to allocate new
@@ -481,13 +524,27 @@ package body bbs.lisp is
       return False;
    end;
    --
-   procedure add_builtin(n : String; b : builtins) is
+--   procedure add_builtin(n : String; b : builtins) is
+--      sym : symb_index;
+--      flag : Boolean;
+--   begin
+--      flag := get_symb(sym, n);
+--      if flag then
+--         symb_table(sym) := (ref => 1, Kind => BUILTIN, i => b,
+--                             f => BBS.lisp.evaluate.eval_quit'Access,
+--                             str => symb_table(sym).str);
+--      else
+--         error("add_builtin", "Unable to add builtin symbol " & n);
+--      end if;
+--   end;
+   --
+   procedure add_builtin(n : String; f : execute_function) is
       sym : symb_index;
       flag : Boolean;
    begin
       flag := get_symb(sym, n);
       if flag then
-         symb_table(sym) := (ref => 1, Kind => BUILTIN, i => b,
+         symb_table(sym) := (ref => 1, Kind => BUILTIN, f => f,
                              str => symb_table(sym).str);
       else
          error("add_builtin", "Unable to add builtin symbol " & n);

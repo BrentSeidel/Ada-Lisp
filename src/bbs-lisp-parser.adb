@@ -1,4 +1,4 @@
-with Ada.Text_IO;
+--with Ada.Text_IO;
 with Ada.Characters.Handling;
 with BBS.lisp.strings;
 package body bbs.lisp.parser is
@@ -170,8 +170,8 @@ package body bbs.lisp.parser is
          --  read some more text and point to the start of it.
          --
          if (ptr > last) and (not list_end) then
-            Ada.Text_IO.Put("More> ");
-            Ada.Text_IO.Get_Line(buff, last);
+            Put("More> ");
+            Get_Line(buff, last);
             ptr := 1;
          end if;
       end loop;

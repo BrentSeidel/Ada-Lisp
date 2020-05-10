@@ -1,6 +1,6 @@
 with BBS.lisp.strings;
 with BBS.lisp.memory;
-with Ada.Text_IO;
+--with Ada.Text_IO;
 package body bbs.lisp.utilities is
    --
    --  Various utility functions
@@ -90,7 +90,7 @@ package body bbs.lisp.utilities is
       loop
          if cons_table(temp).car.kind = ATOM_TYPE then
             if process_atom(cons_table(temp).car.pa, lib, new_atom) then
-               bbs.lisp.memory.deref(cons_table(temp).car.pa);
+               bbs.lisp.memory.deref("replace_syms", cons_table(temp).car.pa);
                cons_table(temp).car.pa := new_atom;
                count := count + 1;
             end if;
@@ -102,7 +102,7 @@ package body bbs.lisp.utilities is
       end loop;
       if cons_table(temp).cdr.kind = ATOM_TYPE then
          if process_atom(cons_table(temp).cdr.pa, lib, new_atom) then
-            bbs.lisp.memory.deref(cons_table(temp).cdr.pa);
+            bbs.lisp.memory.deref("replace_syms", cons_table(temp).cdr.pa);
             cons_table(temp).cdr.pa := new_atom;
             count := count + 1;
          end if;

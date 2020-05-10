@@ -1,4 +1,3 @@
-with Ada.Text_IO;
 with bbs.lisp.memory;
 with bbs.lisp.strings;
 package body bbs.lisp.evaluate is
@@ -10,11 +9,9 @@ package body bbs.lisp.evaluate is
    function eval_dispatch(s : cons_index) return element_type is
       a : atom_index;
       sym : symbol;
-      st : symb_index;
       e : element_type := NIL_ELEM;
       first : element_type := cons_table(s).car;
       rest : element_type := cons_table(s).cdr;
-      flag : Boolean;
    begin
       if first.kind = ATOM_TYPE then
          a := first.pa;
@@ -24,53 +21,21 @@ package body bbs.lisp.evaluate is
             --  Handle the builtin operations
             --
             if sym.kind = BUILTIN then
-               case sym.i is
-               when PLUS | MUL | MINUS | DIV =>
-                  e:= eval_math(rest, sym.i);
-               when QUIT_LISP =>
-                  exit_flag := True;
-               when CAR =>
-                  e := eval_car(rest);
-               when CDR =>
-                  e := eval_cdr(rest);
-               when DUMP =>
-                  dump_atoms;
-                  dump_cons;
-                  dump_symbols;
-                  dump_strings;
-               when RESET =>
-                  init;
-               when SYM_EQ | SYM_NE | SYM_LT | SYM_GT =>
-                  e := eval_comp(rest, sym.i);
-               when SYM_TRUE =>
-                  flag := find_symb(st, "t");
-                  flag := bbs.lisp.memory.alloc(a);
-                  atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => st);
-                  e := (Kind => ATOM_TYPE, pa => a);
-               when SETQ =>
-                  e := eval_setq(rest);
-                  BBS.lisp.memory.ref(e);
-               when SYM_IF =>
-                  e := eval_if(rest);
-               when print =>
-                  e := eval_print(rest);
-               when QUOTE =>
-                  e := rest;
-                  bbs.lisp.memory.ref(e);
-               when DOWHILE =>
-                  e := eval_dowhile(rest);
-               when DOTIMES =>
-                  e := eval_dotimes(rest);
-               when NEWLINE =>
-                  Ada.Text_IO.New_Line;
-               when DEFUN =>
-                  e := eval_defun(rest);
-               when SYM_EVAL =>
-                  null;
-               when others =>
-                  msg("eval_dispatch", "Operation not yet implemented");
-               end case;
+               --
+               --  This will be updates so that the symbol contains the access
+               --  to the function that implements the builtin.  Then instead of
+               --  This big case statement, they can be called directly.
+               --
+               --  Many of the functions will need to change in order to have
+               --  the same function signature.
+               --
+               Put("Evaluating builtin " );
+               Print(sym.str);
+               New_Line;
+               e := sym.f.all(rest);
             elsif sym.kind = LAMBDA then
+               Put("Evaluating lambda ");
+               print(sym.ps);
                e := eval_function(sym.ps, rest);
             elsif sym.kind = VARIABLE then
                e := sym.pv;
@@ -86,9 +51,48 @@ package body bbs.lisp.evaluate is
       return e;
    end;
    --
+   function eval_newline(e : element_type) return element_type is
+   begin
+      New_Line;
+      return NIL_ELEM;
+   end;
+   --
+   function eval_reset(e : element_type) return element_type is
+   begin
+      init;
+      return NIL_ELEM;
+   end;
+   --
+   function eval_quote(e : element_type) return element_type is
+      temp : element_type := e;
+   begin
+      bbs.lisp.memory.ref(temp);
+      return temp;
+   end;
+   --
+   function eval_true(e : element_type) return element_type is
+      a : atom_index;
+      st : symb_index;
+      flag : Boolean;
+   begin
+      flag := find_symb(st, "t");
+      flag := bbs.lisp.memory.alloc(a);
+      atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => st);
+      return (Kind => ATOM_TYPE, pa => a);
+   end;
+   --
+   function eval_dump(e : element_type) return element_type is
+   begin
+      dump_atoms;
+      dump_cons;
+      dump_symbols;
+      dump_strings;
+      return NIL_ELEM;
+   end;
+   --
    --  This function evaluates the basic arithmatic operation (+, -, *, /).
    --
-   function eval_math(e : element_type; b : builtins) return element_type is
+   function eval_math(e : element_type; b : mathops) return element_type is
       accum : Integer := 0;
       a : atom_index;
       p : cons_index;
@@ -98,7 +102,7 @@ package body bbs.lisp.evaluate is
       --
       --  Subfunction to do the actual evaluation.
       --
-      function process_atom(a : atom_index; accum : Integer; b : builtins) return Integer is
+      function process_atom(a : atom_index; accum : Integer; b : mathops) return Integer is
          a1  : atom_index := a;
          e   : element_type;
       begin
@@ -120,7 +124,7 @@ package body bbs.lisp.evaluate is
                   error("eval_math.process_atom", "Internal error, unknown math operation");
             end case;
          else
-            error("eval_sum.add_atom", "Can't process " & atom_kind'Image(atom_table(a).kind));
+            error("eval_math.process_atom", "Can't process " & atom_kind'Image(atom_table(a).kind));
          end if;
          return accum;
       end;
@@ -141,7 +145,7 @@ package body bbs.lisp.evaluate is
             if atom_table(a).kind = ATOM_INTEGER then
                accum := atom_table(a).i;
             else
-               error("eval_sum.add_atom", "Can't process " & atom_kind'Image(atom_table(a).kind));
+               error("eval_math", "Can't process " & atom_kind'Image(atom_table(a).kind));
             end if;
          elsif cons_table(p).car.kind = CONS_TYPE then
             temp := eval_dispatch(cons_table(p).car.ps);
@@ -154,7 +158,7 @@ package body bbs.lisp.evaluate is
                if atom_table(a).kind = ATOM_INTEGER then
                   accum := atom_table(a).i;
                else
-                  error("eval_sum.add_atom", "Can't process " & atom_kind'Image(atom_table(a).kind));
+                  error("eval_math", "Can't process " & atom_kind'Image(atom_table(a).kind));
                end if;
             end if;
             bbs.lisp.memory.deref(temp);
@@ -184,10 +188,30 @@ package body bbs.lisp.evaluate is
          atom_table(a) := (ref => 1, Kind => ATOM_INTEGER, i => accum);
          el := (Kind => ATOM_TYPE, pa => a);
       else
-         error("eval_sum", "Unable to allocate atom");
+         error("eval_math", "Unable to allocate atom");
          el := NIL_ELEM;
       end if;
       return el;
+   end;
+   --
+   function eval_add(e : element_type) return element_type is
+   begin
+      return eval_math(e, PLUS);
+   end;
+   --
+   function eval_sub(e : element_type) return element_type is
+   begin
+      return eval_math(e, MINUS);
+   end;
+   --
+   function eval_mul(e : element_type) return element_type is
+   begin
+      return eval_math(e, MUL);
+   end;
+   --
+   function eval_div(e : element_type) return element_type is
+   begin
+      return eval_math(e, DIV);
    end;
    --
    --  Return the first entry in a list (it may be another list).
@@ -232,7 +256,7 @@ package body bbs.lisp.evaluate is
    --
    --  Perform comparison operations.
    --
-   function eval_comp(e : element_type; b : builtins) return element_type is
+   function eval_comp(e : element_type; b : compops) return element_type is
       t  : element_type;
       t1 : element_type;
       t2 : element_type;
@@ -297,7 +321,7 @@ package body bbs.lisp.evaluate is
                when others =>
                   error("eval_comp", "Unknown comparison type.");
                end case;
-               bbs.lisp.memory.deref(a);
+               bbs.lisp.memory.deref("eval_comp", a);
                return NIL_ELEM;
             else
                error("eval_comp", "Unable to allocate return value.");
@@ -338,7 +362,7 @@ package body bbs.lisp.evaluate is
                      error("eval_comp", "Unknown comparison type.");
                   end case;
                end;
-               bbs.lisp.memory.deref(a);
+               bbs.lisp.memory.deref("eval_comp", a);
                return NIL_ELEM;
             else
                error("eval_comp", "Unable to allocate return value.");
@@ -352,6 +376,26 @@ package body bbs.lisp.evaluate is
          error("eval_comp", "Can only compare two atoms.");
          return NIL_ELEM;
       end if;
+   end;
+   --
+   function eval_eq(e : element_type) return element_type is
+   begin
+      return eval_comp(e, SYM_EQ);
+   end;
+   --
+   function eval_ne(e : element_type) return element_type is
+   begin
+      return eval_comp(e, SYM_NE);
+   end;
+   --
+   function eval_lt(e : element_type) return element_type is
+   begin
+      return eval_comp(e, SYM_LT);
+   end;
+   --
+   function eval_gt(e : element_type) return element_type is
+   begin
+      return eval_comp(e, SYM_GT);
    end;
    --
    --  This sets a symbol to a value.  The first parameter must evaluate to a
@@ -426,14 +470,16 @@ package body bbs.lisp.evaluate is
                deref_previous(symb);
                symb_table(symb) := (ref => 1, Kind => VARIABLE,
                                     pv => p3, str => symb_table(symb).str);
-               bbs.lisp.memory.ref(p3);
+               BBS.lisp.memory.ref(p3);
+               BBS.lisp.memory.ref(p3);
                return p3;
             end if;
          elsif p2.kind = ATOM_TYPE then -- Rare, CDR is an atom.
             deref_previous(symb);
             symb_table(symb) := (ref => 1, Kind => VARIABLE,
                                  pv => p2, str => symb_table(symb).str);
-            bbs.lisp.memory.ref(p2);
+            BBS.lisp.memory.ref(p2);
+            BBS.lisp.memory.ref(p2);
             return p2;
          else
             error("eval_setq", "Not enough arguments.");
@@ -597,6 +643,14 @@ package body bbs.lisp.evaluate is
       return NIL_ELEM;
    end;
    --
+   --  Set the quit flag to exit the lisp interpreter
+   --
+   function eval_quit(e : element_type) return element_type is
+   begin
+      exit_flag := True;
+      return NIL_ELEM;
+   end;
+   --
    --  Defines a function.  The command is (defun name (parameters) body).
    --    name is a symbol of type LAMBDA.
    --    params is a list of the parameters for the function.  It must be a
@@ -706,6 +760,11 @@ package body bbs.lisp.evaluate is
                               kind => LAMBDA, ps => temp.ps);
          bbs.lisp.memory.ref(temp.ps);
       end if;
+      --
+      --  Need to also search for the name of the newly defined symbol to account
+      --  for recursive funtions.
+      --  TODO
+      --
       return NIL_ELEM;
    end;
    --
@@ -728,6 +787,10 @@ package body bbs.lisp.evaluate is
    begin
       params := cons_table(s).car;
       func_body := cons_table(s).cdr;
+      Put("Parameter list is: ");
+      print(params, False, True);
+      Put("Function body is: ");
+      print(func_body, False, True);
       if e.kind = CONS_TYPE then
          supplied := bbs.lisp.utilities.count(e.ps);
       end if;
@@ -747,9 +810,19 @@ package body bbs.lisp.evaluate is
       t1 := params;
       t2 := e;
       while t2.kind = CONS_TYPE loop
+         Put("Setting: ");
+         print(cons_table(t1.ps).car, False, False);
+         Put(" to: ");
+         print(cons_table(t2.ps).car, False, True);
          if cons_table(t1.ps).car.kind = ATOM_TYPE then
-            atom_table(cons_table(t1.ps).car.pa).p_value := cons_table(t2.ps).car;
-            bbs.lisp.memory.ref(cons_table(t1.ps).car);
+            if cons_table(t2.ps).car.kind = ATOM_TYPE then
+               atom_table(cons_table(t1.ps).car.pa).p_value := cons_table(t2.ps).car;
+               bbs.lisp.memory.ref(cons_table(t1.ps).car);
+            else
+               ret_val := eval_dispatch(cons_table(t2.ps).car.ps);
+               atom_table(cons_table(t1.ps).car.pa).p_value := ret_val;
+               bbs.lisp.memory.ref(ret_val);
+            end if;
          end if;
          t1 := cons_table(t1.ps).cdr;
          t2 := cons_table(t2.ps).cdr;
@@ -757,10 +830,10 @@ package body bbs.lisp.evaluate is
       --
       --  Evaluate the function
       --
-      t1 := cons_table(func_body.ps).car;
+--      t1 := cons_table(func_body.ps).car;
+      t1 := func_body;
       ret_val := NIL_ELEM;
       while t1.kind = CONS_TYPE loop
-         bbs.lisp.memory.deref(t2);
          if cons_table(t1.ps).car.kind = CONS_TYPE then
             ret_val := eval_dispatch(cons_table(t1.ps).car.ps);
          end if;
@@ -769,14 +842,21 @@ package body bbs.lisp.evaluate is
       --
       --  Clean up the assigned parameters
       --
-      t1 := params;
-      while t1.kind = CONS_TYPE loop
-         if cons_table(t1.ps).car.kind = ATOM_TYPE then
-            bbs.lisp.memory.deref(cons_table(t1.ps).car);
-            cons_table(t1.ps).car := NIL_ELEM;
-         end if;
-         t1 := cons_table(t1.ps).cdr;
-      end loop;
+--      Ada.Text_IO.Put_Line("Starting cleanup");
+--      dump_atoms;
+--      t1 := params;
+--      while t1.kind = CONS_TYPE loop
+--         if cons_table(t1.ps).car.kind = ATOM_TYPE then
+--            if atom_table(cons_table(t1.ps).car.pa).kind = ATOM_PARAM then
+--               print(atom_table(cons_table(t1.ps).car.pa).p_value, False, True);
+--               bbs.lisp.memory.deref(atom_table(cons_table(t1.ps).car.pa).p_value);
+--               atom_table(cons_table(t1.ps).car.pa).p_value := NIL_ELEM;
+--            end if;
+--         end if;
+--         t1 := cons_table(t1.ps).cdr;
+--      end loop;
+--      Ada.Text_IO.Put_Line("Cleanup done");
+--      dump_atoms;
       return ret_val;
    end;
    --

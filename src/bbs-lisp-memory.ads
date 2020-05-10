@@ -39,7 +39,7 @@ private package bbs.lisp.memory is
    --  item is considered to be deallocated.  In this case, if the item points
    --  to other items, they will be recursively dereffed.
    --
-   procedure deref(a : atom_index);
+   procedure deref(n : String; a : atom_index);
    procedure deref(s : cons_index);
    procedure deref(s : string_index);
    procedure deref(e : element_type);

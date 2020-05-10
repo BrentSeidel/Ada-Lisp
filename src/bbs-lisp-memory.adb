@@ -110,8 +110,9 @@ package body bbs.lisp.memory is
    --
    --  Decrements the reference count of an atom, checking for locked atoms.
    --
-   procedure deref(a : atom_index) is
+   procedure deref(n : String; a : atom_index) is
    begin
+--      msg(n & "/deref atom", "Dereffing atom at " & Integer'Image(Integer(a)));
       if atom_table(a).ref > 0 then
          if atom_table(a).ref < Natural'Last then
             atom_table(a).ref := atom_table(a).ref - 1;
@@ -127,7 +128,7 @@ package body bbs.lisp.memory is
             atom_table(a) := (ref => 0, Kind => ATOM_NIL);
          end if;
       else
-         error("deref atom", "Attempt to deref an unreffed atom at index "
+         error(n & "/deref atom", "Attempt to deref an unreffed atom at index "
                & Integer'Image(Integer(a)));
       end if;
    end;
@@ -159,7 +160,7 @@ package body bbs.lisp.memory is
       if e.kind = CONS_TYPE then
          deref(e.ps);
       elsif e.kind = ATOM_TYPE then
-         deref(e.pa);
+         deref("deref element", e.pa);
       end if;
    end;
    --
