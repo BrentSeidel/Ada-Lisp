@@ -24,11 +24,11 @@ package body ada_main is
    E091 : Short_Integer; pragma Import (Ada, E091, "ada__strings__maps_E");
    E094 : Short_Integer; pragma Import (Ada, E094, "ada__strings__maps__constants_E");
    E084 : Short_Integer; pragma Import (Ada, E084, "bbs__lisp_E");
-   E112 : Short_Integer; pragma Import (Ada, E112, "bbs__lisp__utilities_E");
-   E096 : Short_Integer; pragma Import (Ada, E096, "bbs__lisp__evaluate_E");
-   E102 : Short_Integer; pragma Import (Ada, E102, "bbs__lisp__strings_E");
    E098 : Short_Integer; pragma Import (Ada, E098, "bbs__lisp__memory_E");
    E114 : Short_Integer; pragma Import (Ada, E114, "bbs__lisp__parser_E");
+   E102 : Short_Integer; pragma Import (Ada, E102, "bbs__lisp__strings_E");
+   E112 : Short_Integer; pragma Import (Ada, E112, "bbs__lisp__utilities_E");
+   E096 : Short_Integer; pragma Import (Ada, E096, "bbs__lisp__evaluate_E");
 
    Sec_Default_Sized_Stacks : array (1 .. 1) of aliased System.Secondary_Stack.SS_Stack (System.Parameters.Runtime_Default_Sec_Stack_Size);
 
@@ -192,11 +192,11 @@ package body ada_main is
       E094 := E094 + 1;
       bbs.lisp'elab_spec;
       E098 := E098 + 1;
+      E102 := E102 + 1;
       E114 := E114 + 1;
-      E084 := E084 + 1;
       E112 := E112 + 1;
       E096 := E096 + 1;
-      E102 := E102 + 1;
+      E084 := E084 + 1;
    end adainit;
 
    procedure Ada_Main_Program;
@@ -232,18 +232,18 @@ package body ada_main is
    end;
 
 --  BEGIN Object file/option list
-   --   /Volumes/Brent Local/Development/GitHub/BBS-Ada/bbs.o
-   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/bbs-lisp-memory.o
-   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/bbs-lisp-parser.o
-   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/bbs-lisp.o
-   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/bbs-lisp-utilities.o
-   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/bbs-lisp-evaluate.o
-   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/bbs-lisp-strings.o
-   --   /Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/lisp.o
-   --   -L/Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/
-   --   -L/Volumes/Brent Local/Development/GitHub/Ada-Lisp/obj/
-   --   -L/Volumes/Brent Local/Development/GitHub/BBS-Ada/
-   --   -L/volumes/brent local/opt/gnat/2018/lib/gcc/x86_64-apple-darwin16.7.0/7.3.1/adalib/
+   --   /Volumes/External/Users/brent/Development/GitHub/BBS-Ada/bbs.o
+   --   /Volumes/External/Users/brent/Development/GitHub/Ada-Lisp/obj/bbs-lisp-memory.o
+   --   /Volumes/External/Users/brent/Development/GitHub/Ada-Lisp/obj/bbs-lisp-strings.o
+   --   /Volumes/External/Users/brent/Development/GitHub/Ada-Lisp/obj/bbs-lisp-parser.o
+   --   /Volumes/External/Users/brent/Development/GitHub/Ada-Lisp/obj/bbs-lisp-utilities.o
+   --   /Volumes/External/Users/brent/Development/GitHub/Ada-Lisp/obj/bbs-lisp-evaluate.o
+   --   /Volumes/External/Users/brent/Development/GitHub/Ada-Lisp/obj/bbs-lisp.o
+   --   /Volumes/External/Users/brent/Development/GitHub/Ada-Lisp/obj/lisp.o
+   --   -L/Volumes/External/Users/brent/Development/GitHub/Ada-Lisp/obj/
+   --   -L/Volumes/External/Users/brent/Development/GitHub/Ada-Lisp/obj/
+   --   -L/Volumes/External/Users/brent/Development/GitHub/BBS-Ada/
+   --   -L/volumes/external/users/brent/opt/gnat/2019/lib/gcc/x86_64-apple-darwin17.7.0/8.3.1/adalib/
    --   -static
    --   -lgnat
 --  END Object file/option list   

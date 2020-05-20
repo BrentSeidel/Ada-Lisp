@@ -12,3 +12,8 @@ lisp
 *.db-wal
 *.cgpr
 *.db
+b__lisp.ad*
+lib/*
+obj/*
+*.cswi
+*.lexch
