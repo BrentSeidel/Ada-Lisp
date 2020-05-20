@@ -29,4 +29,12 @@ private package bbs.lisp.strings is
    --  Functions to append to an existing string.
    --
    function append(s : string_index; c : Character) return Boolean;
+   --
+   --  Convert a character to upper-case
+   --
+   function To_Upper(c : Character) return Character;
+   --
+   --  Convert a character to lower-case
+   --
+   function To_Lower(c : Character) return Character;
 end;

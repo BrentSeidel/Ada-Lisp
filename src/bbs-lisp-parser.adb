@@ -1,9 +1,17 @@
---with Ada.Text_IO;
-with Ada.Characters.Handling;
 with BBS.lisp.strings;
+with BBS.lisp;
 package body bbs.lisp.parser is
    --
    --  Utilities to assist in parsing
+   --
+   function Is_Digit(c : Character) return Boolean is
+   begin
+      if (c >= '0' and c <= '9') then
+         return True;
+      else
+         return False;
+      end if;
+   end;
    --
    --  This is the basic parser dispatcher.  Based on the first non-space character,
    --  parsing is dispatched to a lower level parser.
@@ -37,8 +45,8 @@ package body bbs.lisp.parser is
       --
       --  Integer
       --
-      elsif Ada.Characters.Handling.Is_Digit(buff(ptr)) or
-        ((buff(ptr) = '-') and Ada.Characters.Handling.Is_Digit(buff(ptr + 1))) then
+      elsif Is_Digit(buff(ptr)) or
+        ((buff(ptr) = '-') and Is_Digit(buff(ptr + 1))) then
          flag := int(ptr, buff, last, value);
          flag := bbs.lisp.memory.alloc(atom);
          atom_table(atom) := (ref => 1, kind => ATOM_INTEGER, i => value);
@@ -105,8 +113,8 @@ package body bbs.lisp.parser is
          --
          --  Check for the start of an integer atom
          --
-         elsif Ada.Characters.Handling.Is_Digit(buff(ptr)) or
-           ((buff(ptr) = '-') and Ada.Characters.Handling.Is_Digit(buff(ptr + 1))) then
+         elsif Is_Digit(buff(ptr)) or
+           ((buff(ptr) = '-') and Is_Digit(buff(ptr + 1))) then
             flag := int(ptr, buff, last, value);
             if flag then
                flag := bbs.lisp.memory.alloc(atom);
@@ -228,7 +236,7 @@ package body bbs.lisp.parser is
          neg := true;
          ptr := ptr + 1;
       end if;
-      while Ada.Characters.Handling.Is_Digit(buff(ptr)) and (ptr <= Last) loop
+      while Is_Digit(buff(ptr)) and (ptr <= Last) loop
          accumulate := accumulate*10 + Integer'Value(" " & buff(ptr));
          ptr := ptr + 1;
       end loop;

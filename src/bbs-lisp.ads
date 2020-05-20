@@ -1,4 +1,3 @@
-with Ada.Strings.Bounded;
 --
 --  This package is a simple embeddable tiny lisp interpreter.  With being able
 --  to load Ada programs directly onto Arm based embedded computers, it seems
@@ -13,11 +12,6 @@ with Ada.Strings.Bounded;
 package bbs.lisp is
    --
    --  Define the basic types used.
-   --
-   --  Since this interpreter is designed to be used on embedded computers with
-   --  no operating system and possibly no dynamic memory allocation, The max
-   --  sizes for statically allocated data structures is defined here.
-   --
    max_cons : constant Integer := 150;
    max_atom : constant Integer := 100;
    max_symb : constant Integer := 100;
@@ -29,72 +23,9 @@ package bbs.lisp is
    type tempsym_index is range 0 .. max_tempym;
    type string_index is range 0 .. max_string;
    --
-   --  The actual data types are private.
-   --
-   --  An atom represents a single element of data.
-   --
-   type atom is private;
-   --
-   --  A cons cell contains two element_type pointers that can point to either
-   --  an atom or another cons cell.
-   --
-   type cons is private;
-   --
-   --  A symbol give a perminant name to a piece of data.  These can be global
-   --  variables, user defined functions, or builtin functions.  The builtin
-   --  functions are predefined and cannot be changed.
-   --
-   type symbol is private;
-   --
-   --  An element_type can point to a cons cell, an atom, or can be empty.
-   --
-   type element_type is private;
-   --
-   --  Initialize the data structures used in the lisp interpreter.
-   --
-   procedure init;
-   --
-   --  The read procedure/function reads the complete text of an s-expression
-   --  from some input device.  The string is then parsed into a binary form
-   --  that can be evaluated.
-   --
-   function read return Element_Type;
-   --
-   --  This procedure evaluates a binary s-expression and returns the resuls.
-   --
-   function eval(e : element_type) return element_type;
-   --
-   --  These procedures print various types of objects.
-   --
-   procedure print(e : element_type; d : Boolean; nl : Boolean);
-   procedure print(s : cons_index);
-   procedure print(a : atom_index);
-   procedure print(s : string_index);
-   procedure print(a : atom);
-   procedure print(s : symb_index);
-   --
-   --  This function checks if the lisp read-eval-print loop should exit
-   --
-   function exit_lisp return Boolean;
-   --
-   --  For ease of embedding, this implements the full read-evaluate-print loop.
-   --
-   procedure repl;
-
-private
-   --
-   --  Flag for exiting the REPL
-   --
-   exit_flag : Boolean := False;
-   --
-   --  Define some enumerations
-   --
-   --
-   --  Type to indicate the result of comparisons.  The CMP_NE options is
-   --  available for comparisons that cannot be ordered, otherwise CMP_LT or
-   --  CMP_GT should be used.
-   --
-   type comparison is (CMP_EQ, CMP_LT, CMP_GT, CMP_NE);
+   type t_put_line is access procedure(s : String);
+   type t_newline is access procedure;
+   type t_get_line is access procedure(Item : out String; Last : out Natural);
    --
    --  This indicates what type of an object an element_type is pointing to.  It
    --  can be a cons cell, an atom, or nothing.
@@ -112,6 +43,21 @@ private
    --
    --  Define the contents of records.
    --
+   --
+   --  An element_type can point to a cons cell, an atom, or can be empty.
+   --  This is a pointer to either an atom or a cons cell, used in cons cells.
+   --
+   type element_type(kind : ptr_type := NIL_TYPE) is
+      record
+         case kind is
+            when CONS_TYPE =>
+               ps : cons_index;
+            when ATOM_TYPE =>
+               pa : atom_index;
+            when NIL_TYPE =>
+               null;
+         end case;
+      end record;
    --
    --  An atom can hold various kinds of scalar information.
    --
@@ -140,25 +86,12 @@ private
          end case;
       end record;
    --
-   --  This is a pointer to either an atom or a cons cell, used in cons cells.
-   --
-   type element_type(kind : ptr_type := NIL_TYPE) is
-      record
-         case kind is
-            when CONS_TYPE =>
-               ps : cons_index;
-            when ATOM_TYPE =>
-               pa : atom_index;
-            when NIL_TYPE =>
-               null;
-         end case;
-      end record;
-   --
    --  Type for access to function that implements lisp words.
    --
    type execute_function is access function(e : element_type) return element_type;
    --
-   --  A cons cell contains two element_type pointers.
+   --  A cons cell contains two element_type pointers that can point to either
+   --  an atom or another cons cell.
    --
    type cons is
       record
@@ -167,6 +100,9 @@ private
          cdr : element_type;
       end record;
    --
+   --  A symbol give a perminant name to a piece of data.  These can be global
+   --  variables, user defined functions, or builtin functions.  The builtin
+   --  functions are predefined and cannot be changed.
    --  A symbol record contains a name and a type
    --
    type symbol(kind : symbol_type := EMPTY) is
@@ -175,7 +111,6 @@ private
          str : string_index;
          case kind is
             when BUILTIN =>
---               i : builtins; -- This will become an access to the function
                f : execute_function;
             when LAMBDA =>
                ps : cons_index;
@@ -185,6 +120,93 @@ private
                null;
          end case;
       end record;
+   --
+   --  The main data tables for various kinds of data.
+   --
+   --
+   --  Since this interpreter is designed to be used on embedded computers with
+   --  no operating system and possibly no dynamic memory allocation, The max
+   --  sizes for statically allocated data structures is defined here.
+   --
+   cons_table : array (cons_index) of cons;
+   atom_table : array (atom_index) of atom;
+   symb_table : array (symb_index) of symbol;
+   --
+   --  Do initialization and define text I/O routines
+   --
+   procedure init(p_put_line : t_put_line; p_put : t_put_line;
+                  p_new_line : t_newline; p_get_line : t_get_line);
+   --
+   --  The read procedure/function reads the complete text of an s-expression
+   --  from some input device.  The string is then parsed into a binary form
+   --  that can be evaluated.
+   --
+   function read return Element_Type;
+   --
+   --  This procedure evaluates a binary s-expression and returns the resuls.
+   --
+   function eval(e : element_type) return element_type;
+   --
+   --  For ease of embedding, this implements the full read-evaluate-print loop.
+   --
+   procedure repl;
+   --
+   --  Create a symbol for a builtin function.  This is intended to be called
+   --  during initialization to identify the builtin operations.  Once created,
+   --  these should never be changed.  No value is returned.
+   --
+   procedure add_builtin(n : String; f : execute_function);
+   --
+   --  Procedures for printing error and non-error messages.  Pass in string
+   --  representing the function name and the message.  This is intended to
+   --  make error messages more consistent.
+   --
+   procedure error(f : String; m : String);
+   procedure msg(f : String; m : String);
+   --
+   --  Some useful constants
+   --
+   NIL_ELEM : constant element_type := (Kind => NIL_TYPE);
+
+private
+   --
+   --  Flag for exiting the REPL
+   --
+   exit_flag : Boolean := False;
+   --
+   --  Initialize the data structures used in the lisp interpreter.
+   --
+   procedure init;
+   --
+   --  Function pointers for I/O.  Using these pointers may allow the interpeter
+   --  to be run on systems without access to Ada.Text_IO.
+   --
+   io_put_line : t_put_line;
+   io_put      : t_put_line;
+   io_new_line : t_newline;
+   io_get_line : t_get_line;
+   --
+   --  Define some enumerations
+   --
+   --
+   --  Type to indicate the result of comparisons.  The CMP_NE options is
+   --  available for comparisons that cannot be ordered, otherwise CMP_LT or
+   --  CMP_GT should be used.
+   --
+   type comparison is (CMP_EQ, CMP_LT, CMP_GT, CMP_NE);
+   --
+   --  These procedures print various types of objects.
+   --
+   procedure print(e : element_type; d : Boolean; nl : Boolean);
+   procedure print(s : cons_index);
+   procedure print(a : atom_index);
+   procedure print(s : string_index);
+   procedure print(a : atom);
+   procedure print(s : symb_index);
+   --
+   --  This function checks if the lisp read-eval-print loop should exit
+   --
+   function exit_lisp return Boolean;
    --
    --  Structures and definitions for handling strings
    --
@@ -197,21 +219,12 @@ private
          str : String (1..fragment_len);
       end record;
    --
-   --  The main data tables for various kinds of data.
-   --
-   cons_table : array (cons_index) of cons;
-   atom_table : array (atom_index) of atom;
-   symb_table : array (symb_index) of symbol;
    --
    --  Temporary symbols are temporary names that may eventually be converted
    --  to regular symbols.
    --
    tempsym_table : array (tempsym_index) of Integer;
    string_table : array (string_index) of fragment;
-   --
-   --  Some useful constants
-   --
-   NIL_ELEM : constant element_type := (Kind => NIL_TYPE);
    --
    --  For debugging, dump the various tables
    --
@@ -251,15 +264,6 @@ private
    function find_symb(s : out symb_index; n : String) return Boolean;
    function find_symb(s : out symb_index; n : string_index) return Boolean;
    --
-   --  Create a symbol for a builtin function.  This is intended to be called
-   --  during initialization to identify the builtin operations.  Once created,
-   --  these should never be changed.  No value is returned.
-   --
-   --  This will change to add a function access instead of builtins.
-   --
---   procedure add_builtin(n : String; b : builtins);
-   procedure add_builtin(n : String; f : execute_function);
-   --
    --  If a temporary symbol exists, return it, otherwise create a new temporary
    --  symbol.  Returns false if symbol doesn't exist and can't be created.
    --
@@ -271,16 +275,10 @@ private
    function atom_to_cons(s : out cons_index; a : atom_index) return Boolean;
    function append(s1 : cons_index; s2 : cons_index) return Boolean;
    --
-   --  Procedures for printing error and non-error messages.  Pass in string
-   --  representing the function name and the message.  This is intended to
-   --  make error messages more consistent.
-   --
-   procedure error(f : String; m : String);
-   procedure msg(f : String; m : String);
-   --
    --  Operations for math and comparisons
    --
    type mathops is (PLUS, MINUS, MUL, DIV);
    type compops is (SYM_EQ, SYM_NE, SYM_LT, SYM_GT);
+
 
 end bbs.lisp;

@@ -1,4 +1,4 @@
-with Ada.Characters.Handling;
+--with Ada.Characters.Handling;
 with BBS.lisp.memory;
 package body bbs.lisp.strings is
    --
@@ -12,7 +12,7 @@ package body bbs.lisp.strings is
         and (next <= Integer(string_index'Last)) loop
          nxt := string_index(next);
          for i in 1 .. string_table(nxt).len loop
-            string_table(nxt).str(i) := Ada.Characters.Handling.To_Upper(string_table(nxt).str(i));
+            string_table(nxt).str(i) := To_Upper(string_table(nxt).str(i));
          end loop;
          next := string_table(nxt).next;
       end loop;
@@ -31,7 +31,7 @@ package body bbs.lisp.strings is
         and (next <= Integer(string_index'Last)) loop
          nxt := string_index(next);
          for i in 1 .. string_table(nxt).len loop
-            string_table(nxt).str(i) := Ada.Characters.Handling.To_Lower(string_table(nxt).str(i));
+            string_table(nxt).str(i) := To_Lower(string_table(nxt).str(i));
          end loop;
          next := string_table(nxt).next;
       end loop;
@@ -173,6 +173,134 @@ package body bbs.lisp.strings is
             return False;
          end if;
       end if;
+   end;
+   --
+   --  Convert a character to upper-case
+   --
+   function To_Upper(c : Character) return Character is
+      u : Character;
+   begin
+      case c is
+         when 'a' =>
+            u := 'A';
+         when 'b' =>
+            u := 'B';
+         when 'c' =>
+            u := 'C';
+         when 'd' =>
+            u := 'D';
+         when 'e' =>
+            u := 'E';
+         when 'f' =>
+            u := 'F';
+         when 'g' =>
+            u := 'G';
+         when 'h' =>
+            u := 'H';
+         when 'i' =>
+            u := 'I';
+         when 'j' =>
+            u := 'J';
+         when 'k' =>
+            u := 'K';
+         when 'l' =>
+            u := 'L';
+         when 'm' =>
+            u := 'M';
+         when 'n' =>
+            u := 'N';
+         when 'o' =>
+            u := 'O';
+         when 'p' =>
+            u := 'P';
+         when 'q' =>
+            u := 'Q';
+         when 'r' =>
+            u := 'R';
+         when 's' =>
+            u := 'S';
+         when 't' =>
+            u := 'T';
+         when 'u' =>
+            u := 'U';
+         when 'v' =>
+            u := 'V';
+         when 'w' =>
+            u := 'W';
+         when 'x' =>
+            u := 'X';
+         when 'y' =>
+            u := 'Y';
+         when 'z' =>
+            u := 'Z';
+         when others =>
+            u := c;
+      end case;
+      return u;
+   end;
+   --
+   --  Convert a character to lower-case
+   --
+   function To_Lower(c : Character) return Character is
+      u : Character;
+   begin
+      case c is
+         when 'A' =>
+            u := 'a';
+         when 'B' =>
+            u := 'b';
+         when 'C' =>
+            u := 'c';
+         when 'D' =>
+            u := 'd';
+         when 'E' =>
+            u := 'e';
+         when 'F' =>
+            u := 'f';
+         when 'G' =>
+            u := 'g';
+         when 'H' =>
+            u := 'h';
+         when 'I' =>
+            u := 'i';
+         when 'J' =>
+            u := 'j';
+         when 'K' =>
+            u := 'k';
+         when 'L' =>
+            u := 'l';
+         when 'M' =>
+            u := 'm';
+         when 'N' =>
+            u := 'n';
+         when 'O' =>
+            u := 'o';
+         when 'P' =>
+            u := 'p';
+         when 'Q' =>
+            u := 'q';
+         when 'R' =>
+            u := 'r';
+         when 'S' =>
+            u := 's';
+         when 'T' =>
+            u := 't';
+         when 'U' =>
+            u := 'u';
+         when 'V' =>
+            u := 'v';
+         when 'W' =>
+            u := 'w';
+         when 'X' =>
+            u := 'x';
+         when 'Y' =>
+            u := 'y';
+         when 'Z' =>
+            u := 'z';
+         when others =>
+            u := c;
+      end case;
+      return u;
    end;
    --
 end;

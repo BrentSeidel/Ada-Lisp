@@ -1,4 +1,4 @@
-private package bbs.lisp.utilities is
+package bbs.lisp.utilities is
    --
    --  Various utility functions
    --

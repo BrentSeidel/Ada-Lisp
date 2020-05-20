@@ -1,6 +1,5 @@
 with BBS.lisp.strings;
 with BBS.lisp.memory;
---with Ada.Text_IO;
 package body bbs.lisp.utilities is
    --
    --  Various utility functions

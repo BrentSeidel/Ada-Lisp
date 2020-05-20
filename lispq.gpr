@@ -1,8 +1,9 @@
-with "../../GitHub/BBS-Ada/bbs.gpr";
+with "../BBS-Ada/bbs_raven.gpr";
+with "bbs-lisp.gpr";
 
 project Lispq is
 
-   for Source_Dirs use ("src");
+   for Source_Dirs use (".");
    for Object_Dir use "obj";
    for Main use ("lisp.adb");
    for Exec_Dir use ".";

@@ -38,4 +38,8 @@ private package bbs.lisp.parser is
    --  Procedure to skip white space
    --
    procedure skip_whitespace(ptr : in out Integer; buff : String; last : Integer);
+   --
+   --  Function to determine if a character is a digit or not
+   --
+   function Is_Digit(c : Character) return Boolean;
 end;

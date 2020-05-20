@@ -1,5 +1,5 @@
 with bbs.lisp.utilities;
-private package bbs.lisp.evaluate is
+package bbs.lisp.evaluate is
    --
    --  Function for dispatching the various functions for evaluation.
    --

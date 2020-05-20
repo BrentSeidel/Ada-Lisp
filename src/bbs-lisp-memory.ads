@@ -1,4 +1,4 @@
-private package bbs.lisp.memory is
+package bbs.lisp.memory is
    --
    --  Utility functions for allocating and freeing items.  Memory management
    --  uses a reference counting system.  When references are added, the count

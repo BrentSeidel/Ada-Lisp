@@ -1,6 +1,3 @@
-with Ada.Text_IO;
-with Ada.Characters;
-with Ada.Characters.Handling;
 with BBS.lisp.parser;
 with BBS.lisp.evaluate;
 with BBS.lisp.memory;
@@ -45,6 +42,42 @@ package body bbs.lisp is
 --      add_builtin("eval", SYM_EVAL);
    end;
    --
+   --  Do initialization and define text I/O routines
+   --
+   procedure init(p_put_line : t_put_line; p_put : t_put_line;
+                  p_new_line : t_newline; p_get_line : t_get_line) is
+   begin
+      init;
+      io_put_line := p_put_line;
+      io_put      := p_put;
+      io_new_line := p_new_line;
+      io_get_line := p_get_line;
+   end;
+   --
+   --  Replacements for Text_IO to make porting to embedded systems easier.
+   --  When on a system without Ada.Text_IO, these will need to be changed to
+   --  whatever routines are used.
+   --
+   procedure put_line(s : String) is
+   begin
+      io_Put_Line.all(s);
+   end;
+   --
+   procedure put(s : String) is
+   begin
+      io_Put.all(s);
+   end;
+   --
+   procedure new_line is
+   begin
+      io_New_Line.all;
+   end;
+   --
+   procedure Get_Line(Item : out String; Last : out Natural) is
+   begin
+      io_Get_Line.all(Item, Last);
+   end;
+   --
    --  The read procedure reads text from an input device and parses it into
    --  a S-expression.
    --
@@ -58,8 +91,8 @@ package body bbs.lisp is
       el : element_type;
    begin
       bbs.lisp.memory.reset_tempsym;
-      Ada.Text_IO.Put("LISP> ");
-      Ada.Text_IO.Get_Line(buff, size);
+      Put("LISP> ");
+      Get_Line(buff, size);
       flag := bbs.lisp.parser.parse(buff, size, el);
       return el;
    end;
@@ -104,12 +137,12 @@ package body bbs.lisp is
       elsif e.kind = ATOM_TYPE then
          print(atom_table(e.pa));
       elsif e.kind = NIL_TYPE then
-         Ada.Text_IO.Put(" NIL");
+         Put(" NIL");
       else
-         Ada.Text_IO.Put("Tried to print an unknown element type.");
+         Put("Tried to print an unknown element type.");
       end if;
       if nl then
-         Ada.Text_IO.New_Line;
+         New_Line;
       end if;
       if d then
          bbs.lisp.memory.deref(e);
@@ -123,9 +156,9 @@ package body bbs.lisp is
       elsif e.kind = ATOM_TYPE then
          dump(atom_table(e.pa));
       elsif e.kind = NIL_TYPE then
-         Ada.Text_IO.Put(" NIL");
+         Put(" NIL");
       else
-         Ada.Text_IO.Put("Tried to dump an unknown element type.");
+         Put("Tried to dump an unknown element type.");
       end if;
    end;
    --
@@ -134,7 +167,7 @@ package body bbs.lisp is
    procedure print(s : cons_index) is
       temp : element_type;
    begin
-      Ada.Text_IO.Put("(");
+      Put("(");
       temp := (kind => CONS_TYPE, ps => s);
       while temp.kind /= NIL_TYPE loop
          if temp.kind = ATOM_TYPE then
@@ -149,13 +182,13 @@ package body bbs.lisp is
             temp := cons_table(temp.ps).cdr;
          end if;
       end loop;
-      Ada.Text_IO.put(")");
+      put(")");
    end;
    --
    procedure dump(s : cons_index) is
       temp : element_type;
    begin
-      Ada.Text_IO.Put("(");
+      Put("(");
       temp := (kind => CONS_TYPE, ps => s);
       while temp.kind /= NIL_TYPE loop
          if temp.kind = ATOM_TYPE then
@@ -170,7 +203,7 @@ package body bbs.lisp is
             temp := cons_table(temp.ps).cdr;
          end if;
       end loop;
-      Ada.Text_IO.put(")");
+      put(")");
    end;
    --
    procedure print(a : atom_index) is
@@ -187,11 +220,11 @@ package body bbs.lisp is
    begin
       case a.kind is
          when ATOM_INTEGER =>
-            Ada.Text_IO.Put(Integer'Image(a.i) & " ");
+            Put(Integer'Image(a.i) & " ");
          when ATOM_NIL =>
-            Ada.Text_IO.Put(" NIL");
+            Put(" NIL");
          when ATOM_CHARACTER =>
-            Ada.Text_IO.Put("'" & a.c & "'");
+            Put("'" & a.c & "'");
          when ATOM_SYMBOL =>
             print(a.sym);
          when ATOM_TEMPSYM =>
@@ -199,7 +232,7 @@ package body bbs.lisp is
               (tempsym_table(a.tempsym) <= Integer(string_index'Last)) then
                print(string_index(tempsym_table(a.tempsym)));
             else
-               Ada.Text_IO.Put("<unallocated tempsym>");
+               Put("<unallocated tempsym>");
             end if;
          when ATOM_STRING =>
             print(a.str);
@@ -208,47 +241,47 @@ package body bbs.lisp is
          when ATOM_LOCAL =>
             print(a.l_name);
          when others =>
-            Ada.Text_IO.Put("<Unknown atom kind>");
+            Put("<Unknown atom kind>");
       end case;
    end;
    --
    procedure dump(a : atom) is
    begin
-      Ada.Text_IO.Put(" Ref count " & Integer'Image(a.ref) & " contains: <");
+      Put(" Ref count " & Integer'Image(a.ref) & " contains: <");
       case a.kind is
          when ATOM_INTEGER =>
-            Ada.Text_IO.Put(Integer'Image(a.i) & " ");
+            Put(Integer'Image(a.i) & " ");
          when ATOM_NIL =>
-            Ada.Text_IO.Put(" NIL");
+            Put(" NIL");
          when ATOM_CHARACTER =>
-            Ada.Text_IO.Put("'" & a.c & "'");
+            Put("'" & a.c & "'");
          when ATOM_SYMBOL =>
-            Ada.Text_IO.Put("<symbol>");
+            Put("<symbol>");
             dump(a.sym);
          when ATOM_TEMPSYM =>
-            Ada.Text_IO.Put("<tempsym>");
+            Put("<tempsym>");
             if (tempsym_table(a.tempsym) >= Integer(string_index'First)) and
               (tempsym_table(a.tempsym) <= Integer(string_index'Last)) then
                print(string_index(tempsym_table(a.tempsym)));
             else
-               Ada.Text_IO.Put("<unallocated tempsym>");
+               Put("<unallocated tempsym>");
             end if;
          when ATOM_STRING =>
             print(a.str);
          when ATOM_PARAM =>
-            Ada.Text_IO.Put("<parameter>");
+            Put("<parameter>");
             print(a.p_name);
-            Ada.Text_IO.Put(", <value>");
+            Put(", <value>");
             print(a.p_value, False, False);
          when ATOM_LOCAL =>
-            Ada.Text_IO.Put("<local>");
+            Put("<local>");
             print(a.l_name);
-            Ada.Text_IO.Put(", <value>");
+            Put(", <value>");
             print(a.l_value, False, False);
          when others =>
-            Ada.Text_IO.Put("<Unknown atom kind>");
+            Put("<Unknown atom kind>");
       end case;
-      Ada.Text_IO.Put_Line(">");
+      Put_Line(">");
    end;
    --
    --  Print a symbol (BUILTIN, LAMBDA, VARIABLE, EMPTY)
@@ -256,7 +289,7 @@ package body bbs.lisp is
    procedure print(s : symb_index) is
    begin
       print(symb_table(s).str);
-      Ada.Text_IO.Put(" ");
+      Put(" ");
    end;
    --
    procedure dump(s : symb_index) is
@@ -264,13 +297,13 @@ package body bbs.lisp is
       print(symb_table(s).str);
       case symb_table(s).kind is
          when BUILTIN =>
-            Ada.Text_IO.Put(" <BUILTIN>");
+            Put(" <BUILTIN>");
          when LAMBDA =>
-            Ada.Text_IO.Put(" <FUNCTION>");
+            Put(" <FUNCTION>");
          when VARIABLE =>
             dump(symb_table(s).pv);
          when others =>
-            Ada.Text_IO.Put(" <UNKNOWN>");
+            Put(" <UNKNOWN>");
       end case;
    end;
    --
@@ -283,7 +316,7 @@ package body bbs.lisp is
       while (next >= Integer(string_index'First))
         and (next <= Integer(string_index'Last)) loop
          nxt := string_index(next);
-         Ada.Text_IO.Put(string_table(nxt).str(1..string_table(nxt).len));
+         Put(string_table(nxt).str(1..string_table(nxt).len));
          next := string_table(nxt).next;
       end loop;
    end;
@@ -316,7 +349,7 @@ package body bbs.lisp is
    begin
       for i in atom_index loop
          if atom_table(i).ref > 0 then
-            Ada.Text_IO.Put("Atom " & Integer'Image(Integer(i)));
+            Put("Atom " & Integer'Image(Integer(i)));
             dump(atom_table(i));
          end if;
       end loop;
@@ -329,21 +362,21 @@ package body bbs.lisp is
       begin
          case e.kind is
             when NIL_TYPE =>
-               Ada.Text_IO.Put("NIL");
+               Put("NIL");
             when ATOM_TYPE =>
-               Ada.Text_IO.Put("ATOM:" & Integer'Image(Integer(e.pa)));
+               Put("ATOM:" & Integer'Image(Integer(e.pa)));
             when CONS_TYPE =>
-               Ada.Text_IO.Put("CONS:" & Integer'Image(Integer(e.ps)));
+               Put("CONS:" & Integer'Image(Integer(e.ps)));
          end case;
       end;
    begin
       for i in cons_index loop
          if cons_table(i).ref > 0 then
-            Ada.Text_IO.Put("Cons " & Integer'Image(Integer(i)) & " contains: <");
+            Put("Cons " & Integer'Image(Integer(i)) & " contains: <");
             print_element(cons_table(i).car);
-            Ada.Text_IO.Put(" . ");
+            Put(" . ");
             print_element(cons_table(i).cdr);
-            Ada.Text_IO.Put_Line(">");
+            Put_Line(">");
          end if;
       end loop;
    end;
@@ -352,24 +385,24 @@ package body bbs.lisp is
    begin
       for i in symb_index loop
          if symb_table(i).ref > 0 then
-            Ada.Text_IO.Put("Symbol " & Integer'Image(Integer(i))
+            Put("Symbol " & Integer'Image(Integer(i))
                             & " Name ");
             print((symb_table(i).str));
-            Ada.Text_IO.Put(" contains: <");
+            Put(" contains: <");
             case symb_table(i).kind is
                when BUILTIN =>
-                  Ada.Text_IO.Put("Builtin");
+                  Put("Builtin");
                when LAMBDA =>
-                  Ada.Text_IO.Put("Lambda");
+                  Put("Lambda");
                when VARIABLE =>
-                  Ada.Text_IO.Put("Variable: ");
+                  Put("Variable: ");
                   print(symb_table(i).pv, False, False);
                when EMPTY =>
-                  Ada.Text_IO.Put("Empty");
+                  Put("Empty");
                when others =>
-                  Ada.Text_IO.Put("Unknown");
+                  Put("Unknown");
             end case;
-            Ada.Text_IO.Put_Line(">");
+            Put_Line(">");
          end if;
       end loop;
    end;
@@ -379,10 +412,10 @@ package body bbs.lisp is
       for i in tempsym_index loop
          if (tempsym_table(i) >= Integer(string_index'First))
            and (tempsym_table(i) <= Integer(string_index'Last)) then
-            Ada.Text_IO.Put("Temp Symbol " & Integer'Image(Integer(i))
+            Put("Temp Symbol " & Integer'Image(Integer(i))
                             & " Name ");
             print(string_index(tempsym_table(i)));
-            Ada.Text_IO.New_Line;
+            New_Line;
          end if;
       end loop;
    end;
@@ -393,37 +426,13 @@ package body bbs.lisp is
    begin
       for i in string_index loop
          if string_table(i).ref > 0 then
-            Ada.Text_IO.Put("String " & Integer'Image(Integer(i)) & " contains: <"
+            Put("String " & Integer'Image(Integer(i)) & " contains: <"
                                  & string_table(i).str & ">, ");
-            Ada.Text_IO.Put("Reference count: " & Integer'Image(string_table(i).ref));
-            Ada.Text_IO.Put(", Length: " & Integer'Image(Integer(string_table(i).len)));
-            Ada.Text_IO.Put_Line(", Next: " & Integer'Image(string_table(i).next));
+            Put("Reference count: " & Integer'Image(string_table(i).ref));
+            Put(", Length: " & Integer'Image(Integer(string_table(i).len)));
+            Put_Line(", Next: " & Integer'Image(string_table(i).next));
          end if;
       end loop;
-   end;
-   --
-   --  Replacements for Text_IO to make porting to embedded systems easier.
-   --  When on a system without Ada.Text_IO, these will need to be changed to
-   --  whatever routines are used.
-   --
-   procedure put_line(s : String) is
-   begin
-      Ada.Text_IO.Put_Line(s);
-   end;
-   --
-   procedure put(s : String) is
-   begin
-      Ada.Text_IO.Put(s);
-   end;
-   --
-   procedure new_line is
-   begin
-      Ada.Text_IO.New_Line;
-   end;
-   --
-   procedure Get_Line(Item : out String; Last : out Natural) is
-   begin
-      Ada.Text_IO.Get_Line(Item, Last);
    end;
    --
    --  Functions for symbols.
@@ -648,12 +657,12 @@ package body bbs.lisp is
    --
    procedure error(f : String; m : String) is
    begin
-      Ada.Text_IO.Put_Line("ERROR: " & f & ": " & m);
+      Put_Line("ERROR: " & f & ": " & m);
    end;
    --
    procedure msg(f : String; m : String) is
    begin
-      Ada.Text_IO.Put_Line("MSG: " & f & ": " & m);
+      Put_Line("MSG: " & f & ": " & m);
    end;
 
 
