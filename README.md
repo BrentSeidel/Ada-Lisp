@@ -16,6 +16,13 @@ finished, they can be translated into Ada and compiled.
 
 ## Status
 
+### Porting
+It now runs on the Arduino Due.  It took a bit of work to remove all dependencies
+on Ada libraries that aren't available on the Arduino Due.  Another feature added
+was the ability for the host software to add custom lisp commands.  Thus, the
+main Arduino Due program can add custom lisp commands for accessing the Arduino
+hardware.
+
 ### Supported Data Types
 1. Integers are the standard Ada integer type.
 2. Strings are variable length and implemented using a linked list.
@@ -26,12 +33,12 @@ finished, they can be translated into Ada and compiled.
 3. List operations - CAR and CDR
 4. DOWHILE
 5. Function definition is under development
-6. Macros.  This is a long term goal.  I would like to implemente these, but I need to
+6. Macros.  This is a long term goal.  I would like to implement these, but I need to
 figure out how first.
 7. Local variables.  I have an idea that might work.
-8. Hardware access.  This will be done after the port to target hardware.  Builtin functions
-will be defined for accessing various bits of hardware.  These will no doubt have to be
-modified when porting between different boards.
+8. Hardware access.  This is done by allowing the host software to add custom lisp
+commands.  This may also be useful for embedding the lisp interpreter in other
+applications.
 
 ## Internals
 
