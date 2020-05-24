@@ -135,4 +135,33 @@ package body bbs.lisp.utilities is
       return (Kind => ATOM_TYPE, pa => a);
    end;
    --
+   --  This procedure extracts the first value from an element.  This value may
+   --  be a value, a variable, or a list.  If the list starts with an expression,
+   --  it is passed to the evaluator and the results returned.  The rest of the
+   --  expression is also returned
+   --
+   procedure first_value(e : element_type; car : out element_type; cdr : out element_type) is
+      first : element_type;
+      s : cons_index;
+   begin
+      if e.kind = NIL_TYPE then
+         car := NIL_ELEM;
+         cdr := NIL_ELEM;
+      elsif e.kind = ATOM_TYPE then
+         car := indirect_atom(e.pa);
+         cdr := NIL_ELEM;
+      else -- The only other option is CONS_TYPE
+         s := e.ps;
+         first := cons_table(s).car;
+         if first.kind = NIL_TYPE then
+            car := NIL_ELEM;
+         elsif first.kind = ATOM_TYPE then
+            car := indirect_atom(first.pa);
+         else -- The first item is a CONS_TYPE
+            car := eval_dispatch(first.ps);
+         end if;
+         cdr := cons_table(s).cdr;
+      end if;
+   end;
+   --
 end;

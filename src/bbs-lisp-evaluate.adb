@@ -2,55 +2,6 @@ with bbs.lisp.memory;
 with bbs.lisp.strings;
 package body bbs.lisp.evaluate is
    --
-   --  This is the basic dispatcher for evaluating expressions.  A list has to
-   --  start with a symbol to be considered for evaluation.  Some simple items
-   --  are handled in this function.  The rest are passed off to sub-functions.
-   --
-   function eval_dispatch(s : cons_index) return element_type is
-      a : atom_index;
-      sym : symbol;
-      e : element_type := NIL_ELEM;
-      first : element_type := cons_table(s).car;
-      rest : element_type := cons_table(s).cdr;
-   begin
-      if first.kind = ATOM_TYPE then
-         a := first.pa;
-         if atom_table(a).kind = ATOM_SYMBOL then
-            sym := symb_table(atom_table(a).sym);
-            --
-            --  Handle the builtin operations
-            --
-            if sym.kind = BUILTIN then
-               --
-               --  This will be updates so that the symbol contains the access
-               --  to the function that implements the builtin.  Then instead of
-               --  This big case statement, they can be called directly.
-               --
-               --  Many of the functions will need to change in order to have
-               --  the same function signature.
-               --
-               Put("Evaluating builtin " );
-               Print(sym.str);
-               New_Line;
-               e := sym.f.all(rest);
-            elsif sym.kind = LAMBDA then
-               Put("Evaluating lambda ");
-               print(sym.ps);
-               e := eval_function(sym.ps, rest);
-            elsif sym.kind = VARIABLE then
-               e := sym.pv;
-            end if;
-         else
-            bbs.lisp.memory.ref(s);
-            e := (kind => CONS_TYPE, ps => s);
-         end if;
-      else
-         bbs.lisp.memory.ref(s);
-         e := (kind => CONS_TYPE, ps => s);
-      end if;
-      return e;
-   end;
-   --
    function eval_newline(e : element_type) return element_type is
    begin
       New_Line;

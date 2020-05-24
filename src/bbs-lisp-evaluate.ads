@@ -1,10 +1,6 @@
 with bbs.lisp.utilities;
 package bbs.lisp.evaluate is
    --
-   --  Function for dispatching the various functions for evaluation.
-   --
-   function eval_dispatch(s : cons_index) return element_type;
-   --
    --  Functions for evaluating the various builtin functions.
    --
    function eval_car(e : element_type) return element_type;

@@ -163,6 +163,7 @@ package bbs.lisp is
    --
    procedure error(f : String; m : String);
    procedure msg(f : String; m : String);
+   procedure print(e : element_type; d : Boolean; nl : Boolean);
    --
    --  Some useful constants
    --
@@ -197,7 +198,7 @@ private
    --
    --  These procedures print various types of objects.
    --
-   procedure print(e : element_type; d : Boolean; nl : Boolean);
+--   procedure print(e : element_type; d : Boolean; nl : Boolean);
    procedure print(s : cons_index);
    procedure print(a : atom_index);
    procedure print(s : string_index);
@@ -279,6 +280,10 @@ private
    --
    type mathops is (PLUS, MINUS, MUL, DIV);
    type compops is (SYM_EQ, SYM_NE, SYM_LT, SYM_GT);
+   --
+   --  Function for dispatching the various functions for evaluation.
+   --
+   function eval_dispatch(s : cons_index) return element_type;
 
 
 end bbs.lisp;

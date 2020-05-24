@@ -120,7 +120,7 @@ package body bbs.lisp is
          r := e;
       else
          s := e.ps;
-         r := bbs.lisp.evaluate.eval_dispatch(s);
+         r := eval_dispatch(s);
          bbs.lisp.memory.deref(s);
       end if;
       return r;
@@ -533,20 +533,6 @@ package body bbs.lisp is
       return False;
    end;
    --
---   procedure add_builtin(n : String; b : builtins) is
---      sym : symb_index;
---      flag : Boolean;
---   begin
---      flag := get_symb(sym, n);
---      if flag then
---         symb_table(sym) := (ref => 1, Kind => BUILTIN, i => b,
---                             f => BBS.lisp.evaluate.eval_quit'Access,
---                             str => symb_table(sym).str);
---      else
---         error("add_builtin", "Unable to add builtin symbol " & n);
---      end if;
---   end;
-   --
    procedure add_builtin(n : String; f : execute_function) is
       sym : symb_index;
       flag : Boolean;
@@ -663,6 +649,53 @@ package body bbs.lisp is
    procedure msg(f : String; m : String) is
    begin
       Put_Line("MSG: " & f & ": " & m);
+   end;
+   --
+   --  This is the basic dispatcher for evaluating expressions.  A list has to
+   --  start with a symbol to be considered for evaluation.  Some simple items
+   --  are handled in this function.  The rest are passed off to sub-functions.
+   --
+   function eval_dispatch(s : cons_index) return element_type is
+      a : atom_index;
+      sym : symbol;
+      e : element_type := NIL_ELEM;
+      first : element_type := cons_table(s).car;
+      rest : element_type := cons_table(s).cdr;
+   begin
+      if first.kind = ATOM_TYPE then
+         a := first.pa;
+         if atom_table(a).kind = ATOM_SYMBOL then
+            sym := symb_table(atom_table(a).sym);
+            --
+            --  Handle the builtin operations
+            --
+            if sym.kind = BUILTIN then
+               Put("Evaluating builtin " );
+               Print(sym.str);
+               New_Line;
+               e := sym.f.all(rest);
+            --
+            -- Handle defined functions
+            --
+            elsif sym.kind = LAMBDA then
+               Put("Evaluating lambda ");
+               print(sym.ps);
+               e := bbs.lisp.evaluate.eval_function(sym.ps, rest);
+            --
+            -- Handle variables
+            --
+            elsif sym.kind = VARIABLE then
+               e := sym.pv;
+            end if;
+         else
+            bbs.lisp.memory.ref(s);
+            e := (kind => CONS_TYPE, ps => s);
+         end if;
+      else
+         bbs.lisp.memory.ref(s);
+         e := (kind => CONS_TYPE, ps => s);
+      end if;
+      return e;
    end;
 
 

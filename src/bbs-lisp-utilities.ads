@@ -20,4 +20,11 @@ package bbs.lisp.utilities is
    --  points to the original atom.
    --
    function indirect_atom(a : atom_index) return element_type;
+   --
+   --  This procedure extracts the first value from an element.  This value may
+   --  be a value, a variable, or a list.  If the list starts with an expression,
+   --  it is passed to the evaluator and the results returned.  The rest of the
+   --  expression is also returned
+   --
+   procedure first_value(e : element_type; car : out element_type; cdr : out element_type);
 end;
