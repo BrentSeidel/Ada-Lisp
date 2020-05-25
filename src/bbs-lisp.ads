@@ -59,7 +59,8 @@ package bbs.lisp is
          end case;
       end record;
    --
-   --  An atom can hold various kinds of scalar information.
+   --  An atom can hold various kinds of scalar information.  The ref field is
+   --  for holding the reference count used in memory management.
    --
    type atom(kind : atom_kind := ATOM_NIL) is
       record

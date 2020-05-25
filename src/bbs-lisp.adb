@@ -680,6 +680,7 @@ package body bbs.lisp is
             elsif sym.kind = LAMBDA then
                Put("Evaluating lambda ");
                print(sym.ps);
+               new_line;
                e := bbs.lisp.evaluate.eval_function(sym.ps, rest);
             --
             -- Handle variables

@@ -149,6 +149,7 @@ package body bbs.lisp.utilities is
          cdr := NIL_ELEM;
       elsif e.kind = ATOM_TYPE then
          car := indirect_atom(e.pa);
+         BBS.lisp.memory.ref(car);
          cdr := NIL_ELEM;
       else -- The only other option is CONS_TYPE
          s := e.ps;
@@ -157,6 +158,7 @@ package body bbs.lisp.utilities is
             car := NIL_ELEM;
          elsif first.kind = ATOM_TYPE then
             car := indirect_atom(first.pa);
+            BBS.lisp.memory.ref(car);
          else -- The first item is a CONS_TYPE
             car := eval_dispatch(first.ps);
          end if;

@@ -10,9 +10,10 @@
 ;
 ;  Testing the do while loop
 ;
-(setq var1 0)
+(setq var 0)
 (dowhile (< var 100) (print "Var is " var) (new-line) (setq var (+ var 1)))
 
+(setq var1 0)
 (dowhile (< var1 100)
   (setq var2 0)
   (print "Var1 is " var1)
@@ -50,4 +51,24 @@
   (if (> 0 n)
     (- 0 n)
     (+ 0 n)))
+;
+;  Testing pin commands on the Arduino Due
+;
+(pin-mode 10 0)
+(pin-mode 11 1)
+(pin-mode 12 1)
+(dowhile (= (read-pin 10) (+ 0 1))
+  (set-pin 11 0)
+  (set-pin 12 1)
+  (set-pin 11 1)
+  (set-pin 12 0))
+;
+;
+(setq pin10 (read-pin 10))
+(dowhile (= pin10 1)
+  (set-pin 11 0)
+  (set-pin 12 1)
+  (set-pin 11 1)
+  (set-pin 12 0)
+  (setq pin10 (read-pin 10)))
 

@@ -1,5 +1,6 @@
 with bbs.lisp.memory;
 with bbs.lisp.strings;
+with BBS.lisp.utilities;
 package body bbs.lisp.evaluate is
    --
    function eval_newline(e : element_type) return element_type is
@@ -214,12 +215,13 @@ package body bbs.lisp.evaluate is
       a  : atom_index;
       s  : symb_index;
       flag : Boolean;
+      i1 : Integer;
+      i2 : Integer;
    begin
       if e.kind = CONS_TYPE then
-         t1 := cons_table(e.ps).car;
-         t := cons_table(e.ps).cdr;
+         BBS.lisp.utilities.first_value(e, t1, t);
          if t.kind = CONS_TYPE then
-            t2 := cons_table(t.ps).car;
+            BBS.lisp.utilities.first_value(t, t2, t);
          else
             error("eval_comp", "Cannot compare a single atom.");
             return NIL_ELEM;
@@ -227,12 +229,6 @@ package body bbs.lisp.evaluate is
       else
          error("eval_comp", "Cannot compare a single atom.");
          return NIL_ELEM;
-      end if;
-      if t1.kind = CONS_TYPE then
-         t1 := eval_dispatch(t1.ps);
-      end if;
-      if t2.kind = CONS_TYPE then
-         t2 := eval_dispatch(t2.ps);
       end if;
       if (t1.kind = ATOM_TYPE) and (t2.kind = ATOM_TYPE) then
          t := bbs.lisp.utilities.indirect_atom(t1.pa);
@@ -248,31 +244,35 @@ package body bbs.lisp.evaluate is
             flag := find_symb(s, "t");
             flag := bbs.lisp.memory.alloc(a);
             if flag then
+               i1 := atom_table(t1.pa).i;
+               i2 := atom_table(t2.pa).i;
+               BBS.lisp.memory.deref(t1);
+               BBS.lisp.memory.deref(t2);
                case b is
                when SYM_EQ =>
-                  if atom_table(t1.pa).i = atom_table(t2.pa).i then
+                  if i1 = i2 then
                      atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
                      return (Kind => ATOM_TYPE, pa => a);
                   end if;
                when SYM_NE =>
-                  if atom_table(t1.pa).i /= atom_table(t2.pa).i then
+                  if i1 /= i2 then
                      atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
                      return (Kind => ATOM_TYPE, pa => a);
                   end if;
                when SYM_LT =>
-                  if atom_table(t1.pa).i < atom_table(t2.pa).i then
+                  if i1 < i2 then
                      atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
                      return (Kind => ATOM_TYPE, pa => a);
                   end if;
                when SYM_GT =>
-                  if atom_table(t1.pa).i > atom_table(t2.pa).i then
+                  if i1 > i2 then
                      atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
                      return (Kind => ATOM_TYPE, pa => a);
                   end if;
                when others =>
                   error("eval_comp", "Unknown comparison type.");
                end case;
-               bbs.lisp.memory.deref("eval_comp", a);
+               BBS.lisp.memory.deref("eval_comp", a);
                return NIL_ELEM;
             else
                error("eval_comp", "Unable to allocate return value.");
@@ -354,7 +354,7 @@ package body bbs.lisp.evaluate is
    --  perminant symbol in the symbol table.  The assigned value is the result
    --  of evaluating the second parameter.
    --
-   --  To improve memory management, need to may a copy of the assigned value
+   --  To improve memory management, need to make a copy of the assigned value
    --  to use as a return value.  Currently, the REPL deallocates the returned
    --  value after printing it.
    --
@@ -380,8 +380,8 @@ package body bbs.lisp.evaluate is
 
    begin
       if e.kind = CONS_TYPE then
-         p1 := cons_table(e.ps).car;
-         p2 := cons_table(e.ps).cdr;
+         p1 := cons_table(e.ps).car;  --  Should be symbol name
+         p2 := cons_table(e.ps).cdr;  --  Should be value to be assigned
          if p1.kind = ATOM_TYPE then
             a := p1.pa;
             if atom_table(a).kind = ATOM_SYMBOL then
@@ -403,17 +403,19 @@ package body bbs.lisp.evaluate is
             end if;
          end if;
          --
-         --  At this point, p1 should be an atim containing a valid symbol and
+         --  At this point, p1 should be an atom containing a valid symbol and
          --  symb is the index to that symbol.
          --
          --
          --  Now determine what value to attach to the symbol.
          --
          if p2.kind = CONS_TYPE then
+--            msg("setq", "P2 is a cons");
             p3 := cons_table(p2.ps).car;
             if p3.kind = CONS_TYPE then
                ret := eval_dispatch(p3.ps);
                deref_previous(symb);
+               BBS.lisp.memory.ref(ret);
                symb_table(symb) := (ref => 1, Kind => VARIABLE,
                                     pv => ret, str => symb_table(symb).str);
                return ret;
