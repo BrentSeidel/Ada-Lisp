@@ -1,6 +1,7 @@
 with bbs.lisp.memory;
 with bbs.lisp.strings;
 with BBS.lisp.utilities;
+
 package body bbs.lisp.evaluate is
    --
    function eval_newline(e : element_type) return element_type is
@@ -410,7 +411,6 @@ package body bbs.lisp.evaluate is
          --  Now determine what value to attach to the symbol.
          --
          if p2.kind = CONS_TYPE then
---            msg("setq", "P2 is a cons");
             p3 := cons_table(p2.ps).car;
             if p3.kind = CONS_TYPE then
                ret := eval_dispatch(p3.ps);

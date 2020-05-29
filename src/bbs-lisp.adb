@@ -332,6 +332,8 @@ package body bbs.lisp is
       e : element_type;
       r : element_type;
    begin
+      exit_flag := False;
+      break_flag := false;
       while True loop
          e := read;
          r := eval(e);

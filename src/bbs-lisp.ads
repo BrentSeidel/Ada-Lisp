@@ -176,6 +176,10 @@ private
    --
    exit_flag : Boolean := False;
    --
+   --  Flag to exit interpretation
+   --
+   break_flag : Boolean := False;
+   --
    --  Initialize the data structures used in the lisp interpreter.
    --
    procedure init;
