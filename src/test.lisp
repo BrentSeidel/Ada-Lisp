@@ -63,12 +63,11 @@
   (set-pin 11 1)
   (set-pin 12 0))
 ;
+;  Read an analog pin and print the value repeatedly.
+;  Digital pin 10 is tied high to keep looping and tied low to exit the loop.
 ;
-(setq pin10 (read-pin 10))
-(dowhile (= pin10 1)
-  (set-pin 11 0)
-  (set-pin 12 1)
-  (set-pin 11 1)
-  (set-pin 12 0)
-  (setq pin10 (read-pin 10)))
+(pin-mode 10 0)
+(dowhile (= (read-pin 10) (+ 0 1))
+  (print "Analog value is " (read-analog 1))
+  (new-line))
 

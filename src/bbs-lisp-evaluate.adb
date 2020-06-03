@@ -16,6 +16,18 @@ package body bbs.lisp.evaluate is
       return NIL_ELEM;
    end;
    --
+   function eval_msg_on(e : element_type) return element_type is
+   begin
+      msg_flag := True;
+      return NIL_ELEM;
+   end;
+   --
+   function eval_msg_off(e : element_type) return element_type is
+   begin
+      msg_flag := False;
+      return NIL_ELEM;
+   end;
+   --
    function eval_quote(e : element_type) return element_type is
       temp : element_type := e;
    begin

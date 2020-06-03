@@ -25,6 +25,8 @@ package bbs.lisp.evaluate is
    function eval_reset(e : element_type) return element_type;
    function eval_quote(e : element_type) return element_type;
    function eval_newline(e : element_type) return element_type;
+   function eval_msg_on(e : element_type) return element_type;
+   function eval_msg_off(e : element_type) return element_type;
    --
    --  Functions for evaluating lisp functions
    --

@@ -35,6 +35,8 @@ package body bbs.lisp is
       add_builtin("reset", BBS.lisp.evaluate.eval_reset'Access);
       add_builtin("quote", BBS.lisp.evaluate.eval_quote'Access);
       add_builtin("new-line", BBS.lisp.evaluate.eval_newline'Access);
+      add_builtin("msg-on", BBS.lisp.evaluate.eval_msg_on'Access);
+      add_builtin("msg-off", BBS.lisp.evaluate.eval_msg_off'Access);
       --
       --  The following need functions of the proper form created.
       --
@@ -650,7 +652,9 @@ package body bbs.lisp is
    --
    procedure msg(f : String; m : String) is
    begin
-      Put_Line("MSG: " & f & ": " & m);
+      if msg_flag then
+         Put_Line("MSG: " & f & ": " & m);
+      end if;
    end;
    --
    --  This is the basic dispatcher for evaluating expressions.  A list has to
@@ -672,17 +676,21 @@ package body bbs.lisp is
             --  Handle the builtin operations
             --
             if sym.kind = BUILTIN then
-               Put("Evaluating builtin " );
-               Print(sym.str);
-               New_Line;
+               if msg_flag then
+                  Put("Evaluating builtin " );
+                  Print(sym.str);
+                  New_Line;
+               end if;
                e := sym.f.all(rest);
             --
             -- Handle defined functions
             --
             elsif sym.kind = LAMBDA then
-               Put("Evaluating lambda ");
-               print(sym.ps);
-               new_line;
+               if msg_flag then
+                  Put("Evaluating lambda ");
+                  print(sym.ps);
+                  new_line;
+               end if;
                e := bbs.lisp.evaluate.eval_function(sym.ps, rest);
             --
             -- Handle variables

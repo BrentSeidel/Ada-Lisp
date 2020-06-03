@@ -172,13 +172,19 @@ package bbs.lisp is
 
 private
    --
+   --  Global flags
+   --
    --  Flag for exiting the REPL
    --
    exit_flag : Boolean := False;
    --
-   --  Flag to exit interpretation
+   --  Flag to exit current command
    --
    break_flag : Boolean := False;
+   --
+   --  Flag to enable or disable display of messages
+   --
+   msg_flag : Boolean := False;
    --
    --  Initialize the data structures used in the lisp interpreter.
    --
