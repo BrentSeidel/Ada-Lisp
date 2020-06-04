@@ -3,30 +3,31 @@ package bbs.lisp.evaluate is
    --
    --  Functions for evaluating the various builtin functions.
    --
-   function eval_car(e : element_type) return element_type;
-   function eval_cdr(e : element_type) return element_type;
-   function eval_setq(e : element_type) return element_type;
+   function car(e : element_type) return element_type;
+   function cdr(e : element_type) return element_type;
+   function setq(e : element_type) return element_type;
    function eval_if(e : element_type) return element_type;
-   function eval_print(e : element_type) return element_type;
-   function eval_dowhile(e : element_type) return element_type;
-   function eval_dotimes(e : element_type) return element_type;
-   function eval_defun(e : element_type) return element_type;
-   function eval_add(e : element_type) return element_type;
-   function eval_sub(e : element_type) return element_type;
-   function eval_mul(e : element_type) return element_type;
-   function eval_div(e : element_type) return element_type;
-   function eval_quit(e : element_type) return element_type;
-   function eval_eq(e : element_type) return element_type;
-   function eval_ne(e : element_type) return element_type;
-   function eval_lt(e : element_type) return element_type;
-   function eval_gt(e : element_type) return element_type;
-   function eval_true(e : element_type) return element_type;
-   function eval_dump(e : element_type) return element_type;
-   function eval_reset(e : element_type) return element_type;
-   function eval_quote(e : element_type) return element_type;
-   function eval_newline(e : element_type) return element_type;
-   function eval_msg_on(e : element_type) return element_type;
-   function eval_msg_off(e : element_type) return element_type;
+   function print(e : element_type) return element_type;
+   function dowhile(e : element_type) return element_type;
+   function dotimes(e : element_type) return element_type;
+   function defun(e : element_type) return element_type;
+   function add(e : element_type) return element_type;
+   function sub(e : element_type) return element_type;
+   function mul(e : element_type) return element_type;
+   function div(e : element_type) return element_type;
+   function quit(e : element_type) return element_type;
+   function eq(e : element_type) return element_type;
+   function ne(e : element_type) return element_type;
+   function lt(e : element_type) return element_type;
+   function gt(e : element_type) return element_type;
+   function true(e : element_type) return element_type;
+   function dump(e : element_type) return element_type;
+   function reset(e : element_type) return element_type;
+   function quote(e : element_type) return element_type;
+   function newline(e : element_type) return element_type;
+   function msg_on(e : element_type) return element_type;
+   function msg_off(e : element_type) return element_type;
+   function read_line(e : element_type) return element_type;
    --
    --  Functions for evaluating lisp functions
    --

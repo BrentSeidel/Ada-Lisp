@@ -13,30 +13,31 @@ package body bbs.lisp is
    begin
       bbs.lisp.memory.reset_tables;
       --
-      add_builtin("car", BBS.lisp.evaluate.eval_car'Access);
-      add_builtin("cdr", BBS.lisp.evaluate.eval_cdr'Access);
-      add_builtin("print", BBS.lisp.evaluate.eval_print'Access);
-      add_builtin("setq", BBS.lisp.evaluate.eval_setq'Access);
+      add_builtin("car", BBS.lisp.evaluate.car'Access);
+      add_builtin("cdr", BBS.lisp.evaluate.cdr'Access);
+      add_builtin("print", BBS.lisp.evaluate.print'Access);
+      add_builtin("setq", BBS.lisp.evaluate.setq'Access);
       add_builtin("if", BBS.lisp.evaluate.eval_if'Access);
-      add_builtin("dowhile", BBS.lisp.evaluate.eval_dowhile'Access);
-      add_builtin("dotimes", BBS.lisp.evaluate.eval_dotimes'Access);
-      add_builtin("defun", BBS.lisp.evaluate.eval_defun'Access);
-      add_builtin("+", BBS.lisp.evaluate.eval_add'Access);
-      add_builtin("-", BBS.lisp.evaluate.eval_sub'Access);
-      add_builtin("*", BBS.lisp.evaluate.eval_mul'Access);
-      add_builtin("/", BBS.lisp.evaluate.eval_div'Access);
-      add_builtin("exit", BBS.lisp.evaluate.eval_quit'Access);
-      add_builtin("=", BBS.lisp.evaluate.eval_eq'Access);
-      add_builtin("/=", BBS.lisp.evaluate.eval_ne'Access);
-      add_builtin("<", BBS.lisp.evaluate.eval_lt'Access);
-      add_builtin(">", BBS.lisp.evaluate.eval_gt'Access);
-      add_builtin("dump", BBS.lisp.evaluate.eval_dump'Access);
-      add_builtin("t", BBS.lisp.evaluate.eval_true'Access);
-      add_builtin("reset", BBS.lisp.evaluate.eval_reset'Access);
-      add_builtin("quote", BBS.lisp.evaluate.eval_quote'Access);
-      add_builtin("new-line", BBS.lisp.evaluate.eval_newline'Access);
-      add_builtin("msg-on", BBS.lisp.evaluate.eval_msg_on'Access);
-      add_builtin("msg-off", BBS.lisp.evaluate.eval_msg_off'Access);
+      add_builtin("dowhile", BBS.lisp.evaluate.dowhile'Access);
+      add_builtin("dotimes", BBS.lisp.evaluate.dotimes'Access);
+      add_builtin("defun", BBS.lisp.evaluate.defun'Access);
+      add_builtin("+", BBS.lisp.evaluate.add'Access);
+      add_builtin("-", BBS.lisp.evaluate.sub'Access);
+      add_builtin("*", BBS.lisp.evaluate.mul'Access);
+      add_builtin("/", BBS.lisp.evaluate.div'Access);
+      add_builtin("exit", BBS.lisp.evaluate.quit'Access);
+      add_builtin("=", BBS.lisp.evaluate.eq'Access);
+      add_builtin("/=", BBS.lisp.evaluate.ne'Access);
+      add_builtin("<", BBS.lisp.evaluate.lt'Access);
+      add_builtin(">", BBS.lisp.evaluate.gt'Access);
+      add_builtin("dump", BBS.lisp.evaluate.dump'Access);
+      add_builtin("t", BBS.lisp.evaluate.true'Access);
+      add_builtin("reset", BBS.lisp.evaluate.reset'Access);
+      add_builtin("quote", BBS.lisp.evaluate.quote'Access);
+      add_builtin("new-line", BBS.lisp.evaluate.newline'Access);
+      add_builtin("msg-on", BBS.lisp.evaluate.msg_on'Access);
+      add_builtin("msg-off", BBS.lisp.evaluate.msg_off'Access);
+      add_builtin("read-line", BBS.lisp.evaluate.read_line'Access);
       --
       --  The following need functions of the proper form created.
       --
@@ -696,6 +697,7 @@ package body bbs.lisp is
             -- Handle variables
             --
             elsif sym.kind = VARIABLE then
+               BBS.lisp.memory.ref(sym.pv);
                e := sym.pv;
             end if;
          else

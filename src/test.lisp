@@ -70,4 +70,8 @@
 (dowhile (= (read-pin 10) (+ 0 1))
   (print "Analog value is " (read-analog 1))
   (new-line))
-
+;
+(defun monitor-analog (n)
+  (dowhile (= (read-pin 10) (+ 0 1))
+    (print "Analog value is " (read-analog n))
+    (new-line)))

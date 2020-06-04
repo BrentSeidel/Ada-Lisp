@@ -4,38 +4,38 @@ with BBS.lisp.utilities;
 
 package body bbs.lisp.evaluate is
    --
-   function eval_newline(e : element_type) return element_type is
+   function newline(e : element_type) return element_type is
    begin
       New_Line;
       return NIL_ELEM;
    end;
    --
-   function eval_reset(e : element_type) return element_type is
+   function reset(e : element_type) return element_type is
    begin
       init;
       return NIL_ELEM;
    end;
    --
-   function eval_msg_on(e : element_type) return element_type is
+   function msg_on(e : element_type) return element_type is
    begin
       msg_flag := True;
       return NIL_ELEM;
    end;
    --
-   function eval_msg_off(e : element_type) return element_type is
+   function msg_off(e : element_type) return element_type is
    begin
       msg_flag := False;
       return NIL_ELEM;
    end;
    --
-   function eval_quote(e : element_type) return element_type is
+   function quote(e : element_type) return element_type is
       temp : element_type := e;
    begin
       bbs.lisp.memory.ref(temp);
       return temp;
    end;
    --
-   function eval_true(e : element_type) return element_type is
+   function true(e : element_type) return element_type is
       a : atom_index;
       st : symb_index;
       flag : Boolean;
@@ -46,7 +46,7 @@ package body bbs.lisp.evaluate is
       return (Kind => ATOM_TYPE, pa => a);
    end;
    --
-   function eval_dump(e : element_type) return element_type is
+   function dump(e : element_type) return element_type is
    begin
       dump_atoms;
       dump_cons;
@@ -159,29 +159,29 @@ package body bbs.lisp.evaluate is
       return el;
    end;
    --
-   function eval_add(e : element_type) return element_type is
+   function add(e : element_type) return element_type is
    begin
       return eval_math(e, PLUS);
    end;
    --
-   function eval_sub(e : element_type) return element_type is
+   function sub(e : element_type) return element_type is
    begin
       return eval_math(e, MINUS);
    end;
    --
-   function eval_mul(e : element_type) return element_type is
+   function mul(e : element_type) return element_type is
    begin
       return eval_math(e, MUL);
    end;
    --
-   function eval_div(e : element_type) return element_type is
+   function div(e : element_type) return element_type is
    begin
       return eval_math(e, DIV);
    end;
    --
    --  Return the first entry in a list (it may be another list).
    --
-   function eval_car(e : element_type) return element_type is
+   function car(e : element_type) return element_type is
       t : element_type;
    begin
       if e.kind = CONS_TYPE then
@@ -190,18 +190,18 @@ package body bbs.lisp.evaluate is
             bbs.lisp.memory.ref(cons_table(t.ps).car);
             return cons_table(t.ps).car;
          else
-            error("eval_car", "Can only CAR a list");
+            error("car", "Can only CAR a list");
             return NIL_ELEM;
          end if;
       else
-         error("eval_car", "Can only CAR a list");
+         error("car", "Can only CAR a list");
          return NIL_ELEM;
       end if;
    end;
    --
    --  Return the rest of a list
    --
-   function eval_cdr(e : element_type) return element_type is
+   function cdr(e : element_type) return element_type is
       t : element_type;
    begin
       if e.kind = CONS_TYPE then
@@ -210,11 +210,11 @@ package body bbs.lisp.evaluate is
             bbs.lisp.memory.ref(cons_table(t.ps).cdr);
             return cons_table(t.ps).cdr;
          else
-            error("eval_cdr", "Can only CDR a list");
+            error("cdr", "Can only CDR a list");
             return NIL_ELEM;
          end if;
       else
-         error("eval_cdr", "Can only CDR a list");
+         error("cdr", "Can only CDR a list");
          return NIL_ELEM;
       end if;
    end;
@@ -342,22 +342,22 @@ package body bbs.lisp.evaluate is
       end if;
    end;
    --
-   function eval_eq(e : element_type) return element_type is
+   function eq(e : element_type) return element_type is
    begin
       return eval_comp(e, SYM_EQ);
    end;
    --
-   function eval_ne(e : element_type) return element_type is
+   function ne(e : element_type) return element_type is
    begin
       return eval_comp(e, SYM_NE);
    end;
    --
-   function eval_lt(e : element_type) return element_type is
+   function lt(e : element_type) return element_type is
    begin
       return eval_comp(e, SYM_LT);
    end;
    --
-   function eval_gt(e : element_type) return element_type is
+   function gt(e : element_type) return element_type is
    begin
       return eval_comp(e, SYM_GT);
    end;
@@ -371,7 +371,7 @@ package body bbs.lisp.evaluate is
    --  to use as a return value.  Currently, the REPL deallocates the returned
    --  value after printing it.
    --
-   function eval_setq(e : element_type) return element_type is
+   function setq(e : element_type) return element_type is
       symb : symb_index;
       tempsym : tempsym_index;
       a : atom_index;
@@ -403,15 +403,15 @@ package body bbs.lisp.evaluate is
                tempsym := atom_table(a).tempsym;
                flag := get_symb(symb, string_index(tempsym_table(tempsym)));
                if not flag then
-                  error("eval_setq", "Unable to add symbol ");
+                  error("setq", "Unable to add symbol ");
                   return NIL_ELEM;
                end if;
             else
-               error("eval_setq", "First parameter is not a symbol or temporary symbol.");
+               error("setq", "First parameter is not a symbol or temporary symbol.");
                return NIL_ELEM;
             end if;
             if symb_table(symb).kind = BUILTIN then
-               error("eval_setq", "Can't set value of builtin symbol ");
+               error("setq", "Can't set value of builtin symbol ");
                return NIL_ELEM;
             end if;
          end if;
@@ -447,17 +447,17 @@ package body bbs.lisp.evaluate is
             BBS.lisp.memory.ref(p2);
             return p2;
          else
-            error("eval_setq", "Not enough arguments.");
+            error("setq", "Not enough arguments.");
          end if;
       else
-         error("eval_setq", "Not enough arguments.");
+         error("setq", "Not enough arguments.");
       end if;
       return NIL_ELEM;
    end;
    --
    --  Print stuff
    --
-   function eval_print(e : element_type) return element_type is
+   function print(e : element_type) return element_type is
       t : element_type := e;
       result : element_type;
       car : element_type;
@@ -558,7 +558,7 @@ package body bbs.lisp.evaluate is
    --  condition evaluates to true, the rest of the items in the list are
    --  evaluated.  This is repeated until the condition evaluates to false.
    --
-   function eval_dowhile(e : element_type) return element_type is
+   function dowhile(e : element_type) return element_type is
       cond : element_type;
       list : element_type;
       ptr : element_type;
@@ -598,19 +598,19 @@ package body bbs.lisp.evaluate is
          end loop;
          BBS.lisp.memory.deref(temp);
       else
-         error("eval_dowhile", "Must provide a condition and expressions.");
+         error("dowhile", "Must provide a condition and expressions.");
       end if;
       return t;
    end;
    --
-   function eval_dotimes(e : element_type) return element_type is
+   function dotimes(e : element_type) return element_type is
    begin
       return NIL_ELEM;
    end;
    --
    --  Set the quit flag to exit the lisp interpreter
    --
-   function eval_quit(e : element_type) return element_type is
+   function quit(e : element_type) return element_type is
    begin
       exit_flag := True;
       return NIL_ELEM;
@@ -626,7 +626,7 @@ package body bbs.lisp.evaluate is
    --      translated to point to the parameter atom in the parameter list.  It
    --      also could concievable be a single atom or even NIL.
    --
-   function eval_defun(e : element_type) return element_type is
+   function defun(e : element_type) return element_type is
       params : element_type;
       func_body : element_type;
       name : element_type;
@@ -641,7 +641,7 @@ package body bbs.lisp.evaluate is
       --  initial checks to verify that they are the appropriate kind of object.
       --
       if e.kind /= CONS_TYPE then
-         error("eval_defun", "No parameters given to defun.");
+         error("defun", "No parameters given to defun.");
          return NIL_ELEM;
       end if;
       name := cons_table(e.ps).car;
@@ -650,21 +650,21 @@ package body bbs.lisp.evaluate is
          params := cons_table(temp.ps).car;
          func_body := cons_table(temp.ps).cdr;
       else
-         error("eval_defun", "Improper parameters.");
+         error("defun", "Improper parameters.");
          return NIL_ELEM;
       end if;
       if name.kind = ATOM_TYPE then
          if (atom_table(name.pa).kind /= ATOM_SYMBOL)
            and (atom_table(name.pa).kind /= ATOM_TEMPSYM) then
-            error("eval_defun", "Function name must be a symbol or tempsym.");
+            error("defun", "Function name must be a symbol or tempsym.");
             return NIL_ELEM;
          end if;
       else
-         error("eval_defun", "Function name can't be a list.");
+         error("defun", "Function name can't be a list.");
          return NIL_ELEM;
       end if;
       if params.kind /= CONS_TYPE then
-         error("eval_defun", "Parameter list must be a list.");
+         error("defun", "Parameter list must be a list.");
          return NIL_ELEM;
       end if;
       --
@@ -673,7 +673,7 @@ package body bbs.lisp.evaluate is
       temp := params;
       while temp.kind = CONS_TYPE loop
          if cons_table(temp.ps).car.kind /= ATOM_TYPE then
-            error("eval_defun", "A parameter cannot be a list.");
+            error("defun", "A parameter cannot be a list.");
             return NIL_ELEM;
          end if;
          declare
@@ -710,14 +710,14 @@ package body bbs.lisp.evaluate is
          tempsym := atom_table(name.pa).tempsym;
          flag := get_symb(symb, string_index(tempsym_table(tempsym)));
          if not flag then
-            error("eval_defun", "Unable to add symbol ");
+            error("defun", "Unable to add symbol ");
             return NIL_ELEM;
          end if;
       elsif atom_table(name.pa).kind = ATOM_TEMPSYM then
          symb := atom_table(name.pa).sym;
       end if;
       if symb_table(symb).kind = BUILTIN then
-         error("eval_defun", "Cannot redefine builtin symbols");
+         error("defun", "Cannot redefine builtin symbols");
       else
          temp := cons_table(e.ps).cdr;
          cons_table(e.ps).cdr := NIL_ELEM;
@@ -765,7 +765,7 @@ package body bbs.lisp.evaluate is
          requested := 1;
       end if;
       if supplied /= requested then
-         error("eval_function", "Parameter count mismatch. "  & Integer'Image(supplied)
+         error("function", "Parameter count mismatch. "  & Integer'Image(supplied)
               & " elements supplied, " & Integer'Image(requested) & " requested.");
          return NIL_ELEM;
       end if;
@@ -825,4 +825,50 @@ package body bbs.lisp.evaluate is
       return ret_val;
    end;
    --
+   function read_line(e : element_type) return element_type is
+      buff : String(1 .. 256);
+      size : Natural;
+      ptr : Natural := buff'First;
+      start : Natural := ptr;
+      str  : string_index;
+      next : string_index;
+      first : string_index;
+      a : atom_index;
+      flag : Boolean;
+   begin
+      Get_Line(buff, size);
+      flag := BBS.lisp.memory.alloc(str);
+      if flag then
+         string_table(str).len := 0;
+         string_table(str).next := -1;
+         first := str;
+         while (ptr <= size) loop
+            if string_table(str).len < fragment_len then
+               string_table(str).len := string_table(str).len + 1;
+               string_table(str).str(string_table(str).len) := buff(ptr);
+            else
+               flag := bbs.lisp.memory.alloc(next);
+               if flag then
+                  string_table(str).next := Integer(next);
+                  str := next;
+                  string_table(str).len := 1;
+                  string_table(str).str(1) := buff(ptr);
+                  string_table(str).next := -1;
+               else
+                  bbs.lisp.memory.deref(first);
+                  return NIL_ELEM;
+               end if;
+            end if;
+            ptr := ptr + 1;
+         end loop;
+      end if;
+      ptr := ptr + 1;
+      flag := BBS.lisp.memory.alloc(a);
+      if flag then
+         atom_table(a) := (ref => 1, kind => ATOM_STRING, str => first);
+--         BBS.lisp.memory.ref(a);
+         return (kind => ATOM_TYPE, pa => a);
+      end if;
+      return NIL_ELEM;
+   end;
 end;
