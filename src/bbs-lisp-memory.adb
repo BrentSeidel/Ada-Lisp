@@ -112,7 +112,8 @@ package body bbs.lisp.memory is
    --
    procedure deref(n : String; a : atom_index) is
    begin
---      msg(n & "/deref atom", "Dereffing atom at " & Integer'Image(Integer(a)));
+      msg(n & "/deref atom", "Dereffing atom at " & Integer'Image(Integer(a)) &
+         " Ref count was " & Integer'Image(Integer(atom_table(a).ref)));
       if atom_table(a).ref > 0 then
          if atom_table(a).ref < Natural'Last then
             atom_table(a).ref := atom_table(a).ref - 1;
@@ -137,6 +138,8 @@ package body bbs.lisp.memory is
    --
    procedure deref(s : cons_index) is
    begin
+      msg("deref cons", "Dereffing cons at " & Integer'Image(Integer(s)) &
+         " Ref count was " & Integer'Image(Integer(cons_table(s).ref)));
       if cons_table(s).ref > 0 then
          cons_table(s).ref := cons_table(s).ref - 1;
       else

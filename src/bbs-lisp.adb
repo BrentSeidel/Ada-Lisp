@@ -377,7 +377,8 @@ package body bbs.lisp is
    begin
       for i in cons_index loop
          if cons_table(i).ref > 0 then
-            Put("Cons " & Integer'Image(Integer(i)) & " contains: <");
+            Put("Cons " & Integer'Image(Integer(i)) & " ref count " &
+                  Integer'Image(Integer(cons_table(i).ref)) & " contains: <");
             print_element(cons_table(i).car);
             Put(" . ");
             print_element(cons_table(i).cdr);
@@ -682,7 +683,11 @@ package body bbs.lisp is
                   Print(sym.str);
                   New_Line;
                end if;
+               msg("eval_dispatch", "Before evaluating builtin.");
+               dump_cons;
                e := sym.f.all(rest);
+               msg("eval_dispatch", "After evaluating builtin.");
+               dump_cons;
             --
             -- Handle defined functions
             --
@@ -700,11 +705,12 @@ package body bbs.lisp is
                BBS.lisp.memory.ref(sym.pv);
                e := sym.pv;
             end if;
-         else
-            bbs.lisp.memory.ref(s);
+         else -- Not a symbol, just return the value.
+            msg("eval_dispatch", "Before evaluating builtin.");
+            dump_cons;
             e := (kind => CONS_TYPE, ps => s);
          end if;
-      else
+      else -- Not an atom, just return the value
          bbs.lisp.memory.ref(s);
          e := (kind => CONS_TYPE, ps => s);
       end if;

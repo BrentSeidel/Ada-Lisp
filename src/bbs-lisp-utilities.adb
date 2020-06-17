@@ -142,6 +142,7 @@ package body bbs.lisp.utilities is
    --
    procedure first_value(e : element_type; car : out element_type; cdr : out element_type) is
       first : element_type;
+      temp : element_type;
       s : cons_index;
    begin
       if e.kind = NIL_TYPE then
@@ -149,20 +150,37 @@ package body bbs.lisp.utilities is
          cdr := NIL_ELEM;
       elsif e.kind = ATOM_TYPE then
          car := indirect_atom(e.pa);
-         BBS.lisp.memory.ref(car);
          cdr := NIL_ELEM;
       else -- The only other option is CONS_TYPE
+         msg("first-value", "Processing CONS_TYPE");
          s := e.ps;
          first := cons_table(s).car;
+         cdr :=  cons_table(s).cdr;
          if first.kind = NIL_TYPE then
             car := NIL_ELEM;
          elsif first.kind = ATOM_TYPE then
+--            msg("first-value", "First item is a ATOM_TYPE");
+--            dump_cons;
             car := indirect_atom(first.pa);
-            BBS.lisp.memory.ref(car);
          else -- The first item is a CONS_TYPE
-            car := eval_dispatch(first.ps);
+--            msg("first-value", "First item is a CONS_TYPE");
+--            dump_cons;
+            temp := eval_dispatch(first.ps);
+--            msg("first-value", "Evaluated first item");
+--            dump_cons;
+--            print(temp, False, True);
+            if temp.kind = NIL_TYPE then
+               car := NIL_ELEM;
+--               msg("first-value", "Processed value is NIL");
+            elsif temp.kind = ATOM_TYPE then
+--               msg("first-value", "Processed value is atom");
+               car := temp;
+            else
+--               msg("first-value", "Processed value is cons");
+               car := cons_table(temp.ps).car;
+               cdr := cons_table(temp.ps).cdr;
+            end if;
          end if;
-         cdr := cons_table(s).cdr;
       end if;
    end;
    --

@@ -12,11 +12,11 @@
 package bbs.lisp is
    --
    --  Define the basic types used.
-   max_cons : constant Integer := 150;
-   max_atom : constant Integer := 100;
-   max_symb : constant Integer := 100;
+   max_cons : constant Integer := 300;
+   max_atom : constant Integer := 200;
+   max_symb : constant Integer := 200;
    max_tempym : constant Integer := 50;
-   max_string : constant Integer := 200;
+   max_string : constant Integer := 500;
    type cons_index is range 0 .. max_cons;
    type atom_index is range 0 .. max_atom;
    type symb_index is range 0 .. max_symb;

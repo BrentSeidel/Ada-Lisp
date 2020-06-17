@@ -66,12 +66,17 @@
 ;  Read an analog pin and print the value repeatedly.
 ;  Digital pin 10 is tied high to keep looping and tied low to exit the loop.
 ;
-(pin-mode 10 0)
-(dowhile (= (read-pin 10) (+ 0 1))
-  (print "Analog value is " (read-analog 1))
-  (new-line))
-;
 (defun monitor-analog (n)
+  (pin-mode 10 0)
+  (print "Connect digital pin 10 to high to continue looping or to gnd to exit")
+  (new-line)
+  (print "Connect analog pin " n " to the analog value to monitor")
+  (new-line)
+  (print "Press <return> to continue")
+  (read-line)
   (dowhile (= (read-pin 10) (+ 0 1))
     (print "Analog value is " (read-analog n))
-    (new-line)))
+    (new-line))
+  (print "Exiting")
+  (new-line))
+

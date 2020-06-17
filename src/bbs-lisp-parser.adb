@@ -50,7 +50,6 @@ package body bbs.lisp.parser is
          flag := int(ptr, buff, last, value);
          flag := bbs.lisp.memory.alloc(atom);
          atom_table(atom) := (ref => 1, kind => ATOM_INTEGER, i => value);
-         bbs.lisp.memory.lock(atom);
          e := (kind => ATOM_TYPE, pa => atom);
       --
       -- String

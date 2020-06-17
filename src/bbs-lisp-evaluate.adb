@@ -182,41 +182,31 @@ package body bbs.lisp.evaluate is
    --  Return the first entry in a list (it may be another list).
    --
    function car(e : element_type) return element_type is
-      t : element_type;
+      car : element_type;
+      cdr : element_type;
    begin
-      if e.kind = CONS_TYPE then
-         t := cons_table(e.ps).car;
-         if t.kind = CONS_TYPE then
-            bbs.lisp.memory.ref(cons_table(t.ps).car);
-            return cons_table(t.ps).car;
-         else
-            error("car", "Can only CAR a list");
-            return NIL_ELEM;
-         end if;
-      else
-         error("car", "Can only CAR a list");
-         return NIL_ELEM;
-      end if;
+--      msg("car", "Getting first element");
+--      dump_cons;
+      BBS.lisp.utilities.first_value(e, car, cdr);
+      BBS.lisp.memory.ref(car);
+--      msg("car", "Preparing to exit");
+--      dump_cons;
+--      BBS.lisp.memory.deref(e);
+      return car;
    end;
    --
    --  Return the rest of a list
    --
    function cdr(e : element_type) return element_type is
-      t : element_type;
+      car : element_type;
+      cdr : element_type;
    begin
-      if e.kind = CONS_TYPE then
-         t := cons_table(e.ps).car;
-         if t.kind = CONS_TYPE then
-            bbs.lisp.memory.ref(cons_table(t.ps).cdr);
-            return cons_table(t.ps).cdr;
-         else
-            error("cdr", "Can only CDR a list");
-            return NIL_ELEM;
-         end if;
-      else
-         error("cdr", "Can only CDR a list");
-         return NIL_ELEM;
-      end if;
+      BBS.lisp.utilities.first_value(e, car, cdr);
+--      BBS.lisp.memory.ref(cdr);
+      msg("cdr", "Preparing to deref element");
+      dump_cons;
+--      BBS.lisp.memory.deref(e);
+      return cdr;
    end;
    --
    --  Perform comparison operations.
