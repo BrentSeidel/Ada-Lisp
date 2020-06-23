@@ -8,11 +8,11 @@ package body bbs.lisp.utilities is
       t : element_type;
       c : Integer := 1;
    begin
-      while t.kind = CONS_TYPE loop
+      while t.kind = E_CONS loop
          c := c + 1;
          t := cons_table(t.ps).cdr;
       end loop;
-      if t.kind = ATOM_TYPE then
+      if t.kind /= E_NIL then
          c := c + 1;
       end if;
       return c;
@@ -22,17 +22,17 @@ package body bbs.lisp.utilities is
    --
    function is_true(e : element_type) return Boolean is
    begin
-      if e.kind = NIL_TYPE then
+      if e.kind = E_NIL then
          return False;
       end if;
-      if e.kind = ATOM_TYPE then
-         if atom_table(e.pa).kind = ATOM_NIL then
-            return False;
+      if e.kind = E_VALUE then
+         if e.v.kind = V_BOOLEAN  then
+            return e.v.b;
          end if;
          return True;
       end if;
-      if (cons_table(e.ps).car.kind = NIL_TYPE)
-        and (cons_table(e.ps).cdr.kind = NIL_TYPE) then
+      if (cons_table(e.ps).car.kind = E_NIL)
+        and (cons_table(e.ps).cdr.kind = E_NIL) then
          return False;
       end if;
       return True;
@@ -49,37 +49,37 @@ package body bbs.lisp.utilities is
    function replace_syms(s : cons_index; lib : cons_index) return Natural is
       count : Natural := 0;
       temp : cons_index := s;
-      new_atom : atom_index;
+      new_elem : element_type;
 
-      function process_atom(a : atom_index; lib : cons_index;
-                            replace : out atom_index) return Boolean is
+      function process_element(e : element_type; lib : cons_index;
+                            replace : out element_type) return Boolean is
          temp : cons_index := lib;
          name : string_index;
-         var_atom : atom_index;
+         var_elem : element_type;
          var_name : string_index;
       begin
-         if atom_table(a).kind = ATOM_SYMBOL then
-            name := symb_table(atom_table(a).sym).str;
-         elsif atom_table(a).kind = ATOM_TEMPSYM then
-            name := string_index(tempsym_table(atom_table(a).tempsym));
+         if e.kind = E_SYMBOL then
+            name := symb_table(e.sym).str;
+         elsif e.kind = E_TEMPSYM then
+            name := string_index(tempsym_table(e.tempsym));
          else
             return False;
          end if;
          loop
-            var_atom := cons_table(temp).car.pa;
-            if atom_table(var_atom).kind = ATOM_PARAM then
-               var_name := atom_table(var_atom).p_name;
-            elsif atom_table(var_atom).kind = ATOM_LOCAL then
-               var_name := atom_table(var_atom).l_name;
+            var_elem := cons_table(temp).car;
+            if var_elem.kind = E_PARAM then
+               var_name := var_elem.p_name;
+            elsif var_elem.kind = E_LOCAL then
+               var_name := var_elem.l_name;
             else
                error("replace_syms.process_atom", "Improper atom in library");
             end if;
             if bbs.lisp.strings.compare(name, var_name) = CMP_EQ then
-               replace := var_atom;
-               bbs.lisp.memory.ref(replace);
+               replace := var_elem;
+--               bbs.lisp.memory.ref(replace);
                return True;
             end if;
-            exit when cons_table(temp).cdr.kind /= CONS_TYPE;
+            exit when cons_table(temp).cdr.kind /= E_CONS;
             temp := cons_table(temp).cdr.ps;
          end loop;
          return False;
@@ -87,22 +87,20 @@ package body bbs.lisp.utilities is
       --
    begin
       loop
-         if cons_table(temp).car.kind = ATOM_TYPE then
-            if process_atom(cons_table(temp).car.pa, lib, new_atom) then
-               bbs.lisp.memory.deref("replace_syms", cons_table(temp).car.pa);
-               cons_table(temp).car.pa := new_atom;
+         if cons_table(temp).car.kind /= E_CONS then
+            if process_element(cons_table(temp).car, lib, new_elem) then
+               cons_table(temp).car := new_elem;
                count := count + 1;
             end if;
-         elsif cons_table(temp).car.kind = CONS_TYPE then
+         elsif cons_table(temp).car.kind = E_CONS then
             count := count + replace_syms(cons_table(temp).car.ps, lib);
          end if;
-         exit when cons_table(temp).cdr.kind /= CONS_TYPE;
+         exit when cons_table(temp).cdr.kind /= E_CONS;
          temp := cons_table(temp).cdr.ps;
       end loop;
-      if cons_table(temp).cdr.kind = ATOM_TYPE then
-         if process_atom(cons_table(temp).cdr.pa, lib, new_atom) then
-            bbs.lisp.memory.deref("replace_syms", cons_table(temp).cdr.pa);
-            cons_table(temp).cdr.pa := new_atom;
+      if cons_table(temp).cdr.kind /= E_CONS then
+         if process_element(cons_table(temp).cdr, lib, new_elem) then
+            cons_table(temp).cdr := new_elem;
             count := count + 1;
          end if;
          --
@@ -117,22 +115,22 @@ package body bbs.lisp.utilities is
    --  just returns the atom.  If the variable points to a list, then the
    --  original atom is returned.
    --
-   function indirect_atom(a : atom_index) return element_type is
+   function indirect_elem(e : element_type) return element_type is
       sym : symb_index;
    begin
-      if atom_table(a).kind = ATOM_SYMBOL then
-         sym := atom_table(a).sym;
+      if e.kind = E_SYMBOL then
+         sym := e.sym;
          if symb_table(sym).kind = VARIABLE then
             return symb_table(sym).pv;
          end if;
       end if;
-      if atom_table(a).kind = ATOM_LOCAL then
-         return atom_table(a).l_value;
+      if e.kind = E_LOCAL then
+         return (kind => E_VALUE, v => e.l_value);
       end if;
-      if atom_table(a).kind = ATOM_PARAM then
-         return atom_table(a).p_value;
+      if e.kind = E_PARAM then
+         return (kind => E_VALUE, v => e.p_value);
       end if;
-      return (Kind => ATOM_TYPE, pa => a);
+      return e;
    end;
    --
    --  This procedure extracts the first value from an element.  This value may
@@ -145,38 +143,27 @@ package body bbs.lisp.utilities is
       temp : element_type;
       s : cons_index;
    begin
-      if e.kind = NIL_TYPE then
+      if e.kind = E_NIL then
          car := NIL_ELEM;
          cdr := NIL_ELEM;
-      elsif e.kind = ATOM_TYPE then
-         car := indirect_atom(e.pa);
+      elsif e.kind /= E_CONS then
+         car := indirect_elem(e);
          cdr := NIL_ELEM;
-      else -- The only other option is CONS_TYPE
-         msg("first-value", "Processing CONS_TYPE");
+      else -- The only other option is E_CONS
          s := e.ps;
          first := cons_table(s).car;
          cdr :=  cons_table(s).cdr;
-         if first.kind = NIL_TYPE then
+         if first.kind = E_NIL then
             car := NIL_ELEM;
-         elsif first.kind = ATOM_TYPE then
---            msg("first-value", "First item is a ATOM_TYPE");
---            dump_cons;
-            car := indirect_atom(first.pa);
-         else -- The first item is a CONS_TYPE
---            msg("first-value", "First item is a CONS_TYPE");
---            dump_cons;
+         elsif first.kind /= E_CONS then
+            car := indirect_elem(first);
+         else -- The first item is a E_CONS
             temp := eval_dispatch(first.ps);
---            msg("first-value", "Evaluated first item");
---            dump_cons;
---            print(temp, False, True);
-            if temp.kind = NIL_TYPE then
+            if temp.kind = E_NIL then
                car := NIL_ELEM;
---               msg("first-value", "Processed value is NIL");
-            elsif temp.kind = ATOM_TYPE then
---               msg("first-value", "Processed value is atom");
+            elsif temp.kind /= E_CONS then
                car := temp;
             else
---               msg("first-value", "Processed value is cons");
                car := cons_table(temp.ps).car;
                cdr := cons_table(temp.ps).cdr;
             end if;

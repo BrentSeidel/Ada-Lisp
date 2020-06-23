@@ -108,24 +108,21 @@ package body bbs.lisp is
       r : element_type;
       sym : symb_index;
    begin
-      if e.kind = ATOM_TYPE then
-         if atom_table(e.pa).kind = ATOM_SYMBOL then
-            sym := atom_table(e.pa).sym;
+      case e.kind is
+         when E_CONS =>
+            s := e.ps;
+            r := eval_dispatch(s);
+            bbs.lisp.memory.deref(s);
+         when E_SYMBOL =>
+            sym := e.sym;
             if symb_table(sym).kind = VARIABLE then
                r := symb_table(sym).pv;
             else
                r := e;
             end if;
-         else
+         when others =>
             r := e;
-         end if;
-      elsif e.kind = NIL_TYPE then
-         r := e;
-      else
-         s := e.ps;
-         r := eval_dispatch(s);
-         bbs.lisp.memory.deref(s);
-      end if;
+      end case;
       return r;
    end;
    --
@@ -135,15 +132,26 @@ package body bbs.lisp is
    --
    procedure print(e : element_type; d : Boolean; nl : Boolean) is
    begin
-      if e.kind = CONS_TYPE then
-         print(e.ps);
-      elsif e.kind = ATOM_TYPE then
-         print(atom_table(e.pa));
-      elsif e.kind = NIL_TYPE then
-         Put(" NIL");
-      else
-         Put("Tried to print an unknown element type.");
-      end if;
+      case e.kind is
+         when E_CONS =>
+            print(e.ps);
+         when E_NIL =>
+            put("Nil");
+         when E_VALUE =>
+            print(e.v);
+         when E_SYMBOL =>
+            print(e.sym);
+         when E_TEMPSYM =>
+            put("Tempsym");
+         when E_PARAM =>
+            print(e.p_name);
+            put("<-");
+            print(e.p_value);
+         when E_LOCAL =>
+            print(e.l_name);
+         when others =>
+            Put("Tried to print an unknown element type " & ptr_type'Image(e.kind));
+      end case;
       if nl then
          New_Line;
       end if;
@@ -154,14 +162,12 @@ package body bbs.lisp is
    --
    procedure dump(e : element_type) is
    begin
-      if e.kind = CONS_TYPE then
+      if e.kind = E_CONS then
          dump(e.ps);
-      elsif e.kind = ATOM_TYPE then
-         dump(atom_table(e.pa));
-      elsif e.kind = NIL_TYPE then
+      elsif e.kind = E_NIL then
          Put(" NIL");
       else
-         Put("Tried to dump an unknown element type.");
+         Put("Tried to print an unknown element type " & ptr_type'Image(e.kind));
       end if;
    end;
    --
@@ -171,18 +177,18 @@ package body bbs.lisp is
       temp : element_type;
    begin
       Put("(");
-      temp := (kind => CONS_TYPE, ps => s);
-      while temp.kind /= NIL_TYPE loop
-         if temp.kind = ATOM_TYPE then
-            print(atom_table(temp.pa));
-            temp := NIL_ELEM;
-         elsif temp.kind = CONS_TYPE then
-            if cons_table(temp.ps).car.kind = ATOM_TYPE then
-               print(atom_table(cons_table(temp.ps).car.pa));
-            elsif cons_table(temp.ps).car.kind = CONS_TYPE then
+      temp := (kind => E_CONS, ps => s);
+      while temp.kind /= E_NIL loop
+         if temp.kind = E_CONS then
+            if cons_table(temp.ps).car.kind = E_CONS then
                print(cons_table(temp.ps).car.ps);
+            else
+               print(cons_table(temp.ps).car, False, False);
             end if;
             temp := cons_table(temp.ps).cdr;
+         else
+            print(temp, False, False);
+            temp := NIL_ELEM;
          end if;
       end loop;
       put(")");
@@ -192,97 +198,47 @@ package body bbs.lisp is
       temp : element_type;
    begin
       Put("(");
-      temp := (kind => CONS_TYPE, ps => s);
-      while temp.kind /= NIL_TYPE loop
-         if temp.kind = ATOM_TYPE then
-            dump(atom_table(temp.pa));
-            temp := NIL_ELEM;
-         elsif temp.kind = CONS_TYPE then
-            if cons_table(temp.ps).car.kind = ATOM_TYPE then
-               dump(atom_table(cons_table(temp.ps).car.pa));
-            elsif cons_table(temp.ps).car.kind = CONS_TYPE then
+      temp := (kind => E_CONS, ps => s);
+      while temp.kind /= E_NIL loop
+         if temp.kind = E_CONS then
+            if cons_table(temp.ps).car.kind = E_CONS then
                dump(cons_table(temp.ps).car.ps);
             end if;
             temp := cons_table(temp.ps).cdr;
+         else
+            temp := NIL_ELEM;
          end if;
       end loop;
       put(")");
    end;
    --
-   procedure print(a : atom_index) is
+   procedure print(v : value) is
    begin
-      print(atom_table(a));
-   end;
-   --
-   procedure dump(a : atom_index) is
-   begin
-      dump(atom_table(a));
-   end;
-   --
-   procedure print(a : atom) is
-   begin
-      case a.kind is
-         when ATOM_INTEGER =>
-            Put(Integer'Image(a.i) & " ");
-         when ATOM_NIL =>
-            Put(" NIL");
-         when ATOM_CHARACTER =>
-            Put("'" & a.c & "'");
-         when ATOM_SYMBOL =>
-            print(a.sym);
-         when ATOM_TEMPSYM =>
-            if (tempsym_table(a.tempsym) >= Integer(string_index'First)) and
-              (tempsym_table(a.tempsym) <= Integer(string_index'Last)) then
-               print(string_index(tempsym_table(a.tempsym)));
-            else
-               Put("<unallocated tempsym>");
-            end if;
-         when ATOM_STRING =>
-            print(a.str);
-         when ATOM_PARAM =>
-            print(a.p_name);
-         when ATOM_LOCAL =>
-            print(a.l_name);
+      case v.kind is
+         when V_INTEGER =>
+            Put(Integer'Image(v.i) & " ");
+         when V_CHARACTER =>
+            Put("'" & v.c & "'");
+         when V_STRING =>
+            print(v.s);
+         when V_BOOLEAN =>
+            put(Boolean'Image(v.b));
          when others =>
-            Put("<Unknown atom kind>");
+            Put("<Unknown value kind>");
       end case;
    end;
    --
-   procedure dump(a : atom) is
+   procedure dump(v : value) is
    begin
-      Put(" Ref count " & Integer'Image(a.ref) & " contains: <");
-      case a.kind is
-         when ATOM_INTEGER =>
-            Put(Integer'Image(a.i) & " ");
-         when ATOM_NIL =>
-            Put(" NIL");
-         when ATOM_CHARACTER =>
-            Put("'" & a.c & "'");
-         when ATOM_SYMBOL =>
-            Put("<symbol>");
-            dump(a.sym);
-         when ATOM_TEMPSYM =>
-            Put("<tempsym>");
-            if (tempsym_table(a.tempsym) >= Integer(string_index'First)) and
-              (tempsym_table(a.tempsym) <= Integer(string_index'Last)) then
-               print(string_index(tempsym_table(a.tempsym)));
-            else
-               Put("<unallocated tempsym>");
-            end if;
-         when ATOM_STRING =>
-            print(a.str);
-         when ATOM_PARAM =>
-            Put("<parameter>");
-            print(a.p_name);
-            Put(", <value>");
-            print(a.p_value, False, False);
-         when ATOM_LOCAL =>
-            Put("<local>");
-            print(a.l_name);
-            Put(", <value>");
-            print(a.l_value, False, False);
+      case v.kind is
+         when V_INTEGER =>
+            Put(Integer'Image(v.i) & " ");
+         when V_CHARACTER =>
+            Put("'" & v.c & "'");
+         when V_STRING =>
+            print(v.s);
          when others =>
-            Put("<Unknown atom kind>");
+            Put("<Unknown value kind>");
       end case;
       Put_Line(">");
    end;
@@ -348,40 +304,17 @@ package body bbs.lisp is
    --  Private functions and procedures
    --
    --
-   --  For debugging, dump all atoms
-   --
-   procedure dump_atoms is
-   begin
-      for i in atom_index loop
-         if atom_table(i).ref > 0 then
-            Put("Atom " & Integer'Image(Integer(i)));
-            dump(atom_table(i));
-         end if;
-      end loop;
-   end;
-   --
    --  For debugging, dump all cons cells
    --
    procedure dump_cons is
-      procedure print_element(e : element_type) is
-      begin
-         case e.kind is
-            when NIL_TYPE =>
-               Put("NIL");
-            when ATOM_TYPE =>
-               Put("ATOM:" & Integer'Image(Integer(e.pa)));
-            when CONS_TYPE =>
-               Put("CONS:" & Integer'Image(Integer(e.ps)));
-         end case;
-      end;
    begin
       for i in cons_index loop
          if cons_table(i).ref > 0 then
             Put("Cons " & Integer'Image(Integer(i)) & " ref count " &
                   Integer'Image(Integer(cons_table(i).ref)) & " contains: <");
-            print_element(cons_table(i).car);
+            print(cons_table(i).car, False, False);
             Put(" . ");
-            print_element(cons_table(i).cdr);
+            print(cons_table(i).cdr, False, False);
             Put_Line(">");
          end if;
       end loop;
@@ -612,13 +545,13 @@ package body bbs.lisp is
    --
    --  Creates a cons cell to hold an atom.  This can then be appended to a list.
    --
-   function atom_to_cons(s : out cons_index; a : atom_index) return Boolean is
+   function elem_to_cons(s : out cons_index; e : element_type) return Boolean is
       t : cons_index;
       flag : Boolean;
    begin
       flag := bbs.lisp.memory.alloc(t);
       if flag then
-         cons_table(t).car := (kind => ATOM_TYPE, pa => a);
+         cons_table(t).car := e;
          cons_table(t).cdr := NIL_ELEM;
       end if;
       s := t;
@@ -626,20 +559,20 @@ package body bbs.lisp is
    end;
    --
    --  Appends list s2 to the end of list s1.  If the cdr of the last cons cell
-   --  is not NIL_TYPE, this will fail and return False.
+   --  is not E_NIL, this will fail and return False.
    --
    function append(s1 : cons_index; s2 : cons_index) return Boolean is
       t : cons_index;
    begin
       t := s1;
-      while cons_table(t).cdr.kind /= NIL_TYPE loop
-         if cons_table(t).cdr.kind = CONS_TYPE then
+      while cons_table(t).cdr.kind /= E_NIL loop
+         if cons_table(t).cdr.kind = E_CONS then
             t := cons_table(t).cdr.ps;
          else
             return False;
             end if;
       end loop;
-      cons_table(t).cdr := (Kind => CONS_TYPE, ps => s2);
+      cons_table(t).cdr := (Kind => E_CONS, ps => s2);
       return True;
    end;
    --
@@ -664,30 +597,24 @@ package body bbs.lisp is
    --  are handled in this function.  The rest are passed off to sub-functions.
    --
    function eval_dispatch(s : cons_index) return element_type is
-      a : atom_index;
       sym : symbol;
       e : element_type := NIL_ELEM;
       first : element_type := cons_table(s).car;
       rest : element_type := cons_table(s).cdr;
    begin
-      if first.kind = ATOM_TYPE then
-         a := first.pa;
-         if atom_table(a).kind = ATOM_SYMBOL then
-            sym := symb_table(atom_table(a).sym);
+      if first.kind /= E_CONS then
+         if first.kind = E_SYMBOL then
+            sym := symb_table(first.sym);
             --
             --  Handle the builtin operations
             --
             if sym.kind = BUILTIN then
                if msg_flag then
-                  Put("Evaluating builtin " );
+                  Put("Evaluating builtin ");
                   Print(sym.str);
                   New_Line;
                end if;
-               msg("eval_dispatch", "Before evaluating builtin.");
-               dump_cons;
                e := sym.f.all(rest);
-               msg("eval_dispatch", "After evaluating builtin.");
-               dump_cons;
             --
             -- Handle defined functions
             --
@@ -706,13 +633,13 @@ package body bbs.lisp is
                e := sym.pv;
             end if;
          else -- Not a symbol, just return the value.
-            msg("eval_dispatch", "Before evaluating builtin.");
+            msg("eval_dispatch", "Returning value.");
             dump_cons;
-            e := (kind => CONS_TYPE, ps => s);
+            e := (kind => E_CONS, ps => s);
          end if;
       else -- Not an atom, just return the value
          bbs.lisp.memory.ref(s);
-         e := (kind => CONS_TYPE, ps => s);
+         e := (kind => E_CONS, ps => s);
       end if;
       return e;
    end;

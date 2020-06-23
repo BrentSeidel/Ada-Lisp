@@ -13,12 +13,10 @@ package bbs.lisp is
    --
    --  Define the basic types used.
    max_cons : constant Integer := 300;
-   max_atom : constant Integer := 200;
    max_symb : constant Integer := 200;
    max_tempym : constant Integer := 50;
    max_string : constant Integer := 500;
    type cons_index is range 0 .. max_cons;
-   type atom_index is range 0 .. max_atom;
    type symb_index is range 0 .. max_symb;
    type tempsym_index is range 0 .. max_tempym;
    type string_index is range 0 .. max_string;
@@ -30,12 +28,12 @@ package bbs.lisp is
    --  This indicates what type of an object an element_type is pointing to.  It
    --  can be a cons cell, an atom, or nothing.
    --
-   type ptr_type is (CONS_TYPE, ATOM_TYPE, NIL_TYPE);
+   type ptr_type is (E_CONS, E_NIL, E_VALUE, E_SYMBOL,
+                     E_TEMPSYM, E_PARAM, E_LOCAL);
    --
-   --  This indicates what kind of data is in an atom.
+   --  This indicates what kind of data is in a value.
    --
-   type atom_kind is (ATOM_NIL, ATOM_INTEGER, ATOM_CHARACTER, ATOM_SYMBOL,
-                      ATOM_TEMPSYM, ATOM_PARAM, ATOM_STRING, ATOM_LOCAL);
+   type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST);
    --
    --  This indicates what kind of data is in a symbol
    --
@@ -43,47 +41,43 @@ package bbs.lisp is
    --
    --  Define the contents of records.
    --
-   --
-   --  An element_type can point to a cons cell, an atom, or can be empty.
-   --  This is a pointer to either an atom or a cons cell, used in cons cells.
-   --
-   type element_type(kind : ptr_type := NIL_TYPE) is
+   type value(kind : value_type := V_INTEGER) is
       record
          case kind is
-            when CONS_TYPE =>
-               ps : cons_index;
-            when ATOM_TYPE =>
-               pa : atom_index;
-            when NIL_TYPE =>
-               null;
+         when V_INTEGER =>
+            i : Integer;
+         when V_CHARACTER =>
+            c : Character;
+         when V_STRING =>
+            s : string_index;
+         when V_BOOLEAN =>
+            b : Boolean;
+         when V_LIST =>
+            l : cons_index;
          end case;
       end record;
    --
-   --  An atom can hold various kinds of scalar information.  The ref field is
-   --  for holding the reference count used in memory management.
+   --  An element_type can contain a value or point to a cons cell.cons cells.
    --
-   type atom(kind : atom_kind := ATOM_NIL) is
+   type element_type(kind : ptr_type := E_NIL) is
       record
-         ref : Natural;
          case kind is
-            when ATOM_NIL =>
+            when E_CONS =>
+               ps : cons_index;
+            when E_NIL =>
                null;
-            when ATOM_INTEGER =>
-               i : integer;
-            when ATOM_CHARACTER =>
-               c : Character;
-            when ATOM_SYMBOL =>
+            when E_VALUE =>
+               v : value;
+            when E_SYMBOL =>
                sym : symb_index;
-            when ATOM_TEMPSYM =>
+            when E_TEMPSYM =>
                tempsym : tempsym_index;
-            when ATOM_STRING =>
-               str : string_index;
-            when ATOM_PARAM =>
+            when E_PARAM =>
                p_name : string_index;
-               p_value : element_type;
-            when ATOM_LOCAL =>
+               p_value : value;
+            when E_LOCAL =>
                l_name : string_index;
-               l_value : element_type;
+               l_value : value;
          end case;
       end record;
    --
@@ -130,7 +124,6 @@ package bbs.lisp is
    --  sizes for statically allocated data structures is defined here.
    --
    cons_table : array (cons_index) of cons;
-   atom_table : array (atom_index) of atom;
    symb_table : array (symb_index) of symbol;
    --
    --  Do initialization and define text I/O routines
@@ -168,7 +161,7 @@ package bbs.lisp is
    --
    --  Some useful constants
    --
-   NIL_ELEM : constant element_type := (Kind => NIL_TYPE);
+   NIL_ELEM : constant element_type := (Kind => E_NIL);
 
 private
    --
@@ -209,11 +202,9 @@ private
    --
    --  These procedures print various types of objects.
    --
---   procedure print(e : element_type; d : Boolean; nl : Boolean);
    procedure print(s : cons_index);
-   procedure print(a : atom_index);
+   procedure print(v : value);
    procedure print(s : string_index);
-   procedure print(a : atom);
    procedure print(s : symb_index);
    --
    --  This function checks if the lisp read-eval-print loop should exit
@@ -240,15 +231,12 @@ private
    --
    --  For debugging, dump the various tables
    --
-   procedure dump_atoms;
    procedure dump_cons;
    procedure dump_symbols;
    procedure dump_tempsym;
    procedure dump_strings;
    procedure dump(e : element_type);
    procedure dump(s : cons_index);
-   procedure dump(a : atom_index);
-   procedure dump(a : atom);
    procedure dump(s : symb_index);
    --
    --  Local functions and procedures
@@ -284,7 +272,7 @@ private
    --
    --  Utility functions for manipulating lists
    --
-   function atom_to_cons(s : out cons_index; a : atom_index) return Boolean;
+   function elem_to_cons(s : out cons_index; e : element_type) return Boolean;
    function append(s1 : cons_index; s2 : cons_index) return Boolean;
    --
    --  Operations for math and comparisons

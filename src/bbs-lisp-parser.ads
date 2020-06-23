@@ -22,8 +22,8 @@ private package bbs.lisp.parser is
    --  to either the symbol or temp symbol.  Returns false if the symbol or temp
    --  symbol can't be found or created or if the atom can't be created.
    --
-   function symb(ptr : in out Integer; buff : String; last : Integer; a : out atom_index)
-                 return Boolean;
+   function symb(ptr : in out Integer; buff : String; last : Integer)
+                 return element_type;
    --
    --  Subfunction for parsing integers
    --

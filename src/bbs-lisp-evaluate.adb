@@ -36,19 +36,12 @@ package body bbs.lisp.evaluate is
    end;
    --
    function true(e : element_type) return element_type is
-      a : atom_index;
-      st : symb_index;
-      flag : Boolean;
    begin
-      flag := find_symb(st, "t");
-      flag := bbs.lisp.memory.alloc(a);
-      atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => st);
-      return (Kind => ATOM_TYPE, pa => a);
+      return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
    end;
    --
    function dump(e : element_type) return element_type is
    begin
-      dump_atoms;
       dump_cons;
       dump_symbols;
       dump_strings;
@@ -59,104 +52,99 @@ package body bbs.lisp.evaluate is
    --
    function eval_math(e : element_type; b : mathops) return element_type is
       accum : Integer := 0;
-      a : atom_index;
+      v : value;
       p : cons_index;
       el: element_type;
       temp : element_type;
-      flag : Boolean;
       --
       --  Subfunction to do the actual evaluation.
       --
-      function process_atom(a : atom_index; accum : Integer; b : mathops) return Integer is
-         a1  : atom_index := a;
-         e   : element_type;
+      function process_value(e : element_type; accum : Integer; b : mathops) return Integer is
+         v  : value;
+         e1 : element_type;
       begin
-         e := bbs.lisp.utilities.indirect_atom(a);
-         if e.kind = ATOM_TYPE then
-            a1 := e.pa;
-         end if;
-         if atom_table(a1).kind = ATOM_INTEGER then
-            case (b) is
+         e1 := bbs.lisp.utilities.indirect_elem(e);
+         if e1.kind = E_VALUE then
+            v := e.v;
+            if v.kind = V_INTEGER then
+               case (b) is
                when PLUS =>
-                  return accum + atom_table(a1).i;
+                  return accum + v.i;
                when MUL =>
-                  return accum * atom_table(a1).i;
+                  return accum * v.i;
                when MINUS =>
-                  return accum - atom_table(a1).i;
+                  return accum - v.i;
                when DIV =>
-                  return accum / atom_table(a1).i;
+                  return accum / v.i;
                when others =>
                   error("eval_math.process_atom", "Internal error, unknown math operation");
-            end case;
+               end case;
+            else
+               error("eval_math.process_atom", "Can't process " & value_type'Image(v.kind));
+            end if;
          else
-            error("eval_math.process_atom", "Can't process " & atom_kind'Image(atom_table(a).kind));
+            error("eval_math.process_atom", "Can't process " & ptr_type'Image(e1.kind));
          end if;
          return accum;
       end;
 
    begin
-      if e.kind = ATOM_TYPE then
-         if atom_table(e.pa).kind = ATOM_INTEGER then
-            accum := atom_table(e.pa).i;
+      if e.kind = E_VALUE then
+         if e.v.kind = V_INTEGER then
+            accum := e.v.i;
          end if;
-      elsif e.kind = CONS_TYPE then
+      elsif e.kind = E_CONS then
          p := e.ps;
-         if cons_table(p).car.kind = ATOM_TYPE then
-            a := cons_table(p).car.pa;
-            el := BBS.lisp.utilities.indirect_atom(a);
-            if el.kind = ATOM_TYPE then
-               a := el.pa;
-            end if;
-            if atom_table(a).kind = ATOM_INTEGER then
-               accum := atom_table(a).i;
+         if cons_table(p).car.kind /= E_CONS then
+            el := BBS.lisp.utilities.indirect_elem(cons_table(p).car);
+            if el.kind = E_VALUE then
+               v := el.v;
             else
-               error("eval_math", "Can't process " & atom_kind'Image(atom_table(a).kind));
+              error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
             end if;
-         elsif cons_table(p).car.kind = CONS_TYPE then
+            if v.kind = V_INTEGER then
+               accum := v.i;
+            else
+               error("eval_math", "Can't process " & value_type'Image(v.kind));
+            end if;
+         elsif cons_table(p).car.kind = E_CONS then
             temp := eval_dispatch(cons_table(p).car.ps);
-            if temp.kind = ATOM_TYPE then
-               a := temp.pa;
-               el := bbs.lisp.utilities.indirect_atom(a);
-               if el.kind = ATOM_TYPE then
-                  a := el.pa;
+            if temp.kind /= E_CONS then
+               el := bbs.lisp.utilities.indirect_elem(temp);
+               if el.kind = E_VALUE then
+                  v := el.v;
                end if;
-               if atom_table(a).kind = ATOM_INTEGER then
-                  accum := atom_table(a).i;
+               if v.kind = V_INTEGER then
+                  accum := v.i;
                else
-                  error("eval_math", "Can't process " & atom_kind'Image(atom_table(a).kind));
+                  error("eval_math", "Can't process " & value_type'Image(v.kind));
                end if;
             end if;
             bbs.lisp.memory.deref(temp);
          end if;
-         if cons_table(p).cdr.kind /= NIL_TYPE then
+         if cons_table(p).cdr.kind /= E_NIL then
             p := cons_table(p).cdr.ps;
             loop
-               if cons_table(p).car.kind = ATOM_TYPE then
-                  accum := process_atom(cons_table(p).car.pa, accum, b);
-               elsif cons_table(p).car.kind = CONS_TYPE then
+               if cons_table(p).car.kind = E_CONS then
                   temp := eval_dispatch(cons_table(p).car.ps);
-                  if temp.kind = ATOM_TYPE then
-                     accum := process_atom(temp.pa, accum, b);
+                  if temp.kind = E_VALUE then
+                     accum := process_value(temp, accum, b);
                   end if;
                   bbs.lisp.memory.deref(temp);
+               else
+                  el := bbs.lisp.utilities.indirect_elem(cons_table(p).car);
+                  accum := process_value(el, accum, b);
                end if;
-               exit when cons_table(p).cdr.kind /= CONS_TYPE;
+               exit when cons_table(p).cdr.kind /= E_CONS;
                p := cons_table(p).cdr.ps;
             end loop;
-            if cons_table(p).cdr.kind = ATOM_TYPE then
-               accum := process_atom(cons_table(p).cdr.pa, accum, b);
+            if cons_table(p).cdr.kind /= E_NIL then
+               el := bbs.lisp.utilities.indirect_elem(cons_table(p).cdr);
+               accum := process_value(el, accum, b);
             end if;
          end if;
       end if;
-      flag := bbs.lisp.memory.alloc(a);
-      if flag then
-         atom_table(a) := (ref => 1, Kind => ATOM_INTEGER, i => accum);
-         el := (Kind => ATOM_TYPE, pa => a);
-      else
-         error("eval_math", "Unable to allocate atom");
-         el := NIL_ELEM;
-      end if;
-      return el;
+      return (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum));
    end;
    --
    function add(e : element_type) return element_type is
@@ -185,13 +173,8 @@ package body bbs.lisp.evaluate is
       car : element_type;
       cdr : element_type;
    begin
---      msg("car", "Getting first element");
---      dump_cons;
       BBS.lisp.utilities.first_value(e, car, cdr);
       BBS.lisp.memory.ref(car);
---      msg("car", "Preparing to exit");
---      dump_cons;
---      BBS.lisp.memory.deref(e);
       return car;
    end;
    --
@@ -202,10 +185,9 @@ package body bbs.lisp.evaluate is
       cdr : element_type;
    begin
       BBS.lisp.utilities.first_value(e, car, cdr);
---      BBS.lisp.memory.ref(cdr);
+      BBS.lisp.memory.ref(cdr);
       msg("cdr", "Preparing to deref element");
       dump_cons;
---      BBS.lisp.memory.deref(e);
       return cdr;
    end;
    --
@@ -215,15 +197,15 @@ package body bbs.lisp.evaluate is
       t  : element_type;
       t1 : element_type;
       t2 : element_type;
-      a  : atom_index;
-      s  : symb_index;
-      flag : Boolean;
+      v1 : value;
+      v2 : value;
+      el : element_type;
       i1 : Integer;
       i2 : Integer;
    begin
-      if e.kind = CONS_TYPE then
+      if e.kind = E_CONS then
          BBS.lisp.utilities.first_value(e, t1, t);
-         if t.kind = CONS_TYPE then
+         if t.kind = E_CONS then
             BBS.lisp.utilities.first_value(t, t2, t);
          else
             error("eval_comp", "Cannot compare a single atom.");
@@ -233,95 +215,68 @@ package body bbs.lisp.evaluate is
          error("eval_comp", "Cannot compare a single atom.");
          return NIL_ELEM;
       end if;
-      if (t1.kind = ATOM_TYPE) and (t2.kind = ATOM_TYPE) then
-         t := bbs.lisp.utilities.indirect_atom(t1.pa);
-         if t.kind = ATOM_TYPE then
-            t1 := t;
+      if (t1.kind /= E_CONS) and (t2.kind /= E_CONS) then
+         t := bbs.lisp.utilities.indirect_elem(t1);
+         if t.kind = E_VALUE then
+            v1 := t.v;
          end if;
-         t := bbs.lisp.utilities.indirect_atom(t2.pa);
-         if t.kind = ATOM_TYPE then
-            t2 := t;
+         t := bbs.lisp.utilities.indirect_elem(t2);
+         if t.kind = E_VALUE then
+            v2 := t.v;
          end if;
-         if atom_table(t1.pa).kind = ATOM_INTEGER and
-           atom_table(t2.pa).kind = ATOM_INTEGER then
-            flag := find_symb(s, "t");
-            flag := bbs.lisp.memory.alloc(a);
-            if flag then
-               i1 := atom_table(t1.pa).i;
-               i2 := atom_table(t2.pa).i;
-               BBS.lisp.memory.deref(t1);
-               BBS.lisp.memory.deref(t2);
-               case b is
+         if v1.kind = V_INTEGER and
+           v2.kind = V_INTEGER then
+            i1 := v1.i;
+            i2 := v2.i;
+            case b is
                when SYM_EQ =>
                   if i1 = i2 then
-                     atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
-                     return (Kind => ATOM_TYPE, pa => a);
+                     return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
                   end if;
                when SYM_NE =>
                   if i1 /= i2 then
-                     atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
-                     return (Kind => ATOM_TYPE, pa => a);
+                     return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
                   end if;
                when SYM_LT =>
                   if i1 < i2 then
-                     atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
-                     return (Kind => ATOM_TYPE, pa => a);
+                     return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
                   end if;
                when SYM_GT =>
                   if i1 > i2 then
-                     atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
-                     return (Kind => ATOM_TYPE, pa => a);
+                     return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
                   end if;
                when others =>
                   error("eval_comp", "Unknown comparison type.");
                end case;
-               BBS.lisp.memory.deref("eval_comp", a);
                return NIL_ELEM;
-            else
-               error("eval_comp", "Unable to allocate return value.");
-               return NIL_ELEM;
-            end if;
-         elsif atom_table(t1.pa).kind = ATOM_STRING and
-           atom_table(t2.pa).kind = ATOM_STRING then
-            flag := find_symb(s, "t");
-            flag := bbs.lisp.memory.alloc(a);
-            if flag then
-               declare
-                  eq : comparison;
-               begin
-                  eq := bbs.lisp.strings.compare(atom_table(t1.pa).str,
-                                                atom_table(t2.pa).str);
-                  case b is
-                     when SYM_EQ =>
-                        if eq = CMP_EQ then
-                           atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
-                           return (Kind => ATOM_TYPE, pa => a);
-                        end if;
-                     when SYM_LT =>
-                        if eq = CMP_LT then
-                           atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
-                           return (Kind => ATOM_TYPE, pa => a);
-                        end if;
-                     when SYM_GT =>
-                        if eq = CMP_GT then
-                           atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
-                           return (Kind => ATOM_TYPE, pa => a);
-                        end if;
-                     when SYM_NE =>
-                        if eq /= CMP_EQ then
-                           atom_table(a) := (ref => 1, Kind => ATOM_SYMBOL, sym => s);
-                           return (Kind => ATOM_TYPE, pa => a);
-                        end if;
+         elsif v1.kind = V_STRING and
+           v2.kind = V_STRING then
+            declare
+               eq : comparison;
+            begin
+               eq := bbs.lisp.strings.compare(v1.s, v2.s);
+               case b is
+                  when SYM_EQ =>
+                     if eq = CMP_EQ then
+                        return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+                     end if;
+                  when SYM_LT =>
+                     if eq = CMP_LT then
+                        return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+                     end if;
+                  when SYM_GT =>
+                     if eq = CMP_GT then
+                        return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+                     end if;
+                  when SYM_NE =>
+                     if eq /= CMP_EQ then
+                        return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+                     end if;
                   when others =>
                      error("eval_comp", "Unknown comparison type.");
-                  end case;
-               end;
-               bbs.lisp.memory.deref("eval_comp", a);
-               return NIL_ELEM;
-            else
-               error("eval_comp", "Unable to allocate return value.");
-               return NIL_ELEM;
-            end if;
+               end case;
+            end;
+            return NIL_ELEM;
          else
             error("eval_comp", "Can only compare integers, strings, or symbols.");
             return NIL_ELEM;
@@ -364,7 +319,6 @@ package body bbs.lisp.evaluate is
    function setq(e : element_type) return element_type is
       symb : symb_index;
       tempsym : tempsym_index;
-      a : atom_index;
       p1 : element_type;
       p2 : element_type;
       p3 : element_type;
@@ -382,28 +336,25 @@ package body bbs.lisp.evaluate is
       end;
 
    begin
-      if e.kind = CONS_TYPE then
+      if e.kind = E_CONS then
          p1 := cons_table(e.ps).car;  --  Should be symbol name
          p2 := cons_table(e.ps).cdr;  --  Should be value to be assigned
-         if p1.kind = ATOM_TYPE then
-            a := p1.pa;
-            if atom_table(a).kind = ATOM_SYMBOL then
-               symb := atom_table(a).sym;
-            elsif atom_table(a).kind = ATOM_TEMPSYM then
-               tempsym := atom_table(a).tempsym;
-               flag := get_symb(symb, string_index(tempsym_table(tempsym)));
-               if not flag then
-                  error("setq", "Unable to add symbol ");
-                  return NIL_ELEM;
-               end if;
-            else
-               error("setq", "First parameter is not a symbol or temporary symbol.");
+         if p1.kind = E_SYMBOL then
+            symb := p1.sym;
+         elsif p1.kind = E_TEMPSYM then
+            tempsym := p1.tempsym;
+            flag := get_symb(symb, string_index(tempsym_table(tempsym)));
+            if not flag then
+               error("setq", "Unable to add symbol ");
                return NIL_ELEM;
             end if;
-            if symb_table(symb).kind = BUILTIN then
-               error("setq", "Can't set value of builtin symbol ");
-               return NIL_ELEM;
-            end if;
+         else
+            error("setq", "First parameter is not a symbol or temporary symbol.");
+            return NIL_ELEM;
+         end if;
+         if symb_table(symb).kind = BUILTIN then
+            error("setq", "Can't set value of builtin symbol ");
+            return NIL_ELEM;
          end if;
          --
          --  At this point, p1 should be an atom containing a valid symbol and
@@ -412,9 +363,9 @@ package body bbs.lisp.evaluate is
          --
          --  Now determine what value to attach to the symbol.
          --
-         if p2.kind = CONS_TYPE then
+         if p2.kind = E_CONS then
             p3 := cons_table(p2.ps).car;
-            if p3.kind = CONS_TYPE then
+            if p3.kind = E_CONS then
                ret := eval_dispatch(p3.ps);
                deref_previous(symb);
                BBS.lisp.memory.ref(ret);
@@ -425,16 +376,12 @@ package body bbs.lisp.evaluate is
                deref_previous(symb);
                symb_table(symb) := (ref => 1, Kind => VARIABLE,
                                     pv => p3, str => symb_table(symb).str);
-               BBS.lisp.memory.ref(p3);
-               BBS.lisp.memory.ref(p3);
                return p3;
             end if;
-         elsif p2.kind = ATOM_TYPE then -- Rare, CDR is an atom.
+         elsif p2.kind = E_VALUE then -- Rare, CDR is an value.
             deref_previous(symb);
             symb_table(symb) := (ref => 1, Kind => VARIABLE,
                                  pv => p2, str => symb_table(symb).str);
-            BBS.lisp.memory.ref(p2);
-            BBS.lisp.memory.ref(p2);
             return p2;
          else
             error("setq", "Not enough arguments.");
@@ -452,19 +399,19 @@ package body bbs.lisp.evaluate is
       result : element_type;
       car : element_type;
    begin
-      while t.kind = CONS_TYPE loop
+      while t.kind = E_CONS loop
          car := cons_table(t.ps).car;
-         if car.kind = ATOM_TYPE then
-            result := bbs.lisp.utilities.indirect_atom(car.pa);
+         if car.kind /= E_CONS then
+            result := bbs.lisp.utilities.indirect_elem(car);
             print(result, False, False);
-         elsif car.kind = CONS_TYPE then
+         elsif car.kind = E_CONS then
             result := eval_dispatch(car.ps);
             print(result, True, False);
          end if;
          t := cons_table(t.ps).cdr;
       end loop;
-      if t.kind = ATOM_TYPE then
-         print(t.pa);
+      if t.kind /= E_NIL then
+         print(t, False, True);
       end if;
       return NIL_ELEM;
    end;
@@ -475,16 +422,16 @@ package body bbs.lisp.evaluate is
       p2 : element_type;
       p3 : element_type;
    begin
-      if e.kind /= CONS_TYPE then
+      if e.kind /= E_CONS then
          error("eval_if", "Internal error.  Should have a list.");
          return NIL_ELEM;
       end if;
       p1 := cons_table(e.ps).car;
       t := cons_table(e.ps).cdr;
-      if t.kind = CONS_TYPE then
+      if t.kind = E_CONS then
          p2 := cons_table(t.ps).car;
          t := cons_table(t.ps).cdr;
-         if t.kind = CONS_TYPE then
+         if t.kind = E_CONS then
             p3 := cons_table(t.ps).car;
          else
             p3 := t;
@@ -497,48 +444,43 @@ package body bbs.lisp.evaluate is
       --  Now p1 contains the condition, p2 the "then" branch, and p3 the "else"
       --  branch.  Evaluate p1 and decide which of p2 or p3 to evaluate.
       --
-      if p1.kind = CONS_TYPE then
+      if p1.kind = E_CONS then
          t := eval_dispatch(p1.ps);
          if bbs.lisp.utilities.is_true(t) then
             bbs.lisp.memory.deref(t);
-            if p2.kind = CONS_TYPE then
+            if p2.kind = E_CONS then
                t := eval_dispatch(p2.ps);
-            elsif p2.kind = ATOM_TYPE then
+            elsif p2.kind /= E_NIL then
                t := p2;
-               bbs.lisp.memory.ref(t);
             else
                t := NIL_ELEM;
             end if;
          else
-            bbs.lisp.memory.deref(t);
-            if p3.kind = CONS_TYPE then
+            if p3.kind = E_CONS then
                t := eval_dispatch(p3.ps);
-            elsif p3.kind = ATOM_TYPE then
+            elsif p3.kind /= E_NIL then
                t := p3;
-               bbs.lisp.memory.ref(t);
             else
                t := NIL_ELEM;
             end if;
          end if;
-      elsif p1.kind = ATOM_TYPE then
-         if atom_table(p1.pa).kind /= ATOM_NIL then
-            if p2.kind = CONS_TYPE then
-               t := eval_dispatch(p2.ps);
-            elsif p2.kind = ATOM_TYPE then
-               t := p2;
-               bbs.lisp.memory.ref(t);
-            else
-               t := NIL_ELEM;
-            end if;
+      elsif p1.kind /= E_NIL then
+         if p2.kind = E_CONS then
+            t := eval_dispatch(p2.ps);
+         elsif p2.kind /= E_NIL then
+            t := p2;
+            bbs.lisp.memory.ref(t);
          else
-            if p3.kind = CONS_TYPE then
-               t := eval_dispatch(p3.ps);
-            elsif p3.kind = ATOM_TYPE then
-               t := p3;
-               bbs.lisp.memory.ref(t);
-            else
-               t := NIL_ELEM;
-            end if;
+            t := NIL_ELEM;
+         end if;
+      else
+         if p3.kind = E_CONS then
+            t := eval_dispatch(p3.ps);
+         elsif p3.kind /= E_NIL then
+            t := p3;
+            bbs.lisp.memory.ref(t);
+         else
+            t := NIL_ELEM;
          end if;
       end if;
       return t;
@@ -555,7 +497,7 @@ package body bbs.lisp.evaluate is
       t : element_type := NIL_ELEM;
       temp : element_type;
    begin
-      if e.kind = CONS_TYPE then
+      if e.kind = E_CONS then
          cond := cons_table(e.ps).car;
          list := cons_table(e.ps).cdr;
          --
@@ -568,10 +510,10 @@ package body bbs.lisp.evaluate is
             --
             --  Evaluate all of the items in the list.
             --
-            while ptr.kind /= NIL_TYPE loop
+            while ptr.kind /= E_NIL loop
                BBS.lisp.memory.deref(t);
-               if ptr.kind = CONS_TYPE then
-                  if cons_table(ptr.ps).car.kind = CONS_TYPE then
+               if ptr.kind = E_CONS then
+                  if cons_table(ptr.ps).car.kind = E_CONS then
                      t := eval_dispatch(cons_table(ptr.ps).car.ps);
                   else
                      t := cons_table(ptr.ps).car;
@@ -630,30 +572,25 @@ package body bbs.lisp.evaluate is
       --  First identify the name, parameter list, and body.  Then perform
       --  initial checks to verify that they are the appropriate kind of object.
       --
-      if e.kind /= CONS_TYPE then
+      if e.kind /= E_CONS then
          error("defun", "No parameters given to defun.");
          return NIL_ELEM;
       end if;
       name := cons_table(e.ps).car;
       temp := cons_table(e.ps).cdr;
-      if temp.kind = CONS_TYPE then
+      if temp.kind = E_CONS then
          params := cons_table(temp.ps).car;
          func_body := cons_table(temp.ps).cdr;
       else
          error("defun", "Improper parameters.");
          return NIL_ELEM;
       end if;
-      if name.kind = ATOM_TYPE then
-         if (atom_table(name.pa).kind /= ATOM_SYMBOL)
-           and (atom_table(name.pa).kind /= ATOM_TEMPSYM) then
-            error("defun", "Function name must be a symbol or tempsym.");
-            return NIL_ELEM;
-         end if;
-      else
-         error("defun", "Function name can't be a list.");
+      if (name.kind /= E_SYMBOL)
+        and (name.kind /= E_TEMPSYM) then
+         error("defun", "Function name must be a symbol or tempsym.");
          return NIL_ELEM;
       end if;
-      if params.kind /= CONS_TYPE then
+      if params.kind /= E_CONS then
          error("defun", "Parameter list must be a list.");
          return NIL_ELEM;
       end if;
@@ -661,25 +598,27 @@ package body bbs.lisp.evaluate is
       --  Second, check the parameter list and convert to parameters.
       --
       temp := params;
-      while temp.kind = CONS_TYPE loop
-         if cons_table(temp.ps).car.kind /= ATOM_TYPE then
+      while temp.kind = E_CONS loop
+         if cons_table(temp.ps).car.kind = E_CONS then
             error("defun", "A parameter cannot be a list.");
             return NIL_ELEM;
          end if;
          declare
-            a : atom_index := cons_table(temp.ps).car.pa;
-            count : Natural := atom_table(a).ref;
+            el : element_type := cons_table(temp.ps).car;
             str : string_index;
          begin
-            if (atom_table(a).kind = ATOM_SYMBOL) then
-               str := symb_table(atom_table(a).sym).str;
-               atom_table(a) := (ref => count, Kind => ATOM_PARAM, p_name => str,
-                                 p_value => NIL_ELEM);
-            end if;
-            if (atom_table(a).kind = ATOM_TEMPSYM) then
-               str := string_index(tempsym_table(atom_table(a).tempsym));
-               atom_table(a) := (ref => count, Kind => ATOM_PARAM, p_name => str,
-                                 p_value => NIL_ELEM);
+            if (el.kind = E_SYMBOL) then
+               str := symb_table(el.sym).str;
+               msg("defun", "Converting symbol to parameter");
+               el := (kind => E_PARAM, p_name => str,
+                      P_value => (kind => V_INTEGER, i => 0));
+               cons_table(temp.ps).car := el;
+            elsif (el.kind = E_TEMPSYM) then
+               msg("defun", "Converting tempsym to parameter");
+               str := string_index(tempsym_table(el.tempsym));
+               el := (kind => E_PARAM, p_name => str,
+                      P_value => (kind => V_INTEGER, i => 0));
+               cons_table(temp.ps).car := el;
             end if;
          end;
          temp := cons_table(temp.ps).cdr;
@@ -687,7 +626,7 @@ package body bbs.lisp.evaluate is
       --
       --  Third, check the body and find the parameters.
       --
-      if func_body.kind = CONS_TYPE then
+      if func_body.kind = E_CONS then
          count := BBS.lisp.utilities.replace_syms(func_body.ps, params.ps);
       else
          return NIL_ELEM;
@@ -696,15 +635,15 @@ package body bbs.lisp.evaluate is
       --  Fourth, if all checks pass, attach the parameter list and body to the
       --  symbol.
       --
-      if atom_table(name.pa).kind = ATOM_TEMPSYM then
-         tempsym := atom_table(name.pa).tempsym;
+      if name.kind = E_TEMPSYM then
+         tempsym := name.tempsym;
          flag := get_symb(symb, string_index(tempsym_table(tempsym)));
          if not flag then
             error("defun", "Unable to add symbol ");
             return NIL_ELEM;
          end if;
-      elsif atom_table(name.pa).kind = ATOM_TEMPSYM then
-         symb := atom_table(name.pa).sym;
+      elsif name.kind = E_SYMBOL then
+         symb := name.sym;
       end if;
       if symb_table(symb).kind = BUILTIN then
          error("defun", "Cannot redefine builtin symbols");
@@ -739,19 +678,43 @@ package body bbs.lisp.evaluate is
       ret_val : element_type;
       supplied : Integer := 0;
       requested : Integer := 0;
+      --
+      --  Find all the parameters used in the function and set their values.
+      --
+      procedure set_params(func : element_type; params : element_type) is
+         t1 : element_type := func;
+         t2 : element_type := params;
+         temp : element_type;
+      begin
+         while t1.kind = E_CONS loop
+            temp := cons_table(t1.ps).car;
+            if temp.kind = E_CONS then
+               set_params(temp, params);
+            elsif temp.kind = E_PARAM then
+               --
+               --  Search the parameter list to find the value
+               --
+               while t2.kind = E_CONS loop
+                  if temp.p_name = cons_table(t2.ps).car.p_name then
+                     cons_table(t1.ps).car.p_value := cons_table(t2.ps).car.p_value;
+                     exit;
+                  end if;
+                  t2 := cons_table(t2.ps).cdr;
+               end loop;
+               null;
+            end if;
+            t1 := cons_table(t1.ps).cdr;
+         end loop;
+      end;
    begin
       params := cons_table(s).car;
       func_body := cons_table(s).cdr;
-      Put("Parameter list is: ");
-      print(params, False, True);
-      Put("Function body is: ");
-      print(func_body, False, True);
-      if e.kind = CONS_TYPE then
+      if e.kind = E_CONS then
          supplied := bbs.lisp.utilities.count(e.ps);
       end if;
-      if params.kind = CONS_TYPE then
+      if params.kind = E_CONS then
          requested := bbs.lisp.utilities.count(params.ps);
-      elsif params.kind = ATOM_TYPE then
+      elsif params.kind /= E_CONS then
          requested := 1;
       end if;
       if supplied /= requested then
@@ -760,58 +723,31 @@ package body bbs.lisp.evaluate is
          return NIL_ELEM;
       end if;
       --
-      --  Assign parameters to values
+      --  Assign parameters to values.  This needs to change to properly assign
+      --  values to parameters.
       --
-      t1 := params;
-      t2 := e;
-      while t2.kind = CONS_TYPE loop
-         Put("Setting: ");
-         print(cons_table(t1.ps).car, False, False);
-         Put(" to: ");
-         print(cons_table(t2.ps).car, False, True);
-         if cons_table(t1.ps).car.kind = ATOM_TYPE then
-            if cons_table(t2.ps).car.kind = ATOM_TYPE then
-               atom_table(cons_table(t1.ps).car.pa).p_value := cons_table(t2.ps).car;
-               bbs.lisp.memory.ref(cons_table(t1.ps).car);
-            else
-               ret_val := eval_dispatch(cons_table(t2.ps).car.ps);
-               atom_table(cons_table(t1.ps).car.pa).p_value := ret_val;
-               bbs.lisp.memory.ref(ret_val);
-            end if;
+      t1 := e;      --  Supplied parameter values
+      t2 := params; --  List of parameter names
+      while t1.kind = E_CONS loop
+         if cons_table(t1.ps).car.kind = E_VALUE and
+           cons_table(t2.ps).car.kind = E_PARAM then
+            cons_table(t2.ps).car.p_value := cons_table(t1.ps).car.v;
          end if;
          t1 := cons_table(t1.ps).cdr;
          t2 := cons_table(t2.ps).cdr;
       end loop;
+      set_params(func_body, params);
       --
       --  Evaluate the function
       --
---      t1 := cons_table(func_body.ps).car;
       t1 := func_body;
       ret_val := NIL_ELEM;
-      while t1.kind = CONS_TYPE loop
-         if cons_table(t1.ps).car.kind = CONS_TYPE then
+      while t1.kind = E_CONS loop
+         if cons_table(t1.ps).car.kind = E_CONS then
             ret_val := eval_dispatch(cons_table(t1.ps).car.ps);
          end if;
          t1 := cons_table(t1.ps).cdr;
       end loop;
-      --
-      --  Clean up the assigned parameters
-      --
---      Ada.Text_IO.Put_Line("Starting cleanup");
---      dump_atoms;
---      t1 := params;
---      while t1.kind = CONS_TYPE loop
---         if cons_table(t1.ps).car.kind = ATOM_TYPE then
---            if atom_table(cons_table(t1.ps).car.pa).kind = ATOM_PARAM then
---               print(atom_table(cons_table(t1.ps).car.pa).p_value, False, True);
---               bbs.lisp.memory.deref(atom_table(cons_table(t1.ps).car.pa).p_value);
---               atom_table(cons_table(t1.ps).car.pa).p_value := NIL_ELEM;
---            end if;
---         end if;
---         t1 := cons_table(t1.ps).cdr;
---      end loop;
---      Ada.Text_IO.Put_Line("Cleanup done");
---      dump_atoms;
       return ret_val;
    end;
    --
@@ -823,7 +759,6 @@ package body bbs.lisp.evaluate is
       str  : string_index;
       next : string_index;
       first : string_index;
-      a : atom_index;
       flag : Boolean;
    begin
       Get_Line(buff, size);
@@ -853,12 +788,12 @@ package body bbs.lisp.evaluate is
          end loop;
       end if;
       ptr := ptr + 1;
-      flag := BBS.lisp.memory.alloc(a);
-      if flag then
-         atom_table(a) := (ref => 1, kind => ATOM_STRING, str => first);
+--      flag := BBS.lisp.memory.alloc(a);
+--      if flag then
+--         atom_table(a) := (ref => 1, kind => ATOM_STRING, str => first);
 --         BBS.lisp.memory.ref(a);
-         return (kind => ATOM_TYPE, pa => a);
-      end if;
-      return NIL_ELEM;
+         return (kind => E_VALUE, v => (kind => V_STRING, s => first));
+--      end if;
+--      return NIL_ELEM;
    end;
 end;

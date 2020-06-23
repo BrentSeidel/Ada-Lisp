@@ -19,7 +19,7 @@ package bbs.lisp.utilities is
    --  variable, an element type pointing to the value.  If not, the element
    --  points to the original atom.
    --
-   function indirect_atom(a : atom_index) return element_type;
+   function indirect_elem(e : element_type) return element_type;
    --
    --  This procedure extracts the first value from an element.  This value may
    --  be a value, a variable, or a list.  If the list starts with an expression,

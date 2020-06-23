@@ -24,13 +24,13 @@ package bbs.lisp.memory is
    --  and the output value should be ignored.
    --
    function alloc(s : out cons_index) return Boolean;
-   function alloc(a : out atom_index) return Boolean;
+--   function alloc(a : out atom_index) return Boolean;
    function alloc(s : out string_index) return Boolean;
    --
    --  Increment the reference count of various items.  This is typically done
    --  when an additional index to the item is created.
    --
-   procedure ref(a : atom_index);
+--   procedure ref(a : atom_index);
    procedure ref(s : cons_index);
    procedure ref(e : element_type);
    --
@@ -39,12 +39,12 @@ package bbs.lisp.memory is
    --  item is considered to be deallocated.  In this case, if the item points
    --  to other items, they will be recursively dereffed.
    --
-   procedure deref(n : String; a : atom_index);
+--   procedure deref(n : String; a : atom_index);
    procedure deref(s : cons_index);
    procedure deref(s : string_index);
    procedure deref(e : element_type);
    --
    --  Lock an item so that it can't be dereffed.
    --
-   procedure lock(a : atom_index);
+--   procedure lock(a : atom_index);
 end;

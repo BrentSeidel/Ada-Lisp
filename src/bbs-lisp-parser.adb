@@ -19,14 +19,13 @@ package body bbs.lisp.parser is
    function parse(buff : in out String; last : in out Integer; e : out element_type) return Boolean is
       ptr  : Integer;
       head : cons_index;
-      atom : atom_index;
       str  : string_index;
       flag : Boolean := False;
       is_list : Boolean := False;
       is_atom : Boolean := False;
       value : Integer;
    begin
-      e := (kind => NIL_TYPE);
+      e := (kind => E_NIL);
       ptr := buff'First;
       skip_whitespace(ptr, buff, last);
       --
@@ -35,42 +34,36 @@ package body bbs.lisp.parser is
       if buff(ptr) = '(' then
          flag := list(ptr, buff, last, head);
          if flag then
-            e := (kind => CONS_TYPE, ps => head);
+            e := (kind => E_CONS, ps => head);
          end if;
       --
       --  Comment
       --
       elsif buff(ptr) = ';' then
-         e := (Kind => NIL_TYPE);
+         e := (Kind => E_NIL);
       --
       --  Integer
       --
       elsif Is_Digit(buff(ptr)) or
         ((buff(ptr) = '-') and Is_Digit(buff(ptr + 1))) then
          flag := int(ptr, buff, last, value);
-         flag := bbs.lisp.memory.alloc(atom);
-         atom_table(atom) := (ref => 1, kind => ATOM_INTEGER, i => value);
-         e := (kind => ATOM_TYPE, pa => atom);
+         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
       --
       -- String
       --
       elsif buff(ptr) = '"' then
          flag := parse_str(ptr, buff, last, str);
          if flag then
-            flag := bbs.lisp.memory.alloc(atom);
             if flag then
-               atom_table(atom) := (ref => 1, kind => ATOM_STRING, str => str);
-               e := (Kind => ATOM_TYPE, pa => atom);
+               e := (Kind => E_VALUE, v =>(kind => V_STRING, s => str));
             end if;
          end if;
       --
       --  Symbol
       --
       else
-         flag := symb(ptr, buff, last, atom);
-         if flag then
-            e := (kind => ATOM_TYPE, pa => atom);
-         end if;
+         e := symb(ptr, buff, last);
+         flag := true;
       end if;
       return flag;
    end;
@@ -83,10 +76,10 @@ package body bbs.lisp.parser is
       head : cons_index;
       current : cons_index;
       temp : cons_index;
-      atom : atom_index;
       str  : string_index;
       value : Integer;
       flag : Boolean;
+      e : element_type;
       list_end : Boolean := False;
    begin
       flag := bbs.lisp.memory.alloc(head);
@@ -104,7 +97,7 @@ package body bbs.lisp.parser is
          elsif buff(ptr) = '(' then
             flag := list(ptr, buff, last, current);
             flag := bbs.lisp.memory.alloc(temp);
-            cons_table(temp).car := (Kind => CONS_TYPE, ps => current);
+            cons_table(temp).car := (Kind => E_CONS, ps => current);
             ptr := ptr + 1;
             if flag then
                flag := append(head, temp);
@@ -116,18 +109,12 @@ package body bbs.lisp.parser is
            ((buff(ptr) = '-') and Is_Digit(buff(ptr + 1))) then
             flag := int(ptr, buff, last, value);
             if flag then
-               flag := bbs.lisp.memory.alloc(atom);
-               if flag then
-                  atom_table(atom) := (ref => 1, kind => ATOM_INTEGER, i => value);
-                  if cons_table(head).car.kind = NIL_TYPE then
-                     cons_table(head).car := (kind => ATOM_TYPE, pa => atom);
-                  else
-                     flag := atom_to_cons(current, atom);
-                     flag := append(head, current);
-                  end if;
+               e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+               if cons_table(head).car.kind = E_NIL then
+                  cons_table(head).car := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
                else
-                  error("parse list", "Could not allocate atom for integer.");
-                  return False;
+                  flag := elem_to_cons(current, e);
+                  flag := append(head, current);
                end if;
             end if;
          --
@@ -136,18 +123,12 @@ package body bbs.lisp.parser is
          elsif buff(ptr) = '"' then
             flag := parse_str(ptr, buff, last, str);
             if flag then
-               flag := bbs.lisp.memory.alloc(atom);
-               if flag then
-                  atom_table(atom) := (ref => 1, kind => ATOM_STRING, str => str);
-                  if cons_table(head).car.kind = NIL_TYPE then
-                     cons_table(head).car := (kind => ATOM_TYPE, pa => atom);
-                  else
-                     flag := atom_to_cons(current, atom);
-                     flag := append(head, current);
-                  end if;
+               e := (kind => E_VALUE, v => (kind => V_STRING, s => str));
+               if cons_table(head).car.kind = E_NIL then
+                  cons_table(head).car := (kind => E_VALUE, v => (kind => V_STRING, s => str));
                else
-                  error("parse list", "Could not allocate atom for string.");
-                  return False;
+                  flag := elem_to_cons(current, e);
+                  flag := append(head, current);
                end if;
             else
                error("parse list", "Could not allocate string fragment.");
@@ -157,19 +138,17 @@ package body bbs.lisp.parser is
          --  Check for a comment
          --
          elsif buff(ptr) = ';' then
-            ptr := last;
+            ptr := last + 1;
          --
          --  If nothing else, parse it as a symbol
          --
          else
-            flag := symb(ptr, buff, last, atom);
-            if flag then
-               if cons_table(head).car.kind = NIL_TYPE then
-                  cons_table(head).car := (kind => ATOM_TYPE, pa => atom);
-               else
-                  flag := atom_to_cons(current, atom);
-                  flag := append(head, current);
-               end if;
+            e := symb(ptr, buff, last);
+            if cons_table(head).car.kind = E_NIL then
+               cons_table(head).car := e;
+            else
+               flag := elem_to_cons(current, e);
+               flag := append(head, current);
             end if;
          end if;
          --
@@ -188,8 +167,8 @@ package body bbs.lisp.parser is
    --
    --  Parse a symbol
    --
-   function symb(ptr : in out integer; buff : String; last : Integer; a : out atom_index)
-                 return Boolean is
+   function symb(ptr : in out integer; buff : String; last : Integer)
+                 return element_type is
       test : string_index;
       symb : symb_index;
       tempsym : tempsym_index;
@@ -204,24 +183,18 @@ package body bbs.lisp.parser is
          BBS.lisp.strings.uppercase(test);
          flag := find_symb(symb, test);
          if flag then
-            flag := bbs.lisp.memory.alloc(a);
             BBS.lisp.memory.deref(test);
-            if flag then
-               atom_table(a) := (ref => 1, kind => ATOM_SYMBOL, sym => symb);
-            end if;
+            return (kind => E_SYMBOL, sym => symb);
          else
             flag := get_tempsym(tempsym, test);
             if flag then
-               flag := bbs.lisp.memory.alloc(a);
-               if flag then
-                  atom_table(a) := (ref => 1, kind => ATOM_TEMPSYM, tempsym => tempsym);
-               end if;
+               return (kind => E_TEMPSYM, tempsym => tempsym);
             end if;
          end if;
       else
          error("parse symbol", "Unable to allocate string fragment.");
       end if;
-      return flag;
+      return (kind => E_NIL);
    end;
    --
    --  Parse an integer

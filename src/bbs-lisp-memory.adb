@@ -7,9 +7,9 @@ package body bbs.lisp.memory is
       for i in cons_index loop
          cons_table(i).ref := 0;
       end loop;
-      for i in atom_index loop
-         atom_table(i).ref := 0;
-      end loop;
+--      for i in atom_index loop
+--         atom_table(i).ref := 0;
+--      end loop;
       for i in symb_index loop
          symb_table(i).ref := 0;
       end loop;
@@ -38,8 +38,8 @@ package body bbs.lisp.memory is
          if cons_table(i).ref = 0 then
             s := i;
             cons_table(i).ref := 1;
-            cons_table(i).car := (Kind => NIL_TYPE);
-            cons_table(i).cdr := (Kind => NIL_TYPE);
+            cons_table(i).car := (Kind => E_NIL);
+            cons_table(i).cdr := (Kind => E_NIL);
             return True;
          end if;
       end loop;
@@ -50,18 +50,18 @@ package body bbs.lisp.memory is
    --  Find an unused atom in the table, mark it as USED, and return the index
    --  in a.  Return false if no such cell could be found.
    --
-   function alloc(a : out atom_index) return Boolean is
-   begin
-      for i in atom_index loop
-         if atom_table(i).ref = 0 then
-            a := i;
-            atom_table(i) := (ref => 1, Kind => ATOM_NIL);
-            return True;
-         end if;
-      end loop;
-      a := 0;
-      return False;
-   end;
+--   function alloc(a : out atom_index) return Boolean is
+--   begin
+--      for i in atom_index loop
+--         if atom_table(i).ref = 0 then
+--            a := i;
+--            atom_table(i) := (ref => 1, Kind => ATOM_NIL);
+--            return True;
+--         end if;
+--      end loop;
+--      a := 0;
+--      return False;
+--   end;
    --
    --  Find an unused string fragment, mark it as USED, and return the index
    --  in s.  Return false if no such cell could be found.
@@ -83,12 +83,12 @@ package body bbs.lisp.memory is
    --
    --  Increments the reference count of an atom.
    --
-   procedure ref(a : atom_index) is
-   begin
-      if atom_table(a).ref < Natural'Last then
-         atom_table(a).ref := atom_table(a).ref + 1;
-      end if;
-   end;
+--   procedure ref(a : atom_index) is
+--   begin
+--      if atom_table(a).ref < Natural'Last then
+--         atom_table(a).ref := atom_table(a).ref + 1;
+--      end if;
+--   end;
    --
    --  Increments the reference count of a cons cell.
    --
@@ -101,38 +101,38 @@ package body bbs.lisp.memory is
    --
    procedure ref(e : element_type) is
    begin
-      if e.kind = CONS_TYPE then
+      if e.kind = E_CONS then
          ref(e.ps);
-      elsif e.kind = ATOM_TYPE then
-         ref(e.pa);
+--      elsif e.kind = ATOM_TYPE then
+--         ref(e.pa);
       end if;
    end;
    --
    --  Decrements the reference count of an atom, checking for locked atoms.
    --
-   procedure deref(n : String; a : atom_index) is
-   begin
-      msg(n & "/deref atom", "Dereffing atom at " & Integer'Image(Integer(a)) &
-         " Ref count was " & Integer'Image(Integer(atom_table(a).ref)));
-      if atom_table(a).ref > 0 then
-         if atom_table(a).ref < Natural'Last then
-            atom_table(a).ref := atom_table(a).ref - 1;
-         end if;
-         if atom_table(a).ref = 0 then
+--   procedure deref(n : String; a : atom_index) is
+--   begin
+--      msg(n & "/deref atom", "Dereffing atom at " & Integer'Image(Integer(a)) &
+--         " Ref count was " & Integer'Image(Integer(atom_table(a).ref)));
+--      if atom_table(a).ref > 0 then
+--         if atom_table(a).ref < Natural'Last then
+--            atom_table(a).ref := atom_table(a).ref - 1;
+--         end if;
+--         if atom_table(a).ref = 0 then
             --
             --  If an atom's reference count goes to 0, the if the atom points
             --  to a string, the string's reference count must also go to zero.
             --
-            if atom_table(a).kind = ATOM_STRING then
-               deref(atom_table(a).str);
-            end if;
-            atom_table(a) := (ref => 0, Kind => ATOM_NIL);
-         end if;
-      else
-         error(n & "/deref atom", "Attempt to deref an unreffed atom at index "
-               & Integer'Image(Integer(a)));
-      end if;
-   end;
+--            if atom_table(a).kind = ATOM_STRING then
+--               deref(atom_table(a).str);
+--            end if;
+--            atom_table(a) := (ref => 0, Kind => ATOM_NIL);
+--         end if;
+--      else
+--         error(n & "/deref atom", "Attempt to deref an unreffed atom at index "
+--               & Integer'Image(Integer(a)));
+--      end if;
+--   end;
    --
    --  Decrements the reference count of a cons cell.
    --
@@ -160,10 +160,10 @@ package body bbs.lisp.memory is
    --
    procedure deref(e : element_type) is
    begin
-      if e.kind = CONS_TYPE then
+      if e.kind = E_CONS then
          deref(e.ps);
-      elsif e.kind = ATOM_TYPE then
-         deref("deref element", e.pa);
+--      elsif e.kind = ATOM_TYPE then
+--         deref("deref element", e.pa);
       end if;
    end;
    --
@@ -195,13 +195,13 @@ package body bbs.lisp.memory is
    --  Lock an item so that it can't be dereffed.  This perhaps should not be
    --  used.
    --
-   procedure lock(a : atom_index) is
-   begin
-      if atom_table(a).ref > 0 then
-         atom_table(a).ref := Natural'Last;
-      else
-         error("lock atom", "Cannot lock an unreferenced atom.");
-      end if;
-   end;
+--   procedure lock(a : atom_index) is
+--   begin
+--      if atom_table(a).ref > 0 then
+--         atom_table(a).ref := Natural'Last;
+--      else
+--         error("lock atom", "Cannot lock an unreferenced atom.");
+--      end if;
+--   end;
    --
 end;
