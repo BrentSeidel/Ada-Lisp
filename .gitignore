@@ -17,3 +17,10 @@ lib/*
 obj/*
 *.cswi
 *.lexch
+
+# Latex auxiliary files
+documentation/*.aux
+documentation/*.log
+documentation/*.synctex.gz
+documentation/*.toc
+

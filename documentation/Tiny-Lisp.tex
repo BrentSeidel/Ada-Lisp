@@ -1,0 +1,128 @@
+\documentclass[10pt, openany]{book}
+
+\usepackage{fancyhdr}
+\usepackage{imakeidx}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+\usepackage{geometry}
+\geometry{letterpaper}
+
+\usepackage{fancyvrb}
+\usepackage{fancybox}
+%
+% Rules to allow import of graphics files in EPS format
+%
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.eps}
+\DeclareGraphicsRule{.eps}{eps}{.eps}{}
+%
+%  Include the listings package and define Pseudo Code
+%
+\usepackage{listings}
+%
+% Front Matter
+%
+\title{Tiny Lisp Interpreter}
+\author{Brent Seidel \\ Phoenix, AZ}
+\date{ \today }
+%========================================================
+%%% BEGIN DOCUMENT
+\begin{document}
+%
+% Produce the front matter
+%
+\frontmatter
+\maketitle
+\begin{center}
+This document is \copyright 2020 Brent Seidel.  All rights reserved.
+
+\paragraph{}Note that this is a draft version and not the final version for publication.
+\end{center}
+\tableofcontents
+
+\mainmatter
+
+\chapter{Introduction}
+\section{What is This?}
+This is a tiny Lisp interpreter written in Ada.  It is designed to proved a language that can be embedded into other programs, including running on embedded systems without an operating system.  As a result, effort has been made to remove dependencies on Ada packages that may not be available.  A primary example is \emph{Ada.Text\_IO}.  Another feature that may be missing is dynamic memory allocation.
+
+\section{Why is This?}
+
+
+\chapter{Code Examples}
+\section{Lisp Code}
+Here is some sample Lisp code
+
+\lstset{language=lisp}
+\begin{lstlisting}
+;
+;  Read an analog pin and print the value repeatedly.
+;  Digital pin 10 is tied high to keep looping and tied low to exit the loop.
+;
+(defun monitor-analog (n)
+  (pin-mode 10 0)
+  (print "Connect digital pin 10 to high to continue looping or to gnd to exit")
+  (new-line)
+  (print "Connect analog pin " n " to the analog value to monitor")
+  (new-line)
+  (print "Press <return> to continue")
+  (read-line)
+  (dowhile (= (read-pin 10) (+ 0 1))
+    (print "Analog value is " (read-analog n))
+    (new-line))
+  (print "Exiting")
+  (new-line))
+\end{lstlisting}
+
+\section{Ada Code}
+Here is some sample Ada code
+\lstset{language=Ada}
+\begin{lstlisting}
+   procedure first_value(e : element_type;
+                         car : out element_type;
+                         cdr : out element_type) is
+      first : element_type;
+      temp : element_type;
+      s : cons_index;
+   begin
+      if e.kind = E_NIL then
+         car := NIL_ELEM;
+         cdr := NIL_ELEM;
+      elsif e.kind /= E_CONS then
+         car := indirect_elem(e);
+         cdr := NIL_ELEM;
+      else -- The only other option is E_CONS
+         s := e.ps;
+         first := cons_table(s).car;
+         cdr :=  cons_table(s).cdr;
+         if first.kind = E_NIL then
+            car := NIL_ELEM;
+         elsif first.kind /= E_CONS then
+            car := indirect_elem(first);
+         else -- The first item is a E_CONS
+            temp := eval_dispatch(first.ps);
+            if temp.kind = E_NIL then
+               car := NIL_ELEM;
+            elsif temp.kind /= E_CONS then
+               car := temp;
+            else
+               car := cons_table(temp.ps).car;
+               cdr := cons_table(temp.ps).cdr;
+            end if;
+         end if;
+      end if;
+   end;
+
+\end{lstlisting}
+\end{document}
+
+
+-rw-r--r--  1 brent  staff     825 Jun 25 19:48 Tiny-Lisp.aux
+-rw-r--r--  1 brent  staff   14269 Jun 25 19:48 Tiny-Lisp.log
+-rw-r--r--  1 brent  staff  111440 Jun 25 19:48 Tiny-Lisp.pdf
+-rw-r--r--  1 brent  staff   38179 Jun 25 19:48 Tiny-Lisp.synctex.gz
+-rw-r--r--@ 1 brent  staff    3289 Jun 25 19:48 Tiny-Lisp.tex
+-rw-r--r--  1 brent  staff     378 Jun 25 19:48 Tiny-Lisp.toc
+
