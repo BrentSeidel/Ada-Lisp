@@ -84,8 +84,66 @@ A final example:
 This list consists of only two elements.  The first is the symbol ``print''.  The second is the string ``Hello World!''.  With strings, everything from the starting quotation mark to the next quotation mark is part of the string.  This means that you can't have a string that contains a quotation mark (at some point, a work-around may be available).
 
 \section{Operations}
+A limited number of operations are defined.  Note that this list will probably be expanded.
 \subsection{Normal Operation}
+A number of normal operation are defined.
+\subsubsection{Arithmatic Operations}
+Four arithmatic operations are defined for operation on integers.  The operations are addition, subtraction, multiplication, and division.  For example:
+\begin{lstlisting}
+(+ 1 2 3 4)
+(- 1 2 3 4)
+(* 1 2 3 4)
+(/ 1 2 3 4)
+\end{lstlisting}
+These operations work on a list of one or more parameters, with the operation inserted between the parameters.  Thus (+ 1 2 3 4 ) computes as $1+2+3+4$.  The return value for each of these operations is an integer value.
+
+\subsubsection{Comparison Operations}
+Four comparison operations are defined for both integers and strings.  The operations are equals, not equals, greater than, and less than.  For example:
+\begin{lstlisting}
+(= 1 2)
+(/= 1 2)
+(< 1 2)
+(> 1 2)
+\end{lstlisting}
+These operations work on two parameters of the same type.  The return value of each of these operations is a boolean.
+
+\subsubsection{Input/Output}
+As this Lisp may run on systems without filesystems, only three operations are provided for input and output.  These are:
+\begin{lstlisting}
+(print "Strings " 1 2 N)
+(new-line)
+(read-line)
+\end{lstlisting}
+The print operation evaluates each item in its parameter list and prints the value.  The new-line operation simply prints a new line.  The read-line operation reads a string from the input device and returns it.  Both print and new-line return NIL.  Read-line returns the entered string with no line terminator.
+
+\subsubsection{List Operations}
+Basic list operations are provided.
+\begin{lstlisting}
+(car 1 2 3 4)
+(cdr 1 2 3 4)
+\end{lstlisting}
+Each of car and cdr take a list of parameters.  Car returns the first item in the list.  Cdr returns the remainder of the list.
+
+\subsubsection{Other}
+\lstset{language=Ada}
+\begin{lstlisting}
+      add_builtin("dump", BBS.lisp.evaluate.dump'Access);
+      add_builtin("t", BBS.lisp.evaluate.true'Access);
+      add_builtin("msg-on", BBS.lisp.evaluate.msg_on'Access);
+      add_builtin("msg-off", BBS.lisp.evaluate.msg_off'Access);
+\end{lstlisting}
+
 \subsection{Special Forms}
+\begin{lstlisting}
+      add_builtin("setq", BBS.lisp.evaluate.setq'Access);
+      add_builtin("if", BBS.lisp.evaluate.eval_if'Access);
+      add_builtin("dowhile", BBS.lisp.evaluate.dowhile'Access);
+      add_builtin("dotimes", BBS.lisp.evaluate.dotimes'Access);
+      add_builtin("defun", BBS.lisp.evaluate.defun'Access);
+      add_builtin("exit", BBS.lisp.evaluate.quit'Access);
+      add_builtin("reset", BBS.lisp.evaluate.reset'Access);
+      add_builtin("quote", BBS.lisp.evaluate.quote'Access);
+\end{lstlisting}
 
 \section{Data Types}
 A limited selection of data types is provided.  Think of the old Applesoft Integer BASIC.
