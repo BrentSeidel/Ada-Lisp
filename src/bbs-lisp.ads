@@ -12,6 +12,7 @@
 package bbs.lisp is
    --
    --  Define the basic types used.
+   --
    max_cons : constant Integer := 300;
    max_symb : constant Integer := 200;
    max_tempym : constant Integer := 50;
@@ -57,7 +58,7 @@ package bbs.lisp is
          end case;
       end record;
    --
-   --  An element_type can contain a value or point to a cons cell.cons cells.
+   --  An element_type can contain a value or point to a cons cell.
    --
    type element_type(kind : ptr_type := E_NIL) is
       record

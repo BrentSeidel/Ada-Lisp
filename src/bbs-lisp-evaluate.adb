@@ -173,8 +173,12 @@ package body bbs.lisp.evaluate is
       car : element_type;
       cdr : element_type;
    begin
+      msg("CAR", "Getting first value");
       BBS.lisp.utilities.first_value(e, car, cdr);
+      msg("CAR", "Reffing the CAR");
       BBS.lisp.memory.ref(car);
+--      msg("CAR", "De-Reffing the parameters");
+      BBS.lisp.memory.deref(cdr);
       return car;
    end;
    --
@@ -186,8 +190,7 @@ package body bbs.lisp.evaluate is
    begin
       BBS.lisp.utilities.first_value(e, car, cdr);
       BBS.lisp.memory.ref(cdr);
-      msg("cdr", "Preparing to deref element");
-      dump_cons;
+      BBS.lisp.memory.deref(e);
       return cdr;
    end;
    --
@@ -418,16 +421,15 @@ package body bbs.lisp.evaluate is
    --
    function eval_if(e : element_type) return element_type is
       t : element_type;
-      p1 : element_type;
-      p2 : element_type;
-      p3 : element_type;
+      p1 : element_type; --  Condition
+      p2 : element_type; --  True expression
+      p3 : element_type; --  False expression
    begin
       if e.kind /= E_CONS then
          error("eval_if", "Internal error.  Should have a list.");
          return NIL_ELEM;
       end if;
-      p1 := cons_table(e.ps).car;
-      t := cons_table(e.ps).cdr;
+      BBS.lisp.utilities.first_value(e, p1, t);
       if t.kind = E_CONS then
          p2 := cons_table(t.ps).car;
          t := cons_table(t.ps).cdr;
@@ -441,46 +443,22 @@ package body bbs.lisp.evaluate is
          p3 := NIL_ELEM;
       end if;
       --
-      --  Now p1 contains the condition, p2 the "then" branch, and p3 the "else"
-      --  branch.  Evaluate p1 and decide which of p2 or p3 to evaluate.
+      --  Now p1 contains the results of evaluating the condition, p2 the
+      --  "then" branch, and p3 the "else" branch.  Decide which of p2 or p3
+      --  to evaluate.
       --
-      if p1.kind = E_CONS then
-         t := eval_dispatch(p1.ps);
-         if bbs.lisp.utilities.is_true(t) then
-            bbs.lisp.memory.deref(t);
-            if p2.kind = E_CONS then
-               t := eval_dispatch(p2.ps);
-            elsif p2.kind /= E_NIL then
-               t := p2;
-            else
-               t := NIL_ELEM;
-            end if;
-         else
-            if p3.kind = E_CONS then
-               t := eval_dispatch(p3.ps);
-            elsif p3.kind /= E_NIL then
-               t := p3;
-            else
-               t := NIL_ELEM;
-            end if;
-         end if;
-      elsif p1.kind /= E_NIL then
-         if p2.kind = E_CONS then
+      t := NIL_ELEM;
+      if BBS.lisp.utilities.isTrue(p1) then
+         if BBS.lisp.utilities.isFunction(p2) then
             t := eval_dispatch(p2.ps);
-         elsif p2.kind /= E_NIL then
-            t := p2;
-            bbs.lisp.memory.ref(t);
          else
-            t := NIL_ELEM;
+            t := BBS.lisp.utilities.indirect_elem(p2);
          end if;
       else
-         if p3.kind = E_CONS then
+         if BBS.lisp.utilities.isFunction(p3) then
             t := eval_dispatch(p3.ps);
-         elsif p3.kind /= E_NIL then
-            t := p3;
-            bbs.lisp.memory.ref(t);
          else
-            t := NIL_ELEM;
+            t := BBS.lisp.utilities.indirect_elem(p3);
          end if;
       end if;
       return t;
@@ -504,7 +482,7 @@ package body bbs.lisp.evaluate is
          --  Loop while the conditions is true.
          --
          temp := eval_dispatch(cond.ps);
-         while bbs.lisp.utilities.is_true(temp) loop
+         while bbs.lisp.utilities.isTrue(temp) loop
             BBS.lisp.memory.deref(temp);
             ptr := list;
             --
@@ -788,12 +766,6 @@ package body bbs.lisp.evaluate is
          end loop;
       end if;
       ptr := ptr + 1;
---      flag := BBS.lisp.memory.alloc(a);
---      if flag then
---         atom_table(a) := (ref => 1, kind => ATOM_STRING, str => first);
---         BBS.lisp.memory.ref(a);
-         return (kind => E_VALUE, v => (kind => V_STRING, s => first));
---      end if;
---      return NIL_ELEM;
+      return (kind => E_VALUE, v => (kind => V_STRING, s => first));
    end;
 end;

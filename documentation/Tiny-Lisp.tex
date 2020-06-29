@@ -43,7 +43,7 @@ This document is \copyright 2020 Brent Seidel.  All rights reserved.
 \tableofcontents
 
 \mainmatter
-
+%----------------------------------------------------------
 \chapter{Introduction}
 This document provides a definition of a Tiny Lisp interpreter written in Ada.  Without such a definition, it is difficult to determine if the language is actually doing what it should be doing.  This makes debugging more complicated.
 
@@ -59,9 +59,18 @@ Why not?  My first thought was to use some flavor of Tiny BASIC which would have
 \subsection{Why Ada?}
 Again, why non?  I have developed an interest in Ada, especially for programming embedded systems.  It has features, such as strong typing, which can help to catch errors early, thus saving time debugging.  I would not claim to be the world's greatest programmer, so I need all the help that I can get.
 
-
+%----------------------------------------------------------
 \chapter{The Language}
 As a ``Tiny-Lisp'', some (many) of the features of Common Lisp are not available.  Some of the lacks may be temporary while others will be permanent, and some may be added by the host program.
+
+\section{User Interface}
+The interpreter reads text from an input device, parses it, and and executes it.  The function used to read the input must match the signature for \emph{Ada.Text\_IO.Get\_Line()} and this will probably be used if that is available.  On an embedded system without \emph{Ada.Text\_IO}, the user must provide a suitable function.
+
+\subsubsection{Comments}
+A comment starts with a semicolon character, ``;'', and extends to the end of the line.  Any text in a comment is ignore by the interpreter.
+
+\subsubsection{Continuation}
+If a list isn't closed (number of open parentheses matches the number of close parentheses) by the end of the line, the interpreter will ask for more text.  This will continue until the list is closed.
 
 \section{Syntax}
 The basic syntax for languages in the Lisp family is very simple.  Everything is a list of elements, where each element may also be a list.  Elements are separated by spaces and the list is contained in parentheses.  Here is a simple list:
@@ -85,8 +94,21 @@ This list consists of only two elements.  The first is the symbol ``print''.  Th
 
 \section{Operations}
 A limited number of operations are defined.  Note that this list will probably be expanded.
-\subsection{Normal Operation}
-A number of normal operation are defined.
+\subsection{Normal Forms}
+A number of normal forms are defined.  The main difference between normal forms and special forms is that all active arguments for a normal form are evaluated.  Thus:
+\begin{lstlisting}
+(* (+ 1 2) (+ 3 4))
+;
+; Versus
+;
+(if (> 1 2) (+ 1 2) (+ 3 4))
+\end{lstlisting}
+``*'' is a normal operation and both ``(+ 1 2)'' and ``(+ 3 4)'' are evaluated before ``*'' is evaluated.  ``If'' is a special form so first ``(> 1 2)'' is evaluated, then depending on whether the result is true or false, either ``(+ 1 2)'' or ``(+ 3 4)'' is evaluated.  For a simple example like this, it doesn't really matter, but if the operations have other effects, such as:
+\begin{lstlisting}
+(if (> 1 2) (print "Greater") (print "Not greater"))
+\end{lstlisting}
+will only print ``Not greater''.
+
 \subsubsection{Arithmatic Operations}
 Four arithmatic operations are defined for operation on integers.  The operations are addition, subtraction, multiplication, and division.  For example:
 \begin{lstlisting}
@@ -122,7 +144,7 @@ Basic list operations are provided.
 (car 1 2 3 4)
 (cdr 1 2 3 4)
 \end{lstlisting}
-Each of car and cdr take a list of parameters.  Car returns the first item in the list.  Cdr returns the remainder of the list.
+Each of car and cdr take a list of parameters.  Car returns the first item in the list.  This item may be a single element or it may be a list.  Cdr returns the remainder of the list.
 
 \subsubsection{Other}
 \lstset{language=Ada}
@@ -157,9 +179,12 @@ Strings are stored in linked lists of 8-bit characters/bytes.  Unicode is not cu
 \subsection{Boolean}
 \subsection{List}
 \subsection{Possible Additions}
-\section{Internals}
-\subsection{Data Structures}
-\subsubsection{Elements}
+
+%----------------------------------------------------------
+\chapter{Internals}
+As the interpreter is under active development, this section is subject to change without notice.
+\section{Data Structures}
+\subsection{Elements}
 The basic data type is the element.  It is defined as follows:
 \lstset{language=Ada}
 \begin{lstlisting}
@@ -197,7 +222,8 @@ The referenced types are defined as follows:
    type string_index is range 0 .. max_string;
    type ptr_type is (E_CONS, E_NIL, E_VALUE, E_SYMBOL,
                      E_TEMPSYM, E_PARAM, E_LOCAL);
-   type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST);
+   type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN,
+                       V_LIST);
    type value(kind : value_type := V_INTEGER) is
       record
          case kind is
@@ -213,91 +239,22 @@ The referenced types are defined as follows:
             l : cons_index;
          end case;
       end record;
-
 \end{lstlisting}
 
-\subsubsection{Cons}
+\subsection{Cons}
 
-\subsubsection{Symbols}
+\subsection{Symbols}
 
-\subsubsection{Strings}
+\subsection{Strings}
 
-\subsection{Utility Functions}
-\subsection{Embedding}
+\subsection{Global Data}
 
+\subsection{Memory Management}
 
-\chapter{Code Examples}
-\section{Lisp Code}
-Here is some sample Lisp code
+\section{Utility Functions}
 
-\lstset{language=lisp}
-\begin{lstlisting}
-;
-;  Read an analog pin and print the value repeatedly.
-;  Digital pin 10 is tied high to keep looping and tied low to exit the loop.
-;
-(defun monitor-analog (n)
-  (pin-mode 10 0)
-  (print "Connect digital pin 10 to high to continue looping or to gnd to exit")
-  (new-line)
-  (print "Connect analog pin " n " to the analog value to monitor")
-  (new-line)
-  (print "Press <return> to continue")
-  (read-line)
-  (dowhile (= (read-pin 10) (+ 0 1))
-    (print "Analog value is " (read-analog n))
-    (new-line))
-  (print "Exiting")
-  (new-line))
-\end{lstlisting}
+\section{Embedding}
+This section covers how to embed the list interpreter in another program.
 
-\section{Ada Code}
-Here is some sample Ada code
-\lstset{language=Ada}
-\begin{lstlisting}
-   procedure first_value(e : element_type;
-                         car : out element_type;
-                         cdr : out element_type) is
-      first : element_type;
-      temp : element_type;
-      s : cons_index;
-   begin
-      if e.kind = E_NIL then
-         car := NIL_ELEM;
-         cdr := NIL_ELEM;
-      elsif e.kind /= E_CONS then
-         car := indirect_elem(e);
-         cdr := NIL_ELEM;
-      else -- The only other option is E_CONS
-         s := e.ps;
-         first := cons_table(s).car;
-         cdr :=  cons_table(s).cdr;
-         if first.kind = E_NIL then
-            car := NIL_ELEM;
-         elsif first.kind /= E_CONS then
-            car := indirect_elem(first);
-         else -- The first item is a E_CONS
-            temp := eval_dispatch(first.ps);
-            if temp.kind = E_NIL then
-               car := NIL_ELEM;
-            elsif temp.kind /= E_CONS then
-               car := temp;
-            else
-               car := cons_table(temp.ps).car;
-               cdr := cons_table(temp.ps).cdr;
-            end if;
-         end if;
-      end if;
-   end;
-
-\end{lstlisting}
 \end{document}
-
-
--rw-r--r--  1 brent  staff     825 Jun 25 19:48 Tiny-Lisp.aux
--rw-r--r--  1 brent  staff   14269 Jun 25 19:48 Tiny-Lisp.log
--rw-r--r--  1 brent  staff  111440 Jun 25 19:48 Tiny-Lisp.pdf
--rw-r--r--  1 brent  staff   38179 Jun 25 19:48 Tiny-Lisp.synctex.gz
--rw-r--r--@ 1 brent  staff    3289 Jun 25 19:48 Tiny-Lisp.tex
--rw-r--r--  1 brent  staff     378 Jun 25 19:48 Tiny-Lisp.toc
 

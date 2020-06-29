@@ -3,7 +3,9 @@ package bbs.lisp.utilities is
    --  Various utility functions
    --
    function count(s : cons_index) return Integer;
-   function is_true(e : element_type) return Boolean;
+   function isTrue(e : element_type) return Boolean;
+   function isList(e : element_type) return Boolean;
+   function isFunction(e : element_type) return Boolean;
    --
    --  The following routine supports parameters and local variables.
    --  It scans through the passed s expression (recursively, if necessary) and

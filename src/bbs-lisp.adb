@@ -222,7 +222,11 @@ package body bbs.lisp is
          when V_STRING =>
             print(v.s);
          when V_BOOLEAN =>
-            put(Boolean'Image(v.b));
+            if v.b then
+               put(" T");
+            else
+               put(" NIL");
+            end if;
          when others =>
             Put("<Unknown value kind>");
       end case;
@@ -601,6 +605,7 @@ package body bbs.lisp is
       e : element_type := NIL_ELEM;
       first : element_type := cons_table(s).car;
       rest : element_type := cons_table(s).cdr;
+      params : element_type;
    begin
       if first.kind /= E_CONS then
          if first.kind = E_SYMBOL then
@@ -610,7 +615,7 @@ package body bbs.lisp is
             --
             if sym.kind = BUILTIN then
                if msg_flag then
-                  Put("Evaluating builtin ");
+                  Put("eval_dispatch: Evaluating builtin ");
                   Print(sym.str);
                   New_Line;
                end if;
@@ -620,7 +625,7 @@ package body bbs.lisp is
             --
             elsif sym.kind = LAMBDA then
                if msg_flag then
-                  Put("Evaluating lambda ");
+                  Put("eval_dispatch: Evaluating lambda ");
                   print(sym.ps);
                   new_line;
                end if;
@@ -629,17 +634,36 @@ package body bbs.lisp is
             -- Handle variables
             --
             elsif sym.kind = VARIABLE then
+               if msg_flag then
+                  Put("eval_dispatch: Evaluating variable ");
+                  print(first.p_name);
+                  new_line;
+               end if;
                BBS.lisp.memory.ref(sym.pv);
                e := sym.pv;
             end if;
          else -- Not a symbol, just return the value.
-            msg("eval_dispatch", "Returning value.");
-            dump_cons;
+            if msg_flag then
+               Put("eval_dispatch: Evaluating non-symbol ");
+               print(first, False, True);
+               new_line;
+            end if;
+            BBS.lisp.memory.ref(s);
             e := (kind => E_CONS, ps => s);
          end if;
-      else -- Not an atom, just return the value
-         bbs.lisp.memory.ref(s);
+      else -- It a cons, just return the value
+         if msg_flag then
+            Put("eval_dispatch: Evaluating cons ");
+            print(first.ps);
+            new_line;
+         end if;
+--         bbs.lisp.memory.ref(s);
          e := (kind => E_CONS, ps => s);
+      end if;
+      if msg_flag then
+         Put("eval_dispatch: Returning value: ");
+         print(e, False, True);
+         dump_cons;
       end if;
       return e;
    end;

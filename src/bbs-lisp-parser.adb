@@ -165,7 +165,7 @@ package body bbs.lisp.parser is
       return flag;
    end;
    --
-   --  Parse a symbol
+   --  Parse a symbol.  The boolean values "T" and "NIL" are also detected here.
    --
    function symb(ptr : in out integer; buff : String; last : Integer)
                  return element_type is
@@ -181,6 +181,18 @@ package body bbs.lisp.parser is
             ptr := ptr + 1;
          end loop;
          BBS.lisp.strings.uppercase(test);
+         --
+         --  Check for boolean values.
+         --
+         if (string_table(test).len = 1) and (string_table(test).str(1) = 'T') then
+            return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+         end if;
+         if (string_table(test).len = 3) and (string_table(test).str(1..3) = "NIL") then
+            return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         end if;
+         --
+         -- Now check for symbols
+         --
          flag := find_symb(symb, test);
          if flag then
             BBS.lisp.memory.deref(test);

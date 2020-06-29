@@ -20,7 +20,7 @@ package body bbs.lisp.utilities is
    --
    --  Take an element_type and checks if it can be interpreted as true or false.
    --
-   function is_true(e : element_type) return Boolean is
+   function isTrue(e : element_type) return Boolean is
    begin
       if e.kind = E_NIL then
          return False;
@@ -36,6 +36,47 @@ package body bbs.lisp.utilities is
          return False;
       end if;
       return True;
+   end;
+   --
+   --  A list can be either element type E_CONS or a value of type V_LIST.  This
+   --  checks both to see if the element is actually some sort of a list.
+   --
+   function isList(e : element_type) return Boolean is
+   begin
+      if e.kind = E_CONS then
+         return True;
+      end if;
+      if e.kind = E_VALUE then
+         if e.v.kind = V_LIST then
+            return True;
+         end if;
+      end if;
+      return False;
+   end;
+   --
+   --  This checks to see if the element represents a function call.  The element
+   --  is a symbol of type either BUILTIN or LAMBDA.
+   --
+   function isFunction(e : element_type) return Boolean is
+      temp : element_type;
+   begin
+      if e.kind = E_CONS then
+         temp := cons_table(e.ps).car;
+         if temp.kind = E_SYMBOL then
+            if (symb_table(temp.sym).kind = BUILTIN) or
+              (symb_table(temp.sym).kind = LAMBDA) then
+               return True;
+            end if;
+         end if;
+      else
+         if e.kind = E_SYMBOL then
+            if (symb_table(e.sym).kind = BUILTIN) or
+              (symb_table(e.sym).kind = LAMBDA) then
+               return True;
+            end if;
+         end if;
+      end if;
+      return False;
    end;
    --
    --  The following routine supports parameters and local variables.
@@ -158,14 +199,9 @@ package body bbs.lisp.utilities is
          elsif first.kind /= E_CONS then
             car := indirect_elem(first);
          else -- The first item is a E_CONS
-            temp := eval_dispatch(first.ps);
-            if temp.kind = E_NIL then
-               car := NIL_ELEM;
-            elsif temp.kind /= E_CONS then
-               car := temp;
-            else
-               car := cons_table(temp.ps).car;
-               cdr := cons_table(temp.ps).cdr;
+            car := first;
+            if isFunction(first) then
+               car := eval_dispatch(first.ps);
             end if;
          end if;
       end if;
