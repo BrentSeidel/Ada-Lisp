@@ -20,7 +20,6 @@ package bbs.lisp.evaluate is
    function ne(e : element_type) return element_type;
    function lt(e : element_type) return element_type;
    function gt(e : element_type) return element_type;
-   function true(e : element_type) return element_type;
    function dump(e : element_type) return element_type;
    function reset(e : element_type) return element_type;
    function quote(e : element_type) return element_type;

@@ -35,11 +35,6 @@ package body bbs.lisp.evaluate is
       return temp;
    end;
    --
-   function true(e : element_type) return element_type is
-   begin
-      return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-   end;
-   --
    function dump(e : element_type) return element_type is
    begin
       dump_cons;
@@ -251,7 +246,7 @@ package body bbs.lisp.evaluate is
                when others =>
                   error("eval_comp", "Unknown comparison type.");
                end case;
-               return NIL_ELEM;
+               return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
          elsif v1.kind = V_STRING and
            v2.kind = V_STRING then
             declare
@@ -279,7 +274,7 @@ package body bbs.lisp.evaluate is
                      error("eval_comp", "Unknown comparison type.");
                end case;
             end;
-            return NIL_ELEM;
+            return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
          else
             error("eval_comp", "Can only compare integers, strings, or symbols.");
             return NIL_ELEM;

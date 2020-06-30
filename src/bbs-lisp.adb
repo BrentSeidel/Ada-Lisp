@@ -31,7 +31,6 @@ package body bbs.lisp is
       add_builtin("<", BBS.lisp.evaluate.lt'Access);
       add_builtin(">", BBS.lisp.evaluate.gt'Access);
       add_builtin("dump", BBS.lisp.evaluate.dump'Access);
-      add_builtin("t", BBS.lisp.evaluate.true'Access);
       add_builtin("reset", BBS.lisp.evaluate.reset'Access);
       add_builtin("quote", BBS.lisp.evaluate.quote'Access);
       add_builtin("new-line", BBS.lisp.evaluate.newline'Access);

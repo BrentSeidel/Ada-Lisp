@@ -147,15 +147,17 @@ Basic list operations are provided.
 Each of car and cdr take a list of parameters.  Car returns the first item in the list.  This item may be a single element or it may be a list.  Cdr returns the remainder of the list.
 
 \subsubsection{Other}
-\lstset{language=Ada}
+Some additional operations are provided for debugging purposes.  These control the display of some debugging information.
 \begin{lstlisting}
-      add_builtin("dump", BBS.lisp.evaluate.dump'Access);
-      add_builtin("t", BBS.lisp.evaluate.true'Access);
-      add_builtin("msg-on", BBS.lisp.evaluate.msg_on'Access);
-      add_builtin("msg-off", BBS.lisp.evaluate.msg_off'Access);
+(dump)
+(msg-on)
+(msg-off)
 \end{lstlisting}
 
+The dump operation prints the contents of the cons, symbol, and string tables.  The msg-on and msg-off operations turn the display of debugging information on and off.  These are helpful when trying to debug the interpreter and should not be necessary during normal operation.
+
 \subsection{Special Forms}
+\lstset{language=Ada}
 \begin{lstlisting}
       add_builtin("setq", BBS.lisp.evaluate.setq'Access);
       add_builtin("if", BBS.lisp.evaluate.eval_if'Access);
