@@ -179,7 +179,10 @@ This is the same as the Ada Integer type.  Typically it is a 32 bit signed integ
 Strings are stored in linked lists of 8-bit characters/bytes.  Unicode is not currently supported.
 
 \subsection{Boolean}
+The Boolean values ``NIL'' and ``T'' correspond to ``True'' and ``False''.
+
 \subsection{List}
+
 \subsection{Possible Additions}
 
 %----------------------------------------------------------
@@ -243,15 +246,58 @@ The referenced types are defined as follows:
       end record;
 \end{lstlisting}
 
+There is a bit of ambiguity right now about lists.  Since recursively defined records aren't possible, elements of type \emph{E\_PARAM} or \emph{E\_LOCAL} can't contain an \emph{element\_type}.  So in order for them to be able to have lists, the \emph{value} type also contains a list pointer.  This means that right now, an \emph{element\_type} can point to a list either directly by having a kind of \emph{E\_CONS}, or by having a kind that contains a \emph{value} with a kind of \emph{V\_LIST}.  This really should be fixed at some point.  On the other hand, one could make the distinction that the kind \emph{E\_CONS} represents a list that can be evaluated, while a \emph{value} of kind \emph{V\_LIST} is just data.
+
 \subsection{Cons}
+Cons elements are used to make lists.  A cons cell is defined as
+\begin{lstlisting}
+   type cons is
+      record
+         ref : Natural;
+         car : element_type;
+         cdr : element_type;
+      end record;
+\end{lstlisting}
 
 \subsection{Symbols}
+Symbols are defined as:
+\begin{lstlisting}
+   type symbol_type is (BUILTIN, LAMBDA, VARIABLE, EMPTY);
+   type execute_function is access function(e : element_type) return element_type;
+   type symbol(kind : symbol_type := EMPTY) is
+      record
+         ref : Natural;
+         str : string_index;
+         case kind is
+            when BUILTIN =>
+               f : execute_function;
+            when LAMBDA =>
+               ps : cons_index;
+            when VARIABLE =>
+               pv : element_type;
+            when EMPTY =>
+               null;
+         end case;
+      end record;
+\end{lstlisting}
 
 \subsection{Strings}
+Strings are stored as a set of string fragments in a linked list.  Thus, the length of a string is limited only by the number of fragments available.  Strings are defined as:
+\begin{lstlisting}
+   fragment_len : constant Integer := 16;
+   type fragment is
+      record
+         ref : Natural;
+         next : Integer range -1 .. Integer(string_index'Last);
+         len : Integer range 0..fragment_len;
+         str : String (1..fragment_len);
+      end record;
+\end{lstlisting}
 
 \subsection{Global Data}
 
 \subsection{Memory Management}
+Memory management is done by reference counting.  When the number of references goes to zero, the item is deallocated.  Items in the cons table and the strings table are reference counted.
 
 \section{Utility Functions}
 

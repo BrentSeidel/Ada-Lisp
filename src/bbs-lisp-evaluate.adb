@@ -168,12 +168,9 @@ package body bbs.lisp.evaluate is
       car : element_type;
       cdr : element_type;
    begin
-      msg("CAR", "Getting first value");
       BBS.lisp.utilities.first_value(e, car, cdr);
-      msg("CAR", "Reffing the CAR");
       BBS.lisp.memory.ref(car);
---      msg("CAR", "De-Reffing the parameters");
-      BBS.lisp.memory.deref(cdr);
+      BBS.lisp.memory.deref(e);
       return car;
    end;
    --
@@ -456,6 +453,7 @@ package body bbs.lisp.evaluate is
             t := BBS.lisp.utilities.indirect_elem(p3);
          end if;
       end if;
+      BBS.lisp.memory.deref(e);
       return t;
    end;
    --

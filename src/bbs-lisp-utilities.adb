@@ -191,6 +191,7 @@ package body bbs.lisp.utilities is
          car := indirect_elem(e);
          cdr := NIL_ELEM;
       else -- The only other option is E_CONS
+         BBS.lisp.memory.ref(e);
          s := e.ps;
          first := cons_table(s).car;
          cdr :=  cons_table(s).cdr;
