@@ -141,10 +141,10 @@ The print operation evaluates each item in its parameter list and prints the val
 \subsubsection{List Operations}
 Basic list operations are provided.
 \begin{lstlisting}
-(car 1 2 3 4)
-(cdr 1 2 3 4)
+(car (1 2 3 4))
+(cdr (1 2 3 4))
 \end{lstlisting}
-Each of car and cdr take a list of parameters.  Car returns the first item in the list.  This item may be a single element or it may be a list.  Cdr returns the remainder of the list.
+Each of car and cdr take one parameter that should be a list.  Car returns the first item in the list.  This item may be a single element or it may be a list.  Cdr returns the remainder of the list.
 
 \subsubsection{Other}
 Some additional operations are provided for debugging purposes.  These control the display of some debugging information.

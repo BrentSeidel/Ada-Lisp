@@ -6,6 +6,8 @@ package bbs.lisp.utilities is
    function isTrue(e : element_type) return Boolean;
    function isList(e : element_type) return Boolean;
    function isFunction(e : element_type) return Boolean;
+   function getList(e : element_type) return cons_index
+     with pre => isList(e);
    --
    --  The following routine supports parameters and local variables.
    --  It scans through the passed s expression (recursively, if necessary) and

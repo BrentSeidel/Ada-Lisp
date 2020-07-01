@@ -79,6 +79,17 @@ package body bbs.lisp.utilities is
       return False;
    end;
    --
+   --  Note that this only works if e is a list type.
+   --
+   function getList(e : element_type) return cons_index is
+   begin
+      if e.kind = E_CONS then
+         return e.ps;
+      else
+         return e.v.l;
+      end if;
+   end;
+   --
    --  The following routine supports parameters and local variables.
    --  It scans through the passed s expression (recursively, if necessary) and
    --  when it finds a symbol or tempsym, it looks through the list of passed
@@ -187,24 +198,26 @@ package body bbs.lisp.utilities is
       if e.kind = E_NIL then
          car := NIL_ELEM;
          cdr := NIL_ELEM;
-      elsif e.kind /= E_CONS then
-         car := indirect_elem(e);
-         cdr := NIL_ELEM;
-      else -- The only other option is E_CONS
-         BBS.lisp.memory.ref(e);
+      elsif isList(e) then
+--         BBS.lisp.memory.ref(e);
          s := e.ps;
          first := cons_table(s).car;
          cdr :=  cons_table(s).cdr;
          if first.kind = E_NIL then
             car := NIL_ELEM;
-         elsif first.kind /= E_CONS then
-            car := indirect_elem(first);
-         else -- The first item is a E_CONS
+         elsif isList(first) then
             car := first;
             if isFunction(first) then
                car := eval_dispatch(first.ps);
+            else
+               BBS.lisp.memory.ref(car);
             end if;
+         else
+            car := indirect_elem(first);
          end if;
+      else
+         car := indirect_elem(e);
+         cdr := NIL_ELEM;
       end if;
    end;
    --
