@@ -63,21 +63,25 @@ package body bbs.lisp is
    procedure put_line(s : String) is
    begin
       io_Put_Line.all(s);
+      first_char_flag := True;
    end;
    --
    procedure put(s : String) is
    begin
       io_Put.all(s);
+      first_char_flag := False;
    end;
    --
    procedure new_line is
    begin
       io_New_Line.all;
+      first_char_flag := True;
    end;
    --
    procedure Get_Line(Item : out String; Last : out Natural) is
    begin
       io_Get_Line.all(Item, Last);
+      first_char_flag := True;
    end;
    --
    --  The read procedure reads text from an input device and parses it into
@@ -299,6 +303,9 @@ package body bbs.lisp is
       while True loop
          e := read;
          r := eval(e);
+         if not first_char_flag then
+            new_line;
+         end if;
          print(r, True, True);
          exit when exit_lisp;
       end loop;

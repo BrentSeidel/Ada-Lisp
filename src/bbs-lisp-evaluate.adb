@@ -472,8 +472,8 @@ package body bbs.lisp.evaluate is
    --  evaluated.  This is repeated until the condition evaluates to false.
    --
    function dowhile(e : element_type) return element_type is
-      cond : element_type;
-      list : element_type;
+      cond : element_type; --  Condition to evaluate
+      list : element_type; --  List of operations to execute
       ptr : element_type;
       t : element_type := NIL_ELEM;
       temp : element_type;

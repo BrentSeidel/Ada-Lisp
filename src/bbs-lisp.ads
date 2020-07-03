@@ -180,6 +180,14 @@ private
    --
    msg_flag : Boolean := False;
    --
+   --  Set to non-zero to break out of that many nested loops
+   --
+   exit_loop : Natural;
+   --
+   --  Will printing start on a new line
+   --
+   first_char_flag : Boolean := True;
+   --
    --  Initialize the data structures used in the lisp interpreter.
    --
    procedure init;
