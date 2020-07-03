@@ -33,12 +33,20 @@ hardware.
 3. List operations - CAR and CDR
 4. DOWHILE
 5. Function definition is under development
-6. Macros.  This is a long term goal.  I would like to implement these, but I need to
-figure out how first.
-7. Local variables.  I have an idea that might work.
-8. Hardware access.  This is done by allowing the host software to add custom lisp
+6. Hardware access.  This is done by allowing the host software to add custom lisp
 commands.  This may also be useful for embedding the lisp interpreter in other
 applications.
+
+### Non-Supported Features
+There are others, but here are the main missing features.  Some of these may eventually
+be implemented, others will never be implemented.  The goal is to have a useful
+little language, not another port of Common Lisp.
+1. Macros.  This is a long term goal.  I would like to implement these, but I need to
+figure out how first.
+2. Local variables.  I have an idea that might work.
+3. Recursive function.
+4. Object oriented features.  This will probably never happen.
+
 
 ## Internals
 
