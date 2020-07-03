@@ -51,32 +51,4 @@
   (if (> 0 n)
     (- 0 n)
     (+ 0 n)))
-;
-;  Testing pin commands on the Arduino Due
-;
-(pin-mode 10 0)
-(pin-mode 11 1)
-(pin-mode 12 1)
-(dowhile (= (read-pin 10) (+ 0 1))
-  (set-pin 11 0)
-  (set-pin 12 1)
-  (set-pin 11 1)
-  (set-pin 12 0))
-;
-;  Read an analog pin and print the value repeatedly.
-;  Digital pin 10 is tied high to keep looping and tied low to exit the loop.
-;
-(defun monitor-analog (n)
-  (pin-mode 10 0)
-  (print "Connect digital pin 10 to high to continue looping or to gnd to exit")
-  (new-line)
-  (print "Connect analog pin " n " to the analog value to monitor")
-  (new-line)
-  (print "Press <return> to continue")
-  (read-line)
-  (dowhile (= (read-pin 10) (+ 0 1))
-    (print "Analog value is " (read-analog n))
-    (new-line))
-  (print "Exiting")
-  (new-line))
 
