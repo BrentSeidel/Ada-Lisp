@@ -146,7 +146,7 @@ Basic list operations are provided.
 \end{lstlisting}
 Each of car and cdr take one parameter that should be a list.  Car returns the first item in the list.  This item may be a single element or it may be a list.  Cdr returns the remainder of the list.
 
-\subsubsection{Other}
+\subsubsection{Debugging}
 Some additional operations are provided for debugging purposes.  These control the display of some debugging information.
 \begin{lstlisting}
 (dump)
@@ -156,15 +156,34 @@ Some additional operations are provided for debugging purposes.  These control t
 
 The dump operation prints the contents of the cons, symbol, and string tables.  The msg-on and msg-off operations turn the display of debugging information on and off.  These are helpful when trying to debug the interpreter and should not be necessary during normal operation.
 
+\subsubsection{Other}
+There are a few operations that do things that can't be easily catagorized.
+\begin{lstlisting}
+(exit)
+\end{lstlisting}
+The exit operation just exits the interpreter.  It should mainly be used from the command line.  It may cause problems in some cases if used in a function.
+
 \subsection{Special Forms}
+The special forms do not necessarily evaluate all of the parameters.
+
+\subsubsection{Control Flow}
+A couple of control flow special forms are available.  More will probably be added.
+\begin{lstlisting}
+(if (> 1 2) (print "True") (print "False"))
+(dowhile (> 1 2) (print "Forever"))
+\end{lstlisting}
+The ``if'' form has two or three parameters.  The first parameter is a condition.  If the condition evaluates to ``T'', then the second parameter is evaluated.  If the condition evaluates to ``NIL'', then the third parameter, if present, is evaluated.
+The ``dowhile'' form has two parameters.  The first is a condition.  The second is a list of operations to be evaluated.  The second parameter is evaluated as long as the condition evaluates to ``T''.
+
+\subsubsection{Variables}
+\begin{lstlisting}
+(setq variable 1)
+\end{lstlisting}
+The ``setq'' form sets a value for a symbol.  The first parameter is the symbol and the second parameter is the value.  If the symbol does not yet exist, it is created.  Symbols that already exist as builting or lambdas can't be used for values.  The second parameter is evaluated to return the value.
+
 \lstset{language=Ada}
 \begin{lstlisting}
-      add_builtin("setq", BBS.lisp.evaluate.setq'Access);
-      add_builtin("if", BBS.lisp.evaluate.eval_if'Access);
-      add_builtin("dowhile", BBS.lisp.evaluate.dowhile'Access);
-      add_builtin("dotimes", BBS.lisp.evaluate.dotimes'Access);
       add_builtin("defun", BBS.lisp.evaluate.defun'Access);
-      add_builtin("exit", BBS.lisp.evaluate.quit'Access);
       add_builtin("reset", BBS.lisp.evaluate.reset'Access);
       add_builtin("quote", BBS.lisp.evaluate.quote'Access);
 \end{lstlisting}
@@ -176,14 +195,16 @@ A limited selection of data types is provided.  Think of the old Applesoft Integ
 This is the same as the Ada Integer type.  Typically it is a 32 bit signed integer.
 
 \subsection{String}
-Strings are stored in linked lists of 8-bit characters/bytes.  Unicode is not currently supported.
+Strings are stored in linked lists of 8-bit characters/bytes.  Each node in the list can hold 16 (adjustable by a parameter) bytes.  Unicode is not currently supported.
 
 \subsection{Boolean}
 The Boolean values ``NIL'' and ``T'' correspond to ``True'' and ``False''.
 
 \subsection{List}
+The list is the basic complex data type.  A list element has two slots (historically called ``car'' and ``cdr'').  Typically the ``car'' slot contains a data value and the ``cdr'' slot contains a pointer to the next list element.  The end of a list is indicated by a nil value in the ``cdr'' slot.
 
 \subsection{Possible Additions}
+A stack may be added to hold stack frames for parameters and local variables.
 
 %----------------------------------------------------------
 \chapter{Internals}

@@ -19,7 +19,7 @@ package body bbs.lisp is
       add_builtin("setq", BBS.lisp.evaluate.setq'Access);
       add_builtin("if", BBS.lisp.evaluate.eval_if'Access);
       add_builtin("dowhile", BBS.lisp.evaluate.dowhile'Access);
-      add_builtin("dotimes", BBS.lisp.evaluate.dotimes'Access);
+--      add_builtin("dotimes", BBS.lisp.evaluate.dotimes'Access);
       add_builtin("defun", BBS.lisp.evaluate.defun'Access);
       add_builtin("+", BBS.lisp.evaluate.add'Access);
       add_builtin("-", BBS.lisp.evaluate.sub'Access);
