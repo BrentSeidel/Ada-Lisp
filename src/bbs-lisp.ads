@@ -38,7 +38,15 @@ package bbs.lisp is
    --
    --  This indicates what kind of data is in a symbol
    --
-   type symbol_type is (BUILTIN, LAMBDA, VARIABLE, EMPTY);
+   type symbol_type is (SPECIAL,  -- A special form that need support during parsing
+                        BUILTIN,  -- A normal builtin function
+                        LAMBDA,   -- A user defined function
+                        VARIABLE, -- A value, not a function
+                        EMPTY);   -- No contents
+   --
+   --  Phase of operation.  Some functions will need to know.
+   --
+   type phase is (PARSE, EXECUTE);
    --
    --  Define the contents of records.
    --
@@ -82,9 +90,13 @@ package bbs.lisp is
          end case;
       end record;
    --
-   --  Type for access to function that implements lisp words.
+   --  Type for access to function that implement lisp operations.
    --
    type execute_function is access function(e : element_type) return element_type;
+   --
+   --  Type for access to functions that implement lisp special operations
+   --
+   type special_function is access function(e : element_type; p : phase) return element_type;
    --
    --  A cons cell contains two element_type pointers that can point to either
    --  an atom or another cons cell.
@@ -106,6 +118,8 @@ package bbs.lisp is
          ref : Natural;
          str : string_index;
          case kind is
+            when SPECIAL =>
+               s : special_function;
             when BUILTIN =>
                f : execute_function;
             when LAMBDA =>
@@ -278,6 +292,12 @@ private
    --
    function get_tempsym(s : out tempsym_index; n : String) return Boolean;
    function get_tempsym(s : out tempsym_index; n : string_index) return Boolean;
+   --
+   --  Create a symbol for a special function.  This is intended to be called
+   --  during initialization to identify the special operations.  Once created,
+   --  these should never be changed.  No value is returned.
+   --
+   procedure add_special(n : String; f : special_function);
    --
    --  Utility functions for manipulating lists
    --

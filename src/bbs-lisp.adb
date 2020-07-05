@@ -16,7 +16,7 @@ package body bbs.lisp is
       add_builtin("car", BBS.lisp.evaluate.car'Access);
       add_builtin("cdr", BBS.lisp.evaluate.cdr'Access);
       add_builtin("print", BBS.lisp.evaluate.print'Access);
-      add_builtin("setq", BBS.lisp.evaluate.setq'Access);
+      add_special("setq", BBS.lisp.evaluate.setq'Access);
       add_builtin("if", BBS.lisp.evaluate.eval_if'Access);
       add_builtin("dowhile", BBS.lisp.evaluate.dowhile'Access);
 --      add_builtin("dotimes", BBS.lisp.evaluate.dotimes'Access);
@@ -264,6 +264,8 @@ package body bbs.lisp is
       case symb_table(s).kind is
          when BUILTIN =>
             Put(" <BUILTIN>");
+         when SPECIAL =>
+            Put(" <SPECIAL>");
          when LAMBDA =>
             Put(" <FUNCTION>");
          when VARIABLE =>
@@ -341,6 +343,8 @@ package body bbs.lisp is
             case symb_table(i).kind is
                when BUILTIN =>
                   Put("Builtin");
+               when SPECIAL =>
+                  Put(" <SPECIAL>");
                when LAMBDA =>
                   Put("Lambda");
                when VARIABLE =>
@@ -495,6 +499,19 @@ package body bbs.lisp is
       end if;
    end;
    --
+   procedure add_special(n : String; f : special_function) is
+      sym : symb_index;
+      flag : Boolean;
+   begin
+      flag := get_symb(sym, n);
+      if flag then
+         symb_table(sym) := (ref => 1, Kind => SPECIAL, s => f,
+                             str => symb_table(sym).str);
+      else
+         error("add_special", "Unable to add special symbol " & n);
+      end if;
+   end;
+   --
    --  If a temporary symbol exists, return it, otherwise create a new temporary
    --  symbol.  Returns false if symbol doesn't exist and can't be created.
    --
@@ -616,38 +633,44 @@ package body bbs.lisp is
       if first.kind /= E_CONS then
          if first.kind = E_SYMBOL then
             sym := symb_table(first.sym);
-            --
-            --  Handle the builtin operations
-            --
-            if sym.kind = BUILTIN then
-               if msg_flag then
-                  Put("eval_dispatch: Evaluating builtin ");
-                  Print(sym.str);
-                  New_Line;
-               end if;
-               e := sym.f.all(rest);
-            --
-            -- Handle defined functions
-            --
-            elsif sym.kind = LAMBDA then
-               if msg_flag then
-                  Put("eval_dispatch: Evaluating lambda ");
-                  print(sym.ps);
-                  new_line;
-               end if;
-               e := bbs.lisp.evaluate.eval_function(sym.ps, rest);
-            --
-            -- Handle variables
-            --
-            elsif sym.kind = VARIABLE then
-               if msg_flag then
-                  Put("eval_dispatch: Evaluating variable ");
-                  print(first.p_name);
-                  new_line;
-               end if;
-               BBS.lisp.memory.ref(sym.pv);
-               e := sym.pv;
-            end if;
+            case sym.kind is
+               when BUILTIN =>
+                  if msg_flag then
+                     Put("eval_dispatch: Evaluating builtin ");
+                     Print(sym.str);
+                     New_Line;
+                  end if;
+                  e := sym.f.all(rest);
+               when SPECIAL =>
+                  if msg_flag then
+                     Put("eval_dispatch: Evaluating special ");
+                     Print(sym.str);
+                     New_Line;
+                  end if;
+                  e := sym.s.all(rest, EXECUTE);
+               when LAMBDA =>
+                  if msg_flag then
+                     Put("eval_dispatch: Evaluating lambda ");
+                     print(sym.ps);
+                     new_line;
+                  end if;
+                  e := bbs.lisp.evaluate.eval_function(sym.ps, rest);
+               when VARIABLE =>
+                  if msg_flag then
+                     Put("eval_dispatch: Evaluating variable ");
+                     print(first.p_name);
+                     new_line;
+                  end if;
+                  BBS.lisp.memory.ref(sym.pv);
+                  e := sym.pv;
+               when others =>
+                  if msg_flag then
+                     Put("eval_dispatch: Evaluating unknown ");
+                     print(first.p_name);
+                     new_line;
+                  end if;
+                  e := NIL_ELEM;
+            end case;
          else -- Not a symbol, just return the value.
             if msg_flag then
                Put("eval_dispatch: Evaluating non-symbol ");

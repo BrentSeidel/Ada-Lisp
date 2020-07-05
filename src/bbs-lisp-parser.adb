@@ -81,6 +81,7 @@ package body bbs.lisp.parser is
       flag : Boolean;
       e : element_type;
       list_end : Boolean := False;
+      item : Natural := 0;
    begin
       flag := bbs.lisp.memory.alloc(head);
       ptr := ptr + 1;
@@ -102,6 +103,7 @@ package body bbs.lisp.parser is
             if flag then
                flag := append(head, temp);
             end if;
+            item := item + 1;
          --
          --  Check for the start of an integer atom
          --
@@ -117,6 +119,7 @@ package body bbs.lisp.parser is
                   flag := append(head, current);
                end if;
             end if;
+            item := item + 1;
          --
          --  Check for the start of a string
          --
@@ -134,6 +137,7 @@ package body bbs.lisp.parser is
                error("parse list", "Could not allocate string fragment.");
                return False;
             end if;
+            item := item + 1;
          --
          --  Check for a comment
          --
@@ -148,8 +152,25 @@ package body bbs.lisp.parser is
                cons_table(head).car := e;
             else
                flag := elem_to_cons(current, e);
-               flag := append(head, current);
+               if flag then
+                  flag := append(head, current);
+                  if not flag then
+                     error("parse list", "Could not append symbol to list.");
+                  end if;
+               else
+                  error("parse list", "Could not allocate cons cell for symbol.");
+               end if;
             end if;
+            if e.kind = E_SYMBOL then
+               put("Parse List: Parsed symbol at " & Natural'Image(item) & ", name ");
+               print(e.sym);
+               new_line;
+            elsif e.kind = E_TEMPSYM then
+               put("Parse List: Parsed tempsym at " & Natural'Image(item) & ", name ");
+               print(string_index(tempsym_table(e.tempsym)));
+               new_line;
+            end if;
+            item := item + 1;
          end if;
          --
          --  If there is no text left to parse and it's not the end of a list,

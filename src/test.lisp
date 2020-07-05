@@ -14,6 +14,7 @@
 (dowhile (< var 100) (print "Var is " var) (new-line) (setq var (+ var 1)))
 
 (setq var1 0)
+(setq var2 0)
 (dowhile (< var1 100)
   (setq var2 0)
   (print "Var1 is " var1)

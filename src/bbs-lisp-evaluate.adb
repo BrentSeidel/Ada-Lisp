@@ -321,7 +321,7 @@ package body bbs.lisp.evaluate is
    --  to use as a return value.  Currently, the REPL deallocates the returned
    --  value after printing it.
    --
-   function setq(e : element_type) return element_type is
+   function setq(e : element_type; p : phase) return element_type is
       symb : symb_index;
       tempsym : tempsym_index;
       p1 : element_type;
@@ -341,58 +341,62 @@ package body bbs.lisp.evaluate is
       end;
 
    begin
-      if e.kind = E_CONS then
-         p1 := cons_table(e.ps).car;  --  Should be symbol name
-         p2 := cons_table(e.ps).cdr;  --  Should be value to be assigned
-         if p1.kind = E_SYMBOL then
-            symb := p1.sym;
-         elsif p1.kind = E_TEMPSYM then
-            tempsym := p1.tempsym;
-            flag := get_symb(symb, string_index(tempsym_table(tempsym)));
-            if not flag then
-               error("setq", "Unable to add symbol ");
+      if p = PARSE then
+         null;
+      elsif p = EXECUTE then
+         if e.kind = E_CONS then
+            p1 := cons_table(e.ps).car;  --  Should be symbol name
+            p2 := cons_table(e.ps).cdr;  --  Should be value to be assigned
+            if p1.kind = E_SYMBOL then
+               symb := p1.sym;
+            elsif p1.kind = E_TEMPSYM then
+               tempsym := p1.tempsym;
+               flag := get_symb(symb, string_index(tempsym_table(tempsym)));
+               if not flag then
+                  error("setq", "Unable to add symbol ");
+                  return NIL_ELEM;
+               end if;
+            else
+               error("setq", "First parameter is not a symbol or temporary symbol.");
                return NIL_ELEM;
             end if;
-         else
-            error("setq", "First parameter is not a symbol or temporary symbol.");
-            return NIL_ELEM;
-         end if;
-         if symb_table(symb).kind = BUILTIN then
-            error("setq", "Can't set value of builtin symbol ");
-            return NIL_ELEM;
-         end if;
-         --
-         --  At this point, p1 should be an atom containing a valid symbol and
-         --  symb is the index to that symbol.
-         --
-         --
-         --  Now determine what value to attach to the symbol.
-         --
-         if p2.kind = E_CONS then
-            p3 := cons_table(p2.ps).car;
-            if p3.kind = E_CONS then
-               ret := eval_dispatch(p3.ps);
-               deref_previous(symb);
-               BBS.lisp.memory.ref(ret);
-               symb_table(symb) := (ref => 1, Kind => VARIABLE,
-                                    pv => ret, str => symb_table(symb).str);
-               return ret;
-            else -- p3 points to an atom
-               deref_previous(symb);
-               symb_table(symb) := (ref => 1, Kind => VARIABLE,
-                                    pv => p3, str => symb_table(symb).str);
-               return p3;
+            if symb_table(symb).kind = BUILTIN then
+               error("setq", "Can't set value of builtin symbol ");
+               return NIL_ELEM;
             end if;
-         elsif p2.kind = E_VALUE then -- Rare, CDR is an value.
-            deref_previous(symb);
-            symb_table(symb) := (ref => 1, Kind => VARIABLE,
+            --
+            --  At this point, p1 should be an atom containing a valid symbol and
+            --  symb is the index to that symbol.
+            --
+            --
+            --  Now determine what value to attach to the symbol.
+            --
+            if p2.kind = E_CONS then
+               p3 := cons_table(p2.ps).car;
+               if p3.kind = E_CONS then
+                  ret := eval_dispatch(p3.ps);
+                  deref_previous(symb);
+                  BBS.lisp.memory.ref(ret);
+                  symb_table(symb) := (ref => 1, Kind => VARIABLE,
+                                    pv => ret, str => symb_table(symb).str);
+                  return ret;
+               else -- p3 points to an atom
+                  deref_previous(symb);
+                  symb_table(symb) := (ref => 1, Kind => VARIABLE,
+                                    pv => p3, str => symb_table(symb).str);
+                  return p3;
+               end if;
+            elsif p2.kind = E_VALUE then -- Rare, CDR is an value.
+               deref_previous(symb);
+               symb_table(symb) := (ref => 1, Kind => VARIABLE,
                                  pv => p2, str => symb_table(symb).str);
-            return p2;
+               return p2;
+            else
+               error("setq", "Not enough arguments.");
+            end if;
          else
             error("setq", "Not enough arguments.");
          end if;
-      else
-         error("setq", "Not enough arguments.");
       end if;
       return NIL_ELEM;
    end;

@@ -22,6 +22,13 @@
 %
 \usepackage{listings}
 %
+% Macro definitions
+%
+\newcommand{\operation}[1]{\textbf{\texttt{#1}}}
+\newcommand{\package}[1]{\texttt{#1}}
+\newcommand{\function}[1]{\texttt{#1}}
+\newcommand{\constant}[1]{\emph{\texttt{#1}}}
+%
 % Front Matter
 %
 \title{Tiny Lisp Interpreter}
@@ -48,7 +55,7 @@ This document is \copyright 2020 Brent Seidel.  All rights reserved.
 This document provides a definition of a Tiny Lisp interpreter written in Ada.  Without such a definition, it is difficult to determine if the language is actually doing what it should be doing.  This makes debugging more complicated.
 
 \section{What is This?}
-This is a tiny Lisp interpreter written in Ada.  It is designed to proved a language that can be embedded into other programs, including running on embedded systems without an operating system.  As a result, effort has been made to remove dependencies on Ada packages that may not be available.  A primary example is \emph{Ada.Text\_IO}.  Another feature that may be missing is dynamic memory allocation.
+This is a tiny Lisp interpreter written in Ada.  It is designed to proved a language that can be embedded into other programs, including running on embedded systems without an operating system.  As a result, effort has been made to remove dependencies on Ada packages that may not be available.  A primary example is \package{Ada.Text\_IO}.  Another feature that may be missing is dynamic memory allocation.
 
 \section{Why is This?}
 As a young lad, I learned to program on 8-bit computers with minimal BASIC interpreters and 4-16K of RAM.  With these simple systems, one had a hope of being able to understand the complete system at a fairly low level.  Now, one can buy small computers like the Arduino Due with 32-bit processors, 96K of RAM, and 512K of flash memory (I'm ignoring systems like the Raspberry PI as they are full up Linux computer and thus are more complicated).  This seemed like a reasonable platform for recreating the early experience.
@@ -64,7 +71,7 @@ Again, why non?  I have developed an interest in Ada, especially for programming
 As a ``Tiny-Lisp'', some (many) of the features of Common Lisp are not available.  Some of the lacks may be temporary while others will be permanent, and some may be added by the host program.
 
 \section{User Interface}
-The interpreter reads text from an input device, parses it, and and executes it.  The function used to read the input must match the signature for \emph{Ada.Text\_IO.Get\_Line()} and this will probably be used if that is available.  On an embedded system without \emph{Ada.Text\_IO}, the user must provide a suitable function.
+The interpreter reads text from an input device, parses it, and and executes it.  The function used to read the input must match the signature for \function{Ada.Text\_IO.Get\_Line()} and this will probably be used if that is available.  On an embedded system without \package{Ada.Text\_IO}, the user must provide a suitable function.
 
 \subsubsection{Comments}
 A comment starts with a semicolon character, ``;'', and extends to the end of the line.  Any text in a comment is ignore by the interpreter.
@@ -90,7 +97,7 @@ A final example:
 \begin{lstlisting}
 (print "Hello World!")
 \end{lstlisting}
-This list consists of only two elements.  The first is the symbol ``print''.  The second is the string ``Hello World!''.  With strings, everything from the starting quotation mark to the next quotation mark is part of the string.  This means that you can't have a string that contains a quotation mark (at some point, a work-around may be available).
+This list consists of only two elements.  The first is the symbol \operation{print}.  The second is the string ``Hello World!''.  With strings, everything from the starting quotation mark to the next quotation mark is part of the string.  This means that you can't have a string that contains a quotation mark (at some point, a work-around may be available).
 
 \section{Operations}
 A limited number of operations are defined.  Note that this list will probably be expanded.
@@ -103,7 +110,7 @@ A number of normal forms are defined.  The main difference between normal forms 
 ;
 (if (> 1 2) (+ 1 2) (+ 3 4))
 \end{lstlisting}
-``*'' is a normal operation and both ``(+ 1 2)'' and ``(+ 3 4)'' are evaluated before ``*'' is evaluated.  ``If'' is a special form so first ``(> 1 2)'' is evaluated, then depending on whether the result is true or false, either ``(+ 1 2)'' or ``(+ 3 4)'' is evaluated.  For a simple example like this, it doesn't really matter, but if the operations have other effects, such as:
+``*'' is a normal operation and both ``(+ 1 2)'' and ``(+ 3 4)'' are evaluated before ``*'' is evaluated.  \operation{If} is a special form so first ``(> 1 2)'' is evaluated, then depending on whether the result is true or false, either ``(+ 1 2)'' or ``(+ 3 4)'' is evaluated.  For a simple example like this, it doesn't really matter, but if the operations have other effects, such as:
 \begin{lstlisting}
 (if (> 1 2) (print "Greater") (print "Not greater"))
 \end{lstlisting}
@@ -136,7 +143,7 @@ As this Lisp may run on systems without filesystems, only three operations are p
 (new-line)
 (read-line)
 \end{lstlisting}
-The print operation evaluates each item in its parameter list and prints the value.  The new-line operation simply prints a new line.  The read-line operation reads a string from the input device and returns it.  Both print and new-line return NIL.  Read-line returns the entered string with no line terminator.
+The \operation{print} operation evaluates each item in its parameter list and prints the value.  The \operation{new-line} operation simply prints a new line.  The \operation{read-line} operation reads a string from the input device and returns it.  Both print and new-line return NIL.  Read-line returns the entered string with no line terminator.
 
 \subsubsection{List Operations}
 Basic list operations are provided.
@@ -144,7 +151,7 @@ Basic list operations are provided.
 (car (1 2 3 4))
 (cdr (1 2 3 4))
 \end{lstlisting}
-Each of car and cdr take one parameter that should be a list.  Car returns the first item in the list.  This item may be a single element or it may be a list.  Cdr returns the remainder of the list.
+Each of \operation{car} and \operation{cdr} take one parameter that should be a list.  \operation{Car} returns the first item in the list.  This item may be a single element or it may be a list.  \operation{Cdr} returns the remainder of the list.
 
 \subsubsection{Debugging}
 Some additional operations are provided for debugging purposes.  These control the display of some debugging information.
@@ -152,16 +159,19 @@ Some additional operations are provided for debugging purposes.  These control t
 (dump)
 (msg-on)
 (msg-off)
+(reset)
 \end{lstlisting}
 
-The dump operation prints the contents of the cons, symbol, and string tables.  The msg-on and msg-off operations turn the display of debugging information on and off.  These are helpful when trying to debug the interpreter and should not be necessary during normal operation.
+The \operation{dump} operation prints the contents of the cons, symbol, and string tables.  The \operation{msg-on} and \operation{msg-off} operations turn the display of debugging information on and off.  These are helpful when trying to debug the interpreter and should not be necessary during normal operation.
+
+The \operation{reset} operation is intended to reset the interpreter to an initial state.  Currently, it just calls the \function{init()} function.  It needs to go through the symbol table and remove everything that's not a \constant{builtin} and clear out the cons table.  Do not use until this is fixed.
 
 \subsubsection{Other}
-There are a few operations that do things that can't be easily catagorized.
+There are a few operations that do things that can't be easily categorized.
 \begin{lstlisting}
 (exit)
 \end{lstlisting}
-The exit operation just exits the interpreter.  It should mainly be used from the command line.  It may cause problems in some cases if used in a function.
+The \operation{exit} operation just exits the interpreter.  It should mainly be used from the command line.  It may cause problems in some cases if used in a function.
 
 \subsection{Special Forms}
 The special forms do not necessarily evaluate all of the parameters.
@@ -172,19 +182,19 @@ A couple of control flow special forms are available.  More will probably be add
 (if (> 1 2) (print "True") (print "False"))
 (dowhile (> 1 2) (print "Forever"))
 \end{lstlisting}
-The ``if'' form has two or three parameters.  The first parameter is a condition.  If the condition evaluates to ``T'', then the second parameter is evaluated.  If the condition evaluates to ``NIL'', then the third parameter, if present, is evaluated.
-The ``dowhile'' form has two parameters.  The first is a condition.  The second is a list of operations to be evaluated.  The second parameter is evaluated as long as the condition evaluates to ``T''.
+The \operation{if} form has two or three parameters.  The first parameter is a condition.  If the condition evaluates to ``T'', then the second parameter is evaluated.  If the condition evaluates to ``NIL'', then the third parameter, if present, is evaluated.
+
+The \operation{dowhile} form has two parameters.  The first is a condition.  The second is a list of operations to be evaluated.  The second parameter is evaluated as long as the condition evaluates to ``T''.
 
 \subsubsection{Variables}
 \begin{lstlisting}
 (setq variable 1)
 \end{lstlisting}
-The ``setq'' form sets a value for a symbol.  The first parameter is the symbol and the second parameter is the value.  If the symbol does not yet exist, it is created.  Symbols that already exist as builting or lambdas can't be used for values.  The second parameter is evaluated to return the value.
+The \operation{setq} form sets a value for a symbol.  The first parameter is the symbol and the second parameter is the value.  If the symbol does not yet exist, it is created.  Symbols that already exist as builtin or lambdas can't be used for values.  The second parameter is evaluated to return the value.  Currently this only works on global variables, not parameters or local variables (which are currently unimplemented anyway).
 
 \lstset{language=Ada}
 \begin{lstlisting}
       add_builtin("defun", BBS.lisp.evaluate.defun'Access);
-      add_builtin("reset", BBS.lisp.evaluate.reset'Access);
       add_builtin("quote", BBS.lisp.evaluate.quote'Access);
 \end{lstlisting}
 
@@ -267,7 +277,7 @@ The referenced types are defined as follows:
       end record;
 \end{lstlisting}
 
-There is a bit of ambiguity right now about lists.  Since recursively defined records aren't possible, elements of type \emph{E\_PARAM} or \emph{E\_LOCAL} can't contain an \emph{element\_type}.  So in order for them to be able to have lists, the \emph{value} type also contains a list pointer.  This means that right now, an \emph{element\_type} can point to a list either directly by having a kind of \emph{E\_CONS}, or by having a kind that contains a \emph{value} with a kind of \emph{V\_LIST}.  This really should be fixed at some point.  On the other hand, one could make the distinction that the kind \emph{E\_CONS} represents a list that can be evaluated, while a \emph{value} of kind \emph{V\_LIST} is just data.
+There is a bit of ambiguity right now about lists.  Since recursively defined records aren't possible, elements of type \constant{E\_PARAM} or \constant{E\_LOCAL} can't contain an \emph{element\_type}.  So in order for them to be able to have lists, the \emph{value} type also contains a list pointer.  This means that right now, an \emph{element\_type} can point to a list either directly by having a kind of \constant{E\_CONS}, or by having a kind that contains a \emph{value} with a kind of \constant{V\_LIST}.  This really should be fixed at some point.  On the other hand, one could make the distinction that the kind \constant{E\_CONS} represents a list that can be evaluated, while a \emph{value} of kind \constant{V\_LIST} is just data.
 
 \subsection{Cons}
 Cons elements are used to make lists.  A cons cell is defined as
@@ -284,7 +294,8 @@ Cons elements are used to make lists.  A cons cell is defined as
 Symbols are defined as:
 \begin{lstlisting}
    type symbol_type is (BUILTIN, LAMBDA, VARIABLE, EMPTY);
-   type execute_function is access function(e : element_type) return element_type;
+   type execute_function is access function(e : element_type)
+     return element_type;
    type symbol(kind : symbol_type := EMPTY) is
       record
          ref : Natural;
