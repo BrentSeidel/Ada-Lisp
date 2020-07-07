@@ -342,8 +342,6 @@ package body bbs.lisp.evaluate is
 
    begin
       if p = PARSE then
-         put("Setq called during parsing with paramater: ");
-         print(e, False, True);
          if e.kind = E_CONS then
             p1 := cons_table(e.ps).car;  --  Should be symbol for setq
             p2 := cons_table(e.ps).cdr;
@@ -681,8 +679,10 @@ package body bbs.lisp.evaluate is
    function eval_function(s : cons_index; e : element_type) return element_type is
       params : element_type ;
       func_body : element_type;
-      t1 : element_type;
-      t2 : element_type;
+      value : element_type;
+      rest : element_type;
+      statement : element_type;
+      name : element_type;
       ret_val : element_type;
       supplied : Integer := 0;
       requested : Integer := 0;
@@ -714,6 +714,7 @@ package body bbs.lisp.evaluate is
             t1 := cons_table(t1.ps).cdr;
          end loop;
       end;
+      --
    begin
       params := cons_table(s).car;
       func_body := cons_table(s).cdr;
@@ -734,27 +735,37 @@ package body bbs.lisp.evaluate is
       --  Assign parameters to values.  This needs to change to properly assign
       --  values to parameters.
       --
-      t1 := e;      --  Supplied parameter values
-      t2 := params; --  List of parameter names
-      while t1.kind = E_CONS loop
-         if cons_table(t1.ps).car.kind = E_VALUE and
-           cons_table(t2.ps).car.kind = E_PARAM then
-            cons_table(t2.ps).car.p_value := cons_table(t1.ps).car.v;
+      rest := e;       --  Supplied parameter values
+      name := params;  --  List of parameter names
+      while rest.kind = E_CONS loop
+         if cons_table(name.ps).car.kind = E_PARAM then
+            --
+            --  Need to update to evaluate the parameter values.
+            --
+            BBS.lisp.utilities.first_value(rest, value, rest);
+            if value.kind = E_VALUE then
+               cons_table(name.ps).car.p_value := value.v;
+            elsif value.kind = E_CONS then
+               cons_table(name.ps).car.p_value := (kind => V_LIST, l => value.ps);
+            elsif value.kind = E_NIL then
+               cons_table(name.ps).car.p_value := (kind => V_BOOLEAN, b => False);
+            end if;
+         else
+            error("function evaluation", "Something horrible happened, a parameter is not a parameter");
          end if;
-         t1 := cons_table(t1.ps).cdr;
-         t2 := cons_table(t2.ps).cdr;
+         name  := cons_table(name.ps).cdr;
       end loop;
       set_params(func_body, params);
       --
       --  Evaluate the function
       --
-      t1 := func_body;
+      statement := func_body;
       ret_val := NIL_ELEM;
-      while t1.kind = E_CONS loop
-         if cons_table(t1.ps).car.kind = E_CONS then
-            ret_val := eval_dispatch(cons_table(t1.ps).car.ps);
+      while statement.kind = E_CONS loop
+         if cons_table(statement.ps).car.kind = E_CONS then
+            ret_val := eval_dispatch(cons_table(statement.ps).car.ps);
          end if;
-         t1 := cons_table(t1.ps).cdr;
+         statement := cons_table(statement.ps).cdr;
       end loop;
       return ret_val;
    end;

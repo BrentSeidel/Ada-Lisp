@@ -5,7 +5,7 @@ package body bbs.lisp.utilities is
    --  Various utility functions
    --
    function count(s : cons_index) return Integer is
-      t : element_type;
+      t : element_type := (kind => E_CONS, ps => s);
       c : Integer := 1;
    begin
       while t.kind = E_CONS loop
@@ -15,7 +15,7 @@ package body bbs.lisp.utilities is
       if t.kind /= E_NIL then
          c := c + 1;
       end if;
-      return c;
+      return c - 1;
    end;
    --
    --  Take an element_type and checks if it can be interpreted as true or false.
@@ -199,7 +199,6 @@ package body bbs.lisp.utilities is
          car := NIL_ELEM;
          cdr := NIL_ELEM;
       elsif isList(e) then
---         BBS.lisp.memory.ref(e);
          s := e.ps;
          first := cons_table(s).car;
          cdr :=  cons_table(s).cdr;
