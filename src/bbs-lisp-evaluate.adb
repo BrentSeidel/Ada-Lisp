@@ -564,11 +564,14 @@ package body bbs.lisp.evaluate is
    --      translated to point to the parameter atom in the parameter list.  It
    --      also could concievable be a single atom or even NIL.
    --
-   function defun(e : element_type) return element_type is
+   function defun(e : element_type; p : phase) return element_type is
       params : element_type;
       func_body : element_type;
       name : element_type;
       temp : element_type;
+      p1 : element_type;
+      p2 : element_type;
+      p3 : element_type;
       symb : symb_index;
       tempsym : tempsym_index;
       flag : Boolean;
@@ -578,6 +581,36 @@ package body bbs.lisp.evaluate is
       --  First identify the name, parameter list, and body.  Then perform
       --  initial checks to verify that they are the appropriate kind of object.
       --
+      if p = PARSE then
+         if e.kind = E_CONS then
+            p1 := cons_table(e.ps).car;  --  Should be symbol for defun
+            p2 := cons_table(e.ps).cdr;
+            p3 := cons_table(p2.ps).car; --  Should be a symbol or tempsym
+            if p3.kind = E_SYMBOL then
+               symb := p3.sym;
+               if (symb_table(symb).kind = BUILTIN) or
+                 (symb_table(symb).kind = SPECIAL) then
+                  error("defun", "Can't assign a value to a builtin or special symbol");
+                  return NIL_ELEM;
+               end if;
+            elsif p3.kind = E_TEMPSYM then
+               tempsym := p3.tempsym;
+               flag := get_symb(symb, string_index(tempsym_table(tempsym)));
+               if flag then
+                 cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
+                 null;
+               else
+                  error("defun", "Unable to add symbol ");
+               end if;
+            else
+               error("defun", "First parameter is not a symbol or temporary symbol.");
+               put("Parameter type is " & ptr_type'Image(p3.kind));
+            end if;
+         else
+            error("defun", "Something went horribly wrong and defun did not get a list");
+         end if;
+         return NIL_ELEM;
+      end if;
       if e.kind /= E_CONS then
          error("defun", "No parameters given to defun.");
          return NIL_ELEM;
@@ -651,7 +684,8 @@ package body bbs.lisp.evaluate is
       elsif name.kind = E_SYMBOL then
          symb := name.sym;
       end if;
-      if symb_table(symb).kind = BUILTIN then
+      if (symb_table(symb).kind = BUILTIN) or
+        (symb_table(symb).kind = SPECIAL) then
          error("defun", "Cannot redefine builtin symbols");
       else
          temp := cons_table(e.ps).cdr;
@@ -732,22 +766,20 @@ package body bbs.lisp.evaluate is
          return NIL_ELEM;
       end if;
       --
-      --  Assign parameters to values.  This needs to change to properly assign
-      --  values to parameters.
+      --  Assign parameters to values.
       --
       rest := e;       --  Supplied parameter values
       name := params;  --  List of parameter names
       while rest.kind = E_CONS loop
          if cons_table(name.ps).car.kind = E_PARAM then
-            --
-            --  Need to update to evaluate the parameter values.
-            --
             BBS.lisp.utilities.first_value(rest, value, rest);
             if value.kind = E_VALUE then
                cons_table(name.ps).car.p_value := value.v;
             elsif value.kind = E_CONS then
                cons_table(name.ps).car.p_value := (kind => V_LIST, l => value.ps);
             elsif value.kind = E_NIL then
+               cons_table(name.ps).car.p_value := (kind => V_BOOLEAN, b => False);
+            else
                cons_table(name.ps).car.p_value := (kind => V_BOOLEAN, b => False);
             end if;
          else

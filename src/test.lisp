@@ -42,11 +42,11 @@
      (new-line)))
 
 (defun fact (n)
-  ((print "Computing factorial of " n)
+  (print "Computing factorial of " n)
    (new-line)
    (if (> n 1)
     (* n (fact (- n 1)))
-    1)))
+    1))
 
 (defun abs (n)
   (if (> 0 n)

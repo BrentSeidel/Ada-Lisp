@@ -179,6 +179,12 @@ package body bbs.lisp.parser is
             Get_Line(buff, last);
             ptr := 1;
          end if;
+         --
+         --  For special functions, call the function after the first parameter
+         --  has been processed.  This allows symbols to be created immediately.
+         --  This may also be useful when local variables and parameters are on
+         --  a stack.
+         --
          if special_flag and item = 1 then
             e := special_symb.s.all((kind => E_CONS, ps => head), PARSE);
          end if;

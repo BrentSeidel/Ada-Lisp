@@ -10,7 +10,7 @@ package bbs.lisp.evaluate is
    function print(e : element_type) return element_type;
    function dowhile(e : element_type) return element_type;
    function dotimes(e : element_type) return element_type;
-   function defun(e : element_type) return element_type;
+   function defun(e : element_type; p : phase) return element_type;
    function add(e : element_type) return element_type;
    function sub(e : element_type) return element_type;
    function mul(e : element_type) return element_type;
