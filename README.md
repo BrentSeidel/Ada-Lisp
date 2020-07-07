@@ -2,6 +2,9 @@
 This is a tiny Lisp interpreter written in Ada.  As such, it lacks many of the features of
 a full Common Lisp, but can provide a simple Lisp-like programming environment.
 
+If you find it useful or interesting, drop me a note at brentseidel@gmail.com and
+let me know.
+
 ## Goals
 While under initial development, this runs on a host computer (MacOs, in my case), the
 goal is to get it to run on Arm based embedded systems.  Many of these little Arm based
@@ -46,7 +49,7 @@ figure out how first.
 2. Local variables.  I have an idea that might work.
 3. Recursive function.
 4. Object oriented features.  This will probably never happen.
-
+5. Closures.  This will probably never happen
 
 ## Internals
 
@@ -58,3 +61,9 @@ that reference counting is not automatic and has to be done manually.
 
 The memory manager is probably not thread safe, though this could be an interesting
 project.
+
+### Static Tables
+Symbols, cons cells, and strings are allocated from statically defined arrays.  This
+design decision was made to enable the interpreter to run on systems without any
+sort of dynamic memory management.  Basically, I rolled my own.  The size of these
+tables are set when compiling the interpreter and can be changed to suit your use.
