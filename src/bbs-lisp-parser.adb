@@ -82,6 +82,8 @@ package body bbs.lisp.parser is
       e : element_type;
       list_end : Boolean := False;
       item : Natural := 0;
+      special_flag : Boolean := False;
+      special_symb : symbol;
    begin
       flag := bbs.lisp.memory.alloc(head);
       ptr := ptr + 1;
@@ -162,15 +164,11 @@ package body bbs.lisp.parser is
                end if;
             end if;
             if e.kind = E_SYMBOL then
-               put("Parse List: Parsed symbol at " & Natural'Image(item) & ", name ");
-               print(e.sym);
-               new_line;
-            elsif e.kind = E_TEMPSYM then
-               put("Parse List: Parsed tempsym at " & Natural'Image(item) & ", name ");
-               print(string_index(tempsym_table(e.tempsym)));
-               new_line;
+               if (symb_table(e.sym).kind = SPECIAL) and (item = 0) then
+                  special_flag := True;
+                  special_symb := symb_table(e.sym);
+               end if;
             end if;
-            item := item + 1;
          end if;
          --
          --  If there is no text left to parse and it's not the end of a list,
@@ -181,6 +179,10 @@ package body bbs.lisp.parser is
             Get_Line(buff, last);
             ptr := 1;
          end if;
+         if special_flag and item = 1 then
+            e := special_symb.s.all((kind => E_CONS, ps => head), PARSE);
+         end if;
+         item := item + 1;
       end loop;
       s_expr := head;
       return flag;

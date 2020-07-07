@@ -80,6 +80,14 @@ A comment starts with a semicolon character, ``;'', and extends to the end of th
 If a list isn't closed (number of open parentheses matches the number of close parentheses) by the end of the line, the interpreter will ask for more text.  This will continue until the list is closed.
 
 \section{Syntax}
+
+\subsection{Special Characters}
+There are only a few characters with special significance.  Parenthesis, ``('' and ``)'', are used for delimiting lists.  Quotation marks, ``"'' are used for delimiting strings.  The semicolon, ``;'', indicates a comment.  Spaces are used to separate elements in a list.  That's about it.  However, it's probably best to avoid most symbol characters and some more special characters may be added.
+
+\subsection{Reserved Words}
+There are none, however you can't define a symbol that it already used for a builtin or special operation.
+
+\subsection{Examples}
 The basic syntax for languages in the Lisp family is very simple.  Everything is a list of elements, where each element may also be a list.  Elements are separated by spaces and the list is contained in parentheses.  Here is a simple list:
 \lstset{language=Lisp}
 \begin{lstlisting}

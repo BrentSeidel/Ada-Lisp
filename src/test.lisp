@@ -53,3 +53,10 @@
     (- 0 n)
     (+ 0 n)))
 
+(defun hello (n)
+  (setq var n)
+  (dowhile (< 0 var)
+    (print "Hello #" var)
+    (new-line)
+    (setq var (- var 1))))
+

@@ -686,7 +686,6 @@ package body bbs.lisp is
             print(first.ps);
             new_line;
          end if;
---         bbs.lisp.memory.ref(s);
          e := (kind => E_CONS, ps => s);
       end if;
       if msg_flag then

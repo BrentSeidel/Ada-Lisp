@@ -342,26 +342,48 @@ package body bbs.lisp.evaluate is
 
    begin
       if p = PARSE then
-         null;
+         put("Setq called during parsing with paramater: ");
+         print(e, False, True);
+         if e.kind = E_CONS then
+            p1 := cons_table(e.ps).car;  --  Should be symbol for setq
+            p2 := cons_table(e.ps).cdr;
+            p3 := cons_table(p2.ps).car; --  Should be a symbol or tempsym
+            if p3.kind = E_SYMBOL then
+               symb := p3.sym;
+               if (symb_table(symb).kind = BUILTIN) or
+                 (symb_table(symb).kind = SPECIAL) then
+                  error("setq", "Can't assign a value to a builtin or special symbol");
+                  return NIL_ELEM;
+               end if;
+            elsif p3.kind = E_TEMPSYM then
+               tempsym := p3.tempsym;
+               flag := get_symb(symb, string_index(tempsym_table(tempsym)));
+               if flag then
+                 cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
+                 null;
+               else
+                  error("setq", "Unable to add symbol ");
+               end if;
+            else
+               error("setq", "First parameter is not a symbol or temporary symbol.");
+               put("Parameter type is " & ptr_type'Image(p3.kind));
+            end if;
+         else
+            error("setq", "Something went horribly wrong and setq did not get a list");
+         end if;
       elsif p = EXECUTE then
          if e.kind = E_CONS then
             p1 := cons_table(e.ps).car;  --  Should be symbol name
             p2 := cons_table(e.ps).cdr;  --  Should be value to be assigned
             if p1.kind = E_SYMBOL then
                symb := p1.sym;
-            elsif p1.kind = E_TEMPSYM then
-               tempsym := p1.tempsym;
-               flag := get_symb(symb, string_index(tempsym_table(tempsym)));
-               if not flag then
-                  error("setq", "Unable to add symbol ");
-                  return NIL_ELEM;
-               end if;
             else
-               error("setq", "First parameter is not a symbol or temporary symbol.");
+               error("setq", "First parameter is not a symbol.");
                return NIL_ELEM;
             end if;
-            if symb_table(symb).kind = BUILTIN then
-               error("setq", "Can't set value of builtin symbol ");
+            if (symb_table(symb).kind = BUILTIN) or
+              (symb_table(symb).kind = SPECIAL) then
+               error("setq", "Can't assign a value to a builtin or special symbol");
                return NIL_ELEM;
             end if;
             --
@@ -381,10 +403,11 @@ package body bbs.lisp.evaluate is
                                     pv => ret, str => symb_table(symb).str);
                   return ret;
                else -- p3 points to an atom
+                  ret := BBS.lisp.utilities.indirect_elem(p3);
                   deref_previous(symb);
                   symb_table(symb) := (ref => 1, Kind => VARIABLE,
-                                    pv => p3, str => symb_table(symb).str);
-                  return p3;
+                                    pv => ret, str => symb_table(symb).str);
+                  return ret;
                end if;
             elsif p2.kind = E_VALUE then -- Rare, CDR is an value.
                deref_previous(symb);
