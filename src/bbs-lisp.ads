@@ -13,14 +13,19 @@ package bbs.lisp is
    --
    --  Define the basic types used.
    --
+   --  Sizes for the global data structures.  These can be adjusted as needed.
+   --
    max_cons : constant Integer := 300;
    max_symb : constant Integer := 200;
    max_tempym : constant Integer := 50;
    max_string : constant Integer := 500;
+   max_stack : constant Integer := 100;
+   --
    type cons_index is range 0 .. max_cons;
    type symb_index is range 0 .. max_symb;
    type tempsym_index is range 0 .. max_tempym;
    type string_index is range 0 .. max_string;
+   type stack_index is range 0 .. max_stack;
    --
    type t_put_line is access procedure(s : String);
    type t_newline is access procedure;
@@ -34,7 +39,8 @@ package bbs.lisp is
    --
    --  This indicates what kind of data is in a value.
    --
-   type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST);
+   type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
+                      V_NONE);
    --
    --  This indicates what kind of data is in a symbol
    --
@@ -63,6 +69,8 @@ package bbs.lisp is
             b : Boolean;
          when V_LIST =>
             l : cons_index;
+         when V_NONE =>
+            null;
          end case;
       end record;
    --
@@ -83,10 +91,10 @@ package bbs.lisp is
                tempsym : tempsym_index;
             when E_PARAM =>
                p_name : string_index;
-               p_value : value;
+               p_offset : stack_index;
             when E_LOCAL =>
                l_name : string_index;
-               l_value : value;
+               l_offset : stack_index;
          end case;
       end record;
    --

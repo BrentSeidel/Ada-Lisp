@@ -82,7 +82,7 @@ If a list isn't closed (number of open parentheses matches the number of close p
 \section{Syntax}
 
 \subsection{Special Characters}
-There are only a few characters with special significance.  Parenthesis, ``('' and ``)'', are used for delimiting lists.  Quotation marks, ``"'' are used for delimiting strings.  The semicolon, ``;'', indicates a comment.  Spaces are used to separate elements in a list.  That's about it.  However, it's probably best to avoid most symbol characters and some more special characters may be added.
+There are only a few characters with special significance.  Parenthesis, ``('' and ``)'', are used for delimiting lists.  Quotation marks, ``"'' are used for delimiting strings.  The semicolon, ``;'', indicates a comment.  Spaces are used to separate elements in a list.  That's about it.  However, it's probably best to avoid most symbol characters and some more special characters may be added.  The language is case insensitive thus, \function{CAR}, \function{car}, \function{cAr}, etc all are considered identical by the language.
 
 \subsection{Reserved Words}
 There are almost none.  ``T'' and ``NIL'' refer to the boolean true and false values, and you can't define a symbol that it already used for a builtin or special operation.
@@ -247,10 +247,10 @@ The basic data type is the element.  It is defined as follows:
                tempsym : tempsym_index;
             when E_PARAM =>
                p_name : string_index;
-               p_value : value;
+               p_offset : stack_index;
             when E_LOCAL =>
                l_name : string_index;
-               l_value : value;
+               l_offset : stack_index;
          end case;
       end record;
 \end{lstlisting}

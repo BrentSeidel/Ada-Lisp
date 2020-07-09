@@ -1,0 +1,169 @@
+--
+--  This package contains functions and procedures for managing the stack for
+--  the Lisp interpreter.
+--
+with BBS.lisp.strings;
+package body BBS.lisp.stack is
+   --
+   --  Status functions for the stack
+   --
+   function isFull return Boolean is
+   begin
+      return (stack_pointer = stack_index'Last);
+   end;
+   --
+   function isEmpty return Boolean is
+   begin
+      return (stack_pointer = stack_index'First);
+   end;
+   --
+   --
+   --  Adding and removing items from the stack
+   --
+   function pop return stack_entry is
+      t : stack_entry := (kind => ST_EMPTY);
+   begin
+      if not isEmpty then
+         t := stack(stack_pointer);
+         stack(stack_pointer) := (kind => ST_EMPTY);
+         stack_pointer := stack_pointer - 1;
+      else
+         error("pop", "Stack underflow");
+      end if;
+      return t;
+   end;
+   --
+   procedure push(v : stack_entry) is
+   begin
+      if not isFull then
+         stack_pointer := stack_pointer + 1;
+         stack(stack_pointer) := v;
+      else
+         error("push", "Stack overflow");
+      end if;
+   end;
+   --
+   --  Operations for stack frames
+   --
+   procedure enter_frame is
+   begin
+      frame_count := frame_count + 1;
+      push((kind => ST_FRAME, number => frame_count, next => frame_pointer));
+      frame_pointer := stack_pointer;
+   end;
+   --
+   procedure exit_frame is
+      temp : stack_index := frame_pointer;
+      frame : stack_entry := stack(frame_pointer);
+   begin
+      if frame.kind /= ST_FRAME then
+         error("exit_frame", "Not a stack frame.");
+         return;
+      end if;
+      for temp in frame_pointer .. stack_pointer loop
+         stack(temp) := (kind => ST_EMPTY);
+      end loop;
+      stack_pointer := frame_pointer - 1;
+      frame_pointer := frame.next;
+      frame_count := frame.number - 1;
+   end;
+   --
+   procedure dump is
+      e : stack_entry;
+   begin
+      put_line("Stack dump start");
+      for i in stack_index'Range loop
+         e := stack(i);
+         case e.kind is
+            when ST_EMPTY =>
+               null;
+            when ST_FRAME =>
+               put(stack_index'Image(i) & " " & stack_entry_type'Image(e.kind));
+               put(", Number => " & Natural'Image(e.number));
+               put_line(", Next => " & stack_index'Image(e.next));
+            when ST_PARAM =>
+               put(stack_index'Image(i) & " " & stack_entry_type'Image(e.kind));
+               put(", Name => ");
+               print(e.p_name);
+               put(", Value => ");
+               print(e.p_value);
+               new_line;
+            when ST_LOCAL =>
+               put(stack_index'Image(i) & " " & stack_entry_type'Image(e.kind));
+               put(", Name => ");
+               print(e.l_name);
+               put(", Value => ");
+               print(e.l_value);
+               new_line;
+            when others =>
+               put_line(stack_index'Image(i) & " Unknown stack entry kind.");
+         end case;
+      end loop;
+      put_line("Stack dump end");
+   end;
+   --
+   --  Search stack for the variable.  The frame offset and name are used to
+   --  look backwards through the stack frames for a match to the name.  If
+   --  found, the value is returned.  If not found, a value of none is returned.
+   --
+   function search_frames(offset : stack_index; name : string_index) return value is
+      frame : stack_index := frame_pointer;
+      test : stack_entry;
+      test_name : string_index;
+      eq : comparison;
+   begin
+--      put("Search frame at offset " & stack_index'Image(offset) & " for name ");
+--      print(name);
+--      new_line;
+--      put_line("Search frame starting frame pointer is " & stack_index'Image(frame));
+--      dump;
+      while frame > 0 loop
+         test := stack(frame + offset);
+         if test.kind = ST_PARAM then
+            test_name := test.p_name;
+         elsif test.kind = ST_LOCAL then
+            test_name := test.l_name;
+         elsif test.kind = ST_EMPTY then
+            --
+            --  This may happen when building a stack frame.
+            --
+            null;
+--            put_line("Found an empty stack frame, continuing search.");
+         else
+            error("search_frames", "Found unexpected entry type " & stack_entry_type'Image(test.kind));
+            dump;
+            frame := 0;
+         end if;
+         if test.kind /= ST_EMPTY then
+            eq := bbs.lisp.strings.compare(name, test_name);
+            if eq = CMP_EQ then
+               if test.kind = ST_PARAM then
+--                  put("Search frame found parameter value ");
+--                  print(test.p_value);
+--                  new_line;
+                  return test.p_value;
+               elsif test.kind = ST_LOCAL then
+--                  put("Search frame found local value ");
+--                  print(test.l_value);
+--                  new_line;
+                  return test.l_value;
+               else
+                  error("search_frames", "Found unexpected entry type " & stack_entry_type'Image(test.kind));
+                  dump;
+                  frame := 0;
+               end if;
+            end if;
+         end if;
+         if stack(frame).kind = ST_FRAME then
+            frame := stack(frame).next;
+         else
+            error("search_frames", "Did not find frame entry on stack");
+            dump;
+            frame := 0;
+         end if;
+      end loop;
+      return (kind => V_NONE);
+   end;
+   --
+
+end;

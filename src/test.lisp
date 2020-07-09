@@ -34,16 +34,14 @@
 (defun hello (var) ((print "Hello " var) (new-line)))
 
 (defun range (val upper lower)
-   ((if (< val upper)
+   (if (< val upper)
       (if (> val lower)
         (print "In range")
         (print "Below range"))
       (print "Above range"))
-     (new-line)))
+     (new-line))
 
 (defun fact (n)
-  (print "Computing factorial of " n)
-   (new-line)
    (if (> n 1)
     (* n (fact (- n 1)))
     1))
@@ -54,9 +52,22 @@
     (+ 0 n)))
 
 (defun hello (n)
-  (setq var n)
+  (setq var (abs n))
   (dowhile (< 0 var)
     (print "Hello #" var)
     (new-line)
     (setq var (- var 1))))
+;
+;  This should give a workout for recursive functions.  The values returned
+;  should be:
+;  (fib 1) => 1
+;  (fib 2) => 2
+;  (fib 3) => 3
+;  (fib 4) => 5
+;  (fib 5) => 8
+;
+(defun fib (n)
+  (if (< n 2)
+    1
+    (+ (fib (- n 2)) (fib (- n 1)))))
 

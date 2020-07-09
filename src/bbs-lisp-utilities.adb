@@ -1,5 +1,6 @@
 with BBS.lisp.strings;
 with BBS.lisp.memory;
+with BBS.lisp.stack;
 package body bbs.lisp.utilities is
    --
    --  Various utility functions
@@ -128,7 +129,6 @@ package body bbs.lisp.utilities is
             end if;
             if bbs.lisp.strings.compare(name, var_name) = CMP_EQ then
                replace := var_elem;
---               bbs.lisp.memory.ref(replace);
                return True;
             end if;
             exit when cons_table(temp).cdr.kind /= E_CONS;
@@ -169,6 +169,7 @@ package body bbs.lisp.utilities is
    --
    function indirect_elem(e : element_type) return element_type is
       sym : symb_index;
+      val : value;
    begin
       if e.kind = E_SYMBOL then
          sym := e.sym;
@@ -177,10 +178,12 @@ package body bbs.lisp.utilities is
          end if;
       end if;
       if e.kind = E_LOCAL then
-         return (kind => E_VALUE, v => e.l_value);
+         val := BBS.lisp.stack.search_frames(e.l_offset, e.l_name);
+         return (kind => E_VALUE, v => val);
       end if;
       if e.kind = E_PARAM then
-         return (kind => E_VALUE, v => e.p_value);
+         val := BBS.lisp.stack.search_frames(e.p_offset, e.p_name);
+         return (kind => E_VALUE, v => val);
       end if;
       return e;
    end;

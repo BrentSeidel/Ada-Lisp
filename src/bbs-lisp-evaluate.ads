@@ -1,5 +1,5 @@
-with bbs.lisp.utilities;
-package bbs.lisp.evaluate is
+with BBS.lisp.utilities;
+package BBS.lisp.evaluate is
    --
    --  Functions for evaluating the various builtin functions.
    --

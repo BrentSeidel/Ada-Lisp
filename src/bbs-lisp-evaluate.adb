@@ -1,8 +1,9 @@
-with bbs.lisp.memory;
-with bbs.lisp.strings;
+with BBS.lisp.memory;
+with BBS.lisp.strings;
 with BBS.lisp.utilities;
+with BBS.lisp.stack;
 
-package body bbs.lisp.evaluate is
+package body BBS.lisp.evaluate is
    --
    function newline(e : element_type) return element_type is
    begin
@@ -611,6 +612,9 @@ package body bbs.lisp.evaluate is
          end if;
          return NIL_ELEM;
       end if;
+      --
+      --  EXECUTE Phase
+      --
       if e.kind /= E_CONS then
          error("defun", "No parameters given to defun.");
          return NIL_ELEM;
@@ -637,6 +641,7 @@ package body bbs.lisp.evaluate is
       --  Second, check the parameter list and convert to parameters.
       --
       temp := params;
+      BBS.lisp.stack.enter_frame;
       while temp.kind = E_CONS loop
          if cons_table(temp.ps).car.kind = E_CONS then
             error("defun", "A parameter cannot be a list.");
@@ -645,20 +650,24 @@ package body bbs.lisp.evaluate is
          declare
             el : element_type := cons_table(temp.ps).car;
             str : string_index;
+            offset : stack_index := 1;
          begin
             if (el.kind = E_SYMBOL) then
                str := symb_table(el.sym).str;
                msg("defun", "Converting symbol to parameter");
                el := (kind => E_PARAM, p_name => str,
-                      P_value => (kind => V_INTEGER, i => 0));
-               cons_table(temp.ps).car := el;
+                      p_offset => offset);
             elsif (el.kind = E_TEMPSYM) then
                msg("defun", "Converting tempsym to parameter");
                str := string_index(tempsym_table(el.tempsym));
                el := (kind => E_PARAM, p_name => str,
-                      P_value => (kind => V_INTEGER, i => 0));
-               cons_table(temp.ps).car := el;
+                      p_offset => offset);
+            else
+               error("defun", "Can't convert item into a parameter.");
+               print(el, False, True);
             end if;
+            offset := offset + 1;
+            cons_table(temp.ps).car := el;
          end;
          temp := cons_table(temp.ps).cdr;
       end loop;
@@ -668,6 +677,7 @@ package body bbs.lisp.evaluate is
       if func_body.kind = E_CONS then
          count := BBS.lisp.utilities.replace_syms(func_body.ps, params.ps);
       else
+         BBS.lisp.stack.exit_frame;
          return NIL_ELEM;
       end if;
       --
@@ -679,6 +689,7 @@ package body bbs.lisp.evaluate is
          flag := get_symb(symb, string_index(tempsym_table(tempsym)));
          if not flag then
             error("defun", "Unable to add symbol ");
+            BBS.lisp.stack.exit_frame;
             return NIL_ELEM;
          end if;
       elsif name.kind = E_SYMBOL then
@@ -699,6 +710,7 @@ package body bbs.lisp.evaluate is
       --  for recursive funtions.
       --  TODO
       --
+      BBS.lisp.stack.exit_frame;
       return NIL_ELEM;
    end;
    --
@@ -713,42 +725,14 @@ package body bbs.lisp.evaluate is
    function eval_function(s : cons_index; e : element_type) return element_type is
       params : element_type ;
       func_body : element_type;
-      value : element_type;
+      param_value : value := (kind => V_NONE);
+      temp_value : element_type;
       rest : element_type;
       statement : element_type;
       name : element_type;
       ret_val : element_type;
       supplied : Integer := 0;
       requested : Integer := 0;
-      --
-      --  Find all the parameters used in the function and set their values.
-      --
-      procedure set_params(func : element_type; params : element_type) is
-         t1 : element_type := func;
-         t2 : element_type := params;
-         temp : element_type;
-      begin
-         while t1.kind = E_CONS loop
-            temp := cons_table(t1.ps).car;
-            if temp.kind = E_CONS then
-               set_params(temp, params);
-            elsif temp.kind = E_PARAM then
-               --
-               --  Search the parameter list to find the value
-               --
-               while t2.kind = E_CONS loop
-                  if temp.p_name = cons_table(t2.ps).car.p_name then
-                     cons_table(t1.ps).car.p_value := cons_table(t2.ps).car.p_value;
-                     exit;
-                  end if;
-                  t2 := cons_table(t2.ps).cdr;
-               end loop;
-               null;
-            end if;
-            t1 := cons_table(t1.ps).cdr;
-         end loop;
-      end;
-      --
    begin
       params := cons_table(s).car;
       func_body := cons_table(s).cdr;
@@ -770,24 +754,27 @@ package body bbs.lisp.evaluate is
       --
       rest := e;       --  Supplied parameter values
       name := params;  --  List of parameter names
+      BBS.lisp.stack.enter_frame;
       while rest.kind = E_CONS loop
          if cons_table(name.ps).car.kind = E_PARAM then
-            BBS.lisp.utilities.first_value(rest, value, rest);
-            if value.kind = E_VALUE then
-               cons_table(name.ps).car.p_value := value.v;
-            elsif value.kind = E_CONS then
-               cons_table(name.ps).car.p_value := (kind => V_LIST, l => value.ps);
-            elsif value.kind = E_NIL then
-               cons_table(name.ps).car.p_value := (kind => V_BOOLEAN, b => False);
+            BBS.lisp.utilities.first_value(rest, temp_value, rest);
+            if temp_value.kind = E_VALUE then
+               param_value := temp_value.v;
+            elsif temp_value.kind = E_CONS then
+               param_value := (kind => V_LIST, l => temp_value.ps);
+            elsif temp_value.kind = E_NIL then
+               param_value := (kind => V_BOOLEAN, b => False);
             else
-               cons_table(name.ps).car.p_value := (kind => V_BOOLEAN, b => False);
+               param_value := (kind => V_NONE);
             end if;
+            BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_PARAM, p_name =>
+                                   cons_table(name.ps).car.p_name, p_value =>
+                                   param_value));
          else
             error("function evaluation", "Something horrible happened, a parameter is not a parameter");
          end if;
          name  := cons_table(name.ps).cdr;
       end loop;
-      set_params(func_body, params);
       --
       --  Evaluate the function
       --
@@ -799,6 +786,8 @@ package body bbs.lisp.evaluate is
          end if;
          statement := cons_table(statement.ps).cdr;
       end loop;
+      BBS.lisp.stack.exit_frame;
+--      BBS.lisp.stack.dump;
       return ret_val;
    end;
    --

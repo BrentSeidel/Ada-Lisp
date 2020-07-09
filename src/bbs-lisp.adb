@@ -148,8 +148,8 @@ package body bbs.lisp is
             put("Tempsym");
          when E_PARAM =>
             print(e.p_name);
-            put("<-");
-            print(e.p_value);
+--            put("<-");
+--            print(e.p_value);
          when E_LOCAL =>
             print(e.l_name);
          when others =>
@@ -230,8 +230,10 @@ package body bbs.lisp is
             else
                put(" NIL");
             end if;
+         when V_NONE =>
+            put(" Empty");
          when others =>
-            Put("<Unknown value kind>");
+            Put("<Unknown value kind " & value_type'Image(v.kind) & ">");
       end case;
    end;
    --
@@ -244,8 +246,14 @@ package body bbs.lisp is
             Put("'" & v.c & "'");
          when V_STRING =>
             print(v.s);
+         when V_BOOLEAN =>
+            if v.b then
+               put(" T");
+            else
+               put(" NIL");
+            end if;
          when others =>
-            Put("<Unknown value kind>");
+            Put("<Unknown value kind " & value_type'Image(v.kind) & ">");
       end case;
       Put_Line(">");
    end;
@@ -344,7 +352,7 @@ package body bbs.lisp is
                when BUILTIN =>
                   Put("Builtin");
                when SPECIAL =>
-                  Put(" <SPECIAL>");
+                  Put("Special");
                when LAMBDA =>
                   Put("Lambda");
                when VARIABLE =>
