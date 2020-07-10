@@ -3,6 +3,7 @@ with BBS.lisp.evaluate;
 with BBS.lisp.memory;
 with BBS.lisp.strings;
 with BBS.lisp.evaluate;
+--with Ada.Text_IO;
 --
 package body bbs.lisp is
    --
@@ -49,11 +50,11 @@ package body bbs.lisp is
    procedure init(p_put_line : t_put_line; p_put : t_put_line;
                   p_new_line : t_newline; p_get_line : t_get_line) is
    begin
-      init;
       io_put_line := p_put_line;
       io_put      := p_put;
       io_new_line := p_new_line;
       io_get_line := p_get_line;
+      init;
    end;
    --
    --  Replacements for Text_IO to make porting to embedded systems easier.
@@ -62,6 +63,7 @@ package body bbs.lisp is
    --
    procedure put_line(s : String) is
    begin
+--      Ada.Text_IO.Put_Line(s);
       io_Put_Line.all(s);
       first_char_flag := True;
    end;
@@ -148,8 +150,6 @@ package body bbs.lisp is
             put("Tempsym");
          when E_PARAM =>
             print(e.p_name);
---            put("<-");
---            print(e.p_value);
          when E_LOCAL =>
             print(e.l_name);
          when others =>
@@ -286,11 +286,11 @@ package body bbs.lisp is
    --  Procedure to print a string
    --
    procedure print(s : string_index) is
-      next : Integer := Integer(s);
+      next : string_index := s;
       nxt : string_index;
    begin
-      while (next >= Integer(string_index'First))
-        and (next <= Integer(string_index'Last)) loop
+      while (next >= (string_index'First + 1))
+        and (next <= string_index'Last) loop
          nxt := string_index(next);
          Put(string_table(nxt).str(1..string_table(nxt).len));
          next := string_table(nxt).next;
@@ -371,11 +371,11 @@ package body bbs.lisp is
    procedure dump_tempsym is
    begin
       for i in tempsym_index loop
-         if (tempsym_table(i) >= Integer(string_index'First))
-           and (tempsym_table(i) <= Integer(string_index'Last)) then
+         if (tempsym_table(i) >= (string_index'First + 1))
+           and (tempsym_table(i) <= string_index'Last) then
             Put("Temp Symbol " & Integer'Image(Integer(i))
                             & " Name ");
-            print(string_index(tempsym_table(i)));
+            print(tempsym_table(i));
             New_Line;
          end if;
       end loop;
@@ -385,13 +385,13 @@ package body bbs.lisp is
    --
    procedure dump_strings is
    begin
-      for i in string_index loop
+      for i in string_index'First + 1 .. string_index'Last loop
          if string_table(i).ref > 0 then
             Put("String " & Integer'Image(Integer(i)) & " contains: <"
                                  & string_table(i).str & ">, ");
             Put("Reference count: " & Integer'Image(string_table(i).ref));
             Put(", Length: " & Integer'Image(Integer(string_table(i).len)));
-            Put_Line(", Next: " & Integer'Image(string_table(i).next));
+            Put_Line(", Next: " & string_index'Image(string_table(i).next));
          end if;
       end loop;
    end;
@@ -532,18 +532,18 @@ package body bbs.lisp is
       flag := BBS.lisp.strings.str_to_lisp(name, n);
       if flag then
          for i in tempsym_index loop
-            if (tempsym_table(i) < Integer(string_index'First))
-              or (tempsym_table(i) > Integer(string_index'Last)) then
+            if (tempsym_table(i) < (string_index'First + 1))
+              or (tempsym_table(i) > string_index'Last) then
                free := i;
                available := True;
-            elsif bbs.lisp.strings.compare(name, string_index(tempsym_table(i))) = CMP_EQ then
+            elsif bbs.lisp.strings.compare(name, tempsym_table(i)) = CMP_EQ then
                s := i;
                return true;
             end if;
          end loop;
          if available then
             s := free;
-            tempsym_table(s) := Integer(name);
+            tempsym_table(s) := name;
             return True;
          end if;
          error("get_tempsym", "Unable to find empty tempsym");
@@ -559,18 +559,18 @@ package body bbs.lisp is
       available : Boolean := False;
    begin
       for i in tempsym_index loop
-         if (tempsym_table(i) < Integer(string_index'First))
-           or (tempsym_table(i) > Integer(string_index'Last)) then
+         if (tempsym_table(i) < (string_index'First + 1))
+           or (tempsym_table(i) > string_index'Last) then
             free := i;
             available := True;
-         elsif bbs.lisp.strings.compare(n, string_index(tempsym_table(i))) = CMP_EQ then
+         elsif bbs.lisp.strings.compare(n, tempsym_table(i)) = CMP_EQ then
             s := i;
             return true;
          end if;
       end loop;
       if available then
          s := free;
-         tempsym_table(s) := Integer(n);
+         tempsym_table(s) := n;
          return True;
       end if;
       error("get_tempsym", "Unable to find empty tempsym");

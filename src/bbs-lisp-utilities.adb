@@ -141,7 +141,9 @@ package body bbs.lisp.utilities is
       loop
          if cons_table(temp).car.kind /= E_CONS then
             if process_element(cons_table(temp).car, lib, new_elem) then
+               BBS.lisp.memory.deref(cons_table(temp).car);
                cons_table(temp).car := new_elem;
+               BBS.lisp.memory.ref(cons_table(temp).car);
                count := count + 1;
             end if;
          elsif cons_table(temp).car.kind = E_CONS then
@@ -152,7 +154,9 @@ package body bbs.lisp.utilities is
       end loop;
       if cons_table(temp).cdr.kind /= E_CONS then
          if process_element(cons_table(temp).cdr, lib, new_elem) then
+            BBS.lisp.memory.deref(cons_table(temp).cdr);
             cons_table(temp).cdr := new_elem;
+            BBS.lisp.memory.ref(cons_table(temp).cdr);
             count := count + 1;
          end if;
          --

@@ -26,12 +26,13 @@ package BBS.lisp.stack is
    --
    --  The stack array
    --
-   stack : array (stack_index) of stack_entry;
+   stack : array (stack_index'First + 1 .. stack_index'Last) of stack_entry;
    --
    --  Various pointers for managing the stack and its frames.
    --
    stack_pointer : stack_index := 0;
    frame_pointer : stack_index := 0;
+   temp_frame    : stack_index := 0;
    frame_count   : Natural := 0;
    --
    --  Status functions for the stack
@@ -44,8 +45,15 @@ package BBS.lisp.stack is
    function pop return stack_entry;
    procedure push(v : stack_entry);
    --
-   --  Operations for stack frames
+   --  Operations for stack frames.  The usage is as follows:
+   --  1) Call start_frame before pushing items onto the stack that should be
+   --     in the frame.
+   --  2) Call enter_frame once the items are all on the stack.  This finalizes
+   --     stack frame creation.
+   --  3) Call exit_frame to clean up the stack frame.  There is no need to pop
+   --     the items off the stack that belong to the stack frame.
    --
+   procedure start_frame;
    procedure enter_frame;
    procedure exit_frame;
    --
@@ -58,4 +66,10 @@ package BBS.lisp.stack is
    --  found, the value is returned.  If not found, an empty value is returned.
    --
    function search_frames(offset : stack_index; name : string_index) return value;
+   --
+   --  Search stack for the variable.  The frame offset and name are used to
+   --  look backwards through the stack frames for a match to the name.  If
+   --  found, the stack index of the variable is returned, if not 0 is returned.
+   --
+   function search_frames(offset : stack_index; name : string_index) return stack_index;
 end;

@@ -24,7 +24,7 @@ package bbs.lisp is
    type cons_index is range 0 .. max_cons;
    type symb_index is range 0 .. max_symb;
    type tempsym_index is range 0 .. max_tempym;
-   type string_index is range 0 .. max_string;
+   type string_index is range -1 .. max_string;
    type stack_index is range 0 .. max_stack;
    --
    type t_put_line is access procedure(s : String);
@@ -248,7 +248,7 @@ private
    type fragment is
       record
          ref : Natural;
-         next : Integer range -1 .. Integer(string_index'Last);
+         next : string_index;
          len : Integer range 0..fragment_len;
          str : String (1..fragment_len);
       end record;
@@ -257,8 +257,8 @@ private
    --  Temporary symbols are temporary names that may eventually be converted
    --  to regular symbols.
    --
-   tempsym_table : array (tempsym_index) of Integer;
-   string_table : array (string_index) of fragment;
+   tempsym_table : array (tempsym_index) of string_index;
+   string_table : array (string_index'First + 1 .. string_index'Last) of fragment;
    --
    --  For debugging, dump the various tables
    --

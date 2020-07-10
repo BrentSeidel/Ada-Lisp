@@ -214,11 +214,11 @@ package body BBS.lisp.evaluate is
          if t.kind = E_CONS then
             BBS.lisp.utilities.first_value(t, t2, t);
          else
-            error("eval_comp", "Cannot compare a single atom.");
+            error("eval_comp", "Cannot compare a single element.");
             return NIL_ELEM;
          end if;
       else
-         error("eval_comp", "Cannot compare a single atom.");
+         error("eval_comp", "Cannot compare a single element.");
          return NIL_ELEM;
       end if;
       if (t1.kind /= E_CONS) and (t2.kind /= E_CONS) then
@@ -285,10 +285,14 @@ package body BBS.lisp.evaluate is
             return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
          else
             error("eval_comp", "Can only compare integers, strings, or symbols.");
+            put("First type is " & ptr_type'Image(t1.kind));
+            put_line(", second type is " & ptr_type'Image(t2.kind));
             return NIL_ELEM;
          end if;
       else
-         error("eval_comp", "Can only compare two atoms.");
+         error("eval_comp", "Can only compare two elements.");
+         put("First type is " & ptr_type'Image(t1.kind));
+         put_line(", second type is " & ptr_type'Image(t2.kind));
          return NIL_ELEM;
       end if;
    end;
@@ -386,7 +390,7 @@ package body BBS.lisp.evaluate is
                return NIL_ELEM;
             end if;
             --
-            --  At this point, p1 should be an atom containing a valid symbol and
+            --  At this point, p1 should be an element containing a valid symbol and
             --  symb is the index to that symbol.
             --
             --
@@ -401,7 +405,7 @@ package body BBS.lisp.evaluate is
                   symb_table(symb) := (ref => 1, Kind => VARIABLE,
                                     pv => ret, str => symb_table(symb).str);
                   return ret;
-               else -- p3 points to an atom
+               else -- p3 is an element
                   ret := BBS.lisp.utilities.indirect_elem(p3);
                   deref_previous(symb);
                   symb_table(symb) := (ref => 1, Kind => VARIABLE,
@@ -558,8 +562,8 @@ package body BBS.lisp.evaluate is
    --  Defines a function.  The command is (defun name (parameters) body).
    --    name is a symbol of type LAMBDA.
    --    params is a list of the parameters for the function.  It must be a
-   --      list of atoms that translate to symbols or tempsyms.  Defun translates
-   --      these to parameter atoms.
+   --      list of elements that translate to symbols or tempsyms.  Defun translates
+   --      these to parameter elements.
    --    body is a list of the actions for the function.  This needs to be
    --      scanned and any symbol or tempsym that matches one of the params is
    --      translated to point to the parameter atom in the parameter list.  It
@@ -641,7 +645,7 @@ package body BBS.lisp.evaluate is
       --  Second, check the parameter list and convert to parameters.
       --
       temp := params;
-      BBS.lisp.stack.enter_frame;
+      BBS.lisp.stack.start_frame;
       while temp.kind = E_CONS loop
          if cons_table(temp.ps).car.kind = E_CONS then
             error("defun", "A parameter cannot be a list.");
@@ -671,6 +675,7 @@ package body BBS.lisp.evaluate is
          end;
          temp := cons_table(temp.ps).cdr;
       end loop;
+      BBS.lisp.stack.enter_frame;
       --
       --  Third, check the body and find the parameters.
       --
@@ -705,11 +710,6 @@ package body BBS.lisp.evaluate is
                               kind => LAMBDA, ps => temp.ps);
          bbs.lisp.memory.ref(temp.ps);
       end if;
-      --
-      --  Need to also search for the name of the newly defined symbol to account
-      --  for recursive funtions.
-      --  TODO
-      --
       BBS.lisp.stack.exit_frame;
       return NIL_ELEM;
    end;
@@ -754,7 +754,7 @@ package body BBS.lisp.evaluate is
       --
       rest := e;       --  Supplied parameter values
       name := params;  --  List of parameter names
-      BBS.lisp.stack.enter_frame;
+      BBS.lisp.stack.start_frame;
       while rest.kind = E_CONS loop
          if cons_table(name.ps).car.kind = E_PARAM then
             BBS.lisp.utilities.first_value(rest, temp_value, rest);
@@ -775,6 +775,7 @@ package body BBS.lisp.evaluate is
          end if;
          name  := cons_table(name.ps).cdr;
       end loop;
+      BBS.lisp.stack.enter_frame;
       --
       --  Evaluate the function
       --
@@ -787,7 +788,6 @@ package body BBS.lisp.evaluate is
          statement := cons_table(statement.ps).cdr;
       end loop;
       BBS.lisp.stack.exit_frame;
---      BBS.lisp.stack.dump;
       return ret_val;
    end;
    --
@@ -814,7 +814,7 @@ package body BBS.lisp.evaluate is
             else
                flag := bbs.lisp.memory.alloc(next);
                if flag then
-                  string_table(str).next := Integer(next);
+                  string_table(str).next := next;
                   str := next;
                   string_table(str).len := 1;
                   string_table(str).str(1) := buff(ptr);

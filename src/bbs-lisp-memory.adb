@@ -13,7 +13,7 @@ package body bbs.lisp.memory is
       for i in symb_index loop
          symb_table(i).ref := 0;
       end loop;
-      for i in string_index loop
+      for i in string_index'First + 1 .. string_index'Last loop
          string_table(i).ref := 0;
       end loop;
       reset_tempsym;
@@ -52,7 +52,7 @@ package body bbs.lisp.memory is
    --
    function alloc(s : out string_index) return Boolean is
    begin
-      for i in string_index loop
+      for i in string_index'First + 1 .. string_index'Last loop
          if string_table(i).ref = 0 then
             s := i;
             string_table(i).ref := 1;
@@ -130,13 +130,13 @@ package body bbs.lisp.memory is
    --  Decrements the reference count of a string.
    --
    procedure deref(s : string_index) is
-      next : Integer;
+      next : string_index;
    begin
       if string_table(s).ref > 0 then
          string_table(s).ref := string_table(s).ref - 1;
       else
          error("deref cons", "Attempt to deref an unreffed string at index "
-              & Integer'Image(Integer(s)));
+              & string_index'Image(s));
       end if;
       --
       --  If the reference count goes to zero, deref the next fragment.
@@ -144,8 +144,8 @@ package body bbs.lisp.memory is
       if string_table(s).ref = 0 then
          string_table(s).len := 0;
          next := string_table(s).next;
-         if (next >= Integer(string_index'First))
-           and (next <= Integer(string_index'Last)) then
+         if (next >= (string_index'First + 1))
+           and (next <= string_index'Last) then
             deref(string_index(next));
          end if;
          string_table(s).next := -1;

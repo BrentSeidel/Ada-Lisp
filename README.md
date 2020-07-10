@@ -47,9 +47,8 @@ little language, not another port of Common Lisp.
 1. Macros.  This is a long term goal.  I would like to implement these, but I need to
 figure out how first.
 2. Local variables.  I have an idea that might work.
-3. Recursive function.
-4. Object oriented features.  This will probably never happen.
-5. Closures.  This will probably never happen
+3. Object oriented features.  This will probably never happen.
+4. Closures.  This will probably never happen
 
 ## Internals
 

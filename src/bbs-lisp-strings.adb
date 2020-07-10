@@ -5,12 +5,12 @@ package body bbs.lisp.strings is
    --  Converts a string to upper-case in place.
    --
    procedure uppercase(s : string_index) is
-      next : Integer := Integer(s);
+      next : string_index := s;
       nxt : string_index;
    begin
-      while (next >= Integer(string_index'First))
-        and (next <= Integer(string_index'Last)) loop
-         nxt := string_index(next);
+      while (next >= (string_index'First + 1))
+        and (next <= string_index'Last) loop
+         nxt := next;
          for i in 1 .. string_table(nxt).len loop
             string_table(nxt).str(i) := To_Upper(string_table(nxt).str(i));
          end loop;
@@ -24,12 +24,12 @@ package body bbs.lisp.strings is
    --  Converts a string to lower-case in place.
    --
    procedure lowercase(s : string_index) is
-      next : Integer := Integer(s);
+      next : string_index := s;
       nxt : string_index;
    begin
-      while (next >= Integer(string_index'First))
-        and (next <= Integer(string_index'Last)) loop
-         nxt := string_index(next);
+      while (next >= (string_index'First + 1))
+        and (next <= string_index'Last) loop
+         nxt := next;
          for i in 1 .. string_table(nxt).len loop
             string_table(nxt).str(i) := To_Lower(string_table(nxt).str(i));
          end loop;
@@ -43,46 +43,55 @@ package body bbs.lisp.strings is
    --  otherwise equal, the longer string is greater than the shorter one.
    --
    function compare(s1 : string_index; s2 : string_index) return comparison is
-      next1 : Integer := Integer(s1);
-      next2 : Integer := Integer(s2);
+      next1 : string_index := s1;
+      next2 : string_index := s2;
       nxt1 : string_index;
       nxt2 : string_index;
       limit : Integer;
    begin
-      while (next1 >= Integer(string_index'First))
-        and (next1 <= Integer(string_index'Last))
-        and (next2 >= Integer(string_index'First))
-        and (next2 <= Integer(string_index'Last)) loop
-         nxt1 := string_index(next1);
-         nxt2 := string_index(next2);
-         limit := string_table(nxt1).len;
-         if string_table(nxt2).len < limit then
-            limit := string_table(nxt2).len;
+      while (next1 >= (string_index'First + 1))
+        and (next1 <= string_index'Last)
+        and (next2 >= (string_index'First + 1))
+        and (next2 <= string_index'Last) loop
+         limit := string_table(next1).len;
+         if string_table(next2).len < limit then
+            limit := string_table(next2).len;
          end if;
          for i in 1 .. limit loop
-            if string_table(nxt1).str(i) < string_table(nxt2).str(i) then
+            if string_table(next1).str(i) < string_table(next2).str(i) then
                return CMP_LT;
-            elsif string_table(nxt1).str(i) > string_table(nxt2).str(i) then
+            elsif string_table(next1).str(i) > string_table(next2).str(i) then
                return CMP_GT;
             end if;
          end loop;
+         --
+         --  Save current fragment indices so that they will be available when
+         --  the loop exits.
+         --
+         nxt1 := next1;
+         nxt2 := next2;
+         --
+         --  Get ready to examine the next fragment
+         --
          next1 := string_table(nxt1).next;
          next2 := string_table(nxt2).next;
       end loop;
+--      put_line("Checking fragment 1 index " & string_index'Image(nxt1) &
+--         " and fragment 2 index " & string_index'Image(nxt2));
       if string_table(nxt1).len < string_table(nxt2).len then
          return CMP_LT;
       elsif string_table(nxt1).len > string_table(nxt2).len then
          return CMP_GT;
       end if;
-      if (next1 >= Integer(string_index'First))
-        and (next1 <= Integer(string_index'Last))
-        and ((next2 < Integer(string_index'First))
-        or (next2 > Integer(string_index'Last))) then
+      if (next1 >= (string_index'First + 1))
+        and (next1 <= string_index'Last)
+        and ((next2 < (string_index'First + 1))
+        or (next2 > string_index'Last)) then
          return CMP_GT;
-      elsif ((next1 < Integer(string_index'First))
-        or (next1 > Integer(string_index'Last)))
-        and (next2 >= Integer(string_index'First))
-        and (next2 <= Integer(string_index'Last)) then
+      elsif ((next1 < (string_index'First + 1))
+        or (next1 > string_index'Last))
+        and (next2 >= (string_index'First + 1))
+        and (next2 <= string_index'Last) then
          return CMP_LT;
       end if;
       return CMP_EQ;
@@ -91,13 +100,13 @@ package body bbs.lisp.strings is
    --  Returns the length of a string in characters
    --
    function length(s : string_index) return Natural is
-      next : Integer := Integer(s);
+      next : string_index := s;
       nxt : string_index;
       count : Natural := 0;
    begin
-      while (next >= Integer(string_index'First))
-        and (next <= Integer(string_index'Last)) loop
-         nxt := string_index(next);
+      while (next >= (string_index'First + 1))
+        and (next <= string_index'Last) loop
+         nxt := next;
          count := count + string_table(nxt).len;
          next := string_table(nxt).next;
       end loop;
@@ -126,7 +135,7 @@ package body bbs.lisp.strings is
             else
                flag := bbs.lisp.memory.alloc(next);
                if flag then
-                  string_table(prev).next := Integer(next);
+                  string_table(prev).next := next;
                   prev := next;
                   string_table(prev).len := 1;
                   string_table(prev).str(1) := str(ptr);
@@ -144,15 +153,15 @@ package body bbs.lisp.strings is
    --  Functions to append to an existing string.
    --
    function append(s : string_index; c : Character) return Boolean is
-      next : Integer := Integer(s);
+      next : string_index := s;
       nxt : string_index;
       count : Natural := 0;
       flag : Boolean;
       frag : string_index;
    begin
-      while (next >= Integer(string_index'First))
-        and (next <= Integer(string_index'Last)) loop
-         nxt := string_index(next);
+      while (next >= (string_index'First + 1))
+        and (next <= string_index'Last) loop
+         nxt := next;
          count := count + string_table(nxt).len;
          next := string_table(nxt).next;
       end loop;
@@ -165,7 +174,7 @@ package body bbs.lisp.strings is
          if flag then
             string_table(frag).str(1) := c;
             string_table(frag).len := 1;
-            string_table(nxt).next := Integer(frag);
+            string_table(nxt).next := frag;
             string_table(frag).next := -1;
             return True;
          else

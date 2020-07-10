@@ -286,7 +286,7 @@ package body bbs.lisp.parser is
             else
                flag := bbs.lisp.memory.alloc(next);
                if flag then
-                  string_table(str).next := Integer(next);
+                  string_table(str).next := next;
                   str := next;
                   string_table(str).len := 1;
                   string_table(str).str(1) := buff(ptr);
