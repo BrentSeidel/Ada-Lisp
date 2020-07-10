@@ -72,4 +72,9 @@ package BBS.lisp.stack is
    --  found, the stack index of the variable is returned, if not 0 is returned.
    --
    function search_frames(offset : stack_index; name : string_index) return stack_index;
+   --
+   --  Searches the stack to find a variable and returns the stack index and offset
+   --
+   function find_offset(name : string_index; index : out stack_index) return stack_index;
 end;
+

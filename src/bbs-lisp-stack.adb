@@ -124,19 +124,13 @@ package body BBS.lisp.stack is
             test_name := test.p_name;
          elsif test.kind = ST_LOCAL then
             test_name := test.l_name;
---         elsif test.kind = ST_EMPTY then
-            --
-            --  This may happen when building a stack frame.
-            --
---            null;
---            put_line("Found an empty stack frame, continuing search.");
          else
             error("search_frames", "Found unexpected entry type " & stack_entry_type'Image(test.kind));
             dump;
             frame := 0;
          end if;
          if test.kind /= ST_EMPTY then
-            eq := bbs.lisp.strings.compare(name, test_name);
+            eq := BBS.lisp.strings.compare(name, test_name);
             if eq = CMP_EQ then
                if test.kind = ST_PARAM then
                   return test.p_value;
@@ -176,19 +170,13 @@ package body BBS.lisp.stack is
             test_name := test.p_name;
          elsif test.kind = ST_LOCAL then
             test_name := test.l_name;
---         elsif test.kind = ST_EMPTY then
-            --
-            --  This may happen when building a stack frame.
-            --
---            null;
---            put_line("Found an empty stack frame, continuing search.");
          else
             error("search_frames", "Found unexpected entry type " & stack_entry_type'Image(test.kind));
             dump;
             frame := 0;
          end if;
          if test.kind /= ST_EMPTY then
-            eq := bbs.lisp.strings.compare(name, test_name);
+            eq := BBS.lisp.strings.compare(name, test_name);
             if eq = CMP_EQ then
                if (test.kind = ST_PARAM) or (test.kind = ST_LOCAL) then
                   return frame + offset;
@@ -208,6 +196,38 @@ package body BBS.lisp.stack is
          end if;
       end loop;
       return 0;
+   end;
+   --
+   --  Searches the stack to find a variable and returns the stack index and offset
+   --
+   function find_offset(name : string_index; index : out stack_index) return stack_index is
+      sp : stack_index := frame_pointer;
+      fp : stack_index := frame_pointer;
+      item  : stack_entry;
+      eq : comparison := CMP_NE;
+   begin
+      while sp > 0 loop
+         item := stack(sp);
+         case item.kind is
+            when ST_FRAME =>
+               fp := item.next;
+            when ST_LOCAL =>
+               eq := BBS.lisp.strings.compare(name, item.l_name);
+            when ST_PARAM =>
+               eq := BBS.lisp.strings.compare(name, item.p_name);
+            when others =>
+               null;
+         end case;
+         sp := sp - 1;
+         exit when eq = CMP_EQ;
+      end loop;
+      if eq = CMP_EQ then
+         index := sp;
+         return sp - fp;
+      else
+         index := 0;
+         return 0;
+      end if;
    end;
    --
 

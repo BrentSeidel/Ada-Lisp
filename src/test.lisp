@@ -72,6 +72,6 @@
     (+ (fib (- n 2)) (fib (- n 1)))))
 
 (defun test (n)
-  (setq n 3)
+  (setq n (+ 3 1))
   (print "N is " n))
 

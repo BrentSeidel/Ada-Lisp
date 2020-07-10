@@ -334,6 +334,8 @@ package body BBS.lisp.evaluate is
       p3 : element_type;
       ret : element_type;
       flag : Boolean;
+      stacked : Boolean := False;
+      index : stack_index;
 
       procedure deref_previous(s : symb_index) is
       begin
@@ -360,7 +362,7 @@ package body BBS.lisp.evaluate is
                end if;
             elsif p3.kind = E_TEMPSYM then
                tempsym := p3.tempsym;
-               flag := get_symb(symb, string_index(tempsym_table(tempsym)));
+               flag := get_symb(symb, tempsym_table(tempsym));
                if flag then
                  cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
                  null;
@@ -380,14 +382,19 @@ package body BBS.lisp.evaluate is
             p2 := cons_table(e.ps).cdr;  --  Should be value to be assigned
             if p1.kind = E_SYMBOL then
                symb := p1.sym;
+            elsif (p1.kind = E_PARAM) or (p1.kind = E_LOCAL) then
+               stacked := True;
             else
                error("setq", "First parameter is not a symbol.");
+               Put_Line("Kind is " & ptr_type'Image(p1.kind));
                return NIL_ELEM;
             end if;
-            if (symb_table(symb).kind = BUILTIN) or
-              (symb_table(symb).kind = SPECIAL) then
-               error("setq", "Can't assign a value to a builtin or special symbol");
-               return NIL_ELEM;
+            if not stacked then
+               if (symb_table(symb).kind = BUILTIN) or
+                 (symb_table(symb).kind = SPECIAL) then
+                  error("setq", "Can't assign a value to a builtin or special symbol");
+                  return NIL_ELEM;
+               end if;
             end if;
             --
             --  At this point, p1 should be an element containing a valid symbol and
@@ -400,20 +407,44 @@ package body BBS.lisp.evaluate is
                p3 := cons_table(p2.ps).car;
                if p3.kind = E_CONS then
                   ret := eval_dispatch(p3.ps);
+               else -- p3 is an element
+                  ret := BBS.lisp.utilities.indirect_elem(p3);
+               end if;
+               --
+               --  Check for stack variables
+               --
+               if stacked then
+                  if p1.kind = E_PARAM then
+                     index := BBS.lisp.stack.search_frames(p1.p_offset, p1.p_name);
+                     BBS.lisp.memory.deref((kind => E_VALUE, v => BBS.lisp.stack.stack(index).p_value));
+                     BBS.lisp.memory.ref(ret);
+                     if ret.kind = E_VALUE then
+                        BBS.lisp.stack.stack(index).p_value := ret.v;
+                     elsif ret.kind = E_CONS then
+                        BBS.lisp.stack.stack(index).p_value := (kind => V_LIST, l => ret.ps);
+                     end if;
+                  elsif p1.kind = E_LOCAL then
+                     index := BBS.lisp.stack.search_frames(p1.l_offset, p1.l_name);
+                     BBS.lisp.memory.deref((kind => E_VALUE, v => BBS.lisp.stack.stack(index).l_value));
+                     BBS.lisp.memory.ref(ret);
+                     if ret.kind = E_VALUE then
+                        BBS.lisp.stack.stack(index).l_value := ret.v;
+                     elsif ret.kind = E_CONS then
+                        BBS.lisp.stack.stack(index).l_value := (kind => V_LIST, l => ret.ps);
+                     end if;
+                  end if;
+               else
                   deref_previous(symb);
                   BBS.lisp.memory.ref(ret);
                   symb_table(symb) := (ref => 1, Kind => VARIABLE,
-                                    pv => ret, str => symb_table(symb).str);
-                  return ret;
-               else -- p3 is an element
-                  ret := BBS.lisp.utilities.indirect_elem(p3);
-                  deref_previous(symb);
-                  symb_table(symb) := (ref => 1, Kind => VARIABLE,
-                                    pv => ret, str => symb_table(symb).str);
-                  return ret;
+                                       pv => ret, str => symb_table(symb).str);
                end if;
+               return ret;
             elsif p2.kind = E_VALUE then -- Rare, CDR is an value.
                deref_previous(symb);
+               --
+               --  At some point, this needs to be updated to check for stack variables.
+               --
                symb_table(symb) := (ref => 1, Kind => VARIABLE,
                                  pv => p2, str => symb_table(symb).str);
                return p2;
