@@ -5,13 +5,20 @@ a full Common Lisp, but can provide a simple Lisp-like programming environment.
 If you find it useful or interesting, drop me a note at brentseidel@gmail.com and
 let me know.
 
+## Interpreter/Compiler
+I am calling this an interpreter, though the boundaries are a bit fuzzy.  The input text is
+converted into s-expressions that represent the program.  The address for the builtin
+operations are stored in the s-expression and are then directly called when evaluated.
+It may be considered to be a threaded interpreter (which as nothing to do with programming
+threads as a method of concurrent programming).
+
 ## Goals
 While under initial development, this runs on a host computer (MacOs, in my case), the
-goal is to get it to run on Arm based embedded systems.  Many of these little Arm based
-boards have more computing power than the personal computers that I grew up with and it
-seemed like a good idea to provide some sort of interpreter that could be used to write
-simple programs directly on the board.  I did briefly toy with the idea of a tiny BASIC
-interpreter, but quickly abandoned that idea in favor of Lisp.
+goal (achieved) is to get it to run on ARM based embedded systems.  Many of these little
+ARM based boards have more computing power than the personal computers that I grew up
+with and it seemed like a good idea to provide some sort of interpreter that could be
+used to write simple programs directly on the board.  I did briefly toy with the idea
+of a tiny BASIC interpreter, but quickly abandoned that idea in favor of Lisp.
 
 The idea is that not only can simple programs be written, but it can also be used to
 develop algorithms for accessing the board's hardware.  Once the algorithm development is
@@ -23,19 +30,22 @@ finished, they can be translated into Ada and compiled.
 It now runs on the Arduino Due.  It took a bit of work to remove all dependencies
 on Ada libraries that aren't available on the Arduino Due.  Another feature added
 was the ability for the host software to add custom lisp commands.  Thus, the
-main Arduino Due program can add custom lisp commands for accessing the Arduino
+main Arduino Due program can add custom Lisp commands for accessing the Arduino
 hardware.
+
+This Lisp interpreter also builds and runs on Windows 10.
 
 ### Supported Data Types
 1. Integers are the standard Ada integer type.
 2. Strings are variable length and implemented using a linked list.
+3. Booleans are either "T" (true) or "NIL" (false).
 
 ### Supported Operations
 1. Basic arithmetic
 2. Comparisons
 3. List operations - CAR and CDR
 4. DOWHILE
-5. Function definition is under development
+5. User defined functions.
 6. Hardware access.  This is done by allowing the host software to add custom lisp
 commands.  This may also be useful for embedding the lisp interpreter in other
 applications.
@@ -46,7 +56,7 @@ be implemented, others will never be implemented.  The goal is to have a useful
 little language, not another port of Common Lisp.
 1. Macros.  This is a long term goal.  I would like to implement these, but I need to
 figure out how first.
-2. Local variables.  I have an idea that might work.
+2. Local variables.  This is currently under development.
 3. Object oriented features.  This will probably never happen.
 4. Closures.  This will probably never happen
 
