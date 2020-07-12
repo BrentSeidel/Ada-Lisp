@@ -152,6 +152,9 @@ package body bbs.lisp.utilities is
          exit when cons_table(temp).cdr.kind /= E_CONS;
          temp := cons_table(temp).cdr.ps;
       end loop;
+         --
+         --  Process the last element, it it exists in a CDR
+         --
       if cons_table(temp).cdr.kind /= E_CONS then
          if process_element(cons_table(temp).cdr, lib, new_elem) then
             BBS.lisp.memory.deref(cons_table(temp).cdr);
@@ -159,9 +162,6 @@ package body bbs.lisp.utilities is
             BBS.lisp.memory.ref(cons_table(temp).cdr);
             count := count + 1;
          end if;
-         --
-         --  Process the last atom
-         --
       end if;
       return count;
    end;

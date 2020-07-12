@@ -328,7 +328,6 @@ package body BBS.lisp.evaluate is
    --
    function setq(e : element_type; p : phase) return element_type is
       symb : symb_index;
-      tempsym : tempsym_index;
       p1 : element_type;
       p2 : element_type;
       p3 : element_type;
@@ -349,6 +348,7 @@ package body BBS.lisp.evaluate is
 
    begin
       if p = PARSE then
+         msg("setq", "Called during parse phase.");
          if e.kind = E_CONS then
             p1 := cons_table(e.ps).car;  --  Should be symbol for setq
             p2 := cons_table(e.ps).cdr;
@@ -361,11 +361,10 @@ package body BBS.lisp.evaluate is
                   return NIL_ELEM;
                end if;
             elsif p3.kind = E_TEMPSYM then
-               tempsym := p3.tempsym;
-               flag := get_symb(symb, tempsym_table(tempsym));
+               flag := get_symb(symb, tempsym_table(p3.tempsym));
                if flag then
-                 cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
-                 null;
+                  BBS.lisp.memory.ref(tempsym_table(p3.tempsym));
+                  cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
                else
                   error("setq", "Unable to add symbol ");
                end if;
@@ -377,6 +376,7 @@ package body BBS.lisp.evaluate is
             error("setq", "Something went horribly wrong and setq did not get a list");
          end if;
       elsif p = EXECUTE then
+         msg("setq", "Called during execute phase.");
          if e.kind = E_CONS then
             p1 := cons_table(e.ps).car;  --  Should be symbol name
             p2 := cons_table(e.ps).cdr;  --  Should be value to be assigned
@@ -609,7 +609,7 @@ package body BBS.lisp.evaluate is
       p2 : element_type;
       p3 : element_type;
       symb : symb_index;
-      tempsym : tempsym_index;
+--      tempsym : tempsym_index;
       flag : Boolean;
       count : Natural := 0;
    begin
@@ -630,11 +630,11 @@ package body BBS.lisp.evaluate is
                   return NIL_ELEM;
                end if;
             elsif p3.kind = E_TEMPSYM then
-               tempsym := p3.tempsym;
-               flag := get_symb(symb, string_index(tempsym_table(tempsym)));
+--               tempsym := p3.tempsym;
+               flag := get_symb(symb, string_index(tempsym_table(p3.tempsym)));
                if flag then
-                 cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
-                 null;
+                  BBS.lisp.memory.ref(tempsym_table(p3.tempsym));
+                  cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
                else
                   error("defun", "Unable to add symbol ");
                end if;
@@ -695,6 +695,7 @@ package body BBS.lisp.evaluate is
             elsif (el.kind = E_TEMPSYM) then
                msg("defun", "Converting tempsym to parameter");
                str := string_index(tempsym_table(el.tempsym));
+               BBS.lisp.memory.ref(str);
                el := (kind => E_PARAM, p_name => str,
                       p_offset => offset);
             else
@@ -721,8 +722,8 @@ package body BBS.lisp.evaluate is
       --  symbol.
       --
       if name.kind = E_TEMPSYM then
-         tempsym := name.tempsym;
-         flag := get_symb(symb, string_index(tempsym_table(tempsym)));
+--         tempsym := name.tempsym;
+         flag := get_symb(symb, string_index(tempsym_table(name.tempsym)));
          if not flag then
             error("defun", "Unable to add symbol ");
             BBS.lisp.stack.exit_frame;

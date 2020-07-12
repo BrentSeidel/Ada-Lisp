@@ -7,9 +7,6 @@ package body bbs.lisp.memory is
       for i in cons_index loop
          cons_table(i).ref := 0;
       end loop;
---      for i in atom_index loop
---         atom_table(i).ref := 0;
---      end loop;
       for i in symb_index loop
          symb_table(i).ref := 0;
       end loop;
@@ -25,8 +22,11 @@ package body bbs.lisp.memory is
    procedure reset_tempsym is
    begin
       for i in tempsym_index loop
+         if (tempsym_table(i) >= 0) then
+            deref(tempsym_table(i));
+         end if;
          tempsym_table(i) := -1;
-        end loop;
+      end loop;
    end;
    --
    --  Find an used cons cell in the table, mark it as USED, and return the
@@ -69,6 +69,9 @@ package body bbs.lisp.memory is
    --
    procedure ref(s : cons_index) is
    begin
+      if cons_table(s).ref = 0 then
+         error("ref cons", "Attempting to ref an unallocated cons.");
+      end if;
       cons_table(s).ref :=  cons_table(s).ref + 1;
    end;
    --
@@ -76,7 +79,10 @@ package body bbs.lisp.memory is
    --
    procedure ref(s : string_index) is
    begin
-      null;
+      if string_table(s).ref = 0 then
+         error("ref string", "Attempting to ref an unallocated string.");
+      end if;
+    string_table(s).ref := string_table(s).ref + 1;
    end;
    --
    --  Increments the reference count of the item pointed to by an element pointer.

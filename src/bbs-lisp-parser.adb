@@ -214,14 +214,17 @@ package body bbs.lisp.parser is
          --  Check for boolean values.
          --
          if (string_table(test).len = 1) and (string_table(test).str(1) = 'T') then
+            BBS.lisp.memory.deref(test);
             return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
          end if;
          if (string_table(test).len = 3) and (string_table(test).str(1..3) = "NIL") then
+            BBS.lisp.memory.deref(test);
             return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
          end if;
          --
          -- Now check for symbols
          --
+--         Put_Line("Parse Symbols: Searching symbol table.");
          flag := find_symb(symb, test);
          if flag then
             BBS.lisp.memory.deref(test);
@@ -229,6 +232,17 @@ package body bbs.lisp.parser is
          else
             flag := get_tempsym(tempsym, test);
             if flag then
+--               Put("String <");
+--               print(test);
+--               Put_Line("> in temporary symbol table.");
+--               Put_Line("  String index is " & string_index'Image(test));
+--               Put_Line("  Reference count is " & Natural'Image(string_table(test).ref));
+               BBS.lisp.memory.deref(test);
+--               Put("String <");
+--               print(test);
+--               Put_Line("> in temporary symbol table.");
+--               Put_Line("  String index is " & string_index'Image(test));
+--               Put_Line("  Reference count is " & Natural'Image(string_table(test).ref));
                return (kind => E_TEMPSYM, tempsym => tempsym);
             end if;
          end if;

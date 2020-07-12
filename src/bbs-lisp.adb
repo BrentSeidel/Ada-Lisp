@@ -445,12 +445,19 @@ package body bbs.lisp is
          end if;
          if bbs.lisp.strings.compare(n, symb_table(i).str) = CMP_EQ then
             s := i;
+--            put("Found symbol name <");
+--            print(n);
+--            Put_Line("> in symbol table.");
             return True;
          end if;
       end loop;
       if available then
          s := free;
+         BBS.lisp.memory.ref(n);
          symb_table(s) := (ref => 1, kind => EMPTY, str => n);
+--         put("Created symbol name <");
+--         print(n);
+--         Put_Line("> in symbol table.");
          return True;
       end if;
       s := 0;
@@ -565,12 +572,17 @@ package body bbs.lisp is
             available := True;
          elsif bbs.lisp.strings.compare(n, tempsym_table(i)) = CMP_EQ then
             s := i;
+--            Put_Line("get_tempsym: Value already exists in temporary symbol table.");
             return true;
          end if;
       end loop;
       if available then
          s := free;
          tempsym_table(s) := n;
+         BBS.lisp.memory.ref(n);
+--         Put_Line("get_tempsym: Adding value to temporary symbol table.");
+--         Put_Line("  String index is " & string_index'Image(n));
+--         Put_Line("  Reference count is " & Natural'Image(string_table(n).ref));
          return True;
       end if;
       error("get_tempsym", "Unable to find empty tempsym");

@@ -257,7 +257,7 @@ private
    --  Temporary symbols are temporary names that may eventually be converted
    --  to regular symbols.
    --
-   tempsym_table : array (tempsym_index) of string_index;
+   tempsym_table : array (tempsym_index) of string_index := (others => -1);
    string_table : array (string_index'First + 1 .. string_index'Last) of fragment;
    --
    --  For debugging, dump the various tables
