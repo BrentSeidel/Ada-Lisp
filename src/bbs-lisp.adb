@@ -3,6 +3,10 @@ with BBS.lisp.evaluate;
 with BBS.lisp.memory;
 with BBS.lisp.strings;
 with BBS.lisp.evaluate;
+with BBS.lisp.evaluate.math;
+with BBS.lisp.evaluate.cond;
+with BBS.lisp.evaluate.loops;
+with BBS.lisp.evaluate.func;
 --with Ada.Text_IO;
 --
 package body bbs.lisp is
@@ -18,19 +22,19 @@ package body bbs.lisp is
       add_builtin("cdr", BBS.lisp.evaluate.cdr'Access);
       add_builtin("print", BBS.lisp.evaluate.print'Access);
       add_special("setq", BBS.lisp.evaluate.setq'Access);
-      add_builtin("if", BBS.lisp.evaluate.eval_if'Access);
-      add_builtin("dowhile", BBS.lisp.evaluate.dowhile'Access);
---      add_builtin("dotimes", BBS.lisp.evaluate.dotimes'Access);
-      add_special("defun", BBS.lisp.evaluate.defun'Access);
-      add_builtin("+", BBS.lisp.evaluate.add'Access);
-      add_builtin("-", BBS.lisp.evaluate.sub'Access);
-      add_builtin("*", BBS.lisp.evaluate.mul'Access);
-      add_builtin("/", BBS.lisp.evaluate.div'Access);
+      add_builtin("if", BBS.lisp.evaluate.cond.eval_if'Access);
+      add_builtin("dowhile", BBS.lisp.evaluate.loops.dowhile'Access);
+--      add_builtin("dotimes", BBS.lisp.evaluate.loops.dotimes'Access);
+      add_special("defun", BBS.lisp.evaluate.func.defun'Access);
+      add_builtin("+", BBS.lisp.evaluate.math.add'Access);
+      add_builtin("-", BBS.lisp.evaluate.math.sub'Access);
+      add_builtin("*", BBS.lisp.evaluate.math.mul'Access);
+      add_builtin("/", BBS.lisp.evaluate.math.div'Access);
       add_builtin("exit", BBS.lisp.evaluate.quit'Access);
-      add_builtin("=", BBS.lisp.evaluate.eq'Access);
-      add_builtin("/=", BBS.lisp.evaluate.ne'Access);
-      add_builtin("<", BBS.lisp.evaluate.lt'Access);
-      add_builtin(">", BBS.lisp.evaluate.gt'Access);
+      add_builtin("=", BBS.lisp.evaluate.cond.eq'Access);
+      add_builtin("/=", BBS.lisp.evaluate.cond.ne'Access);
+      add_builtin("<", BBS.lisp.evaluate.cond.lt'Access);
+      add_builtin(">", BBS.lisp.evaluate.cond.gt'Access);
       add_builtin("dump", BBS.lisp.evaluate.dump'Access);
       add_builtin("reset", BBS.lisp.evaluate.reset'Access);
       add_builtin("quote", BBS.lisp.evaluate.quote'Access);
@@ -674,7 +678,7 @@ package body bbs.lisp is
                      print(sym.ps);
                      new_line;
                   end if;
-                  e := bbs.lisp.evaluate.eval_function(sym.ps, rest);
+                  e := bbs.lisp.evaluate.func.eval_function(sym.ps, rest);
                when VARIABLE =>
                   if msg_flag then
                      Put("eval_dispatch: Evaluating variable ");
