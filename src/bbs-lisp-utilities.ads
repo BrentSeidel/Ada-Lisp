@@ -19,6 +19,10 @@ package bbs.lisp.utilities is
    --
    function replace_syms(s : cons_index; lib : cons_index) return Natural;
    --
+   --  Perform the replacement for a single symbol/variable
+   --
+   function replace_sym(s : cons_index; var : element_type) return Natural;
+   --
    --  The following function examines an atom.  If the atom is some sort of
    --  variable, an element type pointing to the value.  If not, the element
    --  points to the original atom.

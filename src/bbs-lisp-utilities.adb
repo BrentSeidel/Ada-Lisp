@@ -166,6 +166,70 @@ package body bbs.lisp.utilities is
       return count;
    end;
    --
+   --  Perform the replacement for a single symbol/variable
+   --
+   function replace_sym(s : cons_index; var : element_type) return Natural is
+      count : Natural := 0;
+      temp : cons_index := s;
+      new_elem : element_type;
+
+      function process_element(e : element_type; var : element_type;
+                            replace : out element_type) return Boolean is
+--         temp : cons_index := lib;
+         name : string_index;  --  Name of item to potentially replace
+--         var_elem : element_type;
+         var_name : string_index;  -- Name of potential replacement
+      begin
+         if e.kind = E_SYMBOL then
+            name := symb_table(e.sym).str;
+         elsif e.kind = E_TEMPSYM then
+            name := string_index(tempsym_table(e.tempsym));
+         else
+            return False;
+         end if;
+         if var.kind = E_PARAM then
+            var_name := var.p_name;
+         elsif var.kind = E_LOCAL then
+            var_name := var.l_name;
+         else
+            error("replace_syms.process_atom", "Improper atom in library");
+         end if;
+         if bbs.lisp.strings.compare(name, var_name) = CMP_EQ then
+            replace := var;
+            return True;
+         end if;
+         return False;
+      end;
+      --
+   begin
+      loop
+         if cons_table(temp).car.kind /= E_CONS then
+            if process_element(cons_table(temp).car, var, new_elem) then
+               BBS.lisp.memory.deref(cons_table(temp).car);
+               cons_table(temp).car := new_elem;
+               BBS.lisp.memory.ref(cons_table(temp).car);
+               count := count + 1;
+            end if;
+         elsif cons_table(temp).car.kind = E_CONS then
+            count := count + replace_sym(cons_table(temp).car.ps, var);
+         end if;
+         exit when cons_table(temp).cdr.kind /= E_CONS;
+         temp := cons_table(temp).cdr.ps;
+      end loop;
+         --
+         --  Process the last element, it it exists in a CDR
+         --
+      if cons_table(temp).cdr.kind /= E_CONS then
+         if process_element(cons_table(temp).cdr, var, new_elem) then
+            BBS.lisp.memory.deref(cons_table(temp).cdr);
+            cons_table(temp).cdr := new_elem;
+            BBS.lisp.memory.ref(cons_table(temp).cdr);
+            count := count + 1;
+         end if;
+      end if;
+      return count;
+   end;
+   --
    --  The following function examines an atom.  If the atom is some sort of
    --  variable, it returns the atom that the variable points to.  If not, it
    --  just returns the atom.  If the variable points to a list, then the

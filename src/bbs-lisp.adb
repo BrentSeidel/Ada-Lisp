@@ -24,7 +24,7 @@ package body bbs.lisp is
       add_special("setq", BBS.lisp.evaluate.setq'Access);
       add_builtin("if", BBS.lisp.evaluate.cond.eval_if'Access);
       add_builtin("dowhile", BBS.lisp.evaluate.loops.dowhile'Access);
---      add_builtin("dotimes", BBS.lisp.evaluate.loops.dotimes'Access);
+      add_builtin("dotimes", BBS.lisp.evaluate.loops.dotimes'Access);
       add_special("defun", BBS.lisp.evaluate.func.defun'Access);
       add_builtin("+", BBS.lisp.evaluate.math.add'Access);
       add_builtin("-", BBS.lisp.evaluate.math.sub'Access);
