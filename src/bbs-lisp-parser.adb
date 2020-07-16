@@ -105,7 +105,6 @@ package body bbs.lisp.parser is
             if flag then
                flag := append(head, temp);
             end if;
-            item := item + 1;
          --
          --  Check for the start of an integer atom
          --
@@ -121,7 +120,6 @@ package body bbs.lisp.parser is
                   flag := append(head, current);
                end if;
             end if;
-            item := item + 1;
          --
          --  Check for the start of a string
          --
@@ -139,7 +137,6 @@ package body bbs.lisp.parser is
                error("parse list", "Could not allocate string fragment.");
                return False;
             end if;
-            item := item + 1;
          --
          --  Check for a comment
          --
@@ -200,7 +197,6 @@ package body bbs.lisp.parser is
                  return element_type is
       test : string_index;
       symb : symb_index;
-      tempsym : tempsym_index;
       flag : Boolean;
    begin
       flag := BBS.lisp.memory.alloc(test);
@@ -224,27 +220,12 @@ package body bbs.lisp.parser is
          --
          -- Now check for symbols
          --
---         Put_Line("Parse Symbols: Searching symbol table.");
          flag := find_symb(symb, test);
          if flag then
             BBS.lisp.memory.deref(test);
             return (kind => E_SYMBOL, sym => symb);
          else
-            flag := get_tempsym(tempsym, test);
-            if flag then
---               Put("String <");
---               print(test);
---               Put_Line("> in temporary symbol table.");
---               Put_Line("  String index is " & string_index'Image(test));
---               Put_Line("  Reference count is " & Natural'Image(string_table(test).ref));
-               BBS.lisp.memory.deref(test);
---               Put("String <");
---               print(test);
---               Put_Line("> in temporary symbol table.");
---               Put_Line("  String index is " & string_index'Image(test));
---               Put_Line("  Reference count is " & Natural'Image(string_table(test).ref));
-               return (kind => E_TEMPSYM, tempsym => tempsym);
-            end if;
+            return (kind => E_TEMPSYM, tempsym => test);
          end if;
       else
          error("parse symbol", "Unable to allocate string fragment.");

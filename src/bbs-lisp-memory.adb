@@ -13,20 +13,6 @@ package body bbs.lisp.memory is
       for i in string_index'First + 1 .. string_index'Last loop
          string_table(i).ref := 0;
       end loop;
-      reset_tempsym;
-   end;
-   --
-   --  Reset the tempsym table.  This is in a separate procedure since it needs
-   --  to be done more often.
-   --
-   procedure reset_tempsym is
-   begin
-      for i in tempsym_index loop
-         if (tempsym_table(i) >= 0) then
-            deref(tempsym_table(i));
-         end if;
-         tempsym_table(i) := -1;
-      end loop;
    end;
    --
    --  Find an used cons cell in the table, mark it as USED, and return the

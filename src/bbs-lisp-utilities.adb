@@ -110,11 +110,13 @@ package body bbs.lisp.utilities is
          name : string_index;
          var_elem : element_type;
          var_name : string_index;
+         flag : Boolean := False;
       begin
          if e.kind = E_SYMBOL then
             name := symb_table(e.sym).str;
          elsif e.kind = E_TEMPSYM then
-            name := string_index(tempsym_table(e.tempsym));
+            name := e.tempsym;
+            flag := True;
          else
             return False;
          end if;
@@ -128,6 +130,9 @@ package body bbs.lisp.utilities is
                error("replace_syms.process_atom", "Improper atom in library");
             end if;
             if bbs.lisp.strings.compare(name, var_name) = CMP_EQ then
+               if flag then
+                  BBS.lisp.memory.deref(name);
+               end if;
                replace := var_elem;
                return True;
             end if;
@@ -166,7 +171,9 @@ package body bbs.lisp.utilities is
       return count;
    end;
    --
-   --  Perform the replacement for a single symbol/variable
+   --  Perform the replacement for a single symbol/variable.  Searches the list
+   --  s and any symbols or tempsyms whose name matches that of var are replaced
+   --  by var.  This means that stack variables will shadow symbols.
    --
    function replace_sym(s : cons_index; var : element_type) return Natural is
       count : Natural := 0;
@@ -175,15 +182,15 @@ package body bbs.lisp.utilities is
 
       function process_element(e : element_type; var : element_type;
                             replace : out element_type) return Boolean is
---         temp : cons_index := lib;
-         name : string_index;  --  Name of item to potentially replace
---         var_elem : element_type;
-         var_name : string_index;  -- Name of potential replacement
+         name : string_index;      --  Name of item to potentially replace
+         var_name : string_index;  --  Name of potential replacement
+         flag : Boolean := False;  --  Was it a tempsym?
       begin
          if e.kind = E_SYMBOL then
             name := symb_table(e.sym).str;
          elsif e.kind = E_TEMPSYM then
-            name := string_index(tempsym_table(e.tempsym));
+            name := e.tempsym;
+            flag := True;
          else
             return False;
          end if;
@@ -195,6 +202,9 @@ package body bbs.lisp.utilities is
             error("replace_syms.process_atom", "Improper atom in library");
          end if;
          if bbs.lisp.strings.compare(name, var_name) = CMP_EQ then
+            if flag then
+               BBS.lisp.memory.deref(name);
+            end if;
             replace := var;
             return True;
          end if;

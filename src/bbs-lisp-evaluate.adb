@@ -121,9 +121,9 @@ package body BBS.lisp.evaluate is
                   return NIL_ELEM;
                end if;
             elsif p3.kind = E_TEMPSYM then
-               flag := get_symb(symb, tempsym_table(p3.tempsym));
+               flag := get_symb(symb, p3.tempsym);
                if flag then
-                  BBS.lisp.memory.ref(tempsym_table(p3.tempsym));
+                  BBS.lisp.memory.ref(p3.tempsym);
                   cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
                else
                   error("setq", "Unable to add symbol ");

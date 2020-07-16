@@ -12,11 +12,6 @@ package bbs.lisp.memory is
    --
    procedure reset_tables;
    --
-   --  Reset the tempsym table.  This is done more often so is split out of the
-   --  reset_tables procedure.
-   --
-   procedure reset_tempsym;
-   --
    --  Allocate various types of items.  The table is searched for an entry with
    --  a reference count of zero.  If such an entry is found, its reference
    --  count is set to 1 and the output parameter is set to the index of the

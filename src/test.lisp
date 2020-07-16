@@ -58,6 +58,14 @@
     (new-line)
     (setq var (- var 1))))
 ;
+;  Rewriten to use dotimes
+;
+(defun hello (n)
+  (dotimes (var n)
+    (print "Hello #" var)
+    (new-line)))
+
+;
 ;  This should give a workout for recursive functions.  The values returned
 ;  should be:
 ;  (fib 1) => 1

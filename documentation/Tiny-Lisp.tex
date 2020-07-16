@@ -79,13 +79,16 @@ A comment starts with a semicolon character, ``;'', and extends to the end of th
 \subsubsection{Continuation}
 If a list isn't closed (number of open parentheses matches the number of close parentheses) by the end of the line, the interpreter will ask for more text.  This will continue until the list is closed.
 
+\section{Optimization}
+None.  Some could possibly be added, but right now the focus has been on getting things to work correctly.
+
 \section{Syntax}
 
 \subsection{Special Characters}
 There are only a few characters with special significance.  Parenthesis, ``('' and ``)'', are used for delimiting lists.  Quotation marks, ``"'' are used for delimiting strings.  The semicolon, ``;'', indicates a comment.  Spaces are used to separate elements in a list.  That's about it.  However, it's probably best to avoid most symbol characters and some more special characters may be added.  The language is case insensitive thus, \function{CAR}, \function{car}, \function{cAr}, etc all are considered identical by the language.
 
 \subsection{Reserved Words}
-There are almost none.  ``T'' and ``NIL'' refer to the boolean true and false values, and you can't define a symbol that it already used for a builtin or special operation.
+There are almost none.  ``T'' and ``NIL'' refer to the boolean true and false values, and you can't define a symbol that it already used for a builtin or special operation.  However, even the builtin and special operations are not, strictly speaking, reserved words.  Their names are strings that are added to the symbol table during program initialization.  They can easily be changed (say to translate into a different language) and the interpreter recompiled.
 
 \subsection{Examples}
 The basic syntax for languages in the Lisp family is very simple.  Everything is a list of elements, where each element may also be a list.  Elements are separated by spaces and the list is contained in parentheses.  Here is a simple list:
@@ -188,11 +191,14 @@ The special forms do not necessarily evaluate all of the parameters.
 A couple of control flow special forms are available.  More will probably be added.
 \begin{lstlisting}
 (if (> 1 2) (print "True") (print "False"))
-(dowhile (> 1 2) (print "Forever"))
+(dowhile (> 1 2) (print "Forever") (new-line))
+(dotimes (n 5 10) (print "This is printed 5 times") (new-line))
 \end{lstlisting}
 The \operation{if} form has two or three parameters.  The first parameter is a condition.  If the condition evaluates to ``T'', then the second parameter is evaluated.  If the condition evaluates to ``NIL'', then the third parameter, if present, is evaluated.
 
 The \operation{dowhile} form has two parameters.  The first is a condition.  The second is a list of operations to be evaluated.  The second parameter is evaluated as long as the condition evaluates to ``T''.
+
+The \operation{dotimes} form also has two parameters.  The first is a list with two or three elements.  The first element is the name of the local variable used as a loop counter.  The second element is a positive integer giving the number of times to loop.  The third is a value to return at the end of the loop.  If the return value is not provided, ``NIL'' is returned.  The second parameter is a list of operations to be evaluated.
 
 \subsubsection{Variables}
 \begin{lstlisting}

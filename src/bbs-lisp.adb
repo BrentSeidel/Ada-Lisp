@@ -7,7 +7,6 @@ with BBS.lisp.evaluate.math;
 with BBS.lisp.evaluate.cond;
 with BBS.lisp.evaluate.loops;
 with BBS.lisp.evaluate.func;
---with Ada.Text_IO;
 --
 package body bbs.lisp is
    --
@@ -24,7 +23,7 @@ package body bbs.lisp is
       add_special("setq", BBS.lisp.evaluate.setq'Access);
       add_builtin("if", BBS.lisp.evaluate.cond.eval_if'Access);
       add_builtin("dowhile", BBS.lisp.evaluate.loops.dowhile'Access);
-      add_builtin("dotimes", BBS.lisp.evaluate.loops.dotimes'Access);
+      add_special("dotimes", BBS.lisp.evaluate.loops.dotimes'Access);
       add_special("defun", BBS.lisp.evaluate.func.defun'Access);
       add_builtin("+", BBS.lisp.evaluate.math.add'Access);
       add_builtin("-", BBS.lisp.evaluate.math.sub'Access);
@@ -67,7 +66,6 @@ package body bbs.lisp is
    --
    procedure put_line(s : String) is
    begin
---      Ada.Text_IO.Put_Line(s);
       io_Put_Line.all(s);
       first_char_flag := True;
    end;
@@ -102,7 +100,7 @@ package body bbs.lisp is
       flag : Boolean;
       el : element_type;
    begin
-      bbs.lisp.memory.reset_tempsym;
+--      bbs.lisp.memory.reset_tempsym;
       Put("LISP> ");
       Get_Line(buff, size);
       flag := bbs.lisp.parser.parse(buff, size, el);
@@ -372,18 +370,18 @@ package body bbs.lisp is
       end loop;
    end;
    --
-   procedure dump_tempsym is
-   begin
-      for i in tempsym_index loop
-         if (tempsym_table(i) >= (string_index'First + 1))
-           and (tempsym_table(i) <= string_index'Last) then
-            Put("Temp Symbol " & Integer'Image(Integer(i))
-                            & " Name ");
-            print(tempsym_table(i));
-            New_Line;
-         end if;
-      end loop;
-   end;
+--   procedure dump_tempsym is
+--   begin
+--      for i in tempsym_index loop
+--         if (tempsym_table(i) >= (string_index'First + 1))
+--           and (tempsym_table(i) <= string_index'Last) then
+--            Put("Temp Symbol " & Integer'Image(Integer(i))
+--                            & " Name ");
+--            print(tempsym_table(i));
+--            New_Line;
+--         end if;
+--      end loop;
+--   end;
    --
    --  For debugging, dump all strings
    --
@@ -534,65 +532,61 @@ package body bbs.lisp is
    --  If a temporary symbol exists, return it, otherwise create a new temporary
    --  symbol.  Returns false if symbol doesn't exist and can't be created.
    --
-   function get_tempsym(s : out tempsym_index; n : String) return Boolean is
-      free : tempsym_index;
-      available : Boolean := False;
-      name : string_index;
-      flag : Boolean;
-   begin
-      flag := BBS.lisp.strings.str_to_lisp(name, n);
-      if flag then
-         for i in tempsym_index loop
-            if (tempsym_table(i) < (string_index'First + 1))
-              or (tempsym_table(i) > string_index'Last) then
-               free := i;
-               available := True;
-            elsif bbs.lisp.strings.compare(name, tempsym_table(i)) = CMP_EQ then
-               s := i;
-               return true;
-            end if;
-         end loop;
-         if available then
-            s := free;
-            tempsym_table(s) := name;
-            return True;
-         end if;
-         error("get_tempsym", "Unable to find empty tempsym");
-      else
-         error("get_tempsym", "Unable to allocate symbol name.");
-      end if;
-      s := 0;
-      return False;
-   end;
-   --
-   function get_tempsym(s : out tempsym_index; n : string_index) return Boolean is
-      free : tempsym_index;
-      available : Boolean := False;
-   begin
-      for i in tempsym_index loop
-         if (tempsym_table(i) < (string_index'First + 1))
-           or (tempsym_table(i) > string_index'Last) then
-            free := i;
-            available := True;
-         elsif bbs.lisp.strings.compare(n, tempsym_table(i)) = CMP_EQ then
-            s := i;
---            Put_Line("get_tempsym: Value already exists in temporary symbol table.");
-            return true;
-         end if;
-      end loop;
-      if available then
-         s := free;
-         tempsym_table(s) := n;
-         BBS.lisp.memory.ref(n);
---         Put_Line("get_tempsym: Adding value to temporary symbol table.");
---         Put_Line("  String index is " & string_index'Image(n));
---         Put_Line("  Reference count is " & Natural'Image(string_table(n).ref));
-         return True;
-      end if;
-      error("get_tempsym", "Unable to find empty tempsym");
-      s := 0;
-      return False;
-   end;
+--   function get_tempsym(s : out tempsym_index; n : String) return Boolean is
+--      free : tempsym_index;
+--      available : Boolean := False;
+--      name : string_index;
+--      flag : Boolean;
+--   begin
+--      flag := BBS.lisp.strings.str_to_lisp(name, n);
+--      if flag then
+--         for i in tempsym_index loop
+--            if (tempsym_table(i) < (string_index'First + 1))
+--              or (tempsym_table(i) > string_index'Last) then
+--               free := i;
+--               available := True;
+--            elsif bbs.lisp.strings.compare(name, tempsym_table(i)) = CMP_EQ then
+--               s := i;
+--               return true;
+--            end if;
+--         end loop;
+--         if available then
+--            s := free;
+--            tempsym_table(s) := name;
+--            return True;
+--         end if;
+--         error("get_tempsym", "Unable to find empty tempsym");
+--      else
+--         error("get_tempsym", "Unable to allocate symbol name.");
+--      end if;
+--      s := 0;
+--      return False;
+--   end;
+--
+--   function get_tempsym(s : out tempsym_index; n : string_index) return Boolean is
+--      free : tempsym_index;
+--      available : Boolean := False;
+--   begin
+--      for i in tempsym_index loop
+--         if (tempsym_table(i) < (string_index'First + 1))
+--           or (tempsym_table(i) > string_index'Last) then
+--            free := i;
+--            available := True;
+--         elsif bbs.lisp.strings.compare(n, tempsym_table(i)) = CMP_EQ then
+--            s := i;
+--            return true;
+--         end if;
+--      end loop;
+--      if available then
+--         s := free;
+--         tempsym_table(s) := n;
+--         BBS.lisp.memory.ref(n);
+--         return True;
+--      end if;
+--      error("get_tempsym", "Unable to find empty tempsym");
+--      s := 0;
+--      return False;
+--   end;
    --
    --  Creates a cons cell to hold an atom.  This can then be appended to a list.
    --

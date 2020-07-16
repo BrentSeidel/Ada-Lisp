@@ -62,7 +62,7 @@ package body BBS.lisp.evaluate.loops is
    --  executed the specified number of times.
    --  (dotimes (local count [result]) <body>).
    --
-   function dotimes(e : element_type) return element_type is
+   function dotimes(e : element_type; p : phase) return element_type is
       limits : element_type; --  Condition to evaluate
       list : element_type; --  List of operations to execute
       result : element_type := NIL_ELEM;
@@ -75,69 +75,107 @@ package body BBS.lisp.evaluate.loops is
       t : element_type := NIL_ELEM;
       temp : element_type;
    begin
-      if e.kind = E_CONS then
-         limits := cons_table(e.ps).car;
-         list := cons_table(e.ps).cdr;
-         --
-         --  Extract local variable, limit, and optional result
-         --
-         if limits.kind = E_CONS then
-            var := cons_table(limits.ps).car;
-            rest := cons_table(limits.ps).cdr;
-         else
-            error("dowhile", "List not provided for limits.");
-            return NIL_ELEM;
-         end if;
-         if rest.kind = E_CONS then
-            limit := cons_table(rest.ps).car;
-            if limit.kind = E_CONS then
-               limit := eval_dispatch(limit.ps);
+      if p = PARSE then
+         if e.kind = E_CONS then
+            list := cons_table(e.ps).car;   -- This is the dotimes symbol and ignored here
+            limits := cons_table(e.ps).cdr;
+            --
+            --  Extract local variable, limit, and optional result
+            --
+            limits := cons_table(limits.ps).car;
+            if limits.kind = E_CONS then
+               var := cons_table(limits.ps).car;
+               rest := cons_table(limits.ps).cdr;
             else
-               limit := BBS.lisp.utilities.indirect_elem(limit);
-            end if;
-            result := cons_table(rest.ps).cdr;
-            if result.kind = E_CONS then
-               result := cons_table(result.ps).car;
-            end if;
-         else
-            error("dowhile", "Loop limit not provided.");
-            return NIL_ELEM;
-         end if;
-         --
-         --  Evaluate and validate the loop parameters
-         --
-         --  First convert the loop variable to a local variable, if not already
-         --  done.
-         --
-         if var.kind /= E_LOCAL then
-            if var.kind = E_CONS then
-               error("dowhile", "The loop variable cannot be a list.");
+               error("dotimes", "List not provided for limits.");
                return NIL_ELEM;
             end if;
-            declare
-               str : string_index;
-            begin
-               if (var.kind = E_SYMBOL) then
-                  str := symb_table(var.sym).str;
-                  msg("dowhile", "Converting symbol to parameter");
-                  var := (kind => E_LOCAL, l_name => str, l_offset => 1);
-               elsif (var.kind = E_TEMPSYM) then
-                  msg("dowhile", "Converting tempsym to parameter");
-                  str := string_index(tempsym_table(var.tempsym));
-                  BBS.lisp.memory.ref(str);
-                  var := (kind => E_LOCAL, l_name => str, l_offset => 1);
+            print(rest, False, True);
+            if rest.kind = E_CONS then
+               limit := cons_table(rest.ps).car;
+               if limit.kind = E_CONS then
+                  limit := eval_dispatch(limit.ps);
                else
-                  error("dowhile", "Can't convert item into a parameter.");
-                  print(var, False, True);
+                  limit := BBS.lisp.utilities.indirect_elem(limit);
+               end if;
+               result := cons_table(rest.ps).cdr;
+               if result.kind = E_CONS then
+                  result := cons_table(result.ps).car;
+               end if;
+            else
+               error("dotimes", "Loop limit not provided.");
+               return NIL_ELEM;
+            end if;
+            --
+            --  Evaluate and validate the loop parameters
+            --
+            --  First convert the loop variable to a local variable, if not already
+            --  done.
+            --
+            if var.kind /= E_LOCAL then
+               if var.kind = E_CONS then
+                  error("dowhile", "The loop variable cannot be a list.");
                   return NIL_ELEM;
                end if;
-            end;
+               declare
+                  str : string_index;
+               begin
+                  if (var.kind = E_SYMBOL) then
+                     msg("dotimes", "Converting symbol to parameter");
+                     str := symb_table(var.sym).str;
+                     var := (kind => E_LOCAL, l_name => str, l_offset => 1);
+                  elsif (var.kind = E_TEMPSYM) then
+                     msg("dotimes", "Converting tempsym to parameter");
+                     str := var.tempsym;
+--                     BBS.lisp.memory.ref(str);
+                     var := (kind => E_LOCAL, l_name => str, l_offset => 1);
+                  else
+                     error("dotimes", "Can't convert item into a parameter.");
+                     print(var, False, True);
+                     return NIL_ELEM;
+                  end if;
+               end;
+            end if;
+            --
+            --  Var has been converted to a local variable.  Now put it back into
+            --  the list.
+            --
+            cons_table(limits.ps).car := var;
          end if;
+         return NIL_ELEM;
+      elsif p = EXECUTE then
          --
-         --  Var has been converted to a local variable.  Now put it back into
-         --  the list.
+         --  EXECUTE Phase
          --
-         cons_table(limits.ps).car := var;
+         if e.kind = E_CONS then
+            limits := cons_table(e.ps).car;
+            list := cons_table(e.ps).cdr;
+            --
+            --  Extract local variable, limit, and optional result
+            --
+            if limits.kind = E_CONS then
+               var := cons_table(limits.ps).car;
+               rest := cons_table(limits.ps).cdr;
+            else
+               error("dotimes", "List not provided for limits.");
+               return NIL_ELEM;
+            end if;
+            if rest.kind = E_CONS then
+               limit := cons_table(rest.ps).car;
+               if limit.kind = E_CONS then
+                  limit := eval_dispatch(limit.ps);
+               else
+                  limit := BBS.lisp.utilities.indirect_elem(limit);
+               end if;
+               result := cons_table(rest.ps).cdr;
+               if result.kind = E_CONS then
+                  result := cons_table(result.ps).car;
+               end if;
+            else
+               error("dotimes", "Loop limit not provided.");
+               return NIL_ELEM;
+            end if;
+         end if;
          --
          --  Next determine what the loop limit is
          --
@@ -151,11 +189,11 @@ package body BBS.lisp.evaluate.loops is
                   return NIL_ELEM;
                end if;
             else
-               error("dowhile", "Limit is not an integer");
+               error("dotimes", "Limit is not an integer");
                return NIL_ELEM;
             end if;
          else
-            error("dowhile", "Limit is not a value");
+            error("dotimes", "Limit is not a value");
             return NIL_ELEM;
          end if;
          --
@@ -212,4 +250,5 @@ package body BBS.lisp.evaluate.loops is
       end if;
       return t;
    end;
+
 end;

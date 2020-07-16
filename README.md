@@ -44,7 +44,7 @@ This Lisp interpreter also builds and runs on Windows 10.
 1. Basic arithmetic
 2. Comparisons
 3. List operations - CAR and CDR
-4. DOWHILE
+4. DOWHILE/DOTIMES
 5. User defined functions.
 6. Hardware access.  This is done by allowing the host software to add custom lisp
 commands.  This may also be useful for embedding the lisp interpreter in other
@@ -58,7 +58,8 @@ little language, not another port of Common Lisp.
 figure out how first.
 2. Local variables.  This is currently under development.
 3. Object oriented features.  This will probably never happen.
-4. Closures.  This will probably never happen
+4. Closures.  This will probably never happen.
+5. Passing functions as parameters.  This may happen.
 
 ## Internals
 
