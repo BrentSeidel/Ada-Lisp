@@ -78,6 +78,8 @@ package body BBS.lisp.stack is
       e : stack_entry;
    begin
       put_line("Stack dump start");
+      Put_Line("SP: " & stack_index'Image(stack_pointer) & ", FP: " &
+                 stack_index'Image(frame_pointer));
       for i in stack_index'First + 1 .. stack_index'Last loop
          e := stack(i);
          case e.kind is
@@ -201,13 +203,16 @@ package body BBS.lisp.stack is
    --  Searches the stack to find a variable and returns the stack index and offset
    --
    function find_offset(name : string_index; index : out stack_index) return stack_index is
-      sp : stack_index := frame_pointer;
+      sp : stack_index := stack_pointer;
       fp : stack_index := frame_pointer;
       item  : stack_entry;
       eq : comparison := CMP_NE;
    begin
+--      Put_Line("find_offset: Starting sp: " & stack_index'Image(sp) & ", fp: " &
+--                 stack_index'Image(fp));
       while sp > 0 loop
          item := stack(sp);
+--         Put_Line("find_offset: Checking item of kind " & stack_entry_type'Image(item.kind));
          case item.kind is
             when ST_FRAME =>
                fp := item.next;
@@ -218,8 +223,8 @@ package body BBS.lisp.stack is
             when others =>
                null;
          end case;
-         sp := sp - 1;
          exit when eq = CMP_EQ;
+         sp := sp - 1;
       end loop;
       if eq = CMP_EQ then
          index := sp;

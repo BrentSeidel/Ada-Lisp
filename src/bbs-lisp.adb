@@ -1,6 +1,8 @@
 with BBS.lisp.parser;
 with BBS.lisp.evaluate;
 with BBS.lisp.memory;
+with BBS.lisp.stack;
+use type BBS.lisp.stack.stack_entry_type;
 with BBS.lisp.strings;
 with BBS.lisp.evaluate;
 with BBS.lisp.evaluate.math;
@@ -100,7 +102,6 @@ package body bbs.lisp is
       flag : Boolean;
       el : element_type;
    begin
---      bbs.lisp.memory.reset_tempsym;
       Put("LISP> ");
       Get_Line(buff, size);
       flag := bbs.lisp.parser.parse(buff, size, el);
@@ -370,19 +371,6 @@ package body bbs.lisp is
       end loop;
    end;
    --
---   procedure dump_tempsym is
---   begin
---      for i in tempsym_index loop
---         if (tempsym_table(i) >= (string_index'First + 1))
---           and (tempsym_table(i) <= string_index'Last) then
---            Put("Temp Symbol " & Integer'Image(Integer(i))
---                            & " Name ");
---            print(tempsym_table(i));
---            New_Line;
---         end if;
---      end loop;
---   end;
-   --
    --  For debugging, dump all strings
    --
    procedure dump_strings is
@@ -403,6 +391,8 @@ package body bbs.lisp is
    --  Find a symbol in the symbol table or create a new entry if the name does
    --  not exist.  Return false if name not found and unable to allocate new
    --  symbol entry.  If a new entry is being created, the kind is set to EMPTY.
+   --
+   --  The get_symb() functions will probably be depricated for most uses.
    --
    function get_symb(s : out symb_index; n : String) return Boolean is
       free : symb_index;
@@ -447,9 +437,6 @@ package body bbs.lisp is
          end if;
          if bbs.lisp.strings.compare(n, symb_table(i).str) = CMP_EQ then
             s := i;
---            put("Found symbol name <");
---            print(n);
---            Put_Line("> in symbol table.");
             return True;
          end if;
       end loop;
@@ -457,9 +444,6 @@ package body bbs.lisp is
          s := free;
          BBS.lisp.memory.ref(n);
          symb_table(s) := (ref => 1, kind => EMPTY, str => n);
---         put("Created symbol name <");
---         print(n);
---         Put_Line("> in symbol table.");
          return True;
       end if;
       s := 0;
@@ -492,8 +476,8 @@ package body bbs.lisp is
    --
    function find_symb(s : out symb_index; n : string_index) return Boolean is
    begin
+      BBS.lisp.strings.uppercase(n);
       for i in symb_index loop
-         BBS.lisp.strings.uppercase(n);
          if bbs.lisp.strings.compare(n, symb_table(i).str) = CMP_EQ then
             s := i;
             return true;
@@ -501,6 +485,90 @@ package body bbs.lisp is
       end loop;
       s := 0;
       return False;
+   end;
+   --
+   --  1. Search the symbol table to determine if the string matches an existing
+   --     symbol.  If it does and the symbol is BUILTIN or SPECIAL, return that.
+   --  2. Search the stack frames to see if the name matches a variable on the
+   --     stack.  If found, return that.
+   --  3. If the name matched a symbol of type LAMBDA, VARIABLE, or EMPTY in step
+   --     1, return that.
+   --  4. Create a new symbol of type EMPTY in the symbol table, if create is True
+   --  5. If create is False, return a tempsym.
+   --
+   function find_variable(n : string_index; create : Boolean) return element_type is
+      free : symb_index;
+      available : Boolean := False;
+      temp : symb_index;
+      symb : symbol;
+      offset : stack_index;
+      sp : stack_index;
+      found : Boolean := False;
+      item : BBS.lisp.stack.stack_entry;
+   begin
+      BBS.lisp.strings.uppercase(n);
+      --
+      --  Search the symbol table
+      --
+      for i in symb_index loop
+         if bbs.lisp.strings.compare(n, symb_table(i).str) = CMP_EQ then
+            temp := i;
+            symb := symb_table(temp);
+            found := True;
+            exit;
+         end if;
+         if symb_table(i).ref = 0 then
+            free := i;
+            available := True;
+         end if;
+      end loop;
+      if found then
+         if (symb.kind = BUILTIN) or (symb.kind = SPECIAL) then
+            return (kind => E_SYMBOL, sym => temp);
+         end if;
+      end if;
+      --
+      --  Search stack frames.
+      --
+      offset := BBS.lisp.stack.find_offset(n, sp);
+      if (sp > 0) and (offset > 0) then
+         item := BBS.lisp.stack.stack(sp);
+         if item.kind = BBS.lisp.stack.ST_PARAM then
+            BBS.lisp.memory.ref(item.p_name);
+            return (kind => E_PARAM, p_name => item.p_name, p_offset => offset);
+         elsif item.kind = BBS.lisp.stack.ST_LOCAL then
+            BBS.lisp.memory.ref(item.l_name);
+            return (kind => E_LOCAL, l_name => item.l_name, l_offset => offset);
+         else
+            error("find_variable", "Item on stack is of type " &
+                    BBS.lisp.stack.stack_entry_type'Image(BBS.lisp.stack.stack(sp).kind));
+         end if;
+      end if;
+      --
+      --  Check if the symbol found earlier was LAMBDA, VARIABLE, or EMPTY.  If
+      --  so, then use it.
+      --
+      if found then
+         if (symb.kind = LAMBDA) or (symb.kind = VARIABLE) or (symb.kind = EMPTY) then
+            return (kind => E_SYMBOL, sym => temp);
+         end if;
+      end if;
+      --
+      --  If nothing is found, at this point, try to create a symbol in the symbol
+      --  table and return it.
+      --
+      if create then
+         if available then
+            BBS.lisp.memory.ref(n);
+            symb_table(free) := (ref => 1, kind => EMPTY, str => n);
+            return (kind => E_SYMBOL, sym => free);
+         end if;
+      else
+         BBS.lisp.memory.ref(n);
+         return (kind => E_TEMPSYM, tempsym => n);
+      end if;
+      error("find_variable", "Oddly, no option matched.");
+      return NIL_ELEM;
    end;
    --
    procedure add_builtin(n : String; f : execute_function) is
@@ -528,65 +596,6 @@ package body bbs.lisp is
          error("add_special", "Unable to add special symbol " & n);
       end if;
    end;
-   --
-   --  If a temporary symbol exists, return it, otherwise create a new temporary
-   --  symbol.  Returns false if symbol doesn't exist and can't be created.
-   --
---   function get_tempsym(s : out tempsym_index; n : String) return Boolean is
---      free : tempsym_index;
---      available : Boolean := False;
---      name : string_index;
---      flag : Boolean;
---   begin
---      flag := BBS.lisp.strings.str_to_lisp(name, n);
---      if flag then
---         for i in tempsym_index loop
---            if (tempsym_table(i) < (string_index'First + 1))
---              or (tempsym_table(i) > string_index'Last) then
---               free := i;
---               available := True;
---            elsif bbs.lisp.strings.compare(name, tempsym_table(i)) = CMP_EQ then
---               s := i;
---               return true;
---            end if;
---         end loop;
---         if available then
---            s := free;
---            tempsym_table(s) := name;
---            return True;
---         end if;
---         error("get_tempsym", "Unable to find empty tempsym");
---      else
---         error("get_tempsym", "Unable to allocate symbol name.");
---      end if;
---      s := 0;
---      return False;
---   end;
---
---   function get_tempsym(s : out tempsym_index; n : string_index) return Boolean is
---      free : tempsym_index;
---      available : Boolean := False;
---   begin
---      for i in tempsym_index loop
---         if (tempsym_table(i) < (string_index'First + 1))
---           or (tempsym_table(i) > string_index'Last) then
---            free := i;
---            available := True;
---         elsif bbs.lisp.strings.compare(n, tempsym_table(i)) = CMP_EQ then
---            s := i;
---            return true;
---         end if;
---      end loop;
---      if available then
---         s := free;
---         tempsym_table(s) := n;
---         BBS.lisp.memory.ref(n);
---         return True;
---      end if;
---      error("get_tempsym", "Unable to find empty tempsym");
---      s := 0;
---      return False;
---   end;
    --
    --  Creates a cons cell to hold an atom.  This can then be appended to a list.
    --

@@ -88,7 +88,7 @@ None.  Some could possibly be added, but right now the focus has been on getting
 There are only a few characters with special significance.  Parenthesis, ``('' and ``)'', are used for delimiting lists.  Quotation marks, ``"'' are used for delimiting strings.  The semicolon, ``;'', indicates a comment.  Spaces are used to separate elements in a list.  That's about it.  However, it's probably best to avoid most symbol characters and some more special characters may be added.  The language is case insensitive thus, \function{CAR}, \function{car}, \function{cAr}, etc all are considered identical by the language.
 
 \subsection{Reserved Words}
-There are almost none.  ``T'' and ``NIL'' refer to the boolean true and false values, and you can't define a symbol that it already used for a builtin or special operation.  However, even the builtin and special operations are not, strictly speaking, reserved words.  Their names are strings that are added to the symbol table during program initialization.  They can easily be changed (say to translate into a different language) and the interpreter recompiled.
+There are almost none.  \constant{T} and \constant{NIL} refer to the boolean true and false values, and you can't define a symbol that it already used for a builtin or special operation.  However, even the builtin and special operations are not, strictly speaking, reserved words.  Their names are strings that are added to the symbol table during program initialization.  They can easily be changed (say to translate into a different language) and the interpreter recompiled.
 
 \subsection{Examples}
 The basic syntax for languages in the Lisp family is very simple.  Everything is a list of elements, where each element may also be a list.  Elements are separated by spaces and the list is contained in parentheses.  Here is a simple list:
@@ -102,13 +102,23 @@ A more complicated example:
 \begin{lstlisting}
 (+ (* 2 3) (* 4 5))
 \end{lstlisting}
-This is equivalent to $2*3+4*5$.  Breaking this down, the first element of the outside list is ``+''.  The second element is the list ``(* 2 3)'' and the third element is the list ``(* 4 5)''.  Since ``*'' is the symbol for the multiplication operation, this returns a value of 26.
+This is equivalent to $2*3+4*5$.  Breaking this down, the first element of the outside list is ``+''.  The second element is the list \operation{(* 2 3)} and the third element is the list \operation{(* 4 5)}.  Since ``*'' is the symbol for the multiplication operation, this returns a value of 26.
 
 A final example:
 \begin{lstlisting}
 (print "Hello World!")
 \end{lstlisting}
-This list consists of only two elements.  The first is the symbol \operation{print}.  The second is the string ``Hello World!''.  With strings, everything from the starting quotation mark to the next quotation mark is part of the string.  This means that you can't have a string that contains a quotation mark (at some point, a work-around may be available).
+This list consists of only two elements.  The first is the symbol \function{print}.  The second is the string ``Hello World!''.  With strings, everything from the starting quotation mark to the next quotation mark is part of the string.  This means that you can't have a string that contains a quotation mark (at some point, a work-around may be available).
+
+\section{Symbols and Variables}
+Elements that are not numbers, strings, or lists are symbols or variables.  In determining what the element represents, the search order is:
+\begin{enumerate}
+  \item Boolean literals are checked first.
+  \item Builtin or Special symbols are checked next.
+  \item Variables in the most recent stack frame.
+  \item Variables in older stack frames.
+  \item Variable symbols are checked last.  These can be considered to be global variables.
+\end{enumerate}
 
 \section{Operations}
 A limited number of operations are defined.  Note that this list will probably be expanded.
@@ -121,7 +131,7 @@ A number of normal forms are defined.  The main difference between normal forms 
 ;
 (if (> 1 2) (+ 1 2) (+ 3 4))
 \end{lstlisting}
-``*'' is a normal operation and both ``(+ 1 2)'' and ``(+ 3 4)'' are evaluated before ``*'' is evaluated.  \operation{If} is a special form so first ``(> 1 2)'' is evaluated, then depending on whether the result is true or false, either ``(+ 1 2)'' or ``(+ 3 4)'' is evaluated.  For a simple example like this, it doesn't really matter, but if the operations have other effects, such as:
+``*'' is a normal operation and both \operation{(+ 1 2)} and \operation{(+ 3 4)} are evaluated before ``*'' is evaluated.  \operation{If} is a special form so first \operation{(> 1 2)} is evaluated, then depending on whether the result is \function{T} or \function{NIL}, either \operation{(+ 1 2)} or \operation{(+ 3 4)} is evaluated.  For a simple example like this, it doesn't really matter, but if the operations have other effects, such as:
 \begin{lstlisting}
 (if (> 1 2) (print "Greater") (print "Not greater"))
 \end{lstlisting}
@@ -135,7 +145,7 @@ Four arithmatic operations are defined for operation on integers.  The operation
 (* 1 2 3 4)
 (/ 1 2 3 4)
 \end{lstlisting}
-These operations work on a list of one or more parameters, with the operation inserted between the parameters.  Thus (+ 1 2 3 4 ) computes as $1+2+3+4$.  The return value for each of these operations is an integer value.
+These operations work on a list of one or more parameters, with the operation inserted between the parameters.  Thus \operation{(+ 1 2 3 4)} computes as $1+2+3+4$.  The return value for each of these operations is an integer value.
 
 \subsubsection{Comparison Operations}
 Four comparison operations are defined for both integers and strings.  The operations are equals, not equals, greater than, and less than.  For example:
@@ -154,7 +164,7 @@ As this Lisp may run on systems without filesystems, only three operations are p
 (new-line)
 (read-line)
 \end{lstlisting}
-The \operation{print} operation evaluates each item in its parameter list and prints the value.  The \operation{new-line} operation simply prints a new line.  The \operation{read-line} operation reads a string from the input device and returns it.  Both print and new-line return NIL.  Read-line returns the entered string with no line terminator.
+The \function{print} operation evaluates each item in its parameter list and prints the value.  The \function{new-line} operation simply prints a new line.  The \function{read-line} operation reads a string from the input device and returns it.  Both print and new-line return NIL.  Read-line returns the entered string with no line terminator.
 
 \subsubsection{List Operations}
 Basic list operations are provided.
@@ -162,7 +172,7 @@ Basic list operations are provided.
 (car (1 2 3 4))
 (cdr (1 2 3 4))
 \end{lstlisting}
-Each of \operation{car} and \operation{cdr} take one parameter that should be a list.  \operation{Car} returns the first item in the list.  This item may be a single element or it may be a list.  \operation{Cdr} returns the remainder of the list.
+Each of \function{car} and \function{cdr} take one parameter that should be a list.  \function{Car} returns the first item in the list.  This item may be a single element or it may be a list.  \function{Cdr} returns the remainder of the list.
 
 \subsubsection{Debugging}
 Some additional operations are provided for debugging purposes.  These control the display of some debugging information.
@@ -173,16 +183,16 @@ Some additional operations are provided for debugging purposes.  These control t
 (reset)
 \end{lstlisting}
 
-The \operation{dump} operation prints the contents of the cons, symbol, and string tables.  The \operation{msg-on} and \operation{msg-off} operations turn the display of debugging information on and off.  These are helpful when trying to debug the interpreter and should not be necessary during normal operation.
+The \function{dump} operation prints the contents of the cons, symbol, and string tables.  The \function{msg-on} and \function{msg-off} operations turn the display of debugging information on and off.  These are helpful when trying to debug the interpreter and should not be necessary during normal operation.
 
-The \operation{reset} operation is intended to reset the interpreter to an initial state.  Currently, it just calls the \function{init()} function.  It needs to go through the symbol table and remove everything that's not a \constant{builtin} and clear out the cons table.  Do not use until this is fixed.
+The \function{reset} operation is intended to reset the interpreter to an initial state.  Currently, it just calls the \function{init()} function.  It needs to go through the symbol table and remove everything that's not a \function{builtin} and clear out the cons table.  Do not use until this is fixed.
 
 \subsubsection{Other}
 There are a few operations that do things that can't be easily categorized.
 \begin{lstlisting}
 (exit)
 \end{lstlisting}
-The \operation{exit} operation just exits the interpreter.  It should mainly be used from the command line.  It may cause problems in some cases if used in a function.
+The \function{exit} operation just exits the interpreter.  It should mainly be used from the command line.  It may cause problems in some cases if used in a function.
 
 \subsection{Special Forms}
 The special forms do not necessarily evaluate all of the parameters.
@@ -194,17 +204,17 @@ A couple of control flow special forms are available.  More will probably be add
 (dowhile (> 1 2) (print "Forever") (new-line))
 (dotimes (n 5 10) (print "This is printed 5 times") (new-line))
 \end{lstlisting}
-The \operation{if} form has two or three parameters.  The first parameter is a condition.  If the condition evaluates to ``T'', then the second parameter is evaluated.  If the condition evaluates to ``NIL'', then the third parameter, if present, is evaluated.
+The \function{if} form has two or three parameters.  The first parameter is a condition.  If the condition evaluates to \function{T}, then the second parameter is evaluated.  If the condition evaluates to \function{NIL}, then the third parameter, if present, is evaluated.
 
-The \operation{dowhile} form has two parameters.  The first is a condition.  The second is a list of operations to be evaluated.  The second parameter is evaluated as long as the condition evaluates to ``T''.
+The \function{dowhile} form has two parameters.  The first is a condition.  The second is a list of operations to be evaluated.  The second parameter is evaluated as long as the condition evaluates to \constant{T}.
 
-The \operation{dotimes} form also has two parameters.  The first is a list with two or three elements.  The first element is the name of the local variable used as a loop counter.  The second element is a positive integer giving the number of times to loop.  The third is a value to return at the end of the loop.  If the return value is not provided, ``NIL'' is returned.  The second parameter is a list of operations to be evaluated.
+The \function{dotimes} form also has two parameters.  The first is a list with two or three elements.  The first element is the name of the local variable used as a loop counter.  The second element is a positive integer giving the number of times to loop.  The third is a value to return at the end of the loop.  If the return value is not provided, \constant{NIL} is returned.  The second parameter is a list of operations to be evaluated.
 
 \subsubsection{Variables}
 \begin{lstlisting}
 (setq variable 1)
 \end{lstlisting}
-The \operation{setq} form sets a value for a symbol.  The first parameter is the symbol and the second parameter is the value.  If the symbol does not yet exist, it is created.  Symbols that already exist as builtin or lambdas can't be used for values.  The second parameter is evaluated to return the value.  Currently this only works on global variables, not parameters or local variables (which are currently unimplemented anyway).
+The \function{setq} form sets a value for a symbol.  The first parameter is the symbol and the second parameter is the value.  If the symbol does not yet exist, it is created.  Symbols that already exist as builtin or lambdas can't be used for values.  The second parameter is evaluated to return the value.  Currently this only works on global variables, not parameters or local variables (which are currently unimplemented anyway).
 
 \lstset{language=Ada}
 \begin{lstlisting}
@@ -222,10 +232,10 @@ This is the same as the Ada Integer type.  Typically it is a 32 bit signed integ
 Strings are stored in linked lists of 8-bit characters/bytes.  Each node in the list can hold 16 (adjustable by a parameter) bytes.  Unicode is not currently supported.
 
 \subsection{Boolean}
-The Boolean values ``NIL'' and ``T'' correspond to ``True'' and ``False''.
+The Boolean values \constant{NIL} and \constant{T} correspond to \constant{True} and \constant{False}.
 
 \subsection{List}
-The list is the basic complex data type.  A list element has two slots (historically called ``car'' and ``cdr'').  Typically the ``car'' slot contains a data value and the ``cdr'' slot contains a pointer to the next list element.  The end of a list is indicated by a nil value in the ``cdr'' slot.
+The list is the basic complex data type.  A list element has two slots (historically called \constant{car} and \constant{cdr}).  Typically the \constant{car} slot contains a data value and the \constant{cdr} slot contains a pointer to the next list element.  The end of a list is indicated by a \constant{NIL} value in the \constant{cdr} slot.
 
 \subsection{Possible Additions}
 A stack may be added to hold stack frames for parameters and local variables.

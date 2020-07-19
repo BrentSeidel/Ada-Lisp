@@ -1,12 +1,47 @@
 ;
-;  Some test lisp commands
+;  Test functions for the Tiny Lisp Interpreter
 ;
-(setq t1 1)
-(setq t2 2)
-(setq t3 3)
-(setq t4 4)
-(if (/= t1 t2) (* t3 t3) (* t4 t4))
-(if (= t1 t2) (* t3 t3) (* t4 t4))
+(defun pass (n)
+  (print "PASS: " n)
+  (new-line))
+(defun fail (n)
+  (print "***FAIL: " n)
+  (new-line))
+;
+(defun test-bool (a)
+  (if t (pass "T literal works")
+        (fail "T literal does not work"))
+  (if nil (fail "NIL literal does not work")
+          (pass "NIL literal works")))
+;
+(defun test-int-cmp (a)
+  (if (= 0 0) (pass "0 = 0") (fail "0 = 0"))
+  (if (< 0 0) (fail "0 < 0") (pass "0 < 0"))
+  (if (> 0 0) (fail "0 > 0") (pass "0 > 0"))
+  (if (/= 0 0) (fail "0 /= 0") (pass "0 /= 0"))
+  (if (= 2 1) (fail "2 = 1") (pass "2 = 1"))
+  (if (< 2 1) (fail "2 < 1") (pass "2 < 1"))
+  (if (> 2 1) (pass "2 > 1") (fail "2 > 1"))
+  (if (/= 2 1) (pass "2 /= 1") (fail "2 /= 1"))
+  (if (= -1 1) (fail "-1 = 1") (pass "-1 = 1"))
+  (if (< -1 1) (pass "-1 < 1") (fail "-1 < 1"))
+  (if (> -1 1) (fail "-1 > 1") (pass "-1 > 1"))
+  (if (/= -1 1) (pass "-1 /= 1") (fail "-1 /= 1"))
+  (if (= -2 -1) (fail "-2 = -1") (pass "-2 = -1"))
+  (if (< -2 -1) (pass "-2 < -1") (fail "-2 < -1"))
+  (if (> -2 -1) (fail "-2 > -1") (pass "-2 > -1"))
+  (if (/= -2 -1) (pass "-2 /= -1") (fail "-2 /= -1")))
+;
+(defun test-str-cmp (a)
+  (if (= "A" "A") (pass "A = A") (fail "A = A"))
+  (if (< "A" "A") (fail "A < A") (pass "A < A"))
+  (if (> "A" "A") (fail "A > A") (pass "A > A"))
+  (if (/= "A" "A") (fail "A /= A") (pass "A /= A"))
+  (if (= "A" "B") (fail "A = B") (pass "A = B"))
+  (if (< "A" "B") (pass "A < B") (fail "A < B"))
+  (if (> "A" "B") (fail "A > B") (pass "A > B"))
+  (if (/= "A" "B") (pass "A /= B") (fail "A /= B"))
+)
 ;
 ;  Testing the do while loop
 ;
@@ -64,7 +99,6 @@
   (dotimes (var n)
     (print "Hello #" var)
     (new-line)))
-
 ;
 ;  This should give a workout for recursive functions.  The values returned
 ;  should be:

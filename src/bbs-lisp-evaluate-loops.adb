@@ -75,7 +75,9 @@ package body BBS.lisp.evaluate.loops is
       t : element_type := NIL_ELEM;
       temp : element_type;
    begin
-      if p = PARSE then
+      if p = QUERY then
+         return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
+      elsif p = PARSE_BEGIN then
          if e.kind = E_CONS then
             list := cons_table(e.ps).car;   -- This is the dotimes symbol and ignored here
             limits := cons_table(e.ps).cdr;
@@ -143,6 +145,8 @@ package body BBS.lisp.evaluate.loops is
             cons_table(limits.ps).car := var;
          end if;
          return NIL_ELEM;
+      elsif p = PARSE_END then
+         null;
       elsif p = EXECUTE then
          --
          --  EXECUTE Phase

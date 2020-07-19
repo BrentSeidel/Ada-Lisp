@@ -107,8 +107,10 @@ package body BBS.lisp.evaluate is
       end;
 
    begin
-      if p = PARSE then
-         msg("setq", "Called during parse phase.");
+      if p = QUERY then
+         return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
+      elsif p = PARSE_BEGIN then
+         msg("setq", "Called during parse begin phase.");
          if e.kind = E_CONS then
             p1 := cons_table(e.ps).car;  --  Should be symbol for setq
             p2 := cons_table(e.ps).cdr;
@@ -135,6 +137,8 @@ package body BBS.lisp.evaluate is
          else
             error("setq", "Something went horribly wrong and setq did not get a list");
          end if;
+      elsif p = PARSE_END then
+         null;
       elsif p = EXECUTE then
          msg("setq", "Called during execute phase.");
          if e.kind = E_CONS then

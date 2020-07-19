@@ -84,6 +84,8 @@ package body bbs.lisp.parser is
       item : Natural := 0;
       special_flag : Boolean := False;
       special_symb : symbol;
+      begin_called : Boolean := False;
+      item_count : Natural;
    begin
       flag := bbs.lisp.memory.alloc(head);
       ptr := ptr + 1;
@@ -94,6 +96,13 @@ package body bbs.lisp.parser is
          --
          if buff(ptr) = ')' then
             list_end := true;
+            if special_flag then
+               if begin_called then
+                  e := special_symb.s.all((kind => E_CONS, ps => head), PARSE_END);
+               else
+                  error("list", "Internal error, parse end attempted to be called before parse begin");
+               end if;
+            end if;
          --
          -- Check for starting a new sub-list
          --
@@ -164,6 +173,20 @@ package body bbs.lisp.parser is
                if (symb_table(e.sym).kind = SPECIAL) and (item = 0) then
                   special_flag := True;
                   special_symb := symb_table(e.sym);
+                  e := special_symb.s.all((kind => E_CONS, ps => head), QUERY);
+                  if e.kind = E_VALUE then
+                     if e.v.kind = V_INTEGER then
+                        if e.v.i >= 0 then
+                           item_count := Natural(e.v.i);
+                        else
+                           error("list", "Query returned value less than 0");
+                        end if;
+                     else
+                        error("list", "Query did not return an integer");
+                     end if;
+                  else
+                     error("list", "Query did not return a value");
+                  end if;
                end if;
             end if;
          end if;
@@ -182,8 +205,9 @@ package body bbs.lisp.parser is
          --  This may also be useful when local variables and parameters are on
          --  a stack.
          --
-         if special_flag and item = 1 then
-            e := special_symb.s.all((kind => E_CONS, ps => head), PARSE);
+         if special_flag and item = item_count then
+            e := special_symb.s.all((kind => E_CONS, ps => head), PARSE_BEGIN);
+            begin_called := True;
          end if;
          item := item + 1;
       end loop;
@@ -196,7 +220,7 @@ package body bbs.lisp.parser is
    function symb(ptr : in out integer; buff : String; last : Integer)
                  return element_type is
       test : string_index;
-      symb : symb_index;
+      el : element_type;
       flag : Boolean;
    begin
       flag := BBS.lisp.memory.alloc(test);
@@ -220,13 +244,9 @@ package body bbs.lisp.parser is
          --
          -- Now check for symbols
          --
-         flag := find_symb(symb, test);
-         if flag then
-            BBS.lisp.memory.deref(test);
-            return (kind => E_SYMBOL, sym => symb);
-         else
-            return (kind => E_TEMPSYM, tempsym => test);
-         end if;
+         el := find_variable(test, False);
+         BBS.lisp.memory.deref(test);
+         return el;
       else
          error("parse symbol", "Unable to allocate string fragment.");
       end if;

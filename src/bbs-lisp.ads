@@ -17,13 +17,11 @@ package bbs.lisp is
    --
    max_cons : constant Integer := 300;
    max_symb : constant Integer := 200;
---   max_tempym : constant Integer := 50;
    max_string : constant Integer := 500;
    max_stack : constant Integer := 100;
    --
    type cons_index is range 0 .. max_cons;
    type symb_index is range 0 .. max_symb;
---   type tempsym_index is range 0 .. max_tempym;
    type string_index is range -1 .. max_string;
    type stack_index is range 0 .. max_stack;
    --
@@ -52,7 +50,7 @@ package bbs.lisp is
    --
    --  Phase of operation.  Some functions will need to know.
    --
-   type phase is (PARSE, EXECUTE);
+   type phase is (QUERY, PARSE_BEGIN, PARSE_END, EXECUTE);
    --
    --  Define the contents of records.
    --
@@ -257,14 +255,12 @@ private
    --  Temporary symbols are temporary names that may eventually be converted
    --  to regular symbols.
    --
---   tempsym_table : array (tempsym_index) of string_index := (others => -1);
    string_table : array (string_index'First + 1 .. string_index'Last) of fragment;
    --
    --  For debugging, dump the various tables
    --
    procedure dump_cons;
    procedure dump_symbols;
---   procedure dump_tempsym;
    procedure dump_strings;
    procedure dump(e : element_type);
    procedure dump(s : cons_index);
@@ -295,11 +291,7 @@ private
    function find_symb(s : out symb_index; n : String) return Boolean;
    function find_symb(s : out symb_index; n : string_index) return Boolean;
    --
-   --  If a temporary symbol exists, return it, otherwise create a new temporary
-   --  symbol.  Returns false if symbol doesn't exist and can't be created.
-   --
---   function get_tempsym(s : out tempsym_index; n : String) return Boolean;
---   function get_tempsym(s : out tempsym_index; n : string_index) return Boolean;
+   function find_variable(n : string_index; create : Boolean) return element_type;
    --
    --  Create a symbol for a special function.  This is intended to be called
    --  during initialization to identify the special operations.  Once created,
