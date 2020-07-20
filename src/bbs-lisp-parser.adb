@@ -34,7 +34,12 @@ package body bbs.lisp.parser is
       if buff(ptr) = '(' then
          flag := list(ptr, buff, last, head);
          if flag then
-            e := (kind => E_CONS, ps => head);
+            if (cons_table(head).car.kind = E_NIL) and (cons_table(head).cdr.kind = E_NIL) then
+               e := NIL_ELEM;
+               BBS.lisp.memory.deref(head);
+            else
+               e := (kind => E_CONS, ps => head);
+            end if;
          end if;
       --
       --  Comment
@@ -108,12 +113,22 @@ package body bbs.lisp.parser is
          --
          elsif buff(ptr) = '(' then
             flag := list(ptr, buff, last, current);
-            flag := bbs.lisp.memory.alloc(temp);
-            cons_table(temp).car := (Kind => E_CONS, ps => current);
             ptr := ptr + 1;
+
             if flag then
-               flag := append(head, temp);
+               if (cons_table(current).car.kind = E_NIL) and (cons_table(current).cdr.kind = E_NIL) then
+                  BBS.lisp.memory.deref(current);
+                  flag := elem_to_cons(current, NIL_ELEM);
+                  flag := append(head, current);
+               else
+                  flag := bbs.lisp.memory.alloc(temp);
+                  cons_table(temp).car := (Kind => E_CONS, ps => current);
+                  if flag then
+                     flag := append(head, temp);
+                  end if;
+               end if;
             end if;
+
          --
          --  Check for the start of an integer atom
          --

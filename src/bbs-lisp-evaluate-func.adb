@@ -30,14 +30,12 @@ package body BBS.lisp.evaluate.func is
       --  Begin should be called at item 2 so that the parameter list is available.
       --
       if p = QUERY then
---         Put_Line("Defun: QUERY phase.");
          return (kind => E_VALUE, v => (kind => V_INTEGER, i => 2));
       --
       --  First identify the name, parameter list, and body.  Then perform
       --  initial checks to verify that they are the appropriate kind of object.
       --
       elsif p = PARSE_BEGIN then
---         Put_Line("Defun: Start PARSE_BEGIN phase.");
          if e.kind = E_CONS then
             --
             --  First process the symbol for the function.
@@ -112,10 +110,8 @@ package body BBS.lisp.evaluate.func is
          else
             error("defun", "Something went horribly wrong and defun did not get a list");
          end if;
---         Put_Line("Defun: End PARSE_BEGIN phase.");
       elsif p = PARSE_END then
          BBS.lisp.stack.exit_frame;
---         Put_Line("Defun: End PARSE_END phase.");
       --
       --  EXECUTE Phase
       --
@@ -138,8 +134,8 @@ package body BBS.lisp.evaluate.func is
             error("defun", "Function name must be a symbol or tempsym.");
             return NIL_ELEM;
          end if;
-         if params.kind /= E_CONS then
-            error("defun", "Parameter list must be a list.");
+         if (params.kind /= E_CONS) and (params.kind /= E_NIL) then
+            error("defun", "Parameter list must be a list or NIL.");
             return NIL_ELEM;
          end if;
          --
@@ -197,6 +193,8 @@ package body BBS.lisp.evaluate.func is
       end if;
       if params.kind = E_CONS then
          requested := bbs.lisp.utilities.count(params.ps);
+      elsif params.kind = E_NIL then
+         requested := 0;
       elsif params.kind /= E_CONS then
          requested := 1;
       end if;
