@@ -57,7 +57,11 @@
   (if (= "A" "B") (fail "A = B") (pass "A = B"))
   (if (< "A" "B") (pass "A < B") (fail "A < B"))
   (if (> "A" "B") (fail "A > B") (pass "A > B"))
-  (if (/= "A" "B") (pass "A /= B") (fail "A /= B")))
+  (if (/= "A" "B") (pass "A /= B") (fail "A /= B"))
+  (if (= "A" "AA") (fail "A = AA") (pass "A = AA"))
+  (if (< "A" "AA") (pass "A < AA") (fail "A < AA"))
+  (if (> "A" "AA") (fail "A > AA") (pass "A > AA"))
+  (if (/= "A" "AA") (pass "A /= AA") (fail "A /= AA")))
 ;
 ;  Test basic math functions
 ;

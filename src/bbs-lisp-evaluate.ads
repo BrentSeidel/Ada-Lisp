@@ -9,7 +9,6 @@ package BBS.lisp.evaluate is
    --
    function car(e : element_type) return element_type;
    function cdr(e : element_type) return element_type;
-   function setq(e : element_type; p : phase) return element_type;
    function print(e : element_type) return element_type;
    function quit(e : element_type) return element_type;
    function dump(e : element_type) return element_type;

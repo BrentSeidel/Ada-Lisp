@@ -88,6 +88,8 @@ package body BBS.lisp.evaluate.func is
                      msg("defun", "Converting symbol to parameter");
                      el := (kind => E_PARAM, p_name => str,
                          p_offset => offset);
+                     BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_PARAM, p_name =>
+                                   str, p_value => (kind => V_NONE)));
                   elsif (el.kind = E_TEMPSYM) then
                      msg("defun", "Converting tempsym to parameter");
                      str := el.tempsym;
