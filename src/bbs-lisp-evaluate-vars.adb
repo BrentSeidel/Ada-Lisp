@@ -189,7 +189,7 @@ package body BBS.lisp.evaluate.vars is
                      else
                         el := cons_table(locals.ps).car;
                      end if;
-                     if (el.kind = E_SYMBOL) then
+                     if el.kind = E_SYMBOL then
                         str := symb_table(el.sym).str;
                         msg("local", "Converting symbol to local variable");
                         el := (kind => E_LOCAL, l_name => str,
@@ -197,9 +197,23 @@ package body BBS.lisp.evaluate.vars is
                         BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_LOCAL,
                                              l_name => str,
                                              l_value => (kind => V_NONE)));
-                     elsif (el.kind = E_TEMPSYM) then
+                     elsif el.kind = E_TEMPSYM then
                         msg("local", "Converting tempsym to local variable");
                         str := el.tempsym;
+                        el := (kind => E_LOCAL, l_name => str,
+                               l_offset => offset);
+                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_LOCAL,
+                                             l_name => str,
+                                             l_value => (kind => V_NONE)));
+                     elsif el.kind = E_PARAM then
+                        str := el.p_name;
+                        el := (kind => E_LOCAL, l_name => str,
+                               l_offset => offset);
+                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_LOCAL,
+                                             l_name => str,
+                                             l_value => (kind => V_NONE)));
+                     elsif el.kind = E_LOCAL then
+                        str := el.l_name;
                         el := (kind => E_LOCAL, l_name => str,
                                l_offset => offset);
                         BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_LOCAL,
