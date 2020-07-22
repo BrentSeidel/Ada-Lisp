@@ -126,16 +126,6 @@ package body BBS.lisp.stack is
             test_name := test.p_name;
          elsif test.kind = ST_LOCAL then
             test_name := test.l_name;
---         else
-            --
-            -- This might be OK if the variable is not in the current frame.
-            --
---            error("search_frames", "Found unexpected entry type " & stack_entry_type'Image(test.kind));
---            put("Searching for variable <");
---            print(name);
---            Put_Line(">");
---            dump;
---            frame := 0;
          end if;
          if test.kind /= ST_EMPTY then
             eq := BBS.lisp.strings.compare(name, test_name);
@@ -184,10 +174,6 @@ package body BBS.lisp.stack is
             test_name := test.p_name;
          elsif test.kind = ST_LOCAL then
             test_name := test.l_name;
---         else
---            error("search_frames", "Found unexpected entry type " & stack_entry_type'Image(test.kind));
---            dump;
---            frame := 0;
          end if;
          if test.kind /= ST_EMPTY then
             eq := BBS.lisp.strings.compare(name, test_name);
@@ -223,11 +209,8 @@ package body BBS.lisp.stack is
       item  : stack_entry;
       eq : comparison := CMP_NE;
    begin
---      Put_Line("find_offset: Starting sp: " & stack_index'Image(sp) & ", fp: " &
---                 stack_index'Image(fp));
       while sp > 0 loop
          item := stack(sp);
---         Put_Line("find_offset: Checking item of kind " & stack_entry_type'Image(item.kind));
          case item.kind is
             when ST_FRAME =>
                fp := item.next;
