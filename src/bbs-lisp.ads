@@ -288,8 +288,8 @@ private
    --
    --  Finds a symbol and returns it.  Returns false if symbol can't be found.
    --
-   function find_symb(s : out symb_index; n : String) return Boolean;
-   function find_symb(s : out symb_index; n : string_index) return Boolean;
+--   function find_symb(s : out symb_index; n : String) return Boolean;
+--   function find_symb(s : out symb_index; n : string_index) return Boolean;
    --
    function find_variable(n : string_index; create : Boolean) return element_type;
    --

@@ -114,17 +114,20 @@ package body bbs.lisp.parser is
          elsif buff(ptr) = '(' then
             flag := list(ptr, buff, last, current);
             ptr := ptr + 1;
-
             if flag then
                if (cons_table(current).car.kind = E_NIL) and (cons_table(current).cdr.kind = E_NIL) then
                   BBS.lisp.memory.deref(current);
                   flag := elem_to_cons(current, NIL_ELEM);
                   flag := append(head, current);
                else
-                  flag := bbs.lisp.memory.alloc(temp);
-                  cons_table(temp).car := (Kind => E_CONS, ps => current);
-                  if flag then
-                     flag := append(head, temp);
+                  if cons_table(head).car.kind = E_NIL then
+                     cons_table(head).car := (kind => E_CONS, ps => current);
+                  else
+                     flag := bbs.lisp.memory.alloc(temp);
+                     if flag then
+                        cons_table(temp).car := (Kind => E_CONS, ps => current);
+                        flag := append(head, temp);
+                     end if;
                   end if;
                end if;
             end if;

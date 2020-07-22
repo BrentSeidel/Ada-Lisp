@@ -5,6 +5,12 @@ a full Common Lisp, but can provide a simple Lisp-like programming environment.
 If you find it useful or interesting, drop me a note at brentseidel@gmail.com and
 let me know.
 
+Note that this is my first attempt at writing a programming language, so I'm sure
+that things could have been done better.  It has been a learning experience and
+I'm pleased with how well that it's actually turned out.  This is still under
+active development so most things are subject to change, especially the program
+internals.
+
 ## Interpreter/Compiler
 I am calling this an interpreter, though the boundaries are a bit fuzzy.  The input text is
 converted into s-expressions that represent the program.  The address for the builtin
@@ -46,7 +52,8 @@ This Lisp interpreter also builds and runs on Windows 10.
 3. List operations - CAR and CDR
 4. DOWHILE/DOTIMES
 5. User defined functions.
-6. Hardware access.  This is done by allowing the host software to add custom lisp
+6. Local variables.
+7. Hardware access.  This is done by allowing the host software to add custom lisp
 commands.  This may also be useful for embedding the lisp interpreter in other
 applications.
 
@@ -56,10 +63,9 @@ be implemented, others will never be implemented.  The goal is to have a useful
 little language, not another port of Common Lisp.
 1. Macros.  This is a long term goal.  I would like to implement these, but I need to
 figure out how first.
-2. Local variables.  This is currently under development.
-3. Object oriented features.  This will probably never happen.
-4. Closures.  This will probably never happen.
-5. Passing functions as parameters.  This may happen.
+2. Object oriented features.  This will probably never happen.
+3. Closures.  This will probably never happen.
+4. Passing functions as parameters.  This may happen.
 
 ## Internals
 
@@ -68,6 +74,10 @@ Since this is intended to run on embedded systems without any memory management,
 pools are pre-allocated and sized arrays from which objects can be allocated.  Each object
 has a reference count and the object it freed when the number of references reaches 0.  Note
 that reference counting is not automatic and has to be done manually.
+
+One advantage that I've discovered about reference counting is that is usually
+quickly makes one aware that one has done something wrong.  Two types of errors
+are possible - prematurely dereffing an object or not dereffing an object.
 
 The memory manager is probably not thread safe, though this could be an interesting
 project.

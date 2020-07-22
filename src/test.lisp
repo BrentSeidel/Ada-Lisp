@@ -14,7 +14,10 @@
   (new-line))
 ;  If two values are equal, print pass message, otherwise print fail message
 (defun verify-equal (a b msg)
-  (if (= a b) (pass msg) (fail msg)))
+  (if (= a b) (print "Pass: Actual")
+              (print "***FAIL: Actual"))
+  (print  a ", Expected " b " " msg)
+  (new-line))
 ;
 ;  Test if and booleans
 ;
@@ -90,6 +93,25 @@
   (verify-equal **GLOB** 2 "Increment global")
   (setq **GLOB** "Hello")
   (verify-equal **GLOB** "Hello" "Set global to string"))
+;
+;  Test local variables with setq
+;
+(defun test-local ()
+  (local ((a (+ 1 2)) (b 4) (c 0))
+    (verify-equal a 3 "A is 3")
+    (verify-equal b 4 "B is 4")
+    (verify-equal c 0 "C is 0")
+    (setq a (+ 1 a))
+    (verify-equal a 4 "A is 4")
+    (setq b -10)
+    (verify-equal b -10 "B is -10")
+    (setq c (+ a 2))
+    (verify-equal c 6 "C is 6")
+    (local ((a 1))
+      (verify-equal a 1 "A is 1")
+      (setq a 20)
+      (verify-equal a 20 "A is 20"))
+    (verify-equal a 4 "A is 4")))
 ;
 ;  Testing the do while loop
 ;

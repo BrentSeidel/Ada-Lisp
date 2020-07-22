@@ -18,7 +18,6 @@ package body BBS.lisp.evaluate.vars is
       p2 : element_type;
       p3 : element_type;
       ret : element_type;
-      flag : Boolean;
       stacked : Boolean := False;
       index : stack_index;
 
@@ -49,16 +48,14 @@ package body BBS.lisp.evaluate.vars is
                   return NIL_ELEM;
                end if;
             elsif p3.kind = E_TEMPSYM then
-               flag := get_symb(symb, p3.tempsym);
-               if flag then
-                  BBS.lisp.memory.ref(p3.tempsym);
-                  cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
-               else
-                  error("setq", "Unable to add symbol ");
-               end if;
+               p3 := find_variable(p3.tempsym, True);
+               Put_Line("Setq: Found variable of type " & ptr_type'Image(p3.kind));
+               cons_table(p2.ps).car := p3;
+            elsif (p3.kind = E_LOCAL) or (p3.kind = E_PARAM) then
+               null;
             else
                error("setq", "First parameter is not a symbol or temporary symbol.");
-               put("Parameter type is " & ptr_type'Image(p3.kind));
+               Put_Line("Parameter type is " & ptr_type'Image(p3.kind));
             end if;
          else
             error("setq", "Something went horribly wrong and setq did not get a list");
@@ -152,7 +149,6 @@ package body BBS.lisp.evaluate.vars is
    --
    function local(e : element_type; p : phase) return element_type is
       p1 : element_type;
---      temp : element_type;
       locals : element_type;
       list : element_type;
       ptr : element_type;
@@ -167,9 +163,9 @@ package body BBS.lisp.evaluate.vars is
                --  First process the list of local variables
                --
                p1 := cons_table(e.ps).car;    --  Should be symbol for delocalfun
-               locals := cons_table(e.ps).cdr;  --  Should be parameter list.
+               locals := cons_table(e.ps).cdr;  --  Should be local variable list.
                --
-               --  Next process the parameter list.
+               --  Next process the local variable list.
                --
                if locals.kind = E_CONS then
                   locals := cons_table(locals.ps).car;
@@ -195,14 +191,14 @@ package body BBS.lisp.evaluate.vars is
                      end if;
                      if (el.kind = E_SYMBOL) then
                         str := symb_table(el.sym).str;
-                        msg("local", "Converting symbol to parameter");
+                        msg("local", "Converting symbol to local variable");
                         el := (kind => E_LOCAL, l_name => str,
                                l_offset => offset);
                         BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_LOCAL,
                                              l_name => str,
                                              l_value => (kind => V_NONE)));
                      elsif (el.kind = E_TEMPSYM) then
-                        msg("local", "Converting tempsym to parameter");
+                        msg("local", "Converting tempsym to local variable");
                         str := el.tempsym;
                         el := (kind => E_LOCAL, l_name => str,
                                l_offset => offset);
@@ -210,7 +206,7 @@ package body BBS.lisp.evaluate.vars is
                                              l_name => str,
                                              l_value => (kind => V_NONE)));
                      else
-                        error("local", "Can't convert item into a parameter.");
+                        error("local", "Can't convert item into a local variable.");
                         print(el, False, True);
                         Put_Line("Item is of kind " & ptr_type'Image(el.kind));
                      end if;
