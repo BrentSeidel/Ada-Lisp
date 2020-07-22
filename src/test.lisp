@@ -1,8 +1,16 @@
 ;
-;  Test functions for the Tiny Lisp Interpreter
+;  Test functions for the Tiny Lisp Interpreter.  Currently, the data table
+;  probably aren't large enough to load all this code at once.  To run a test
+;  set, first start the Lisp interpreter, then load the support functions.
+;  Finally load and run the desired test.
+;
+;  These tests more or less proceed in increasing complexity where later tests
+;  depend on items from earlier tests working correctly.  There are some things
+;  that are not explicitly tested, such as defun, but are used throughout so
+;  failures should be obvious with other things not working properly.
 ;
 ;
-;  Support functions
+;  Support functions.  Load these first.
 ;
 ; Prints a pass message
 (defun pass (n)
@@ -19,10 +27,9 @@
   (print  a ", Expected " b " " msg)
   (new-line))
 ;
-;  Test if and booleans
+;  Test cases.  Load and run the desired test.
 ;
-;  Note that there is currently a bug where defun does not work for functions
-;  with no parameters.
+;  Test if and booleans
 ;
 (defun test-bool ()
   (if t (pass "T literal works")
@@ -113,11 +120,24 @@
       (verify-equal a 20 "A is 20"))
     (verify-equal a 4 "A is 4")))
 ;
+;  Test dowhile operation
+;
+(defun test-dowhile ()
+  (local ((count 0) (accum 0))
+    (dowhile (< count 10)
+      (setq count (+ count 1))
+      (setq accum (+ accum count))
+      (print "Counter is " count ", Accumulator is " accum)
+      (new-line))
+    (verify-equal count 10 "Count is 10")
+    (verify-equal accum 55 "Accumulator is 55")))
+;
+;  Other old code that tests some things.  These snippits will be deleted as
+;  more formal tests are written.
+;
+;
 ;  Testing the do while loop
 ;
-(setq var 0)
-(dowhile (< var 100) (print "Var is " var) (new-line) (setq var (+ var 1)))
-
 (setq var1 0)
 (setq var2 0)
 (dowhile (< var1 100)
@@ -146,16 +166,6 @@
       (print "Above range"))
      (new-line))
 
-(defun fact (n)
-   (if (> n 1)
-    (* n (fact (- n 1)))
-    1))
-
-(defun abs (n)
-  (if (> 0 n)
-    (- 0 n)
-    (+ 0 n)))
-
 (defun hello (n)
   (setq var (abs n))
   (dowhile (< 0 var)
@@ -169,19 +179,6 @@
   (dotimes (var n)
     (print "Hello #" var)
     (new-line)))
-;
-;  This should give a workout for recursive functions.  The values returned
-;  should be:
-;  (fib 1) => 1
-;  (fib 2) => 2
-;  (fib 3) => 3
-;  (fib 4) => 5
-;  (fib 5) => 8
-;
-(defun fib (n)
-  (if (< n 2)
-    1
-    (+ (fib (- n 2)) (fib (- n 1)))))
 
 (defun test (n)
   (setq n (+ 3 1))

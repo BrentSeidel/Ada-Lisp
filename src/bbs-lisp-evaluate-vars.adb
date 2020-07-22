@@ -294,6 +294,8 @@ package body BBS.lisp.evaluate.vars is
                if ptr.kind = E_CONS then
                   if cons_table(ptr.ps).car.kind = E_CONS then
                      t := eval_dispatch(cons_table(ptr.ps).car.ps);
+                  else
+                     t := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).car);
                   end if;
                   ptr := cons_table(ptr.ps).cdr;
                else
