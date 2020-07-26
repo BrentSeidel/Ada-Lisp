@@ -1,6 +1,6 @@
 with BBS.lisp.memory;
-with BBS.lisp.strings;
-with BBS.lisp.stack;
+--with BBS.lisp.strings;
+--with BBS.lisp.stack;
 with BBS.lisp.utilities;
 
 package body BBS.lisp.evaluate.math is
@@ -33,8 +33,8 @@ package body BBS.lisp.evaluate.math is
                   return accum - v.i;
                when DIV =>
                   return accum / v.i;
-               when others =>
-                  error("eval_math.process_atom", "Internal error, unknown math operation");
+--               when others =>
+--                  error("eval_math.process_atom", "Internal error, unknown math operation");
                end case;
             else
                error("eval_math.process_atom", "Can't process " & value_type'Image(v.kind));

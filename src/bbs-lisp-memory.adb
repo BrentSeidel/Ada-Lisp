@@ -136,9 +136,8 @@ package body bbs.lisp.memory is
       if string_table(s).ref = 0 then
          string_table(s).len := 0;
          next := string_table(s).next;
-         if (next >= (string_index'First + 1))
-           and (next <= string_index'Last) then
-            deref(string_index(next));
+         if next >= (string_index'First + 1) then
+            deref(next);
          end if;
          string_table(s).next := -1;
       end if;

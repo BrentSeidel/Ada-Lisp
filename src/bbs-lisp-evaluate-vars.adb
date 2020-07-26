@@ -23,11 +23,11 @@ package body BBS.lisp.evaluate.vars is
 
       procedure deref_previous(s : symb_index) is
       begin
-         if symb_table(symb).kind = VARIABLE then
-            BBS.lisp.memory.deref(symb_table(symb).pv);
+         if symb_table(s).kind = VARIABLE then
+            BBS.lisp.memory.deref(symb_table(s).pv);
          end if;
-         if symb_table(symb).kind = LAMBDA then
-            BBS.lisp.memory.deref(symb_table(symb).ps);
+         if symb_table(s).kind = LAMBDA then
+            BBS.lisp.memory.deref(symb_table(s).ps);
          end if;
       end;
 
@@ -148,7 +148,7 @@ package body BBS.lisp.evaluate.vars is
    --  Define local variables and optionally assign values to them.
    --
    function local(e : element_type; p : phase) return element_type is
-      p1 : element_type;
+--      p1 : element_type;
       locals : element_type;
       list : element_type;
       ptr : element_type;
@@ -162,7 +162,7 @@ package body BBS.lisp.evaluate.vars is
                --
                --  First process the list of local variables
                --
-               p1 := cons_table(e.ps).car;    --  Should be symbol for delocalfun
+--               locals := cons_table(e.ps).car;  --  Should be symbol for local
                locals := cons_table(e.ps).cdr;  --  Should be local variable list.
                --
                --  Next process the local variable list.

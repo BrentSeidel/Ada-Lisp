@@ -26,7 +26,8 @@ package BBS.lisp.stack is
    --
    --  The stack array
    --
-   stack : array (stack_index'First + 1 .. stack_index'Last) of stack_entry;
+   stack : array (stack_index'First + 1 .. stack_index'Last) of stack_entry :=
+     (others => (kind => ST_EMPTY));
    --
    --  Various pointers for managing the stack and its frames.
    --

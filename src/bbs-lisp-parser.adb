@@ -1,5 +1,6 @@
-with BBS.lisp.strings;
 with BBS.lisp;
+with BBS.lisp.strings;
+with BBS.lisp.memory;
 package body bbs.lisp.parser is
    --
    --  Utilities to assist in parsing
@@ -21,8 +22,8 @@ package body bbs.lisp.parser is
       head : cons_index;
       str  : string_index;
       flag : Boolean := False;
-      is_list : Boolean := False;
-      is_atom : Boolean := False;
+--      is_list : Boolean := False;
+--      is_atom : Boolean := False;
       value : Integer;
    begin
       e := (kind => E_NIL);
@@ -59,9 +60,7 @@ package body bbs.lisp.parser is
       elsif buff(ptr) = '"' then
          flag := parse_str(ptr, buff, last, str);
          if flag then
-            if flag then
-               e := (Kind => E_VALUE, v =>(kind => V_STRING, s => str));
-            end if;
+            e := (Kind => E_VALUE, v =>(kind => V_STRING, s => str));
          end if;
       --
       --  Symbol
@@ -297,12 +296,12 @@ package body bbs.lisp.parser is
    --  Parse strings.  Note that currently strings cannot be broken across lines.
    --  An end of line probably has the same effect as a closing quotation mark.
    --
-   function parse_str(ptr : in out Integer; buff : in out String;
-                      last : in out integer; s : out string_index) return Boolean is
+   function parse_str(ptr : in out Integer; buff : in String;
+                      last : in integer; s : out string_index) return Boolean is
       str  : string_index;
       next : string_index;
       first : string_index;
-      start : Integer := ptr;
+--      start : Integer := ptr;
       flag : Boolean;
    begin
       flag := bbs.lisp.memory.alloc(str);

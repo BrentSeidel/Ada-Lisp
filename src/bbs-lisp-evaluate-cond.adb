@@ -1,7 +1,7 @@
 with BBS.lisp.memory;
 with BBS.lisp.strings;
 with BBS.lisp.utilities;
-with BBS.lisp.stack;
+--with BBS.lisp.stack;
 package body BBS.lisp.evaluate.cond is
    --
    --  Perform comparison operations.
@@ -12,7 +12,7 @@ package body BBS.lisp.evaluate.cond is
       t2 : element_type;
       v1 : value;
       v2 : value;
-      el : element_type;
+--      el : element_type;
       i1 : Integer;
       i2 : Integer;
    begin
@@ -58,8 +58,8 @@ package body BBS.lisp.evaluate.cond is
                   if i1 > i2 then
                      return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
                   end if;
-               when others =>
-                  error("eval_comp", "Unknown comparison type.");
+--               when others =>
+--                  error("eval_comp", "Unknown comparison type.");
                end case;
                return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
          elsif v1.kind = V_STRING and
@@ -85,15 +85,15 @@ package body BBS.lisp.evaluate.cond is
                      if eq /= CMP_EQ then
                         return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
                      end if;
-                  when others =>
-                     error("eval_comp", "Unknown comparison type.");
+--                  when others =>
+--                     error("eval_comp", "Unknown comparison type.");
                end case;
             end;
             return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
          else
             error("eval_comp", "Can only compare integers, strings, or symbols.");
-            put("First type is " & ptr_type'Image(t1.kind));
-            put_line(", second type is " & ptr_type'Image(t2.kind));
+            put("First type is " & value_type'Image(v1.kind));
+            put_line(", second type is " & value_type'Image(v2.kind));
             return NIL_ELEM;
          end if;
       else

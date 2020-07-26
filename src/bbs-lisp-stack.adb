@@ -59,8 +59,8 @@ package body BBS.lisp.stack is
    end;
    --
    procedure exit_frame is
-      temp : stack_index := frame_pointer;
-      frame : stack_entry := stack(frame_pointer);
+--      temp : stack_index := frame_pointer;
+      frame : constant stack_entry := stack(frame_pointer);
    begin
       if frame.kind /= ST_FRAME then
          error("exit_frame", "Not a stack frame.");
@@ -103,8 +103,8 @@ package body BBS.lisp.stack is
                put(", Value => ");
                print(e.l_value);
                new_line;
-            when others =>
-               put_line(stack_index'Image(i) & " Unknown stack entry kind.");
+--            when others =>
+--               put_line(stack_index'Image(i) & " Unknown stack entry kind.");
          end case;
       end loop;
       put_line("Stack dump end");

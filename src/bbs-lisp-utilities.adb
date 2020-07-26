@@ -65,6 +65,7 @@ package body bbs.lisp.utilities is
          temp := cons_table(e.ps).car;
          if temp.kind = E_SYMBOL then
             if (symb_table(temp.sym).kind = BUILTIN) or
+              (symb_table(temp.sym).kind = SPECIAL) or
               (symb_table(temp.sym).kind = LAMBDA) then
                return True;
             end if;
@@ -72,6 +73,7 @@ package body bbs.lisp.utilities is
       else
          if e.kind = E_SYMBOL then
             if (symb_table(e.sym).kind = BUILTIN) or
+              (symb_table(e.sym).kind = SPECIAL) or
               (symb_table(e.sym).kind = LAMBDA) then
                return True;
             end if;
@@ -273,7 +275,7 @@ package body bbs.lisp.utilities is
    --
    procedure first_value(e : element_type; car : out element_type; cdr : out element_type) is
       first : element_type;
-      temp : element_type;
+--      temp : element_type;
       s : cons_index;
    begin
       if e.kind = E_NIL then

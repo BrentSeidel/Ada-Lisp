@@ -1,5 +1,5 @@
 with BBS.lisp.memory;
-with BBS.lisp.strings;
+--with BBS.lisp.strings;
 with BBS.lisp.utilities;
 with BBS.lisp.stack;
 package body BBS.lisp.evaluate.loops is
@@ -70,10 +70,10 @@ package body BBS.lisp.evaluate.loops is
       rest : element_type := NIL_ELEM;
       limit : element_type := NIL_ELEM;
       limit_value : Natural := 0;
-      count : Natural;
+      dummy : Natural;
       ptr : element_type;
       t : element_type := NIL_ELEM;
-      temp : element_type;
+--      temp : element_type;
    begin
       if p = QUERY then
          return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
@@ -204,7 +204,7 @@ package body BBS.lisp.evaluate.loops is
          --  Find the index variable name in the body and convert all occurences.
          --
          if list.kind = E_CONS then
-            count := BBS.lisp.utilities.replace_sym(list.ps, var);
+            dummy := BBS.lisp.utilities.replace_sym(list.ps, var);
          end if;
          --
          --  Build the stack frame

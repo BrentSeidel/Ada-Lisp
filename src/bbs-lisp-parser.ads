@@ -1,4 +1,4 @@
-with bbs.lisp.memory;
+--with bbs.lisp.memory;
 --
 --  This package handles the parsing of input.  Input can be a list, an atom
 --  of either a symbol or integer, or a comment.
@@ -32,8 +32,8 @@ private package bbs.lisp.parser is
    --
    --  Parse strings
    --
-   function parse_str(ptr : in out Integer; buff : in out String;
-                      last : in out integer; s : out string_index) return Boolean;
+   function parse_str(ptr : in out Integer; buff : in String;
+                      last : in integer; s : out string_index) return Boolean;
    --
    --  Procedure to skip white space
    --

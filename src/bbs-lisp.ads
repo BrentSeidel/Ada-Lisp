@@ -265,6 +265,7 @@ private
    procedure dump(e : element_type);
    procedure dump(s : cons_index);
    procedure dump(s : symb_index);
+   procedure dump(v : value);
    --
    --  Local functions and procedures
    --

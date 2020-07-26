@@ -8,8 +8,7 @@ package body bbs.lisp.strings is
       next : string_index := s;
       nxt : string_index;
    begin
-      while (next >= (string_index'First + 1))
-        and (next <= string_index'Last) loop
+      while next >= (string_index'First + 1) loop
          nxt := next;
          for i in 1 .. string_table(nxt).len loop
             string_table(nxt).str(i) := To_Upper(string_table(nxt).str(i));
@@ -27,8 +26,7 @@ package body bbs.lisp.strings is
       next : string_index := s;
       nxt : string_index;
    begin
-      while (next >= (string_index'First + 1))
-        and (next <= string_index'Last) loop
+      while next >= (string_index'First + 1) loop
          nxt := next;
          for i in 1 .. string_table(nxt).len loop
             string_table(nxt).str(i) := To_Lower(string_table(nxt).str(i));
@@ -50,9 +48,7 @@ package body bbs.lisp.strings is
       limit : Integer;
    begin
       while (next1 >= (string_index'First + 1))
-        and (next1 <= string_index'Last)
-        and (next2 >= (string_index'First + 1))
-        and (next2 <= string_index'Last) loop
+        and (next2 >= (string_index'First + 1)) loop
          limit := string_table(next1).len;
          if string_table(next2).len < limit then
             limit := string_table(next2).len;
@@ -84,14 +80,10 @@ package body bbs.lisp.strings is
          return CMP_GT;
       end if;
       if (next1 >= (string_index'First + 1))
-        and (next1 <= string_index'Last)
-        and ((next2 < (string_index'First + 1))
-        or (next2 > string_index'Last)) then
+        and ((next2 < (string_index'First + 1))) then
          return CMP_GT;
       elsif ((next1 < (string_index'First + 1))
-        or (next1 > string_index'Last))
-        and (next2 >= (string_index'First + 1))
-        and (next2 <= string_index'Last) then
+        and (next2 >= (string_index'First + 1))) then
          return CMP_LT;
       end if;
       return CMP_EQ;
@@ -104,8 +96,7 @@ package body bbs.lisp.strings is
       nxt : string_index;
       count : Natural := 0;
    begin
-      while (next >= (string_index'First + 1))
-        and (next <= string_index'Last) loop
+      while next >= (string_index'First + 1) loop
          nxt := next;
          count := count + string_table(nxt).len;
          next := string_table(nxt).next;
@@ -159,8 +150,7 @@ package body bbs.lisp.strings is
       flag : Boolean;
       frag : string_index;
    begin
-      while (next >= (string_index'First + 1))
-        and (next <= string_index'Last) loop
+      while next >= (string_index'First + 1) loop
          nxt := next;
          count := count + string_table(nxt).len;
          next := string_table(nxt).next;

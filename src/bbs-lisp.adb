@@ -4,7 +4,7 @@ with BBS.lisp.memory;
 with BBS.lisp.stack;
 use type BBS.lisp.stack.stack_entry_type;
 with BBS.lisp.strings;
-with BBS.lisp.evaluate;
+--with BBS.lisp.evaluate;
 with BBS.lisp.evaluate.math;
 with BBS.lisp.evaluate.cond;
 with BBS.lisp.evaluate.loops;
@@ -100,13 +100,13 @@ package body bbs.lisp is
    function read return Element_Type is
       buff : String(1 .. 256);
       size : Natural;
-      finished : Boolean := False;
-      flag : Boolean;
+--      finished : Boolean := False;
+      dummy : Boolean;
       el : element_type;
    begin
       Put("LISP> ");
       Get_Line(buff, size);
-      flag := bbs.lisp.parser.parse(buff, size, el);
+      dummy := bbs.lisp.parser.parse(buff, size, el);
       return el;
    end;
    --
@@ -157,8 +157,8 @@ package body bbs.lisp is
             print(e.p_name);
          when E_LOCAL =>
             print(e.l_name);
-         when others =>
-            Put("Tried to print an unknown element type " & ptr_type'Image(e.kind));
+--         when others =>
+--            Put("Tried to print an unknown element type " & ptr_type'Image(e.kind));
       end case;
       if nl then
          New_Line;
@@ -294,9 +294,8 @@ package body bbs.lisp is
       next : string_index := s;
       nxt : string_index;
    begin
-      while (next >= (string_index'First + 1))
-        and (next <= string_index'Last) loop
-         nxt := string_index(next);
+      while next >= (string_index'First + 1) loop
+         nxt := next;
          Put(string_table(nxt).str(1..string_table(nxt).len));
          next := string_table(nxt).next;
       end loop;
@@ -365,8 +364,8 @@ package body bbs.lisp is
                   print(symb_table(i).pv, False, False);
                when EMPTY =>
                   Put("Empty");
-               when others =>
-                  Put("Unknown");
+--               when others =>
+--                  Put("Unknown");
             end case;
             Put_Line(">");
          end if;
@@ -618,9 +617,9 @@ package body bbs.lisp is
    function eval_dispatch(s : cons_index) return element_type is
       sym : symbol;
       e : element_type := NIL_ELEM;
-      first : element_type := cons_table(s).car;
-      rest : element_type := cons_table(s).cdr;
-      params : element_type;
+      first : constant element_type := cons_table(s).car;
+      rest : constant element_type := cons_table(s).cdr;
+--      params : element_type;
    begin
       if first.kind /= E_CONS then
          if first.kind = E_SYMBOL then
@@ -683,7 +682,7 @@ package body bbs.lisp is
       if msg_flag then
          Put("eval_dispatch: Returning value: ");
          print(e, False, True);
-         dump_cons;
+--         dump_cons;
       end if;
       return e;
    end;

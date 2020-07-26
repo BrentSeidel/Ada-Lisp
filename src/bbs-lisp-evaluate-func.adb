@@ -1,5 +1,5 @@
 with BBS.lisp.memory;
-with BBS.lisp.strings;
+--with BBS.lisp.strings;
 with BBS.lisp.utilities;
 with BBS.lisp.stack;
 package body BBS.lisp.evaluate.func is
@@ -16,15 +16,15 @@ package body BBS.lisp.evaluate.func is
    --
    function defun(e : element_type; p : phase) return element_type is
       params : element_type;
-      func_body : element_type;
+--      func_body : element_type;
       name : element_type;
       temp : element_type;
-      p1 : element_type;
+--      p1 : element_type;
       p2 : element_type;
       p3 : element_type;
       symb : symb_index;
       flag : Boolean;
-      count : Natural := 0;
+--      count : Natural := 0;
    begin
       --
       --  Begin should be called at item 2 so that the parameter list is available.
@@ -40,7 +40,7 @@ package body BBS.lisp.evaluate.func is
             --
             --  First process the symbol for the function.
             --
-            p1 := cons_table(e.ps).car;    --  Should be symbol for defun
+--            p1 := cons_table(e.ps).car;    --  Should be symbol for defun
             p2 := cons_table(e.ps).cdr;
             p3 := cons_table(p2.ps).car;   --  Should be a symbol or tempsym
             temp := cons_table(p2.ps).cdr; --  Should be parameter list.
@@ -126,7 +126,7 @@ package body BBS.lisp.evaluate.func is
          temp := cons_table(e.ps).cdr;
          if temp.kind = E_CONS then
             params := cons_table(temp.ps).car;
-            func_body := cons_table(temp.ps).cdr;
+--            func_body := cons_table(temp.ps).cdr;
          else
             error("defun", "Improper parameters.");
             return NIL_ELEM;

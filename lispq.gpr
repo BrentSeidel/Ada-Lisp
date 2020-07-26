@@ -8,5 +8,21 @@ project Lispq is
    for Main use ("lisp.adb");
    for Exec_Dir use ".";
 
+   package Builder is
+      for Switches ("ada") use ("-g", "-s");
+   end Builder;
+
+   package Compiler is
+      for Switches ("ada") use ("-g", "-O", "-gnato", "-gnatp", "-fstack-check", "-gnatE", "-gnatf", "-fcallgraph-info=su,da", "-gnat12", "-gnatVa", "-gnatw.d.f.g.h.k.l.n.o.s.u.wadhlt");
+   end Compiler;
+
+   package Binder is
+      for Switches ("ada") use ("-E", "-r");
+   end Binder;
+
+   package Linker is
+      for Switches ("ada") use ("-g");
+   end Linker;
+
 end Lispq;
 
