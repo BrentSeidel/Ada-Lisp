@@ -39,4 +39,26 @@
       (setq n1 n2)
       (setq n2 temp))
     n2))
+;
+;  Compute the remainder
+;
+(defun rem (a b) (- a (* (/ a b) b)))
+;
+;  Squares and square roots
+;
+(defun sqr (n) (* n n))
+;
+;  Integer square root of n.  Returns i where i*i <= n and (i+1)*(i+1) > n.
+;  This assumes that n > 0.  Note that this is not a particularly efficient
+;  algorithm.
+;
+(defun sqrt (n)
+  (if (< n 1)
+    0
+    (if (< n 4)
+      1
+      (local ((temp 2))
+        (dowhile (< (* temp temp) (+ n 1))
+          (setq temp (+ temp 1)))
+        (- temp 1)))))
 
