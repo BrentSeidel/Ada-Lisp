@@ -35,22 +35,23 @@ package bbs.lisp is
    type ptr_type is (E_CONS, E_NIL, E_VALUE, E_SYMBOL,
                      E_TEMPSYM, E_PARAM, E_LOCAL);
    --
-   --  This indicates what kind of data is in a value.
+   --  This indicates what kind of data is in a value.  These are the allowed
+   --  data types.
    --
    type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
                       V_NONE);
    --
    --  This indicates what kind of data is in a symbol
    --
-   type symbol_type is (SPECIAL,  -- A special form that need support during parsing
-                        BUILTIN,  -- A normal builtin function
-                        LAMBDA,   -- A user defined function
-                        VARIABLE, -- A value, not a function
-                        EMPTY);   -- No contents
+   type symbol_type is (SY_SPECIAL,  -- A special form that need support during parsing
+                        SY_BUILTIN,  -- A normal builtin function
+                        SY_LAMBDA,   -- A user defined function
+                        SY_VARIABLE, -- A value, not a function
+                        SY_EMPTY);   -- No contents
    --
    --  Phase of operation.  Some functions will need to know.
    --
-   type phase is (QUERY, PARSE_BEGIN, PARSE_END, EXECUTE);
+   type phase is (PH_QUERY, PH_PARSE_BEGIN, PH_PARSE_END, PH_EXECUTE);
    --
    --  Define the contents of records.
    --
@@ -119,20 +120,20 @@ package bbs.lisp is
    --  functions are predefined and cannot be changed.
    --  A symbol record contains a name and a type
    --
-   type symbol(kind : symbol_type := EMPTY) is
+   type symbol(kind : symbol_type := SY_EMPTY) is
       record
          ref : Natural;
          str : string_index;
          case kind is
-            when SPECIAL =>
+            when SY_SPECIAL =>
                s : special_function;
-            when BUILTIN =>
+            when SY_BUILTIN =>
                f : execute_function;
-            when LAMBDA =>
+            when SY_LAMBDA =>
                ps : cons_index;
-            when VARIABLE =>
+            when SY_VARIABLE =>
                pv : element_type;
-            when EMPTY =>
+            when SY_EMPTY =>
                null;
          end case;
       end record;

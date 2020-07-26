@@ -64,17 +64,17 @@ package body bbs.lisp.utilities is
       if e.kind = E_CONS then
          temp := cons_table(e.ps).car;
          if temp.kind = E_SYMBOL then
-            if (symb_table(temp.sym).kind = BUILTIN) or
-              (symb_table(temp.sym).kind = SPECIAL) or
-              (symb_table(temp.sym).kind = LAMBDA) then
+            if (symb_table(temp.sym).kind = SY_BUILTIN) or
+              (symb_table(temp.sym).kind = SY_SPECIAL) or
+              (symb_table(temp.sym).kind = SY_LAMBDA) then
                return True;
             end if;
          end if;
       else
          if e.kind = E_SYMBOL then
-            if (symb_table(e.sym).kind = BUILTIN) or
-              (symb_table(e.sym).kind = SPECIAL) or
-              (symb_table(e.sym).kind = LAMBDA) then
+            if (symb_table(e.sym).kind = SY_BUILTIN) or
+              (symb_table(e.sym).kind = SY_SPECIAL) or
+              (symb_table(e.sym).kind = SY_LAMBDA) then
                return True;
             end if;
          end if;
@@ -253,7 +253,7 @@ package body bbs.lisp.utilities is
    begin
       if e.kind = E_SYMBOL then
          sym := e.sym;
-         if symb_table(sym).kind = VARIABLE then
+         if symb_table(sym).kind = SY_VARIABLE then
             return symb_table(sym).pv;
          end if;
       end if;

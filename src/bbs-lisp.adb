@@ -125,7 +125,7 @@ package body bbs.lisp is
             bbs.lisp.memory.deref(s);
          when E_SYMBOL =>
             sym := e.sym;
-            if symb_table(sym).kind = VARIABLE then
+            if symb_table(sym).kind = SY_VARIABLE then
                r := symb_table(sym).pv;
             else
                r := e;
@@ -157,8 +157,6 @@ package body bbs.lisp is
             print(e.p_name);
          when E_LOCAL =>
             print(e.l_name);
---         when others =>
---            Put("Tried to print an unknown element type " & ptr_type'Image(e.kind));
       end case;
       if nl then
          New_Line;
@@ -275,13 +273,13 @@ package body bbs.lisp is
    begin
       print(symb_table(s).str);
       case symb_table(s).kind is
-         when BUILTIN =>
+         when SY_BUILTIN =>
             Put(" <BUILTIN>");
-         when SPECIAL =>
+         when SY_SPECIAL =>
             Put(" <SPECIAL>");
-         when LAMBDA =>
+         when SY_LAMBDA =>
             Put(" <FUNCTION>");
-         when VARIABLE =>
+         when SY_VARIABLE =>
             dump(symb_table(s).pv);
          when others =>
             Put(" <UNKNOWN>");
@@ -353,19 +351,17 @@ package body bbs.lisp is
             print((symb_table(i).str));
             Put(" contains: <");
             case symb_table(i).kind is
-               when BUILTIN =>
+               when SY_BUILTIN =>
                   Put("Builtin");
-               when SPECIAL =>
+               when SY_SPECIAL =>
                   Put("Special");
-               when LAMBDA =>
+               when SY_LAMBDA =>
                   Put("Lambda");
-               when VARIABLE =>
+               when SY_VARIABLE =>
                   Put("Variable: ");
                   print(symb_table(i).pv, False, False);
-               when EMPTY =>
+               when SY_EMPTY =>
                   Put("Empty");
---               when others =>
---                  Put("Unknown");
             end case;
             Put_Line(">");
          end if;
@@ -416,7 +412,7 @@ package body bbs.lisp is
          end loop;
          if available then
             s := free;
-            symb_table(s) := (ref => 1, kind => EMPTY, str => temp);
+            symb_table(s) := (ref => 1, kind => SY_EMPTY, str => temp);
             return True;
          end if;
       else
@@ -444,7 +440,7 @@ package body bbs.lisp is
       if available then
          s := free;
          BBS.lisp.memory.ref(n);
-         symb_table(s) := (ref => 1, kind => EMPTY, str => n);
+         symb_table(s) := (ref => 1, kind => SY_EMPTY, str => n);
          return True;
       end if;
       s := 0;
@@ -487,7 +483,7 @@ package body bbs.lisp is
          end if;
       end loop;
       if found then
-         if (symb.kind = BUILTIN) or (symb.kind = SPECIAL) then
+         if (symb.kind = SY_BUILTIN) or (symb.kind = SY_SPECIAL) then
             return (kind => E_SYMBOL, sym => temp);
          end if;
       end if;
@@ -497,12 +493,9 @@ package body bbs.lisp is
       offset := BBS.lisp.stack.find_offset(n, sp);
       if (sp > 0) and (offset > 0) then
          item := BBS.lisp.stack.stack(sp);
-         if item.kind = BBS.lisp.stack.ST_PARAM then
-            BBS.lisp.memory.ref(item.p_name);
-            return (kind => E_PARAM, p_name => item.p_name, p_offset => offset);
-         elsif item.kind = BBS.lisp.stack.ST_LOCAL then
-            BBS.lisp.memory.ref(item.l_name);
-            return (kind => E_LOCAL, l_name => item.l_name, l_offset => offset);
+         if item.kind = BBS.lisp.stack.ST_VALUE then
+            BBS.lisp.memory.ref(item.st_name);
+            return (kind => E_PARAM, p_name => item.st_name, p_offset => offset);
          else
             error("find_variable", "Item on stack is of type " &
                     BBS.lisp.stack.stack_entry_type'Image(BBS.lisp.stack.stack(sp).kind));
@@ -513,7 +506,7 @@ package body bbs.lisp is
       --  so, then use it.
       --
       if found then
-         if (symb.kind = LAMBDA) or (symb.kind = VARIABLE) or (symb.kind = EMPTY) then
+         if (symb.kind = SY_LAMBDA) or (symb.kind = SY_VARIABLE) or (symb.kind = SY_EMPTY) then
             return (kind => E_SYMBOL, sym => temp);
          end if;
       end if;
@@ -524,7 +517,7 @@ package body bbs.lisp is
       if create then
          if available then
             BBS.lisp.memory.ref(n);
-            symb_table(free) := (ref => 1, kind => EMPTY, str => n);
+            symb_table(free) := (ref => 1, kind => SY_EMPTY, str => n);
             return (kind => E_SYMBOL, sym => free);
          end if;
       else
@@ -541,7 +534,7 @@ package body bbs.lisp is
    begin
       flag := get_symb(sym, n);
       if flag then
-         symb_table(sym) := (ref => 1, Kind => BUILTIN, f => f,
+         symb_table(sym) := (ref => 1, Kind => SY_BUILTIN, f => f,
                              str => symb_table(sym).str);
       else
          error("add_builtin", "Unable to add builtin symbol " & n);
@@ -554,7 +547,7 @@ package body bbs.lisp is
    begin
       flag := get_symb(sym, n);
       if flag then
-         symb_table(sym) := (ref => 1, Kind => SPECIAL, s => f,
+         symb_table(sym) := (ref => 1, Kind => SY_SPECIAL, s => f,
                              str => symb_table(sym).str);
       else
          error("add_special", "Unable to add special symbol " & n);
@@ -625,28 +618,28 @@ package body bbs.lisp is
          if first.kind = E_SYMBOL then
             sym := symb_table(first.sym);
             case sym.kind is
-               when BUILTIN =>
+               when SY_BUILTIN =>
                   if msg_flag then
                      Put("eval_dispatch: Evaluating builtin ");
                      Print(sym.str);
                      New_Line;
                   end if;
                   e := sym.f.all(rest);
-               when SPECIAL =>
+               when SY_SPECIAL =>
                   if msg_flag then
                      Put("eval_dispatch: Evaluating special ");
                      Print(sym.str);
                      New_Line;
                   end if;
-                  e := sym.s.all(rest, EXECUTE);
-               when LAMBDA =>
+                  e := sym.s.all(rest, PH_EXECUTE);
+               when SY_LAMBDA =>
                   if msg_flag then
                      Put("eval_dispatch: Evaluating lambda ");
                      print(sym.ps);
                      new_line;
                   end if;
                   e := bbs.lisp.evaluate.func.eval_function(sym.ps, rest);
-               when VARIABLE =>
+               when SY_VARIABLE =>
                   if msg_flag then
                      Put("eval_dispatch: Evaluating variable ");
                      print(first.p_name);
@@ -682,7 +675,6 @@ package body bbs.lisp is
       if msg_flag then
          Put("eval_dispatch: Returning value: ");
          print(e, False, True);
---         dump_cons;
       end if;
       return e;
    end;

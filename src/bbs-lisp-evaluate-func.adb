@@ -16,155 +16,152 @@ package body BBS.lisp.evaluate.func is
    --
    function defun(e : element_type; p : phase) return element_type is
       params : element_type;
---      func_body : element_type;
       name : element_type;
       temp : element_type;
---      p1 : element_type;
       p2 : element_type;
       p3 : element_type;
       symb : symb_index;
       flag : Boolean;
---      count : Natural := 0;
    begin
       --
       --  Begin should be called at item 2 so that the parameter list is available.
       --
-      if p = QUERY then
-         return (kind => E_VALUE, v => (kind => V_INTEGER, i => 2));
-      --
-      --  First identify the name, parameter list, and body.  Then perform
-      --  initial checks to verify that they are the appropriate kind of object.
-      --
-      elsif p = PARSE_BEGIN then
-         if e.kind = E_CONS then
+      case p is
+         when PH_QUERY =>
+            return (kind => E_VALUE, v => (kind => V_INTEGER, i => 2));
             --
-            --  First process the symbol for the function.
+            --  First identify the name, parameter list, and body.  Then perform
+            --  initial checks to verify that they are the appropriate kind of object.
             --
---            p1 := cons_table(e.ps).car;    --  Should be symbol for defun
-            p2 := cons_table(e.ps).cdr;
-            p3 := cons_table(p2.ps).car;   --  Should be a symbol or tempsym
-            temp := cons_table(p2.ps).cdr; --  Should be parameter list.
-            if p3.kind = E_SYMBOL then
-               symb := p3.sym;
-               if (symb_table(symb).kind = BUILTIN) or
-                 (symb_table(symb).kind = SPECIAL) then
-                  error("defun", "Can't assign a value to a builtin or special symbol");
-                  return NIL_ELEM;
-               end if;
-            elsif p3.kind = E_TEMPSYM then
-               flag := get_symb(symb, p3.tempsym);
-               if flag then
-                  BBS.lisp.memory.ref(p3.tempsym);
-                  cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
+         when PH_PARSE_BEGIN =>
+            if e.kind = E_CONS then
+               --
+               --  First process the symbol for the function.
+               --
+               --            p1 := cons_table(e.ps).car;    --  Should be symbol for defun
+               p2 := cons_table(e.ps).cdr;
+               p3 := cons_table(p2.ps).car;   --  Should be a symbol or tempsym
+               temp := cons_table(p2.ps).cdr; --  Should be parameter list.
+               if p3.kind = E_SYMBOL then
+                  symb := p3.sym;
+                  if (symb_table(symb).kind = SY_BUILTIN) or
+                    (symb_table(symb).kind = SY_SPECIAL) then
+                     error("defun", "Can't assign a value to a builtin or special symbol");
+                     return NIL_ELEM;
+                  end if;
+               elsif p3.kind = E_TEMPSYM then
+                  flag := get_symb(symb, p3.tempsym);
+                  if flag then
+                     BBS.lisp.memory.ref(p3.tempsym);
+                     cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
+                  else
+                     error("defun", "Unable to add symbol ");
+                  end if;
                else
-                  error("defun", "Unable to add symbol ");
+                  error("defun", "First parameter is not a symbol or temporary symbol.");
+                  Put_Line("Parameter type is " & ptr_type'Image(p3.kind));
                end if;
+               --
+               --  Next process the parameter list.
+               --
+               if temp.kind = E_CONS then
+                  params := cons_table(temp.ps).car;
+               else
+                  error("defun", "Improper parameters.");
+               end if;
+               temp := params;
+               BBS.lisp.stack.start_frame;
+               while temp.kind = E_CONS loop
+                  if cons_table(temp.ps).car.kind = E_CONS then
+                     error("defun", "A parameter cannot be a list.");
+                     return NIL_ELEM;
+                  end if;
+                  declare
+                     el : element_type := cons_table(temp.ps).car;
+                     str : string_index;
+                     offset : stack_index := 1;
+                  begin
+                     if (el.kind = E_SYMBOL) then
+                        str := symb_table(el.sym).str;
+                        msg("defun", "Converting symbol to parameter");
+                        el := (kind => E_PARAM, p_name => str,
+                               p_offset => offset);
+                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE, st_name =>
+                                               str, st_value => (kind => V_NONE)));
+                     elsif (el.kind = E_TEMPSYM) then
+                        msg("defun", "Converting tempsym to parameter");
+                        str := el.tempsym;
+                        BBS.lisp.memory.ref(str);
+                        el := (kind => E_PARAM, p_name => str,
+                               p_offset => offset);
+                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE, st_name =>
+                                               str, st_value => (kind => V_NONE)));
+                     else
+                        error("defun", "Can't convert item into a parameter.");
+                        print(el, False, True);
+                        Put_Line("Item is of kind " & ptr_type'Image(el.kind));
+                     end if;
+                     offset := offset + 1;
+                     cons_table(temp.ps).car := el;
+                  end;
+                  temp := cons_table(temp.ps).cdr;
+               end loop;
+               BBS.lisp.stack.enter_frame;
             else
-               error("defun", "First parameter is not a symbol or temporary symbol.");
-               Put_Line("Parameter type is " & ptr_type'Image(p3.kind));
+               error("defun", "Something went horribly wrong and defun did not get a list");
             end if;
+         when PH_PARSE_END =>
+            BBS.lisp.stack.exit_frame;
             --
-            --  Next process the parameter list.
+            --  EXECUTE Phase
             --
+         when PH_EXECUTE =>
+            if e.kind /= E_CONS then
+               error("defun", "No parameters given to defun.");
+               return NIL_ELEM;
+            end if;
+            name := cons_table(e.ps).car;
+            temp := cons_table(e.ps).cdr;
             if temp.kind = E_CONS then
                params := cons_table(temp.ps).car;
             else
                error("defun", "Improper parameters.");
-            end if;
-            temp := params;
-            BBS.lisp.stack.start_frame;
-            while temp.kind = E_CONS loop
-               if cons_table(temp.ps).car.kind = E_CONS then
-                  error("defun", "A parameter cannot be a list.");
-                  return NIL_ELEM;
-               end if;
-               declare
-                  el : element_type := cons_table(temp.ps).car;
-                  str : string_index;
-                  offset : stack_index := 1;
-               begin
-                  if (el.kind = E_SYMBOL) then
-                     str := symb_table(el.sym).str;
-                     msg("defun", "Converting symbol to parameter");
-                     el := (kind => E_PARAM, p_name => str,
-                         p_offset => offset);
-                     BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_PARAM, p_name =>
-                                   str, p_value => (kind => V_NONE)));
-                  elsif (el.kind = E_TEMPSYM) then
-                     msg("defun", "Converting tempsym to parameter");
-                     str := el.tempsym;
-                     BBS.lisp.memory.ref(str);
-                     el := (kind => E_PARAM, p_name => str,
-                         p_offset => offset);
-                     BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_PARAM, p_name =>
-                                   str, p_value => (kind => V_NONE)));
-                  else
-                     error("defun", "Can't convert item into a parameter.");
-                     print(el, False, True);
-                     Put_Line("Item is of kind " & ptr_type'Image(el.kind));
-                  end if;
-                  offset := offset + 1;
-                  cons_table(temp.ps).car := el;
-               end;
-               temp := cons_table(temp.ps).cdr;
-            end loop;
-            BBS.lisp.stack.enter_frame;
-         else
-            error("defun", "Something went horribly wrong and defun did not get a list");
-         end if;
-      elsif p = PARSE_END then
-         BBS.lisp.stack.exit_frame;
-      --
-      --  EXECUTE Phase
-      --
-      elsif p = EXECUTE then
-         if e.kind /= E_CONS then
-            error("defun", "No parameters given to defun.");
-            return NIL_ELEM;
-         end if;
-         name := cons_table(e.ps).car;
-         temp := cons_table(e.ps).cdr;
-         if temp.kind = E_CONS then
-            params := cons_table(temp.ps).car;
---            func_body := cons_table(temp.ps).cdr;
-         else
-            error("defun", "Improper parameters.");
-            return NIL_ELEM;
-         end if;
-         if (name.kind /= E_SYMBOL)
-           and (name.kind /= E_TEMPSYM) then
-            error("defun", "Function name must be a symbol or tempsym.");
-            return NIL_ELEM;
-         end if;
-         if (params.kind /= E_CONS) and (params.kind /= E_NIL) then
-            error("defun", "Parameter list must be a list or NIL.");
-            return NIL_ELEM;
-         end if;
-         --
-         --  If all checks pass, attach the parameter list and body to the
-         --  symbol.
-         --
-         if name.kind = E_TEMPSYM then
-            flag := get_symb(symb, name.tempsym);
-            if not flag then
-               error("defun", "Unable to add symbol ");
-               BBS.lisp.stack.exit_frame;
                return NIL_ELEM;
             end if;
-         elsif name.kind = E_SYMBOL then
-            symb := name.sym;
-         end if;
-         if (symb_table(symb).kind = BUILTIN) or
-           (symb_table(symb).kind = SPECIAL) then
-            error("defun", "Cannot redefine builtin symbols");
-         else
-            temp := cons_table(e.ps).cdr;
-            cons_table(e.ps).cdr := NIL_ELEM;
-            symb_table(symb) := (ref => 1, str => symb_table(symb).str,
-                                 kind => LAMBDA, ps => temp.ps);
-            bbs.lisp.memory.ref(temp.ps);
-         end if;
-      end if;
+            if (name.kind /= E_SYMBOL)
+              and (name.kind /= E_TEMPSYM) then
+               error("defun", "Function name must be a symbol or tempsym.");
+               return NIL_ELEM;
+            end if;
+            if (params.kind /= E_CONS) and (params.kind /= E_NIL) then
+               error("defun", "Parameter list must be a list or NIL.");
+               return NIL_ELEM;
+            end if;
+            --
+            --  If all checks pass, attach the parameter list and body to the
+            --  symbol.
+            --
+            if name.kind = E_TEMPSYM then
+               flag := get_symb(symb, name.tempsym);
+               if not flag then
+                  error("defun", "Unable to add symbol ");
+                  BBS.lisp.stack.exit_frame;
+                  return NIL_ELEM;
+               end if;
+            elsif name.kind = E_SYMBOL then
+               symb := name.sym;
+            end if;
+            if (symb_table(symb).kind = SY_BUILTIN) or
+              (symb_table(symb).kind = SY_SPECIAL) then
+               error("defun", "Cannot redefine builtin symbols");
+            else
+               temp := cons_table(e.ps).cdr;
+               cons_table(e.ps).cdr := NIL_ELEM;
+               symb_table(symb) := (ref => 1, str => symb_table(symb).str,
+                                 kind => SY_LAMBDA, ps => temp.ps);
+               bbs.lisp.memory.ref(temp.ps);
+            end if;
+      end case;
       return NIL_ELEM;
    end;
    --
@@ -223,9 +220,9 @@ package body BBS.lisp.evaluate.func is
             else
                param_value := (kind => V_NONE);
             end if;
-            BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_PARAM, p_name =>
-                                   cons_table(name.ps).car.p_name, p_value =>
-                                   param_value));
+            BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
+                                 st_name => cons_table(name.ps).car.p_name,
+                                 st_value => param_value));
          else
             error("function evaluation", "Something horrible happened, a parameter is not a parameter");
          end if;

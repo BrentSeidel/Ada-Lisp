@@ -6,7 +6,7 @@ package BBS.lisp.stack is
    --
    --  Data types for the stack
    --
-   type stack_entry_type is (ST_EMPTY, ST_FRAME, ST_PARAM, ST_LOCAL);
+   type stack_entry_type is (ST_EMPTY, ST_FRAME, ST_VALUE);
    type stack_entry(kind : stack_entry_type := ST_EMPTY) is
       record
          case kind is
@@ -15,12 +15,9 @@ package BBS.lisp.stack is
             when ST_FRAME =>
                number: Natural;
                next : stack_index;
-            when ST_PARAM =>
-               p_name : string_index;
-               p_value : value;
-               when ST_LOCAL =>
-               l_name : string_index;
-               l_value : value;
+            when ST_VALUE =>
+               st_name : string_index;
+               st_value : value;
          end case;
       end record;
    --
