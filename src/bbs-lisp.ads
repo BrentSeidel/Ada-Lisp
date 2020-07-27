@@ -33,7 +33,7 @@ package bbs.lisp is
    --  can be a cons cell, an atom, or nothing.
    --
    type ptr_type is (E_CONS, E_NIL, E_VALUE, E_SYMBOL,
-                     E_TEMPSYM, E_PARAM, E_LOCAL);
+                     E_TEMPSYM, E_STACK);
    --
    --  This indicates what kind of data is in a value.  These are the allowed
    --  data types.
@@ -88,12 +88,12 @@ package bbs.lisp is
                sym : symb_index;
             when E_TEMPSYM =>
                tempsym : string_index;
-            when E_PARAM =>
-               p_name : string_index;
-               p_offset : stack_index;
-            when E_LOCAL =>
-               l_name : string_index;
-               l_offset : stack_index;
+            when E_STACK =>
+               st_name : string_index;
+               st_offset : stack_index;
+--            when E_LOCAL =>
+--               l_name : string_index;
+--               l_offset : stack_index;
          end case;
       end record;
    --

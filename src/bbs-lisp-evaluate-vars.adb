@@ -54,7 +54,7 @@ package body BBS.lisp.evaluate.vars is
                   p3 := find_variable(str, True);
                   BBS.lisp.memory.deref(str);
                   cons_table(p2.ps).car := p3;
-               elsif (p3.kind = E_LOCAL) or (p3.kind = E_PARAM) then
+               elsif p3.kind = E_STACK then
                   null;
                else
                   error("setq", "First parameter is not a symbol or temporary symbol.");
@@ -72,7 +72,7 @@ package body BBS.lisp.evaluate.vars is
                p2 := cons_table(e.ps).cdr;  --  Should be value to be assigned
                if p1.kind = E_SYMBOL then
                   symb := p1.sym;
-               elsif (p1.kind = E_PARAM) or (p1.kind = E_LOCAL) then
+               elsif p1.kind = E_STACK then
                   stacked := True;
                else
                   error("setq", "First parameter is not a symbol.");
@@ -104,8 +104,8 @@ package body BBS.lisp.evaluate.vars is
                   --  Check for stack variables
                   --
                   if stacked then
-                     if p1.kind = E_PARAM then
-                        index := BBS.lisp.stack.search_frames(p1.p_offset, p1.p_name);
+                     if p1.kind = E_STACK then
+                        index := BBS.lisp.stack.search_frames(p1.st_offset, p1.st_name);
                         BBS.lisp.memory.deref(BBS.lisp.stack.stack(index).st_value);
                         BBS.lisp.memory.ref(ret);
                         if ret.kind = E_VALUE then
@@ -113,15 +113,15 @@ package body BBS.lisp.evaluate.vars is
                         elsif ret.kind = E_CONS then
                            BBS.lisp.stack.stack(index).st_value := (kind => V_LIST, l => ret.ps);
                         end if;
-                     elsif p1.kind = E_LOCAL then
-                        index := BBS.lisp.stack.search_frames(p1.l_offset, p1.l_name);
-                        BBS.lisp.memory.deref(BBS.lisp.stack.stack(index).st_value);
-                        BBS.lisp.memory.ref(ret);
-                        if ret.kind = E_VALUE then
-                           BBS.lisp.stack.stack(index).st_value := ret.v;
-                        elsif ret.kind = E_CONS then
-                           BBS.lisp.stack.stack(index).st_value := (kind => V_LIST, l => ret.ps);
-                        end if;
+--                     elsif p1.kind = E_LOCAL then
+--                        index := BBS.lisp.stack.search_frames(p1.l_offset, p1.l_name);
+--                        BBS.lisp.memory.deref(BBS.lisp.stack.stack(index).st_value);
+--                        BBS.lisp.memory.ref(ret);
+--                        if ret.kind = E_VALUE then
+--                           BBS.lisp.stack.stack(index).st_value := ret.v;
+--                        elsif ret.kind = E_CONS then
+--                           BBS.lisp.stack.stack(index).st_value := (kind => V_LIST, l => ret.ps);
+--                        end if;
                      end if;
                   else
                      deref_previous(symb);
@@ -193,33 +193,33 @@ package body BBS.lisp.evaluate.vars is
                      if el.kind = E_SYMBOL then
                         str := symb_table(el.sym).str;
                         msg("local", "Converting symbol to local variable");
-                        el := (kind => E_LOCAL, l_name => str,
-                               l_offset => offset);
+                        el := (kind => E_STACK, st_name => str,
+                               st_offset => offset);
                         BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
                                              st_name => str,
                                              st_value => (kind => V_NONE)));
                      elsif el.kind = E_TEMPSYM then
                         msg("local", "Converting tempsym to local variable");
                         str := el.tempsym;
-                        el := (kind => E_LOCAL, l_name => str,
-                               l_offset => offset);
+                        el := (kind => E_STACK, st_name => str,
+                               st_offset => offset);
                         BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
                                              st_name => str,
                                              st_value => (kind => V_NONE)));
-                     elsif el.kind = E_PARAM then
-                        str := el.p_name;
-                        el := (kind => E_LOCAL, l_name => str,
-                               l_offset => offset);
+                     elsif el.kind = E_STACK then
+                        str := el.st_name;
+                        el := (kind => E_STACK, st_name => str,
+                               st_offset => offset);
                         BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
                                              st_name => str,
                                              st_value => (kind => V_NONE)));
-                     elsif el.kind = E_LOCAL then
-                        str := el.l_name;
-                        el := (kind => E_LOCAL, l_name => str,
-                               l_offset => offset);
-                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
-                                             st_name => str,
-                                             st_value => (kind => V_NONE)));
+--                     elsif el.kind = E_LOCAL then
+--                        str := el.l_name;
+--                        el := (kind => E_LOCAL, l_name => str,
+--                               l_offset => offset);
+--                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
+--                                             st_name => str,
+--                                             st_value => (kind => V_NONE)));
                      else
                         error("local", "Can't convert item into a local variable.");
                         print(el, False, True);
@@ -287,9 +287,9 @@ package body BBS.lisp.evaluate.vars is
                   else
                      el := cons_table(locals.ps).car;
                   end if;
-                  if (el.kind = E_LOCAL) then
+                  if (el.kind = E_STACK) then
                      BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
-                                          st_name => el.l_name,
+                                          st_name => el.st_name,
                                           st_value => local_val));
                   else
                      error("local", "Local variable is not a local.");

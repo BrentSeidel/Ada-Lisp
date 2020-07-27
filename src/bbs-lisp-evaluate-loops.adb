@@ -115,7 +115,7 @@ package body BBS.lisp.evaluate.loops is
                --  First convert the loop variable to a local variable, if not already
                --  done.
                --
-               if var.kind /= E_LOCAL then
+               if var.kind /= E_STACK then
                   if var.kind = E_CONS then
                      error("dowhile", "The loop variable cannot be a list.");
                      return NIL_ELEM;
@@ -126,11 +126,11 @@ package body BBS.lisp.evaluate.loops is
                      if (var.kind = E_SYMBOL) then
                         msg("dotimes", "Converting symbol to parameter");
                         str := symb_table(var.sym).str;
-                        var := (kind => E_LOCAL, l_name => str, l_offset => 1);
+                        var := (kind => E_STACK, st_name => str, st_offset => 1);
                      elsif (var.kind = E_TEMPSYM) then
                         msg("dotimes", "Converting tempsym to parameter");
                         str := var.tempsym;
-                        var := (kind => E_LOCAL, l_name => str, l_offset => 1);
+                        var := (kind => E_STACK, st_name => str, st_offset => 1);
                      else
                         error("dotimes", "Can't convert item into a parameter.");
                         print(var, False, True);
@@ -211,7 +211,7 @@ package body BBS.lisp.evaluate.loops is
             --
             BBS.lisp.stack.start_frame;
             BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
-                                 st_name => var.l_name, st_value =>
+                                 st_name => var.st_name, st_value =>
                                    (kind => V_INTEGER, i => 0)));
             BBS.lisp.stack.enter_frame;
             --
@@ -223,7 +223,7 @@ package body BBS.lisp.evaluate.loops is
                --
                BBS.lisp.stack.stack(BBS.lisp.stack.frame_pointer + 1) :=
                  (kind => BBS.lisp.stack.ST_VALUE,
-                  st_name => var.l_name, st_value =>
+                  st_name => var.st_name, st_value =>
                     (kind => V_INTEGER, i => index));
                --
                --  Evaluate all of the items in the list.

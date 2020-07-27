@@ -84,16 +84,16 @@ package body BBS.lisp.evaluate.func is
                      if (el.kind = E_SYMBOL) then
                         str := symb_table(el.sym).str;
                         msg("defun", "Converting symbol to parameter");
-                        el := (kind => E_PARAM, p_name => str,
-                               p_offset => offset);
+                        el := (kind => E_STACK, st_name => str,
+                               st_offset => offset);
                         BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE, st_name =>
                                                str, st_value => (kind => V_NONE)));
                      elsif (el.kind = E_TEMPSYM) then
                         msg("defun", "Converting tempsym to parameter");
                         str := el.tempsym;
                         BBS.lisp.memory.ref(str);
-                        el := (kind => E_PARAM, p_name => str,
-                               p_offset => offset);
+                        el := (kind => E_STACK, st_name => str,
+                               st_offset => offset);
                         BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE, st_name =>
                                                str, st_value => (kind => V_NONE)));
                      else
@@ -209,7 +209,7 @@ package body BBS.lisp.evaluate.func is
       name := params;  --  List of parameter names
       BBS.lisp.stack.start_frame;
       while rest.kind = E_CONS loop
-         if cons_table(name.ps).car.kind = E_PARAM then
+         if cons_table(name.ps).car.kind = E_STACK then
             BBS.lisp.utilities.first_value(rest, temp_value, rest);
             if temp_value.kind = E_VALUE then
                param_value := temp_value.v;
@@ -221,7 +221,7 @@ package body BBS.lisp.evaluate.func is
                param_value := (kind => V_NONE);
             end if;
             BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
-                                 st_name => cons_table(name.ps).car.p_name,
+                                 st_name => cons_table(name.ps).car.st_name,
                                  st_value => param_value));
          else
             error("function evaluation", "Something horrible happened, a parameter is not a parameter");

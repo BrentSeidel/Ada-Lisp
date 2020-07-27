@@ -124,12 +124,12 @@ package body bbs.lisp.utilities is
          end if;
          loop
             var_elem := cons_table(temp).car;
-            if var_elem.kind = E_PARAM then
-               var_name := var_elem.p_name;
-            elsif var_elem.kind = E_LOCAL then
-               var_name := var_elem.l_name;
+            if var_elem.kind = E_STACK then
+               var_name := var_elem.st_name;
+--            elsif var_elem.kind = E_LOCAL then
+--               var_name := var_elem.l_name;
             else
-               error("replace_syms.process_atom", "Improper atom in library");
+               error("replace_syms.process_element", "Improper element in library");
             end if;
             if bbs.lisp.strings.compare(name, var_name) = CMP_EQ then
                if flag then
@@ -196,12 +196,12 @@ package body bbs.lisp.utilities is
          else
             return False;
          end if;
-         if var.kind = E_PARAM then
-            var_name := var.p_name;
-         elsif var.kind = E_LOCAL then
-            var_name := var.l_name;
+         if var.kind = E_STACK then
+            var_name := var.st_name;
+--         elsif var.kind = E_LOCAL then
+--            var_name := var.l_name;
          else
-            error("replace_syms.process_atom", "Improper atom in library");
+            error("replace_syms.process_element", "Improper element in library");
          end if;
          if bbs.lisp.strings.compare(name, var_name) = CMP_EQ then
             if flag then
@@ -257,14 +257,14 @@ package body bbs.lisp.utilities is
             return symb_table(sym).pv;
          end if;
       end if;
-      if e.kind = E_LOCAL then
-         val := BBS.lisp.stack.search_frames(e.l_offset, e.l_name);
+      if e.kind = E_STACK then
+         val := BBS.lisp.stack.search_frames(e.st_offset, e.st_name);
          return (kind => E_VALUE, v => val);
       end if;
-      if e.kind = E_PARAM then
-         val := BBS.lisp.stack.search_frames(e.p_offset, e.p_name);
-         return (kind => E_VALUE, v => val);
-      end if;
+--      if e.kind = E_PARAM then
+--         val := BBS.lisp.stack.search_frames(e.p_offset, e.p_name);
+--         return (kind => E_VALUE, v => val);
+--      end if;
       return e;
    end;
    --

@@ -153,10 +153,10 @@ package body bbs.lisp is
             print(e.sym);
          when E_TEMPSYM =>
             put("Tempsym");
-         when E_PARAM =>
-            print(e.p_name);
-         when E_LOCAL =>
-            print(e.l_name);
+         when E_STACK =>
+            print(e.st_name);
+--         when E_LOCAL =>
+--            print(e.l_name);
       end case;
       if nl then
          New_Line;
@@ -495,7 +495,7 @@ package body bbs.lisp is
          item := BBS.lisp.stack.stack(sp);
          if item.kind = BBS.lisp.stack.ST_VALUE then
             BBS.lisp.memory.ref(item.st_name);
-            return (kind => E_PARAM, p_name => item.st_name, p_offset => offset);
+            return (kind => E_STACK, st_name => item.st_name, st_offset => offset);
          else
             error("find_variable", "Item on stack is of type " &
                     BBS.lisp.stack.stack_entry_type'Image(BBS.lisp.stack.stack(sp).kind));
@@ -642,7 +642,7 @@ package body bbs.lisp is
                when SY_VARIABLE =>
                   if msg_flag then
                      Put("eval_dispatch: Evaluating variable ");
-                     print(first.p_name);
+                     print(sym.str);
                      new_line;
                   end if;
                   BBS.lisp.memory.ref(sym.pv);
@@ -650,7 +650,7 @@ package body bbs.lisp is
                when others =>
                   if msg_flag then
                      Put("eval_dispatch: Evaluating unknown ");
-                     print(first.p_name);
+                     print(sym.str);
                      new_line;
                   end if;
                   e := NIL_ELEM;
