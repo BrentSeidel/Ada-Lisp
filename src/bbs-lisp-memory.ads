@@ -36,5 +36,6 @@ package bbs.lisp.memory is
    procedure deref(s : cons_index);
    procedure deref(s : string_index);
    procedure deref(e : element_type);
+   procedure deref(v : value);
    --
 end;

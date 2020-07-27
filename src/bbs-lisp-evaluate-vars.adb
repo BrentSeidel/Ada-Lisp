@@ -106,7 +106,7 @@ package body BBS.lisp.evaluate.vars is
                   if stacked then
                      if p1.kind = E_PARAM then
                         index := BBS.lisp.stack.search_frames(p1.p_offset, p1.p_name);
-                        BBS.lisp.memory.deref((kind => E_VALUE, v => BBS.lisp.stack.stack(index).st_value));
+                        BBS.lisp.memory.deref(BBS.lisp.stack.stack(index).st_value);
                         BBS.lisp.memory.ref(ret);
                         if ret.kind = E_VALUE then
                            BBS.lisp.stack.stack(index).st_value := ret.v;
@@ -115,7 +115,7 @@ package body BBS.lisp.evaluate.vars is
                         end if;
                      elsif p1.kind = E_LOCAL then
                         index := BBS.lisp.stack.search_frames(p1.l_offset, p1.l_name);
-                        BBS.lisp.memory.deref((kind => E_VALUE, v => BBS.lisp.stack.stack(index).st_value));
+                        BBS.lisp.memory.deref(BBS.lisp.stack.stack(index).st_value);
                         BBS.lisp.memory.ref(ret);
                         if ret.kind = E_VALUE then
                            BBS.lisp.stack.stack(index).st_value := ret.v;

@@ -3,6 +3,7 @@
 --  the Lisp interpreter.
 --
 with BBS.lisp.strings;
+with BBS.lisp.memory;
 package body BBS.lisp.stack is
    --
    --  Status functions for the stack
@@ -25,6 +26,9 @@ package body BBS.lisp.stack is
    begin
       if not isEmpty then
          t := stack(stack_pointer);
+         if t.kind = ST_VALUE then
+            BBS.lisp.memory.deref(t.st_value);
+         end if;
          stack(stack_pointer) := (kind => ST_EMPTY);
          stack_pointer := stack_pointer - 1;
       else
@@ -59,7 +63,6 @@ package body BBS.lisp.stack is
    end;
    --
    procedure exit_frame is
---      temp : stack_index := frame_pointer;
       frame : constant stack_entry := stack(frame_pointer);
    begin
       if frame.kind /= ST_FRAME then
@@ -67,6 +70,9 @@ package body BBS.lisp.stack is
          return;
       end if;
       for temp in frame_pointer .. stack_pointer loop
+         if stack(temp).kind = ST_VALUE then
+            BBS.lisp.memory.deref(stack(temp).st_value);
+         end if;
          stack(temp) := (kind => ST_EMPTY);
       end loop;
       stack_pointer := frame_pointer - 1;

@@ -12,7 +12,6 @@ package body BBS.lisp.evaluate.cond is
       t2 : element_type;
       v1 : value;
       v2 : value;
---      el : element_type;
       i1 : Integer;
       i2 : Integer;
    begin
@@ -58,8 +57,6 @@ package body BBS.lisp.evaluate.cond is
                   if i1 > i2 then
                      return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
                   end if;
---               when others =>
---                  error("eval_comp", "Unknown comparison type.");
                end case;
                return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
          elsif v1.kind = V_STRING and
@@ -85,8 +82,6 @@ package body BBS.lisp.evaluate.cond is
                      if eq /= CMP_EQ then
                         return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
                      end if;
---                  when others =>
---                     error("eval_comp", "Unknown comparison type.");
                end case;
             end;
             return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));

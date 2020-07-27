@@ -113,9 +113,18 @@ package body bbs.lisp.memory is
       if e.kind = E_CONS then
          deref(e.ps);
       elsif e.kind = E_VALUE then
-         if e.v.kind = V_STRING then
-            deref(e.v.s);
-         end if;
+         deref(e.v);
+      end if;
+   end;
+   --
+   --  Decrements the reference count of the item pointed to by a value.
+   --
+   procedure deref(v : value) is
+   begin
+      if v.kind = V_STRING then
+         deref(v.s);
+      elsif v.kind = V_LIST then
+         deref(v.l);
       end if;
    end;
    --
