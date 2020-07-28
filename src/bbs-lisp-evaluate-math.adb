@@ -8,7 +8,7 @@ package body BBS.lisp.evaluate.math is
    --  This function evaluates the basic arithmatic operation (+, -, *, /).
    --
    function eval_math(e : element_type; b : mathops) return element_type is
-      accum : Integer := 0;
+      accum : int32 := 0;
       v : value;
       p : cons_index;
       el: element_type;
@@ -16,7 +16,7 @@ package body BBS.lisp.evaluate.math is
       --
       --  Subfunction to do the actual evaluation.
       --
-      function process_value(e : element_type; accum : Integer; b : mathops) return Integer is
+      function process_value(e : element_type; accum : int32; b : mathops) return int32 is
          v  : value;
          e1 : element_type;
       begin
@@ -33,8 +33,6 @@ package body BBS.lisp.evaluate.math is
                   return accum - v.i;
                when DIV =>
                   return accum / v.i;
---               when others =>
---                  error("eval_math.process_atom", "Internal error, unknown math operation");
                end case;
             else
                error("eval_math.process_atom", "Can't process " & value_type'Image(v.kind));

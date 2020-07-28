@@ -73,7 +73,6 @@ package body BBS.lisp.evaluate.loops is
       dummy : Natural;
       ptr : element_type;
       t : element_type := NIL_ELEM;
---      temp : element_type;
    begin
       case p is
          when PH_QUERY =>
@@ -187,7 +186,7 @@ package body BBS.lisp.evaluate.loops is
             if limit.kind = E_VALUE then
                if limit.v.kind = V_INTEGER then
                   if limit.v.i >= 0 then
-                     limit_value := limit.v.i;
+                     limit_value := Natural(limit.v.i);
                   else
                      error("dotimes", "Limit must not be negative.");
                      return NIL_ELEM;
@@ -224,7 +223,7 @@ package body BBS.lisp.evaluate.loops is
                BBS.lisp.stack.stack(BBS.lisp.stack.frame_pointer + 1) :=
                  (kind => BBS.lisp.stack.ST_VALUE,
                   st_name => var.st_name, st_value =>
-                    (kind => V_INTEGER, i => index));
+                    (kind => V_INTEGER, i => int32(index)));
                --
                --  Evaluate all of the items in the list.
                --

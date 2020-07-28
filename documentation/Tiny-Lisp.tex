@@ -24,7 +24,7 @@
 %
 %  Define Tiny Lisp based on Common Lisp
 %
-\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{car, cdr, dowhile, dump, exit, if, local, msg-on, msg-off, new-line, read-line, reset, setq}}
+\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{car, cdr, dowhile, dump, exit, if, local, msg-on, msg-off, new-line, quote, read-line, reset, setq}}
 %
 % Macro definitions
 %
@@ -168,15 +168,6 @@ Four comparison operations are defined for both integers and strings.  The opera
 \end{lstlisting}
 These operations work on two parameters of the same type.  The return value of each of these operations is a boolean.
 
-\subsection{Input/Output}
-As this Lisp may run on systems without filesystems, only three operations are provided for input and output.  These are:
-
-\begin{lstlisting}
-(print "Strings " 1 2 N)
-(new-line)
-(read-line)
-\end{lstlisting}
-
 The \function{print} operation evaluates each item in its parameter list and prints the value.  The \function{new-line} operation simply prints a new line.  The \function{read-line} operation reads a string from the input device and returns it.  Both print and new-line return NIL.  Read-line returns the entered string with no line terminator.
 
 \subsection{Control Flow}
@@ -218,14 +209,26 @@ The \function{reset} operation is intended to reset the interpreter to an initia
 
 the \function{defun} form is used to create a user defined function.  The first parameter is a symbol for the function name.  The second parameter is a list of the parameters for the function.  If the function has no parameters, the empty list ``()'' is used.  Following this is a list of statements for the function.  The function returns the value from the last statement to return a value.\\
 
+\subsection{Input/Output}
+As this Lisp may run on systems without filesystems, only three operations are provided for input and output.  These are:
+
+\begin{lstlisting}
+(print "Strings " 1 2 N)
+(new-line)
+(read-line)
+\end{lstlisting}
+
 \subsection{List Operations}
 Basic list operations are provided.
 \begin{lstlisting}
 (car (1 2 3 4))
 (cdr (1 2 3 4))
+(quote (+ 1 2) 3 4 (* 5 6 7 8))
 \end{lstlisting}
 
 Each of \function{car} and \function{cdr} take one parameter that should be a list.  \function{Car} returns the first item in the list.  This item may be a single element or it may be a list.  \function{Cdr} returns the remainder of the list.
+
+The \function{quote} operation returns its parameters as a list without evaluating any of them.  In many cases this is not needed since if the first item in a list is not a symbol representing an operation or user defined function, the list simply evaluates to itself.  At some point, this may change to be more compatible with Common Lisp.
 
 \subsection{Variables}
 
@@ -248,13 +251,6 @@ There are a few operations that do things that can't be easily categorized.
 \end{lstlisting}
 
 The \function{exit} operation just exits the interpreter.  It should mainly be used from the command line.  It may cause problems in some cases if used in a function.
-
-\subsection{Not Yet Documented}
-
-\lstset{language=Ada}
-\begin{lstlisting}
-      add_builtin("quote", BBS.lisp.evaluate.quote'Access);
-\end{lstlisting}
 
 \section{Data Types}
 A limited selection of data types is provided.  Think of the old Applesoft Integer BASIC.

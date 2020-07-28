@@ -45,11 +45,6 @@ package body bbs.lisp is
       add_builtin("msg-on", BBS.lisp.evaluate.msg_on'Access);
       add_builtin("msg-off", BBS.lisp.evaluate.msg_off'Access);
       add_builtin("read-line", BBS.lisp.evaluate.read_line'Access);
-      --
-      --  The following need functions of the proper form created.
-      --
---      add_builtin("cond", SYM_COND);
---      add_builtin("eval", SYM_EVAL);
    end;
    --
    --  Do initialization and define text I/O routines
@@ -100,7 +95,6 @@ package body bbs.lisp is
    function read return Element_Type is
       buff : String(1 .. 256);
       size : Natural;
---      finished : Boolean := False;
       dummy : Boolean;
       el : element_type;
    begin
@@ -155,8 +149,6 @@ package body bbs.lisp is
             put("Tempsym");
          when E_STACK =>
             print(e.st_name);
---         when E_LOCAL =>
---            print(e.l_name);
       end case;
       if nl then
          New_Line;
@@ -222,7 +214,7 @@ package body bbs.lisp is
    begin
       case v.kind is
          when V_INTEGER =>
-            Put(Integer'Image(v.i) & " ");
+            Put(int32'Image(v.i) & " ");
          when V_CHARACTER =>
             Put("'" & v.c & "'");
          when V_STRING =>
@@ -244,7 +236,7 @@ package body bbs.lisp is
    begin
       case v.kind is
          when V_INTEGER =>
-            Put(Integer'Image(v.i) & " ");
+            Put(int32'Image(v.i) & " ");
          when V_CHARACTER =>
             Put("'" & v.c & "'");
          when V_STRING =>
@@ -612,7 +604,6 @@ package body bbs.lisp is
       e : element_type := NIL_ELEM;
       first : constant element_type := cons_table(s).car;
       rest : constant element_type := cons_table(s).cdr;
---      params : element_type;
    begin
       if first.kind /= E_CONS then
          if first.kind = E_SYMBOL then

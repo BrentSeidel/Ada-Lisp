@@ -12,8 +12,8 @@ package body BBS.lisp.evaluate.cond is
       t2 : element_type;
       v1 : value;
       v2 : value;
-      i1 : Integer;
-      i2 : Integer;
+      i1 : int32;
+      i2 : int32;
    begin
       if e.kind = E_CONS then
          BBS.lisp.utilities.first_value(e, t1, t);

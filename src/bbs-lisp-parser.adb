@@ -22,9 +22,7 @@ package body bbs.lisp.parser is
       head : cons_index;
       str  : string_index;
       flag : Boolean := False;
---      is_list : Boolean := False;
---      is_atom : Boolean := False;
-      value : Integer;
+      value : int32;
    begin
       e := (kind => E_NIL);
       ptr := buff'First;
@@ -81,7 +79,7 @@ package body bbs.lisp.parser is
       current : cons_index;
       temp : cons_index;
       str  : string_index;
-      value : Integer;
+      value : int32;
       flag : Boolean;
       e : element_type;
       list_end : Boolean := False;
@@ -130,7 +128,6 @@ package body bbs.lisp.parser is
                   end if;
                end if;
             end if;
-
          --
          --  Check for the start of an integer atom
          --
@@ -270,11 +267,11 @@ package body bbs.lisp.parser is
       return (kind => E_NIL);
    end;
    --
-   --  Parse an integer
+   --  Parse an integer.
    --
-   function int(ptr : in out integer; buff : String; last : Integer; value : out Integer)
+   function int(ptr : in out integer; buff : String; last : Integer; value : out int32)
                 return Boolean is
-      accumulate : Integer := 0;
+      accumulate : int32 := 0;
       neg : Boolean := False;
    begin
       if buff(ptr) = '-' then
@@ -282,7 +279,7 @@ package body bbs.lisp.parser is
          ptr := ptr + 1;
       end if;
       while Is_Digit(buff(ptr)) and (ptr <= Last) loop
-         accumulate := accumulate*10 + Integer'Value(" " & buff(ptr));
+         accumulate := accumulate*10 + int32'Value(" " & buff(ptr));
          ptr := ptr + 1;
       end loop;
       if neg then
@@ -301,7 +298,6 @@ package body bbs.lisp.parser is
       str  : string_index;
       next : string_index;
       first : string_index;
---      start : Integer := ptr;
       flag : Boolean;
    begin
       flag := bbs.lisp.memory.alloc(str);

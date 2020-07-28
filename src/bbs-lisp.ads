@@ -9,6 +9,7 @@
 --  can be added to directly interface with the hardware.  Since each board is
 --  different, these will have to be customized for each target.
 --
+with Ada.Unchecked_Conversion;
 package bbs.lisp is
    --
    --  Define the basic types used.
@@ -25,15 +26,11 @@ package bbs.lisp is
    type string_index is range -1 .. max_string;
    type stack_index is range 0 .. max_stack;
    --
-   type t_put_line is access procedure(s : String);
-   type t_newline is access procedure;
-   type t_get_line is access procedure(Item : out String; Last : out Natural);
-   --
    --  This indicates what type of an object an element_type is pointing to.  It
-   --  can be a cons cell, an atom, or nothing.
+   --  can be a cons cell, a value, a symbol, a temporary symbol a stack
+   --  variable, or nothing.
    --
-   type ptr_type is (E_CONS, E_NIL, E_VALUE, E_SYMBOL,
-                     E_TEMPSYM, E_STACK);
+   type ptr_type is (E_CONS, E_NIL, E_VALUE, E_SYMBOL, E_TEMPSYM, E_STACK);
    --
    --  This indicates what kind of data is in a value.  These are the allowed
    --  data types.
@@ -41,17 +38,38 @@ package bbs.lisp is
    type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
                       V_NONE);
    --
-   --  This indicates what kind of data is in a symbol
+   --  This indicates what kind of data is in a symbol.
    --
    type symbol_type is (SY_SPECIAL,  -- A special form that need support during parsing
                         SY_BUILTIN,  -- A normal builtin function
                         SY_LAMBDA,   -- A user defined function
                         SY_VARIABLE, -- A value, not a function
                         SY_EMPTY);   -- No contents
+
    --
-   --  Phase of operation.  Some functions will need to know.
+   --  Phase of operation.  Some functions will need to know.  This is mainly
+   --  used to allow a function to be able to build stack frames so that parsing
+   --  of nested functions can properly identify parameters or local variables.
+   --
+   --  PH_QUERY       - Ask the routine when it wants to be called again.
+   --  PH_PARSE_BEGIN - At desired point in parsing.
+   --  PH_PARSE_END   - At the end of parsing.
+   --  PH_EXECUTE     - Normal execution
    --
    type phase is (PH_QUERY, PH_PARSE_BEGIN, PH_PARSE_END, PH_EXECUTE);
+   --
+   --  Define the 32 bit signed and unsigned integer types along with unchecked
+   --  conversions.  This is to support bitwise logical operations..
+   --
+   type int32 is range -(2**31) .. 2**31 - 1
+     with Size => 32;
+   type uint32 is mod 2**32
+     with Size => 32;
+   function uint32_to_int32 is
+      new Ada.Unchecked_Conversion(source => uint32, target => int32);
+   function int32_to_uint32 is
+      new Ada.Unchecked_Conversion(source => int32, target => uint32);
+
    --
    --  Define the contents of records.
    --
@@ -59,7 +77,7 @@ package bbs.lisp is
       record
          case kind is
          when V_INTEGER =>
-            i : Integer;
+            i : int32;
          when V_CHARACTER =>
             c : Character;
          when V_STRING =>
@@ -91,19 +109,8 @@ package bbs.lisp is
             when E_STACK =>
                st_name : string_index;
                st_offset : stack_index;
---            when E_LOCAL =>
---               l_name : string_index;
---               l_offset : stack_index;
          end case;
       end record;
-   --
-   --  Type for access to function that implement lisp operations.
-   --
-   type execute_function is access function(e : element_type) return element_type;
-   --
-   --  Type for access to functions that implement lisp special operations
-   --
-   type special_function is access function(e : element_type; p : phase) return element_type;
    --
    --  A cons cell contains two element_type pointers that can point to either
    --  an atom or another cons cell.
@@ -114,6 +121,20 @@ package bbs.lisp is
          car : element_type;
          cdr : element_type;
       end record;
+   --
+   --  Define function types for Ada.Text_IO replacements.
+   --
+   type t_put_line is access procedure(s : String);
+   type t_newline is access procedure;
+   type t_get_line is access procedure(Item : out String; Last : out Natural);
+   --
+   --  Type for access to function that implement lisp operations.
+   --
+   type execute_function is access function(e : element_type) return element_type;
+   --
+   --  Type for access to functions that implement lisp special operations
+   --
+   type special_function is access function(e : element_type; p : phase) return element_type;
    --
    --  A symbol give a perminant name to a piece of data.  These can be global
    --  variables, user defined functions, or builtin functions.  The builtin
@@ -213,14 +234,6 @@ private
    --
    procedure init;
    --
-   --  Function pointers for I/O.  Using these pointers may allow the interpeter
-   --  to be run on systems without access to Ada.Text_IO.
-   --
-   io_put_line : t_put_line;
-   io_put      : t_put_line;
-   io_new_line : t_newline;
-   io_get_line : t_get_line;
-   --
    --  Define some enumerations
    --
    --
@@ -253,9 +266,6 @@ private
       end record;
    --
    --
-   --  Temporary symbols are temporary names that may eventually be converted
-   --  to regular symbols.
-   --
    string_table : array (string_index'First + 1 .. string_index'Last) of fragment;
    --
    --  For debugging, dump the various tables
@@ -271,9 +281,16 @@ private
    --  Local functions and procedures
    --
    --
+   --  Function pointers for I/O.  Using these pointers may allow the interpeter
+   --  to be run on systems without access to Ada.Text_IO.
+   --
+   io_put_line : t_put_line;
+   io_put      : t_put_line;
+   io_new_line : t_newline;
+   io_get_line : t_get_line;
+   --
    --  Replacements for Text_IO to make porting to embedded systems easier.
-   --  When on a system without Ada.Text_IO, these will need to be changed to
-   --  whatever routines are used.
+   --  These call the user specified routines in the above pointers.
    --
    procedure put_line(s : String);
    procedure put(s : String);

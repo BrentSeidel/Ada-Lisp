@@ -27,7 +27,7 @@ private package bbs.lisp.parser is
    --
    --  Subfunction for parsing integers
    --
-   function int(ptr : in out Integer; buff : String; last : Integer; value : out Integer)
+   function int(ptr : in out Integer; buff : String; last : Integer; value : out int32)
                 return Boolean;
    --
    --  Parse strings
