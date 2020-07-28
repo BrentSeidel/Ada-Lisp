@@ -61,4 +61,22 @@
         (dowhile (< (* temp temp) (+ n 1))
           (setq temp (+ temp 1)))
         (- temp 1)))))
+;
+;  Compute integer square root of n using bisection algorithm.  This is not the
+;  best, but will be better than the one above that just counts up.
+;
+(defun sqrt (n)
+  (if (< n 1)
+    0
+    (if (< n 4)
+      1
+      (if (< n 9)
+        3
+        (local ((min 1) (max (/ n 2)) (mid 0))
+          (dowhile (> (- max min) 1)
+            (setq mid (/ (+ min max) 2))
+            (if (> (* mid mid) n)
+              (setq max mid)
+              (setq min mid)))
+           (+ 0 min))))))
 
