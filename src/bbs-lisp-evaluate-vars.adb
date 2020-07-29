@@ -113,15 +113,6 @@ package body BBS.lisp.evaluate.vars is
                         elsif ret.kind = E_CONS then
                            BBS.lisp.stack.stack(index).st_value := (kind => V_LIST, l => ret.ps);
                         end if;
---                     elsif p1.kind = E_LOCAL then
---                        index := BBS.lisp.stack.search_frames(p1.l_offset, p1.l_name);
---                        BBS.lisp.memory.deref(BBS.lisp.stack.stack(index).st_value);
---                        BBS.lisp.memory.ref(ret);
---                        if ret.kind = E_VALUE then
---                           BBS.lisp.stack.stack(index).st_value := ret.v;
---                        elsif ret.kind = E_CONS then
---                           BBS.lisp.stack.stack(index).st_value := (kind => V_LIST, l => ret.ps);
---                        end if;
                      end if;
                   else
                      deref_previous(symb);
@@ -213,13 +204,6 @@ package body BBS.lisp.evaluate.vars is
                         BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
                                              st_name => str,
                                              st_value => (kind => V_NONE)));
---                     elsif el.kind = E_LOCAL then
---                        str := el.l_name;
---                        el := (kind => E_LOCAL, l_name => str,
---                               l_offset => offset);
---                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
---                                             st_name => str,
---                                             st_value => (kind => V_NONE)));
                      else
                         error("local", "Can't convert item into a local variable.");
                         print(el, False, True);

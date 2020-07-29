@@ -38,10 +38,13 @@ package body BBS.lisp.evaluate.func is
                --
                --  First process the symbol for the function.
                --
-               --            p1 := cons_table(e.ps).car;    --  Should be symbol for defun
                p2 := cons_table(e.ps).cdr;
                p3 := cons_table(p2.ps).car;   --  Should be a symbol or tempsym
                temp := cons_table(p2.ps).cdr; --  Should be parameter list.
+
+               --
+               --  Process the function name
+               --
                if p3.kind = E_SYMBOL then
                   symb := p3.sym;
                   if (symb_table(symb).kind = SY_BUILTIN) or
@@ -62,7 +65,10 @@ package body BBS.lisp.evaluate.func is
                   Put_Line("Parameter type is " & ptr_type'Image(p3.kind));
                end if;
                --
-               --  Next process the parameter list.
+               --  Next process the parameter list.  Note that currently, defun
+               --  is intended to be used at the command level, not within other
+               --  functions or local blocks.  Thus there should be no stack
+               --  variables to check when processing the parameter list.
                --
                if temp.kind = E_CONS then
                   params := cons_table(temp.ps).car;
@@ -141,26 +147,26 @@ package body BBS.lisp.evaluate.func is
             --  If all checks pass, attach the parameter list and body to the
             --  symbol.
             --
-            if name.kind = E_TEMPSYM then
-               flag := get_symb(symb, name.tempsym);
-               if not flag then
-                  error("defun", "Unable to add symbol ");
-                  BBS.lisp.stack.exit_frame;
-                  return NIL_ELEM;
-               end if;
-            elsif name.kind = E_SYMBOL then
+--            if name.kind = E_TEMPSYM then
+--               flag := get_symb(symb, name.tempsym);
+--               if not flag then
+--                  error("defun", "Unable to add symbol ");
+--                  BBS.lisp.stack.exit_frame;
+--                  return NIL_ELEM;
+--               end if;
+--            elsif name.kind = E_SYMBOL then
                symb := name.sym;
-            end if;
-            if (symb_table(symb).kind = SY_BUILTIN) or
-              (symb_table(symb).kind = SY_SPECIAL) then
-               error("defun", "Cannot redefine builtin symbols");
-            else
+--            end if;
+--            if (symb_table(symb).kind = SY_BUILTIN) or
+--              (symb_table(symb).kind = SY_SPECIAL) then
+--               error("defun", "Cannot redefine builtin symbols");
+--            else
                temp := cons_table(e.ps).cdr;
                cons_table(e.ps).cdr := NIL_ELEM;
                symb_table(symb) := (ref => 1, str => symb_table(symb).str,
                                  kind => SY_LAMBDA, ps => temp.ps);
                bbs.lisp.memory.ref(temp.ps);
-            end if;
+--            end if;
       end case;
       return NIL_ELEM;
    end;

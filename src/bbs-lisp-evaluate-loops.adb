@@ -92,7 +92,7 @@ package body BBS.lisp.evaluate.loops is
                   error("dotimes", "List not provided for limits.");
                   return NIL_ELEM;
                end if;
-               print(rest, False, True);
+--               print(rest, False, True);
                if rest.kind = E_CONS then
                   limit := cons_table(rest.ps).car;
                   if limit.kind = E_CONS then

@@ -84,6 +84,17 @@ package body bbs.lisp.memory is
       end if;
    end;
    --
+   --  Increments the reference count of a value, if applicable.
+   --
+   procedure ref(v : value) is
+   begin
+      if v.kind = V_STRING then
+         ref(v.s);
+      elsif v.kind = V_LIST then
+         ref(v.l);
+      end if;
+   end;
+   --
    --  Decrements the reference count of a cons cell.
    --
    procedure deref(s : cons_index) is
@@ -136,13 +147,14 @@ package body bbs.lisp.memory is
       if string_table(s).ref > 0 then
          string_table(s).ref := string_table(s).ref - 1;
       else
-         error("deref cons", "Attempt to deref an unreffed string at index "
+         error("deref string", "Attempt to deref an unreffed string at index "
               & string_index'Image(s));
       end if;
       --
       --  If the reference count goes to zero, deref the next fragment.
       --
       if string_table(s).ref = 0 then
+
          string_table(s).len := 0;
          next := string_table(s).next;
          if next >= (string_index'First + 1) then

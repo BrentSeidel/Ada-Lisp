@@ -27,6 +27,7 @@ package bbs.lisp.memory is
    procedure ref(s : cons_index);
    procedure ref(s : string_index);
    procedure ref(e : element_type);
+   procedure ref(v : value);
    --
    --  Decrement the reference count for various items.  This is done when the
    --  reference is no longer needed.  If the reference count reaches 0, the

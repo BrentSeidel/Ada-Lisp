@@ -256,7 +256,7 @@ The \function{exit} operation just exits the interpreter.  It should mainly be u
 A limited selection of data types is provided.  Think of the old Applesoft Integer BASIC.
 
 \subsection{Integer}
-This is the same as the Ada Integer type.  Typically it is a 32 bit signed integer.
+This is a 32 bit signed integer.
 
 \subsection{String}
 Strings are stored in linked lists of 8-bit characters/bytes.  Each node in the list can hold 16 (adjustable by a parameter) bytes.  Unicode is not currently supported.
@@ -267,17 +267,23 @@ The Boolean values \constant{NIL} and \constant{T} correspond to \constant{True}
 \subsection{List}
 The list is the basic complex data type.  A list element has two slots (historically called \constant{car} and \constant{cdr}).  Typically the \constant{car} slot contains a data value and the \constant{cdr} slot contains a pointer to the next list element.  The end of a list is indicated by a \constant{NIL} value in the \constant{cdr} slot.
 
-\subsection{Possible Additions}
-A stack may be added to hold stack frames for parameters and local variables.
-
 %----------------------------------------------------------
 \chapter{Internals}
 As the interpreter is under active development, this section is subject to change without notice.
+
 \section{Data Structures}
+
 \subsection{Elements}
 The basic data type is the element.  It is defined as follows:
 \lstset{language=Ada}
 \begin{lstlisting}
+   max_cons : constant Integer := 300;
+   max_symb : constant Integer := 200;
+   max_string : constant Integer := 500;
+   type cons_index is range 0 .. max_cons;
+   type symb_index is range 0 .. max_symb;
+   type string_index is range 0 .. max_string;
+   type ptr_type is (E_CONS, E_NIL, E_VALUE, E_SYMBOL, E_TEMPSYM, E_STACK);
    type element_type(kind : ptr_type := E_NIL) is
       record
          case kind is
@@ -291,45 +297,24 @@ The basic data type is the element.  It is defined as follows:
                sym : symb_index;
             when E_TEMPSYM =>
                tempsym : string_index;
-            when E_PARAM =>
-               p_name : string_index;
-               p_offset : stack_index;
-            when E_LOCAL =>
-               l_name : string_index;
-               l_offset : stack_index;
-         end case;
-      end record;
-\end{lstlisting}
-The referenced types are defined as follows:
-\begin{lstlisting}
-   max_cons : constant Integer := 300;
-   max_symb : constant Integer := 200;
-   max_string : constant Integer := 500;
-   type cons_index is range 0 .. max_cons;
-   type symb_index is range 0 .. max_symb;
-   type string_index is range 0 .. max_string;
-   type ptr_type is (E_CONS, E_NIL, E_VALUE, E_SYMBOL,
-                     E_TEMPSYM, E_PARAM, E_LOCAL);
-   type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN,
-                       V_LIST);
-   type value(kind : value_type := V_INTEGER) is
-      record
-         case kind is
-         when V_INTEGER =>
-            i : Integer;
-         when V_CHARACTER =>
-            c : Character;
-         when V_STRING =>
-            s : string_index;
-         when V_BOOLEAN =>
-            b : Boolean;
-         when V_LIST =>
-            l : cons_index;
+            when E_STACK =>
+               st_name : string_index;
+               st_offset : stack_index;
          end case;
       end record;
 \end{lstlisting}
 
-There is a bit of ambiguity right now about lists.  Since recursively defined records aren't possible, elements of type \constant{E\_PARAM} or \constant{E\_LOCAL} can't contain an \emph{element\_type}.  So in order for them to be able to have lists, the \emph{value} type also contains a list pointer.  This means that right now, an \emph{element\_type} can point to a list either directly by having a kind of \constant{E\_CONS}, or by having a kind that contains a \emph{value} with a kind of \constant{V\_LIST}.  This really should be fixed at some point.  On the other hand, one could make the distinction that the kind \constant{E\_CONS} represents a list that can be evaluated, while a \emph{value} of kind \constant{V\_LIST} is just data.
+The different types of elements are:
+\begin{description}
+  \item[E\_CONS] Contains an index into the array of cons cells.  This may eventually go away.
+  \item[E\_NIL] This represents an empty element.
+  \item[E\_VALUE] This represents a value.  It can contain any of the defined data types.  Note that for \emph{V\_STRING} or \emph{V\_LIST} data types, the value actually contains an index into the \emph{string} or \emph{cons} array.
+  \item[E\_SYMBOL] This contains an index into the \emph{symbol} table thus representing a symbol.
+  \item[E\_TEMPSYM] This contains an index into the \emph{string} table for representing a temporary symbol name.  This is used during parsing to represent an item where the type has not yet been determined.  It should never appear once parsing is complete.
+  \item[E\_STACK] This represents a stack variable.  It contains an index into the \emph{string} table for the variable's name and a stack frame offset.
+\end{description}
+
+There is a bit of ambiguity right now about lists.  Since recursively defined records aren't possible, elements of type  \constant{E\_STACK} can't contain an \emph{element\_type}.  So in order for them to be able to have lists, the \emph{value} type also contains a list pointer.  This means that right now, an \emph{element\_type} can point to a list either directly by having a kind of \constant{E\_CONS}, or by having a kind that contains a \emph{value} with a kind of \constant{V\_LIST}.  This really should be fixed at some point.  On the other hand, one could make the distinction that the kind \constant{E\_CONS} represents a list that can be evaluated, while a \emph{value} of kind \constant{V\_LIST} is just data.
 
 \subsection{Cons}
 Cons elements are used to make lists.  A cons cell is defined as
@@ -388,6 +373,30 @@ The phases are:
   \item[PH\_PARSE\_END] This is the call at the end of parsing for the function.  Usually this just clears the stack frame.  It could also be used for things like preprocessing the parameter list.
   \item[PH\_EXECUTE] This is the call for execution where the function performs its normal operation.
 \end{description}
+
+\subsection{Values}
+\begin{lstlisting}
+   type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN,
+                       V_LIST);
+   type int32 is range -(2**31) .. 2**31 - 1
+     with Size => 32;
+   type value(kind : value_type := V_INTEGER) is
+      record
+         case kind is
+         when V_INTEGER =>
+            i : int32;
+         when V_CHARACTER =>
+            c : Character;
+         when V_STRING =>
+            s : string_index;
+         when V_BOOLEAN =>
+            b : Boolean;
+         when V_LIST =>
+            l : cons_index;
+         end case;
+      end record;
+\end{lstlisting}
+
 
 \subsection{Strings}
 Strings are stored as a set of string fragments in a linked list.  Thus, the length of a string is limited only by the number of fragments available.  Strings are defined as:

@@ -27,6 +27,7 @@ package body BBS.lisp.stack is
       if not isEmpty then
          t := stack(stack_pointer);
          if t.kind = ST_VALUE then
+            BBS.lisp.memory.deref(t.st_name);
             BBS.lisp.memory.deref(t.st_value);
          end if;
          stack(stack_pointer) := (kind => ST_EMPTY);
@@ -40,6 +41,10 @@ package body BBS.lisp.stack is
    procedure push(v : stack_entry) is
    begin
       if not isFull then
+         if v.kind = ST_VALUE then
+            BBS.lisp.memory.ref(v.st_name);
+            BBS.lisp.memory.ref(v.st_value);
+         end if;
          stack_pointer := stack_pointer + 1;
          stack(stack_pointer) := v;
       else
@@ -71,6 +76,7 @@ package body BBS.lisp.stack is
       end if;
       for temp in frame_pointer .. stack_pointer loop
          if stack(temp).kind = ST_VALUE then
+            BBS.lisp.memory.deref(stack(temp).st_name);
             BBS.lisp.memory.deref(stack(temp).st_value);
          end if;
          stack(temp) := (kind => ST_EMPTY);
