@@ -5,10 +5,11 @@ with BBS.lisp.stack;
 use type BBS.lisp.stack.stack_entry_type;
 with BBS.lisp.strings;
 --with BBS.lisp.evaluate;
-with BBS.lisp.evaluate.math;
 with BBS.lisp.evaluate.cond;
-with BBS.lisp.evaluate.loops;
 with BBS.lisp.evaluate.func;
+with BBS.lisp.evaluate.io;
+with BBS.lisp.evaluate.loops;
+with BBS.lisp.evaluate.math;
 with BBS.lisp.evaluate.vars;
 --
 package body bbs.lisp is
@@ -32,8 +33,9 @@ package body bbs.lisp is
       add_builtin("cdr", BBS.lisp.evaluate.cdr'Access);
       add_builtin("dowhile", BBS.lisp.evaluate.loops.dowhile'Access);
       add_special("dotimes", BBS.lisp.evaluate.loops.dotimes'Access);
+      add_builtin("fresh-line", BBS.lisp.evaluate.io.fresh_line'Access);
       add_builtin("if", BBS.lisp.evaluate.cond.eval_if'Access);
-      add_builtin("print", BBS.lisp.evaluate.print'Access);
+      add_builtin("print", BBS.lisp.evaluate.io.print'Access);
       add_special("setq", BBS.lisp.evaluate.vars.setq'Access);
       add_special("local", BBS.lisp.evaluate.vars.local'Access);
       add_special("defun", BBS.lisp.evaluate.func.defun'Access);
@@ -41,10 +43,11 @@ package body bbs.lisp is
       add_builtin("dump", BBS.lisp.evaluate.dump'Access);
       add_builtin("reset", BBS.lisp.evaluate.reset'Access);
       add_builtin("quote", BBS.lisp.evaluate.quote'Access);
-      add_builtin("new-line", BBS.lisp.evaluate.newline'Access);
+      add_builtin("new-line", BBS.lisp.evaluate.io.terpri'Access); -- Depricated.
       add_builtin("msg-on", BBS.lisp.evaluate.msg_on'Access);
       add_builtin("msg-off", BBS.lisp.evaluate.msg_off'Access);
-      add_builtin("read-line", BBS.lisp.evaluate.read_line'Access);
+      add_builtin("read-line", BBS.lisp.evaluate.io.read_line'Access);
+      add_builtin("terpri", BBS.lisp.evaluate.io.terpri'Access);
    end;
    --
    --  Do initialization and define text I/O routines

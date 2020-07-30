@@ -24,7 +24,7 @@
 %
 %  Define Tiny Lisp based on Common Lisp
 %
-\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{car, cdr, dowhile, dump, exit, if, local, msg-on, msg-off, new-line, quote, read-line, reset, setq}}
+\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{car, cdr, dowhile, dump, exit, fresh-line, if, local, msg-on, msg-off, new-line, quote, read-line, reset, setq}}
 %
 % Macro definitions
 %
@@ -210,13 +210,22 @@ The \function{reset} operation is intended to reset the interpreter to an initia
 the \function{defun} form is used to create a user defined function.  The first parameter is a symbol for the function name.  The second parameter is a list of the parameters for the function.  If the function has no parameters, the empty list ``()'' is used.  Following this is a list of statements for the function.  The function returns the value from the last statement to return a value.\\
 
 \subsection{Input/Output}
-As this Lisp may run on systems without filesystems, only three operations are provided for input and output.  These are:
+As this Lisp may run on systems without filesystems, only a few operations are provided for input and output.  These are:
 
 \begin{lstlisting}
 (print "Strings " 1 2 N)
-(new-line)
+(fresh-line)
 (read-line)
+(terpri)
 \end{lstlisting}
+
+The \function{print} form prints the list of objects to the standard output.  No newline is added to the end.  It returns \constant{NIL\_ELEM}.
+
+The \function{fresh-line} prints a newline to the standard output if the output is not already at the start of a line.  It returns \constant{NIL\_ELEM}.
+
+The \function{read-line} reads a line of text from the standard input, terminated by a newline.  It returns the text as a string without the newline.
+
+The \function{terpri} prints a newline to the standard output.  It returns \constant{NIL\_ELEM}.
 
 \subsection{List Operations}
 Basic list operations are provided.
@@ -283,7 +292,8 @@ The basic data type is the element.  It is defined as follows:
    type cons_index is range 0 .. max_cons;
    type symb_index is range 0 .. max_symb;
    type string_index is range 0 .. max_string;
-   type ptr_type is (E_CONS, E_NIL, E_VALUE, E_SYMBOL, E_TEMPSYM, E_STACK);
+   type ptr_type is (E_CONS, E_NIL, E_VALUE, E_SYMBOL, E_TEMPSYM,
+                     E_STACK);
    type element_type(kind : ptr_type := E_NIL) is
       record
          case kind is
@@ -360,7 +370,7 @@ Symbols are defined as:
       end record;
 \end{lstlisting}
 
-\subsection{SY\_BUILTIN vs SY\_SPECIAL}
+\subsubsection{SY\_BUILTIN vs SY\_SPECIAL}
 Some functions need to be able to access some of their parameters during parsing so that the rest of the parameters can be properly parsed.  Usually, but not always, this involves building a stack frame with the parameters so that they will be properly identified during further processing.  These functions are passed an extra parameter \emph{p} for phase.  The possible values are:
 \begin{lstlisting}
    type phase is (PH_QUERY, PH_PARSE_BEGIN, PH_PARSE_END, PH_EXECUTE);
@@ -368,13 +378,14 @@ Some functions need to be able to access some of their parameters during parsing
 
 The phases are:
 \begin{description}
-  \item[PH\_QUERY] Initial call of the function to query the function when it wants to be called again.  The function returns an integer value indicating the parameter after which it should be called.
+  \item[PH\_QUERY] Initial call to the function to query the function when it wants to be called again.  The function returns an integer value indicating the parameter after which it should be called.
   \item[PH\_PARSE\_BEGIN] This is the call after the desired parameter has been parsed.  The function can then examine this parameter and make any needed changes.
   \item[PH\_PARSE\_END] This is the call at the end of parsing for the function.  Usually this just clears the stack frame.  It could also be used for things like preprocessing the parameter list.
   \item[PH\_EXECUTE] This is the call for execution where the function performs its normal operation.
 \end{description}
 
 \subsection{Values}
+The value type represent a (surprise) value.  It can be either an atomic type such as integer or boolean, or a more complex type such as a list or a string.  
 \begin{lstlisting}
    type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN,
                        V_LIST);
@@ -397,8 +408,17 @@ The phases are:
       end record;
 \end{lstlisting}
 
+The data types available are:
+\begin{description}
+  \item[V\_INTEGER] is the basic integer numeric type.  It is defined as a 32 bit signed integer.  Basic math operations can be performed on it and integers can be compared.
+  \item[V\_STRING] is the string type.  These are unbounded strings.  The value structure contains an index into the string fragment array.  Details of strings are described in section \ref{sec:strings}.
+  \item[V\_CHARACTER] will represent a character data type when implemented.  It is currently not implemented.
+  \item[V\_BOOLEAN] is a boolean data type that can represent false or true.  Comparison operations return boolean values and certain functions expect boolean values.
+  \item[V\_LIST] is a list data type.  It is approximately equal to an element type of \emph{E\_CONS}.  The value structure contains an index into the cons cell array.
+\end{description}
 
 \subsection{Strings}
+\label{sec:strings}
 Strings are stored as a set of string fragments in a linked list.  Thus, the length of a string is limited only by the number of fragments available.  Strings are defined as:
 \begin{lstlisting}
    fragment_len : constant Integer := 16;

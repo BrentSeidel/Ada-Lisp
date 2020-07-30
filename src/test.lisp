@@ -15,17 +15,17 @@
 ; Prints a pass message
 (defun pass (n)
   (print "PASS: " n)
-  (new-line))
+  (terpri))
 ; Prints a fail message
 (defun fail (n)
   (print "***FAIL: " n)
-  (new-line))
+  (terpri))
 ;  If two values are equal, print pass message, otherwise print fail message
-(defun verify-equal (a b msg)
-  (if (= a b) (print "Pass: Actual")
+(defun verify-equal (actual expected msg)
+  (if (= actual expected) (print "Pass: Actual")
               (print "***FAIL: Actual"))
-  (print  a ", Expected " b " " msg)
-  (new-line))
+  (print  actual ", Expected " expected " " msg)
+  (terpri))
 ;
 ;  Test cases.  Load and run the desired test.
 ;
@@ -128,59 +128,18 @@
       (setq count (+ count 1))
       (setq accum (+ accum count))
       (print "Counter is " count ", Accumulator is " accum)
-      (new-line))
+      (terpri))
     (verify-equal count 10 "Count is 10")
     (verify-equal accum 55 "Accumulator is 55")))
 ;
-;  Other old code that tests some things.  These snippits will be deleted as
-;  more formal tests are written.
+;  Test dotimes operation
 ;
-;
-;  Testing the do while loop
-;
-(setq var1 0)
-(setq var2 0)
-(dowhile (< var1 100)
-  (setq var2 0)
-  (print "Var1 is " var1)
-  (new-line)
-  (setq var1 (+ 1 var1))
-  (dowhile (< var2 100)
-    (print "  Var2 is " var2)
-    (setq var2 (+ 1 var2))
-    (new-line)))
-
-(dowhile (< var1 5)
-  (setq var2 0)
-  (setq var1 (+ 1 var1))
-  (dowhile (< var2 5)
-    (setq var2 (+ 1 var2))))
-
-(defun hello (var) ((print "Hello " var) (new-line)))
-
-(defun range (val upper lower)
-   (if (< val upper)
-      (if (> val lower)
-        (print "In range")
-        (print "Below range"))
-      (print "Above range"))
-     (new-line))
-
-(defun hello (n)
-  (setq var (abs n))
-  (dowhile (< 0 var)
-    (print "Hello #" var)
-    (new-line)
-    (setq var (- var 1))))
-;
-;  Rewriten to use dotimes
-;
-(defun hello (n)
-  (dotimes (var n)
-    (print "Hello #" var)
-    (new-line)))
-
-(defun test (n)
-  (setq n (+ 3 1))
-  (print "N is " n))
+(defun test-dotimes ()
+  (local ((accum 0) result)
+    (setq result (dotimes (n 10 20)
+      (print "Count is " n)
+      (terpri)
+      (setq accum (+ accum n))))
+    (verify-equal result 20 "Result returned")
+    (verify-equal accum 45 "Accumulator is 45")))
 

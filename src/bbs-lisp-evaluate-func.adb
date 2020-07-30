@@ -1,5 +1,4 @@
 with BBS.lisp.memory;
---with BBS.lisp.strings;
 with BBS.lisp.utilities;
 with BBS.lisp.stack;
 package body BBS.lisp.evaluate.func is
@@ -144,29 +143,15 @@ package body BBS.lisp.evaluate.func is
                return NIL_ELEM;
             end if;
             --
-            --  If all checks pass, attach the parameter list and body to the
-            --  symbol.
+            --  To get to this point, all checks have passed, so attach the
+            --  parameter list and body to the symbol.
             --
---            if name.kind = E_TEMPSYM then
---               flag := get_symb(symb, name.tempsym);
---               if not flag then
---                  error("defun", "Unable to add symbol ");
---                  BBS.lisp.stack.exit_frame;
---                  return NIL_ELEM;
---               end if;
---            elsif name.kind = E_SYMBOL then
-               symb := name.sym;
---            end if;
---            if (symb_table(symb).kind = SY_BUILTIN) or
---              (symb_table(symb).kind = SY_SPECIAL) then
---               error("defun", "Cannot redefine builtin symbols");
---            else
-               temp := cons_table(e.ps).cdr;
-               cons_table(e.ps).cdr := NIL_ELEM;
-               symb_table(symb) := (ref => 1, str => symb_table(symb).str,
+            symb := name.sym;
+            temp := cons_table(e.ps).cdr;
+            cons_table(e.ps).cdr := NIL_ELEM;
+            symb_table(symb) := (ref => 1, str => symb_table(symb).str,
                                  kind => SY_LAMBDA, ps => temp.ps);
-               bbs.lisp.memory.ref(temp.ps);
---            end if;
+            bbs.lisp.memory.ref(temp.ps);
       end case;
       return NIL_ELEM;
    end;
