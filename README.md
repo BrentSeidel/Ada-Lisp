@@ -39,7 +39,8 @@ was the ability for the host software to add custom lisp commands.  Thus, the
 main Arduino Due program can add custom Lisp commands for accessing the Arduino
 hardware.
 
-This Lisp interpreter also builds and runs on Windows 10.
+This Lisp interpreter also builds and runs on Windows 10 as well as a Raspberry
+PI under Raspberian.
 
 ### Supported Data Types
 1. Integers are the standard Ada integer type.
@@ -66,6 +67,19 @@ figure out how first.
 2. Object oriented features.  This will probably never happen.
 3. Closures.  This will probably never happen.
 4. Passing functions as parameters.  This may happen.
+
+### Roadmap
+The following updates to the language are planned.  They may not be done in the
+order shown and other items may be added before some of these.
+1. Peek and Poke functions for accessing memory.  This is mainly for use on embedded
+systems.
+2. Hexidecimal literals.
+3. Logical and bitwise logical operations AND, OR, NOT.
+4. Parsing string to number.
+5. Character data type and conversions.
+6. Some basic string operations.
+7. Improved error handling and general code cleanup.
+8. Make functions first class objects.
 
 ## Internals
 

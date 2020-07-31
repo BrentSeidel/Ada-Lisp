@@ -5,13 +5,67 @@ package body bbs.lisp.parser is
    --
    --  Utilities to assist in parsing
    --
-   function Is_Digit(c : Character) return Boolean is
+   --  Is character a decimal digit?
+   function isDigit(c : Character) return Boolean is
    begin
-      if (c >= '0' and c <= '9') then
-         return True;
-      else
-         return False;
-      end if;
+      return (c >= '0' and c <= '9');
+   end;
+   --
+   -- Is character a hexidecimal digit?
+   --
+   function isHex(c : Character) return Boolean is
+   begin
+      return (c >= '0' and c <= '9') or (c >= 'A' and c <= 'F')
+        or (c >= 'a' and c <= 'f');
+   end;
+   --
+   function hexDigit(c : Character) return uint32 is
+   begin
+      case c is
+         when '0' =>
+            return 0;
+         when '1' =>
+            return 1;
+         when '2' =>
+            return 2;
+         when '3' =>
+            return 3;
+         when '4' =>
+            return 4;
+         when '5' =>
+            return 5;
+         when '6' =>
+            return 6;
+         when '7' =>
+            return 7;
+         when '8' =>
+            return 8;
+         when '9' =>
+            return 9;
+         when 'A' | 'a' =>
+            return 10;
+         when 'B' | 'b' =>
+            return 11;
+         when 'C' | 'c' =>
+            return 12;
+         when 'D' | 'd' =>
+            return 13;
+         when 'E' | 'e' =>
+            return 14;
+         when 'F' | 'f' =>
+            return 15;
+         when others =>
+            return 0;
+      end case;
+   end;
+   --
+   --  Procedure to skip white space
+   --
+   procedure skip_whitespace(ptr : in out Integer; buff : String; last : Integer) is
+   begin
+      while (buff(ptr) = ' ') and (ptr < Last) loop
+         ptr := ptr + 1;
+      end loop;
    end;
    --
    --  This is the basic parser dispatcher.  Based on the first non-space character,
@@ -48,8 +102,8 @@ package body bbs.lisp.parser is
       --
       --  Integer
       --
-      elsif Is_Digit(buff(ptr)) or
-        ((buff(ptr) = '-') and Is_Digit(buff(ptr + 1))) then
+      elsif isDigit(buff(ptr)) or
+        ((buff(ptr) = '-') and isDigit(buff(ptr + 1))) then
          flag := int(ptr, buff, last, value);
          e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
       --
@@ -61,7 +115,16 @@ package body bbs.lisp.parser is
             e := (Kind => E_VALUE, v =>(kind => V_STRING, s => str));
          end if;
       --
-      --  Symbol
+      -- Special
+      --
+      elsif buff(ptr) = '#' then
+         ptr := ptr + 1;
+         if (buff(ptr) = 'x') or (buff(ptr) = 'X') then
+            flag := hex(ptr, buff, last, value);
+            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+         end if;
+      --
+      --  Anything that doesn't match something else is treated as a symbol
       --
       else
          e := symb(ptr, buff, last);
@@ -131,8 +194,8 @@ package body bbs.lisp.parser is
          --
          --  Check for the start of an integer atom
          --
-         elsif Is_Digit(buff(ptr)) or
-           ((buff(ptr) = '-') and Is_Digit(buff(ptr + 1))) then
+         elsif isDigit(buff(ptr)) or
+           ((buff(ptr) = '-') and isDigit(buff(ptr + 1))) then
             flag := int(ptr, buff, last, value);
             if flag then
                e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
@@ -141,6 +204,26 @@ package body bbs.lisp.parser is
                else
                   flag := elem_to_cons(current, e);
                   flag := append(head, current);
+               end if;
+            end if;
+         --
+         --  Check for special sequences.
+         --
+         elsif buff(ptr) = '#' then
+            ptr := ptr + 1;
+            if (buff(ptr) = 'x') or (buff(ptr) = 'X') then
+               --
+               --  Hexidecimal number
+               --
+               flag := hex(ptr, buff, last, value);
+               if flag then
+                  e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+                  if cons_table(head).car.kind = E_NIL then
+                     cons_table(head).car := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+                  else
+                     flag := elem_to_cons(current, e);
+                     flag := append(head, current);
+                  end if;
                end if;
             end if;
          --
@@ -278,7 +361,7 @@ package body bbs.lisp.parser is
          neg := true;
          ptr := ptr + 1;
       end if;
-      while Is_Digit(buff(ptr)) and (ptr <= Last) loop
+      while isDigit(buff(ptr)) and (ptr <= Last) loop
          accumulate := accumulate*10 + int32'Value(" " & buff(ptr));
          ptr := ptr + 1;
       end loop;
@@ -287,6 +370,21 @@ package body bbs.lisp.parser is
       else
          value := accumulate;
       end if;
+      return True;
+   end;
+   --
+   --  Parse an integer in hexidecimal notation.
+   --
+   function hex(ptr : in out integer; buff : String; last : Integer; value : out int32)
+                return Boolean is
+      accumulate : uint32 := 0;
+   begin
+      ptr := ptr + 1;
+      while isHex(buff(ptr)) and (ptr <= Last) loop
+         accumulate := accumulate*16 + hexDigit(buff(ptr));
+         ptr := ptr + 1;
+      end loop;
+      value := uint32_to_int32(accumulate);
       return True;
    end;
    --
@@ -329,14 +427,5 @@ package body bbs.lisp.parser is
       end if;
       ptr := ptr + 1;
       return True;
-   end;
-   --
-   --  Procedure to skip white space
-   --
-   procedure skip_whitespace(ptr : in out Integer; buff : String; last : Integer) is
-   begin
-      while (buff(ptr) = ' ') and (ptr < Last) loop
-         ptr := ptr + 1;
-      end loop;
    end;
 end;

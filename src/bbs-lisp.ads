@@ -30,7 +30,7 @@ package bbs.lisp is
    --  can be a cons cell, a value, a symbol, a temporary symbol a stack
    --  variable, or nothing.
    --
-   type ptr_type is (E_CONS, E_NIL, E_VALUE, E_SYMBOL, E_TEMPSYM, E_STACK);
+   type ptr_type is (E_CONS, E_ERROR, E_NIL, E_STACK, E_SYMBOL, E_TEMPSYM, E_VALUE);
    --
    --  This indicates what kind of data is in a value.  These are the allowed
    --  data types.
@@ -98,17 +98,19 @@ package bbs.lisp is
          case kind is
             when E_CONS =>
                ps : cons_index;
+            when E_ERROR =>
+               null;
             when E_NIL =>
                null;
-            when E_VALUE =>
-               v : value;
-            when E_SYMBOL =>
-               sym : symb_index;
             when E_TEMPSYM =>
                tempsym : string_index;
+            when E_SYMBOL =>
+               sym : symb_index;
             when E_STACK =>
                st_name : string_index;
                st_offset : stack_index;
+            when E_VALUE =>
+               v : value;
          end case;
       end record;
    --

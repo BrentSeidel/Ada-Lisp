@@ -89,7 +89,9 @@ None.  Some could possibly be added, but right now the focus has been on getting
 \section{Syntax}
 
 \subsection{Special Characters}
-There are only a few characters with special significance.  Parenthesis, ``('' and ``)'', are used for delimiting lists.  Quotation marks, ``"'' are used for delimiting strings.  The semicolon, ``;'', indicates a comment.  Spaces are used to separate elements in a list.  That's about it.  However, it's probably best to avoid most symbol characters and some more special characters may be added.  The language is case insensitive thus, \function{CAR}, \function{car}, \function{cAr}, etc all are considered identical by the language.
+There are only a few characters with special significance.  Parenthesis, ``('' and ``)'', are used for delimiting lists.  Quotation marks, ``"'' are used for delimiting strings.  The semicolon, ``;'', indicates a comment.  Spaces are used to separate elements in a list.  That's about it.  However, it's probably best to avoid most symbol characters since some more special characters may be added.  For example, the apostrophe will probably be used to delimit characters once they are implemented and the pound sign, ``\#'' will be used to indicate certain special processing.
+
+The language is case insensitive thus, \function{CAR}, \function{car}, \function{cAr}, etc all are considered identical by the language.
 
 \subsection{Reserved Words}
 There are almost none.  \constant{T} and \constant{NIL} refer to the boolean true and false values, and you can't define a symbol that it already used for a builtin or special operation.  However, even the builtin and special operations are not, strictly speaking, reserved words.  Their names are strings that are added to the symbol table during program initialization.  They can easily be changed (say to translate into a different language) and the interpreter recompiled.
@@ -156,6 +158,8 @@ Four arithmetic operations are defined for operation on integers.  The operation
 \end{lstlisting}
 
 These operations work on a list of one or more parameters, with the operation inserted between the parameters.  Thus \operation{(+ 1 2 3 4)} computes as $1+2+3+4$.  The return value for each of these operations is an integer value.
+
+Note that division by zero is not checked.  If this occurs, an Ada exception will be thrown.  In some cases, this might be useful.
 
 \subsection{Comparison Operations}
 Four comparison operations are defined for both integers and strings.  The operations are equals, not equals, greater than, and less than.  For example:
@@ -265,7 +269,7 @@ The \function{exit} operation just exits the interpreter.  It should mainly be u
 A limited selection of data types is provided.  Think of the old Applesoft Integer BASIC.
 
 \subsection{Integer}
-This is a 32 bit signed integer.
+This is a 32 bit signed integer.  Integer literals can be given as either signed decimal integers, with a minus sign, ``-'', indicating negative numbers.  This is just as one would expect, however don't use a plus sign, ``+'', to indicate positive numbers.  Integers can also be expressed as unsigned hexadecimal numbers by preceding the number by ``\#x''.
 
 \subsection{String}
 Strings are stored in linked lists of 8-bit characters/bytes.  Each node in the list can hold 16 (adjustable by a parameter) bytes.  Unicode is not currently supported.
@@ -292,24 +296,26 @@ The basic data type is the element.  It is defined as follows:
    type cons_index is range 0 .. max_cons;
    type symb_index is range 0 .. max_symb;
    type string_index is range 0 .. max_string;
-   type ptr_type is (E_CONS, E_NIL, E_VALUE, E_SYMBOL, E_TEMPSYM,
-                     E_STACK);
+   type ptr_type is (E_CONS, E_ERROR, E_NIL, E_STACK, E_SYMBOL,
+                     E_TEMPSYM, E_VALUE);
    type element_type(kind : ptr_type := E_NIL) is
       record
          case kind is
             when E_CONS =>
                ps : cons_index;
+            when E_ERROR =>
+               null;
             when E_NIL =>
                null;
-            when E_VALUE =>
-               v : value;
-            when E_SYMBOL =>
-               sym : symb_index;
             when E_TEMPSYM =>
                tempsym : string_index;
+            when E_SYMBOL =>
+               sym : symb_index;
             when E_STACK =>
                st_name : string_index;
                st_offset : stack_index;
+            when E_VALUE =>
+               v : value;
          end case;
       end record;
 \end{lstlisting}
@@ -317,11 +323,12 @@ The basic data type is the element.  It is defined as follows:
 The different types of elements are:
 \begin{description}
   \item[E\_CONS] Contains an index into the array of cons cells.  This may eventually go away.
+  \item[E\_ERROR]  This indicates that some operation has encountered an error of some sort.  This currently is not implemented, but is intended to help with error handling and propagation.
   \item[E\_NIL] This represents an empty element.
-  \item[E\_VALUE] This represents a value.  It can contain any of the defined data types.  Note that for \emph{V\_STRING} or \emph{V\_LIST} data types, the value actually contains an index into the \emph{string} or \emph{cons} array.
-  \item[E\_SYMBOL] This contains an index into the \emph{symbol} table thus representing a symbol.
   \item[E\_TEMPSYM] This contains an index into the \emph{string} table for representing a temporary symbol name.  This is used during parsing to represent an item where the type has not yet been determined.  It should never appear once parsing is complete.
   \item[E\_STACK] This represents a stack variable.  It contains an index into the \emph{string} table for the variable's name and a stack frame offset.
+  \item[E\_SYMBOL] This contains an index into the \emph{symbol} table thus representing a symbol.
+  \item[E\_VALUE] This represents a value.  It can contain any of the defined data types.  Note that for \emph{V\_STRING} or \emph{V\_LIST} data types, the value actually contains an index into the \emph{string} or \emph{cons} array.
 \end{description}
 
 There is a bit of ambiguity right now about lists.  Since recursively defined records aren't possible, elements of type  \constant{E\_STACK} can't contain an \emph{element\_type}.  So in order for them to be able to have lists, the \emph{value} type also contains a list pointer.  This means that right now, an \emph{element\_type} can point to a list either directly by having a kind of \constant{E\_CONS}, or by having a kind that contains a \emph{value} with a kind of \constant{V\_LIST}.  This really should be fixed at some point.  On the other hand, one could make the distinction that the kind \constant{E\_CONS} represents a list that can be evaluated, while a \emph{value} of kind \constant{V\_LIST} is just data.

@@ -5,13 +5,13 @@
 --
 private package bbs.lisp.parser is
    --
-   --  Utilities to assist in parsing
-   --
-   type TOKEN_TYPE is (LIST, TOK_SYMB, TOK_NUMBER, INVALID);
-   --
    --  The main parser function
    --
    function parse(buff : in out String; last : in out Integer; e : out element_type) return Boolean;
+private
+   --
+   --  Utilities to assist in parsing
+   --
    --
    --  Subfunction for parsing lists
    --
@@ -30,6 +30,12 @@ private package bbs.lisp.parser is
    function int(ptr : in out Integer; buff : String; last : Integer; value : out int32)
                 return Boolean;
    --
+   --  Hexidecimal numbers are read in as 32 bit unsigned integers and conerted
+   --  to signed 32 bit integers using an unchecked conversion.
+   --
+   function hex(ptr : in out Integer; buff : String; last : Integer; value : out int32)
+                return Boolean;
+   --
    --  Parse strings
    --
    function parse_str(ptr : in out Integer; buff : in String;
@@ -39,7 +45,10 @@ private package bbs.lisp.parser is
    --
    procedure skip_whitespace(ptr : in out Integer; buff : String; last : Integer);
    --
-   --  Function to determine if a character is a digit or not
+   --  Function to determine if a character is a digit or not in different number
+   --  systems.
    --
-   function Is_Digit(c : Character) return Boolean;
+   function isDigit(c : Character) return Boolean;
+   function isHex(c : Character) return Boolean;
+   function hexDigit(c : Character) return uint32;
 end;
