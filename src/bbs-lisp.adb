@@ -4,6 +4,7 @@ with BBS.lisp.evaluate.func;
 with BBS.lisp.evaluate.io;
 with BBS.lisp.evaluate.loops;
 with BBS.lisp.evaluate.math;
+with BBS.lisp.evaluate.mem;
 with BBS.lisp.evaluate.vars;
 with BBS.lisp.memory;
 with BBS.lisp.parser;
@@ -42,9 +43,11 @@ package body bbs.lisp is
       add_builtin("dump", BBS.lisp.evaluate.dump'Access);
       add_builtin("reset", BBS.lisp.evaluate.reset'Access);
       add_builtin("quote", BBS.lisp.evaluate.quote'Access);
---      add_builtin("new-line", BBS.lisp.evaluate.io.terpri'Access); -- Depricated.
       add_builtin("msg-on", BBS.lisp.evaluate.msg_on'Access);
       add_builtin("msg-off", BBS.lisp.evaluate.msg_off'Access);
+      add_builtin("peek8", BBS.lisp.evaluate.mem.peek8'Access);
+      add_builtin("peek16", BBS.lisp.evaluate.mem.peek16'Access);
+      add_builtin("peek32", BBS.lisp.evaluate.mem.peek32'Access);
       add_builtin("read-line", BBS.lisp.evaluate.io.read_line'Access);
       add_builtin("terpri", BBS.lisp.evaluate.io.terpri'Access);
    end;

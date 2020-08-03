@@ -24,7 +24,7 @@
 %
 %  Define Tiny Lisp based on Common Lisp
 %
-\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{car, cdr, dowhile, dump, exit, fresh-line, if, local, msg-on, msg-off, new-line, quote, read-line, reset, setq}}
+\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{car, cdr, dowhile, dump, exit, fresh-line, if, local, msg-on, msg-off, peek8, peek16, peek32, poke8, poke16, poke32, quote, read-line, reset, setq}}
 %
 % Macro definitions
 %
@@ -32,6 +32,8 @@
 \newcommand{\package}[1]{\texttt{#1}}
 \newcommand{\function}[1]{\texttt{#1}}
 \newcommand{\constant}[1]{\emph{\texttt{#1}}}
+\newcommand{\tl}{Tiny-Lisp}
+\newcommand{\cl}{Common Lisp}
 %
 % Front Matter
 %
@@ -56,23 +58,25 @@ This document is \copyright 2020 Brent Seidel.  All rights reserved.
 \mainmatter
 %----------------------------------------------------------
 \chapter{Introduction}
-This document provides a definition of a Tiny Lisp interpreter written in Ada.  Without such a definition, it is difficult to determine if the language is actually doing what it should be doing.  This makes debugging more complicated.
+This document provides a definition of a \tl\ interpreter written in Ada.  Without such a definition, it is difficult to determine if the language is actually doing what it should be doing.  This makes debugging more complicated.
 
 \section{What is This?}
-This is a tiny Lisp interpreter written in Ada.  It is designed to proved a language that can be embedded into other programs, including running on embedded systems without an operating system.  As a result, effort has been made to remove dependencies on Ada packages that may not be available.  A primary example is \package{Ada.Text\_IO}.  Another feature that may be missing is dynamic memory allocation.
+This is a \tl\ interpreter written in Ada.  It is designed to proved a language that can be embedded into other programs, including running on embedded systems without an operating system.  As a result, effort has been made to remove dependencies on Ada packages that may not be available.  A primary example is \package{Ada.Text\_IO}.  Another feature that may be missing is dynamic memory allocation.
 
 \section{Why is This?}
 As a young lad, I learned to program on 8-bit computers with minimal BASIC interpreters and 4-16K of RAM.  With these simple systems, one had a hope of being able to understand the complete system at a fairly low level.  Now, one can buy small computers like the Arduino Due with 32-bit processors, 96K of RAM, and 512K of flash memory (I'm ignoring systems like the Raspberry PI as they are full up Linux computer and thus are more complicated).  This seemed like a reasonable platform for recreating the early experience.
 
 \subsection{Why Lisp?}
-Why not?  My first thought was to use some flavor of Tiny BASIC which would have more in common with those early systems.  I then realized that Lisp is much easier to parse.  Being somewhat lazy and interested in various computer languages, I decided that some form of a ``Tiny-Lisp'' would be a good idea.
+Why not?  My first thought was to use some flavor of Tiny BASIC which would have more in common with those early systems.  I then realized that Lisp is much easier to parse.  Being somewhat lazy and interested in various computer languages, I decided that some form of a ``\tl'' would be a good idea.
+
+\tl\ can be thought of as a small subset of \cl, with some extensions of use to embedded systems.  Most of the more complex features of \cl\ are not and probably never will be available in this \tl.  However, one should be able to write code in \tl\ and have it actually run on a \cl\ system.
 
 \subsection{Why Ada?}
-Again, why non?  I have developed an interest in Ada, especially for programming embedded systems.  It has features, such as strong typing, which can help to catch errors early, thus saving time debugging.  I would not claim to be the world's greatest programmer, so I need all the help that I can get.
+Again, why not?  I have developed an interest in Ada, especially for programming embedded systems.  It has features, such as strong typing, which can help to catch errors early, thus saving time debugging.  I would not claim to be the world's greatest programmer, so I need all the help that I can get.
 
 %----------------------------------------------------------
 \chapter{The Language}
-As a ``Tiny-Lisp'', some (many) of the features of Common Lisp are not available.  Some of the lacks may be temporary while others will be permanent, and some may be added by the host program.
+As a ``\tl'', some (many) of the features of \cl\ are not available.  Some of the lacks may be temporary while others will be permanent, and some may be added by the host program.
 
 \section{User Interface}
 The interpreter reads text from an input device, parses it, and and executes it.  The function used to read the input must match the signature for \function{Ada.Text\_IO.Get\_Line()} and this will probably be used if that is available.  On an embedded system without \package{Ada.Text\_IO}, the user must provide a suitable function.
@@ -89,7 +93,7 @@ None.  Some could possibly be added, but right now the focus has been on getting
 \section{Syntax}
 
 \subsection{Special Characters}
-There are only a few characters with special significance.  Parenthesis, ``('' and ``)'', are used for delimiting lists.  Quotation marks, ``"'' are used for delimiting strings.  The semicolon, ``;'', indicates a comment.  Spaces are used to separate elements in a list.  That's about it.  However, it's probably best to avoid most symbol characters since some more special characters may be added.  For example, the apostrophe will probably be used to delimit characters once they are implemented and the pound sign, ``\#'' will be used to indicate certain special processing.
+There are only a few characters with special significance.  Parenthesis, ``('' and ``)'', are used for delimiting lists.  Quotation marks, ``"'' are used for delimiting strings.  The semicolon, ``;'', indicates a comment.  The pound sign (octothorp) ``\#'' is used to indicate certain special processing.  Spaces are used to separate elements in a list.  That's about it.  However, it's probably best to avoid most symbol characters since some more special characters may be added.  A good rule of thumb would be to avoid any special characters that are used by \cl.
 
 The language is case insensitive thus, \function{CAR}, \function{car}, \function{cAr}, etc all are considered identical by the language.
 
@@ -126,7 +130,9 @@ Elements that are not numbers, strings, or lists are symbols or variables.  In d
   \item Variable symbols are checked last.  These can be considered to be global variables.
 \end{enumerate}
 
-This is, I believe, dynamic scoping rather than lexical scoping.  A potential problem is if you define a function within a \function{local} block and the function references variables defined in the block.  In Common Lisp, this would create a closure and the defined function would continue to have access to the variable.  This doesn't work in this Tiny Lisp and will probably cause an error message.  If, however, a variable with the same name is defined with the same frame offset, the function will access that variable.  This is probably not what you want.  This may also change at some point, so don't do it.
+All symbols share the same namespace.  This makes this \tl\ a LISP-1 (for those who are interested in such things).  It is possible that this will change at some point.
+
+Another thing to be aware of is that if a function is defined within a function definition or local block, the inner definition may reference locals or parameters in the outer blocks.  In \cl, this creates a closure where the variables remain accessible.  This does not work in \tl\ and may cause an error when the function is called.  It is best to define functions are the top level for now.
 
 \section{Operations}
 A limited number of operations are defined.  Note that this list will probably be expanded.
@@ -172,15 +178,13 @@ Four comparison operations are defined for both integers and strings.  The opera
 \end{lstlisting}
 These operations work on two parameters of the same type.  The return value of each of these operations is a boolean.
 
-The \function{print} operation evaluates each item in its parameter list and prints the value.  The \function{new-line} operation simply prints a new line.  The \function{read-line} operation reads a string from the input device and returns it.  Both print and new-line return NIL.  Read-line returns the entered string with no line terminator.
-
 \subsection{Control Flow}
 A couple of control flow special forms are available.  More will probably be added.
 
 \begin{lstlisting}
 (if (> 1 2) (print "True") (print "False"))
-(dowhile (> 1 2) (print "Forever") (new-line))
-(dotimes (n 5 10) (print "This is printed 5 times") (new-line))
+(dowhile (> 1 2) (print "Forever") (terpri))
+(dotimes (n 5 10) (print "This is printed 5 times") (terpri))
 \end{lstlisting}
 
 The \function{if} form has two or three parameters.  The first parameter is a condition.  If the condition evaluates to \function{T}, then the second parameter is evaluated.  If the condition evaluates to \function{NIL}, then the third parameter, if present, is evaluated.
@@ -241,7 +245,22 @@ Basic list operations are provided.
 
 Each of \function{car} and \function{cdr} take one parameter that should be a list.  \function{Car} returns the first item in the list.  This item may be a single element or it may be a list.  \function{Cdr} returns the remainder of the list.
 
-The \function{quote} operation returns its parameters as a list without evaluating any of them.  In many cases this is not needed since if the first item in a list is not a symbol representing an operation or user defined function, the list simply evaluates to itself.  At some point, this may change to be more compatible with Common Lisp.
+The \function{quote} operation returns its parameters as a list without evaluating any of them.  In many cases this is not needed since if the first item in a list is not a symbol representing an operation or user defined function, the list simply evaluates to itself.  At some point, this may change to be more compatible with \cl.
+
+\subsection{Memory Access}
+Here be dragons!  Use at your own risk.  These operations are intended for use on embedded systems to access memory mapped peripheral devices.  Access to a memory map is essential so that you know which locations to access.
+\begin{lstlisting}
+(peek8 #x400E0940)
+(peek16 #x400E0940)
+(peek32 #x400E0940)
+(poke8 #x100 5)
+(poke16 #x110 10)
+(poke32 #x1000 32)
+\end{lstlisting}
+
+The \function{peek} operations read 8, 16, or 32 bits from the specified memory location.  Depending on the hardware, there may be memory alignment requirements, or certain operations will only work on some addresses.  For example, the bytes of the Chip ID (CHIPID\_CIDR) register on the SAM3X8E works using \function{peek8}, but hangs when using \function{peek16} or \function{peek32}.  The returned value is the contents of memory at the specified location.
+
+The \function{poke} operations write a 8, 16, or 32 bit value to the specified memory location.  This is even more dangerous that the \function{peek} operations.  You have been warned!  \function{poke} is not yet implemented.
 
 \subsection{Variables}
 
@@ -249,7 +268,7 @@ The \function{quote} operation returns its parameters as a list without evaluati
 (setq variable 1)
 (local (var1 (var2 2) (var3))
   (print "var1 is " var1 " var2 is " var2 "var3 is " var3)
-  (new-line))
+  (terpri))
 \end{lstlisting}
 
 The \function{setq} form sets a value for a symbol.  The first parameter is the symbol and the second parameter is the value.  If the symbol does not yet exist, it is created.  Symbols that already exist as builtin or special can't be used for values.  The second parameter is evaluated to return the value.

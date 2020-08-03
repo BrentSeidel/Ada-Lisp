@@ -73,13 +73,12 @@ The following updates to the language are planned.  They may not be done in the
 order shown and other items may be added before some of these.
 1. Peek and Poke functions for accessing memory.  This is mainly for use on embedded
 systems.
-2. Hexidecimal literals.
-3. Logical and bitwise logical operations AND, OR, NOT.
-4. Parsing string to number.
-5. Character data type and conversions.
-6. Some basic string operations.
-7. Improved error handling and general code cleanup.
-8. Make functions first class objects.
+2. Logical and bitwise logical operations AND, OR, NOT.
+3. Parsing string to number.
+4. Character data type and conversions.
+5. Some basic string operations.
+6. Improved error handling and general code cleanup.
+7. Make functions first class objects.
 
 ## Internals
 
