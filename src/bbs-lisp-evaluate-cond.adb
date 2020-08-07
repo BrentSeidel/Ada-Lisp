@@ -1,7 +1,6 @@
 with BBS.lisp.memory;
 with BBS.lisp.strings;
 with BBS.lisp.utilities;
---with BBS.lisp.stack;
 package body BBS.lisp.evaluate.cond is
    --
    --  Perform comparison operations.

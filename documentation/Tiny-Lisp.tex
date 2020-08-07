@@ -260,7 +260,7 @@ Here be dragons!  Use at your own risk.  These operations are intended for use o
 
 The \function{peek} operations read 8, 16, or 32 bits from the specified memory location.  Depending on the hardware, there may be memory alignment requirements, or certain operations will only work on some addresses.  For example, the bytes of the Chip ID (CHIPID\_CIDR) register on the SAM3X8E works using \function{peek8}, but hangs when using \function{peek16} or \function{peek32}.  The returned value is the contents of memory at the specified location.
 
-The \function{poke} operations write a 8, 16, or 32 bit value to the specified memory location.  This is even more dangerous that the \function{peek} operations.  You have been warned!  \function{poke} is not yet implemented.
+The \function{poke} operations write a 8, 16, or 32 bit value to the specified memory location.  This is even more dangerous that the \function{peek} operations.  \textbf{\textit{You have been warned!}}  The return value is the value written to the memory location.
 
 \subsection{Variables}
 

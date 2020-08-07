@@ -48,6 +48,9 @@ package body bbs.lisp is
       add_builtin("peek8", BBS.lisp.evaluate.mem.peek8'Access);
       add_builtin("peek16", BBS.lisp.evaluate.mem.peek16'Access);
       add_builtin("peek32", BBS.lisp.evaluate.mem.peek32'Access);
+      add_builtin("poke8", BBS.lisp.evaluate.mem.poke8'Access);
+      add_builtin("poke16", BBS.lisp.evaluate.mem.poke16'Access);
+      add_builtin("poke32", BBS.lisp.evaluate.mem.poke32'Access);
       add_builtin("read-line", BBS.lisp.evaluate.io.read_line'Access);
       add_builtin("terpri", BBS.lisp.evaluate.io.terpri'Access);
    end;
