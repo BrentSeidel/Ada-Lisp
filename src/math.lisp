@@ -17,8 +17,8 @@
 ;
 ;  Recursive function to compute Fibonacci numbers.
 ;
-;  This should give a workout for recursive functions.  The values returned
-;  should be:
+;  This should give a workout for recursive functions.  The first few values
+;  returned should be:
 ;  (fib 1) => 1
 ;  (fib 2) => 2
 ;  (fib 3) => 3

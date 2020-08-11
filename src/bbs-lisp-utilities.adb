@@ -126,8 +126,6 @@ package body bbs.lisp.utilities is
             var_elem := cons_table(temp).car;
             if var_elem.kind = E_STACK then
                var_name := var_elem.st_name;
---            elsif var_elem.kind = E_LOCAL then
---               var_name := var_elem.l_name;
             else
                error("replace_syms.process_element", "Improper element in library");
             end if;
@@ -198,8 +196,6 @@ package body bbs.lisp.utilities is
          end if;
          if var.kind = E_STACK then
             var_name := var.st_name;
---         elsif var.kind = E_LOCAL then
---            var_name := var.l_name;
          else
             error("replace_syms.process_element", "Improper element in library");
          end if;
@@ -261,10 +257,6 @@ package body bbs.lisp.utilities is
          val := BBS.lisp.stack.search_frames(e.st_offset, e.st_name);
          return (kind => E_VALUE, v => val);
       end if;
---      if e.kind = E_PARAM then
---         val := BBS.lisp.stack.search_frames(e.p_offset, e.p_name);
---         return (kind => E_VALUE, v => val);
---      end if;
       return e;
    end;
    --
@@ -275,7 +267,6 @@ package body bbs.lisp.utilities is
    --
    procedure first_value(e : element_type; car : out element_type; cdr : out element_type) is
       first : element_type;
---      temp : element_type;
       s : cons_index;
    begin
       if e.kind = E_NIL then

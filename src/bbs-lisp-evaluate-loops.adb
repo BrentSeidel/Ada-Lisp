@@ -1,5 +1,4 @@
 with BBS.lisp.memory;
---with BBS.lisp.strings;
 with BBS.lisp.utilities;
 with BBS.lisp.stack;
 package body BBS.lisp.evaluate.loops is
@@ -22,6 +21,10 @@ package body BBS.lisp.evaluate.loops is
          --  Loop while the conditions is true.
          --
          temp := eval_dispatch(cond.ps);
+         if temp.kind = E_ERROR then
+            error("dowhile", "Error occured during evaluation of condition");
+            return temp;
+         end if;
          while bbs.lisp.utilities.isTrue(temp) loop
             BBS.lisp.memory.deref(temp);
             ptr := list;
@@ -33,6 +36,10 @@ package body BBS.lisp.evaluate.loops is
                if ptr.kind = E_CONS then
                   if cons_table(ptr.ps).car.kind = E_CONS then
                      t := eval_dispatch(cons_table(ptr.ps).car.ps);
+                     if t.kind = E_ERROR then
+                        error("dowhile", "Error occured during evaluation of body");
+                        return t;
+                     end if;
                   else
                      t := cons_table(ptr.ps).car;
                      BBS.lisp.memory.ref(t);
@@ -45,10 +52,15 @@ package body BBS.lisp.evaluate.loops is
                end if;
             end loop;
             temp := eval_dispatch(cond.ps);
+            if temp.kind = E_ERROR then
+               error("dowhile", "Error occured during evaluation of condition");
+               return temp;
+            end if;
          end loop;
          BBS.lisp.memory.deref(temp);
       else
          error("dowhile", "Must provide a condition and expressions.");
+         return (kind => E_ERROR);
       end if;
       return t;
    end;
@@ -90,9 +102,8 @@ package body BBS.lisp.evaluate.loops is
                   rest := cons_table(limits.ps).cdr;
                else
                   error("dotimes", "List not provided for limits.");
-                  return NIL_ELEM;
+                  return (kind => E_ERROR);
                end if;
---               print(rest, False, True);
                if rest.kind = E_CONS then
                   limit := cons_table(rest.ps).car;
                   if limit.kind = E_CONS then
@@ -106,7 +117,7 @@ package body BBS.lisp.evaluate.loops is
                   end if;
                else
                   error("dotimes", "Loop limit not provided.");
-                  return NIL_ELEM;
+                  return (kind => E_ERROR);
                end if;
                --
                --  Evaluate and validate the loop parameters
@@ -116,8 +127,8 @@ package body BBS.lisp.evaluate.loops is
                --
                if var.kind /= E_STACK then
                   if var.kind = E_CONS then
-                     error("dowhile", "The loop variable cannot be a list.");
-                     return NIL_ELEM;
+                     error("dotimes", "The loop variable cannot be a list.");
+                     return (kind => E_ERROR);
                   end if;
                   declare
                      str : string_index;
@@ -133,7 +144,7 @@ package body BBS.lisp.evaluate.loops is
                      else
                         error("dotimes", "Can't convert item into a parameter.");
                         print(var, False, True);
-                        return NIL_ELEM;
+                        return (kind => E_ERROR);
                      end if;
                   end;
                end if;
@@ -161,7 +172,7 @@ package body BBS.lisp.evaluate.loops is
                   rest := cons_table(limits.ps).cdr;
                else
                   error("dotimes", "List not provided for limits.");
-                  return NIL_ELEM;
+                  return (kind => E_ERROR);
                end if;
                if rest.kind = E_CONS then
                   limit := cons_table(rest.ps).car;
@@ -176,7 +187,7 @@ package body BBS.lisp.evaluate.loops is
                   end if;
                else
                   error("dotimes", "Loop limit not provided.");
-                  return NIL_ELEM;
+                  return (kind => E_ERROR);
                end if;
             end if;
             --
@@ -189,15 +200,15 @@ package body BBS.lisp.evaluate.loops is
                      limit_value := Natural(limit.v.i);
                   else
                      error("dotimes", "Limit must not be negative.");
-                     return NIL_ELEM;
+                     return (kind => E_ERROR);
                   end if;
                else
                   error("dotimes", "Limit is not an integer");
-                  return NIL_ELEM;
+                  return (kind => E_ERROR);
                end if;
             else
                error("dotimes", "Limit is not a value");
-               return NIL_ELEM;
+               return (kind => E_ERROR);
             end if;
             --
             --  Find the index variable name in the body and convert all occurences.
@@ -232,6 +243,11 @@ package body BBS.lisp.evaluate.loops is
                   if ptr.kind = E_CONS then
                      if cons_table(ptr.ps).car.kind = E_CONS then
                         t := eval_dispatch(cons_table(ptr.ps).car.ps);
+                        if t.kind = E_ERROR then
+                           error("dotimes", "Error occured in body");
+                           BBS.lisp.stack.exit_frame;
+                           return t;
+                        end if;
                      end if;
                      ptr := cons_table(ptr.ps).cdr;
                   else
@@ -247,6 +263,9 @@ package body BBS.lisp.evaluate.loops is
                t := eval_dispatch(result.ps);
             else
                t := BBS.lisp.utilities.indirect_elem(result);
+               if t.kind = E_ERROR then
+                  error("dotimes", "Error occured in body");
+               end if;
             end if;
             return t;
       end case;

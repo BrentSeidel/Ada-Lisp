@@ -315,12 +315,15 @@ package body bbs.lisp is
       exit_flag := False;
       break_flag := false;
       while True loop
+         BBS.lisp.stack.reset;
          e := read;
-         r := eval(e);
-         if not first_char_flag then
-            new_line;
+         if e.kind /= E_ERROR then
+            r := eval(e);
+            if not first_char_flag then
+               new_line;
+            end if;
+            print(r, True, True);
          end if;
-         print(r, True, True);
          exit when exit_lisp;
       end loop;
    end;
@@ -527,7 +530,7 @@ package body bbs.lisp is
          return (kind => E_TEMPSYM, tempsym => n);
       end if;
       error("find_variable", "Oddly, no option matched.");
-      return NIL_ELEM;
+      return (kind => E_ERROR);
    end;
    --
    procedure add_builtin(n : String; f : execute_function) is

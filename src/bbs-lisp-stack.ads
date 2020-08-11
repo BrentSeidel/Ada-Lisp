@@ -55,6 +55,12 @@ package BBS.lisp.stack is
    procedure enter_frame;
    procedure exit_frame;
    --
+   --  Procedure for clearing stack.  This is done at the command line level.
+   --  There should be nothing on the stack at this point.  Some error conditions
+   --  may cause a return to the command line without clearing the stack.
+   --
+   procedure reset;
+   --
    --  Dump the stack for debugging purposes
    --
    procedure dump;

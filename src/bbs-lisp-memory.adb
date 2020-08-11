@@ -4,8 +4,10 @@ package body bbs.lisp.memory is
    --
    procedure reset_tables is
    begin
-      for i in cons_index loop
+      for i in cons_index'First + 1 .. cons_index'Last loop
          cons_table(i).ref := 0;
+         cons_table(i).car := (Kind => E_NIL);
+         cons_table(i).cdr := (Kind => E_NIL);
       end loop;
       for i in symb_index loop
          symb_table(i).ref := 0;
@@ -20,7 +22,7 @@ package body bbs.lisp.memory is
    --
    function alloc(s : out cons_index) return Boolean is
    begin
-      for i in cons_index loop
+      for i in cons_index'First + 1 .. cons_index'Last loop
          if cons_table(i).ref = 0 then
             s := i;
             cons_table(i).ref := 1;
@@ -99,21 +101,25 @@ package body bbs.lisp.memory is
    --
    procedure deref(s : cons_index) is
    begin
-      msg("deref cons", "Dereffing cons at " & Integer'Image(Integer(s)) &
-         " Ref count was " & Integer'Image(Integer(cons_table(s).ref)));
-      if cons_table(s).ref > 0 then
-         cons_table(s).ref := cons_table(s).ref - 1;
-      else
-         error("deref cons", "Attempt to deref an unreffed cons at index "
-              & Integer'Image(Integer(s)));
-      end if;
-      --
-      --  If the reference count goes to zero, deref the things that the cons
-      --  points to.
-      --
-      if cons_table(s).ref = 0 then
-         deref(cons_table(s).car);
-         deref(cons_table(s).cdr);
+      if s > cons_index'First then
+         msg("deref cons", "Dereffing cons at " & Integer'Image(Integer(s)) &
+            " Ref count was " & Integer'Image(Integer(cons_table(s).ref)));
+         if cons_table(s).ref > 0 then
+            cons_table(s).ref := cons_table(s).ref - 1;
+         else
+            error("deref cons", "Attempt to deref an unreffed cons at index "
+               & Integer'Image(Integer(s)));
+         end if;
+         --
+         --  If the reference count goes to zero, deref the things that the cons
+         --  points to.
+         --
+         if cons_table(s).ref = 0 then
+            deref(cons_table(s).car);
+            deref(cons_table(s).cdr);
+            cons_table(s).car := NIL_ELEM;
+            cons_table(s).cdr := NIL_ELEM;
+         end if;
       end if;
    end;
    --

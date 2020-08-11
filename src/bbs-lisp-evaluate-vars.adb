@@ -47,7 +47,7 @@ package body BBS.lisp.evaluate.vars is
                   if (symb_table(symb).kind = SY_BUILTIN) or
                     (symb_table(symb).kind = SY_SPECIAL) then
                      error("setq", "Can't assign a value to a builtin or special symbol");
-                     return NIL_ELEM;
+                     return (kind => E_ERROR);
                   end if;
                elsif p3.kind = E_TEMPSYM then
                   str := p3.tempsym;
@@ -59,9 +59,11 @@ package body BBS.lisp.evaluate.vars is
                else
                   error("setq", "First parameter is not a symbol or temporary symbol.");
                   Put_Line("Parameter type is " & ptr_type'Image(p3.kind));
+                  return (kind => E_ERROR);
                end if;
             else
                error("setq", "Something went horribly wrong and setq did not get a list");
+               return (kind => E_ERROR);
             end if;
          when PH_PARSE_END =>
             null;
@@ -77,13 +79,13 @@ package body BBS.lisp.evaluate.vars is
                else
                   error("setq", "First parameter is not a symbol.");
                   Put_Line("Kind is " & ptr_type'Image(p1.kind));
-                  return NIL_ELEM;
+                  return (kind => E_ERROR);
                end if;
                if not stacked then
                   if (symb_table(symb).kind = SY_BUILTIN) or
                     (symb_table(symb).kind = SY_SPECIAL) then
                      error("setq", "Can't assign a value to a builtin or special symbol");
-                     return NIL_ELEM;
+                     return (kind => E_ERROR);
                   end if;
                end if;
                --
@@ -131,9 +133,11 @@ package body BBS.lisp.evaluate.vars is
                   return p2;
                else
                   error("setq", "Not enough arguments.");
+                  return (kind => E_ERROR);
                end if;
             else
                error("setq", "Not enough arguments.");
+               return (kind => E_ERROR);
             end if;
       end case;
       return NIL_ELEM;
@@ -163,6 +167,7 @@ package body BBS.lisp.evaluate.vars is
                   locals := cons_table(locals.ps).car;
                else
                   error("local", "Improper parameters.");
+                  return (kind => E_ERROR);
                end if;
                BBS.lisp.stack.start_frame;
                while locals.kind = E_CONS loop
@@ -208,6 +213,7 @@ package body BBS.lisp.evaluate.vars is
                         error("local", "Can't convert item into a local variable.");
                         print(el, False, True);
                         Put_Line("Item is of kind " & ptr_type'Image(el.kind));
+                        return (kind => E_ERROR);
                      end if;
                      offset := offset + 1;
                      if cons_table(locals.ps).car.kind = E_CONS then
@@ -221,6 +227,7 @@ package body BBS.lisp.evaluate.vars is
                BBS.lisp.stack.enter_frame;
             else
                error("local", "Something went horribly wrong and local did not get a list");
+               return (kind => E_ERROR);
             end if;
          when PH_PARSE_END =>
             BBS.lisp.stack.exit_frame;
@@ -265,7 +272,7 @@ package body BBS.lisp.evaluate.vars is
                            null;
                         when E_VALUE =>
                            local_val := check.v;
-                        when others =>
+                        when others =>  -- Might need to update to check for errors.
                            null;
                      end case;
                   else
@@ -279,6 +286,7 @@ package body BBS.lisp.evaluate.vars is
                      error("local", "Local variable is not a local.");
                      print(el, False, True);
                      Put_Line("Item is of kind " & ptr_type'Image(el.kind));
+                     return (kind => E_ERROR);
                   end if;
                   offset := offset + 1;
                end;

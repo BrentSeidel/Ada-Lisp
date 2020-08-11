@@ -20,11 +20,11 @@ package body BBS.lisp.evaluate.cond is
             BBS.lisp.utilities.first_value(t, t2, t);
          else
             error("eval_comp", "Cannot compare a single element.");
-            return NIL_ELEM;
+            return (kind => E_ERROR);
          end if;
       else
          error("eval_comp", "Cannot compare a single element.");
-         return NIL_ELEM;
+         return (kind => E_ERROR);
       end if;
       if (t1.kind /= E_CONS) and (t2.kind /= E_CONS) then
          t := bbs.lisp.utilities.indirect_elem(t1);
@@ -88,13 +88,13 @@ package body BBS.lisp.evaluate.cond is
             error("eval_comp", "Can only compare integers, strings, or symbols.");
             put("First type is " & value_type'Image(v1.kind));
             put_line(", second type is " & value_type'Image(v2.kind));
-            return NIL_ELEM;
+            return (kind => E_ERROR);
          end if;
       else
          error("eval_comp", "Can only compare two elements.");
          put("First type is " & ptr_type'Image(t1.kind));
          put_line(", second type is " & ptr_type'Image(t2.kind));
-         return NIL_ELEM;
+         return (kind => E_ERROR);
       end if;
    end;
    --
@@ -126,9 +126,13 @@ package body BBS.lisp.evaluate.cond is
    begin
       if e.kind /= E_CONS then
          error("eval_if", "Internal error.  Should have a list.");
-         return NIL_ELEM;
+         return (kind => E_ERROR);
       end if;
       BBS.lisp.utilities.first_value(e, p1, t);
+      if p1.kind = E_ERROR then
+         error("eval_if", "Condition reported an error.");
+         return p1;
+      end if;
       if t.kind = E_CONS then
          p2 := cons_table(t.ps).car;
          t := cons_table(t.ps).cdr;
@@ -150,12 +154,18 @@ package body BBS.lisp.evaluate.cond is
       if BBS.lisp.utilities.isTrue(p1) then
          if BBS.lisp.utilities.isFunction(p2) then
             t := eval_dispatch(p2.ps);
+            if t.kind = E_ERROR then
+               error("eval_if", "Error in evaluating true branch");
+            end if;
          else
             t := BBS.lisp.utilities.indirect_elem(p2);
          end if;
       else
          if BBS.lisp.utilities.isFunction(p3) then
             t := eval_dispatch(p3.ps);
+            if t.kind = E_ERROR then
+               error("eval_if", "Error in evaluating false branch");
+            end if;
          else
             t := BBS.lisp.utilities.indirect_elem(p3);
          end if;

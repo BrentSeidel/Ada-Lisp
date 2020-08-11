@@ -21,7 +21,7 @@ package bbs.lisp is
    max_string : constant Integer := 500;
    max_stack : constant Integer := 100;
    --
-   type cons_index is range 0 .. max_cons;
+   type cons_index is range -1 .. max_cons;
    type symb_index is range 0 .. max_symb;
    type string_index is range -1 .. max_string;
    type stack_index is range 0 .. max_stack;
@@ -168,7 +168,7 @@ package bbs.lisp is
    --  no operating system and possibly no dynamic memory allocation, The max
    --  sizes for statically allocated data structures is defined here.
    --
-   cons_table : array (cons_index) of cons;
+   cons_table : array (cons_index'First + 1 .. cons_index'Last) of cons;
    symb_table : array (symb_index) of symbol;
    --
    --  Do initialization and define text I/O routines

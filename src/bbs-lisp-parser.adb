@@ -78,7 +78,7 @@ package body bbs.lisp.parser is
       flag : Boolean := False;
       value : int32;
    begin
-      e := (kind => E_NIL);
+      e := NIL_ELEM;
       ptr := buff'First;
       skip_whitespace(ptr, buff, last);
       --
@@ -93,6 +93,10 @@ package body bbs.lisp.parser is
             else
                e := (kind => E_CONS, ps => head);
             end if;
+         else
+            error("parse", "Error in parsing list.");
+            BBS.lisp.memory.deref(head);
+            e := (kind => E_ERROR);
          end if;
       --
       --  Comment
@@ -105,7 +109,12 @@ package body bbs.lisp.parser is
       elsif isDigit(buff(ptr)) or
         ((buff(ptr) = '-') and isDigit(buff(ptr + 1))) then
          flag := int(ptr, buff, last, value);
-         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+         if flag then
+            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+         else
+            error("parse", "Error parsing number");
+            e := (kind => E_ERROR);
+         end if;
       --
       -- String
       --
@@ -113,6 +122,10 @@ package body bbs.lisp.parser is
          flag := parse_str(ptr, buff, last, str);
          if flag then
             e := (Kind => E_VALUE, v =>(kind => V_STRING, s => str));
+         else
+            error("parse", "Error parsing string");
+            BBS.lisp.memory.deref(str);
+            e := (kind => E_ERROR);
          end if;
       --
       -- Special
@@ -121,14 +134,27 @@ package body bbs.lisp.parser is
          ptr := ptr + 1;
          if (buff(ptr) = 'x') or (buff(ptr) = 'X') then
             flag := hex(ptr, buff, last, value);
-            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+            if flag then
+               e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+            else
+               error("parse", "Error parsing hexidecimal integer");
+               e := (kind => E_ERROR);
+            end if;
+         else
+            error("parse", "Unrecognized special form");
+            e := (kind => E_ERROR);
          end if;
       --
       --  Anything that doesn't match something else is treated as a symbol
       --
       else
          e := symb(ptr, buff, last);
-         flag := true;
+         if e.kind /= E_ERROR then
+            flag := true;
+         else
+            error("parse", "Error parsing symbol");
+            flag := False;
+         end if;
       end if;
       return flag;
    end;
@@ -138,9 +164,9 @@ package body bbs.lisp.parser is
    --
    function list(ptr : in out integer; buff : in out String; last : in out Integer; s_expr : out cons_index)
                  return Boolean is
-      head : cons_index;
-      current : cons_index;
-      temp : cons_index;
+      head : cons_index := -1;
+      current : cons_index := -1;
+      temp : cons_index := -1;
       str  : string_index;
       value : int32;
       flag : Boolean;
@@ -150,9 +176,13 @@ package body bbs.lisp.parser is
       special_flag : Boolean := False;
       special_symb : symbol;
       begin_called : Boolean := False;
-      item_count : Natural;
+      item_count : Natural := 0;
    begin
       flag := bbs.lisp.memory.alloc(head);
+      if not flag then
+         error("list", "Unable to allocate cons for head");
+         return False;
+      end if;
       ptr := ptr + 1;
       while (not list_end) loop
          skip_whitespace(ptr, buff, last);
@@ -178,18 +208,47 @@ package body bbs.lisp.parser is
                if (cons_table(current).car.kind = E_NIL) and (cons_table(current).cdr.kind = E_NIL) then
                   BBS.lisp.memory.deref(current);
                   flag := elem_to_cons(current, NIL_ELEM);
-                  flag := append(head, current);
+                  if flag then
+                     flag := append(head, current);
+                     if not flag then
+                        error("list", "Unable to append to list");
+                        BBS.lisp.memory.deref(current);
+                        BBS.lisp.memory.deref(head);
+                        return False;
+                     end if;
+                  else
+                     error("list", "Unable to convert NIL_ELEM to cons");
+                     BBS.lisp.memory.deref(current);
+                     BBS.lisp.memory.deref(head);
+                     return False;
+                  end if;
                else
                   if cons_table(head).car.kind = E_NIL then
                      cons_table(head).car := (kind => E_CONS, ps => current);
                   else
-                     flag := bbs.lisp.memory.alloc(temp);
+                     flag := BBS.lisp.memory.alloc(temp);
                      if flag then
                         cons_table(temp).car := (Kind => E_CONS, ps => current);
                         flag := append(head, temp);
+                        if not flag then
+                           error("list", "Unable to append to list");
+                           BBS.lisp.memory.deref(current);
+                           BBS.lisp.memory.deref(head);
+                           return False;
+                        end if;
+                     else
+                        error("list", "Unable to convert element to cons");
+                        BBS.lisp.memory.deref(current);
+                        BBS.lisp.memory.deref(head);
+                        return False;
                      end if;
                   end if;
                end if;
+            else
+               error ("list", "Error parsing list");
+               BBS.lisp.memory.deref(current);
+               BBS.lisp.memory.deref(head);
+               return False;
             end if;
          --
          --  Check for the start of an integer atom
@@ -203,8 +262,26 @@ package body bbs.lisp.parser is
                   cons_table(head).car := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
                else
                   flag := elem_to_cons(current, e);
-                  flag := append(head, current);
+                  if flag then
+                     flag := append(head, current);
+                     if not flag then
+                        error("list", "Unable to append to list");
+                        BBS.lisp.memory.deref(current);
+                        BBS.lisp.memory.deref(head);
+                        return False;
+                     end if;
+                  else
+                     error("list", "Unable to convert element to cons");
+                     BBS.lisp.memory.deref(current);
+                     BBS.lisp.memory.deref(head);
+                     return False;
+                  end if;
                end if;
+            else
+               error ("list", "Error parsing integer");
+               BBS.lisp.memory.deref(current);
+               BBS.lisp.memory.deref(head);
+               return False;
             end if;
          --
          --  Check for special sequences.
@@ -222,9 +299,32 @@ package body bbs.lisp.parser is
                      cons_table(head).car := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
                   else
                      flag := elem_to_cons(current, e);
-                     flag := append(head, current);
+                     if flag then
+                        flag := append(head, current);
+                        if not flag then
+                           error("list", "Unable to append to list");
+                           BBS.lisp.memory.deref(current);
+                           BBS.lisp.memory.deref(head);
+                           return False;
+                        end if;
+                     else
+                        error("list", "Unable to convert element to cons");
+                        BBS.lisp.memory.deref(current);
+                        BBS.lisp.memory.deref(head);
+                        return False;
+                     end if;
                   end if;
+               else
+                  error("list", "Error parsing hexidecimal number");
+                  BBS.lisp.memory.deref(current);
+                  BBS.lisp.memory.deref(head);
+                  return False;
                end if;
+            else
+               error("list", "Unrecognized special form");
+               BBS.lisp.memory.deref(current);
+               BBS.lisp.memory.deref(head);
+               return False;
             end if;
          --
          --  Check for the start of a string
@@ -237,10 +337,25 @@ package body bbs.lisp.parser is
                   cons_table(head).car := (kind => E_VALUE, v => (kind => V_STRING, s => str));
                else
                   flag := elem_to_cons(current, e);
-                  flag := append(head, current);
+                  if flag then
+                     flag := append(head, current);
+                     if not flag then
+                        error("list", "Unable to append string to list");
+                        BBS.lisp.memory.deref(current);
+                        BBS.lisp.memory.deref(head);
+                        return False;
+                     end if;
+                  else
+                     error("list", "Unable to convert string to cons");
+                     BBS.lisp.memory.deref(current);
+                     BBS.lisp.memory.deref(head);
+                     return False;
+                  end if;
                end if;
             else
-               error("parse list", "Could not allocate string fragment.");
+               error("list", "Could not allocate string fragment.");
+               BBS.lisp.memory.deref(current);
+               BBS.lisp.memory.deref(head);
                return False;
             end if;
          --
@@ -260,10 +375,16 @@ package body bbs.lisp.parser is
                if flag then
                   flag := append(head, current);
                   if not flag then
-                     error("parse list", "Could not append symbol to list.");
+                     error("list", "Could not append symbol to list.");
+                     BBS.lisp.memory.deref(current);
+                     BBS.lisp.memory.deref(head);
+                     return False;
                   end if;
                else
-                  error("parse list", "Could not allocate cons cell for symbol.");
+                  error("list", "Could not allocate cons cell for symbol.");
+                  BBS.lisp.memory.deref(current);
+                  BBS.lisp.memory.deref(head);
+                  return False;
                end if;
             end if;
             if e.kind = E_SYMBOL then
@@ -277,12 +398,21 @@ package body bbs.lisp.parser is
                            item_count := Natural(e.v.i);
                         else
                            error("list", "Query returned value less than 0");
+                           BBS.lisp.memory.deref(current);
+                           BBS.lisp.memory.deref(head);
+                           return False;
                         end if;
                      else
                         error("list", "Query did not return an integer");
+                        BBS.lisp.memory.deref(current);
+                        BBS.lisp.memory.deref(head);
+                        return False;
                      end if;
                   else
                      error("list", "Query did not return a value");
+                     BBS.lisp.memory.deref(current);
+                     BBS.lisp.memory.deref(head);
+                     return False;
                   end if;
                end if;
             end if;
@@ -302,7 +432,7 @@ package body bbs.lisp.parser is
          --  This may also be useful when local variables and parameters are on
          --  a stack.
          --
-         if special_flag and item = item_count then
+         if special_flag and then (item = item_count) then
             e := special_symb.s.all((kind => E_CONS, ps => head), PH_PARSE_BEGIN);
             begin_called := True;
          end if;

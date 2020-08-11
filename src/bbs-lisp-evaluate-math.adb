@@ -13,6 +13,7 @@ package body BBS.lisp.evaluate.math is
       p : cons_index;
       el: element_type;
       temp : element_type;
+      err : Boolean := False;
       --
       --  Subfunction to do the actual evaluation.
       --
@@ -36,9 +37,11 @@ package body BBS.lisp.evaluate.math is
                end case;
             else
                error("eval_math.process_atom", "Can't process " & value_type'Image(v.kind));
+               err := True;
             end if;
          else
             error("eval_math.process_atom", "Can't process " & ptr_type'Image(e1.kind));
+            err := True;
          end if;
          return accum;
       end;
@@ -55,12 +58,14 @@ package body BBS.lisp.evaluate.math is
             if el.kind = E_VALUE then
                v := el.v;
             else
-              error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
+               error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
+               return (kind => E_ERROR);
             end if;
             if v.kind = V_INTEGER then
                accum := v.i;
             else
                error("eval_math", "Can't process " & value_type'Image(v.kind));
+               return (kind => E_ERROR);
             end if;
          elsif cons_table(p).car.kind = E_CONS then
             temp := eval_dispatch(cons_table(p).car.ps);
@@ -73,6 +78,7 @@ package body BBS.lisp.evaluate.math is
                   accum := v.i;
                else
                   error("eval_math", "Can't process " & value_type'Image(v.kind));
+                  return (kind => E_ERROR);
                end if;
             end if;
             bbs.lisp.memory.deref(temp);
@@ -84,11 +90,22 @@ package body BBS.lisp.evaluate.math is
                   temp := eval_dispatch(cons_table(p).car.ps);
                   if temp.kind = E_VALUE then
                      accum := process_value(temp, accum, b);
+                     if err then
+                        error("eval_math", "Error processing parameter");
+                        return (kind => E_ERROR);
+                     end if;
+                  elsif temp.kind = E_ERROR then
+                     error("eval_math", "Argument evaluation returned an error");
+                     return temp;
                   end if;
                   bbs.lisp.memory.deref(temp);
                else
                   el := bbs.lisp.utilities.indirect_elem(cons_table(p).car);
                   accum := process_value(el, accum, b);
+                  if err then
+                     error("eval_math", "Error processing parameter");
+                     return (kind => E_ERROR);
+                  end if;
                end if;
                exit when cons_table(p).cdr.kind /= E_CONS;
                p := cons_table(p).cdr.ps;
@@ -96,6 +113,10 @@ package body BBS.lisp.evaluate.math is
             if cons_table(p).cdr.kind /= E_NIL then
                el := bbs.lisp.utilities.indirect_elem(cons_table(p).cdr);
                accum := process_value(el, accum, b);
+               if err then
+                  error("eval_math", "Error processing parameter");
+                  return (kind => E_ERROR);
+               end if;
             end if;
          end if;
       end if;

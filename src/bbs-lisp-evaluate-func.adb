@@ -49,7 +49,7 @@ package body BBS.lisp.evaluate.func is
                   if (symb_table(symb).kind = SY_BUILTIN) or
                     (symb_table(symb).kind = SY_SPECIAL) then
                      error("defun", "Can't assign a value to a builtin or special symbol");
-                     return NIL_ELEM;
+                     return (kind => E_ERROR);
                   end if;
                elsif p3.kind = E_TEMPSYM then
                   flag := get_symb(symb, p3.tempsym);
@@ -58,10 +58,12 @@ package body BBS.lisp.evaluate.func is
                      cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
                   else
                      error("defun", "Unable to add symbol ");
+                     return (kind => E_ERROR);
                   end if;
                else
                   error("defun", "First parameter is not a symbol or temporary symbol.");
                   Put_Line("Parameter type is " & ptr_type'Image(p3.kind));
+                  return (kind => E_ERROR);
                end if;
                --
                --  Next process the parameter list.  Note that currently, defun
@@ -73,13 +75,14 @@ package body BBS.lisp.evaluate.func is
                   params := cons_table(temp.ps).car;
                else
                   error("defun", "Improper parameters.");
+                  return (kind => E_ERROR);
                end if;
                temp := params;
                BBS.lisp.stack.start_frame;
                while temp.kind = E_CONS loop
                   if cons_table(temp.ps).car.kind = E_CONS then
                      error("defun", "A parameter cannot be a list.");
-                     return NIL_ELEM;
+                     return (kind => E_ERROR);
                   end if;
                   declare
                      el : element_type := cons_table(temp.ps).car;
@@ -114,6 +117,7 @@ package body BBS.lisp.evaluate.func is
                BBS.lisp.stack.enter_frame;
             else
                error("defun", "Something went horribly wrong and defun did not get a list");
+               return (kind => E_ERROR);
             end if;
          when PH_PARSE_END =>
             BBS.lisp.stack.exit_frame;
@@ -123,7 +127,7 @@ package body BBS.lisp.evaluate.func is
          when PH_EXECUTE =>
             if e.kind /= E_CONS then
                error("defun", "No parameters given to defun.");
-               return NIL_ELEM;
+               return (kind => E_ERROR);
             end if;
             name := cons_table(e.ps).car;
             temp := cons_table(e.ps).cdr;
@@ -131,16 +135,16 @@ package body BBS.lisp.evaluate.func is
                params := cons_table(temp.ps).car;
             else
                error("defun", "Improper parameters.");
-               return NIL_ELEM;
+               return (kind => E_ERROR);
             end if;
             if (name.kind /= E_SYMBOL)
               and (name.kind /= E_TEMPSYM) then
                error("defun", "Function name must be a symbol or tempsym.");
-               return NIL_ELEM;
+               return (kind => E_ERROR);
             end if;
             if (params.kind /= E_CONS) and (params.kind /= E_NIL) then
                error("defun", "Parameter list must be a list or NIL.");
-               return NIL_ELEM;
+               return (kind => E_ERROR);
             end if;
             --
             --  To get to this point, all checks have passed, so attach the
@@ -191,7 +195,7 @@ package body BBS.lisp.evaluate.func is
       if supplied /= requested then
          error("function", "Parameter count mismatch. "  & Integer'Image(supplied)
               & " elements supplied, " & Integer'Image(requested) & " requested.");
-         return NIL_ELEM;
+         return (kind => E_ERROR);
       end if;
       --
       --  Assign parameters to values.
@@ -216,6 +220,7 @@ package body BBS.lisp.evaluate.func is
                                  st_value => param_value));
          else
             error("function evaluation", "Something horrible happened, a parameter is not a parameter");
+            return (kind => E_ERROR);
          end if;
          name  := cons_table(name.ps).cdr;
       end loop;
@@ -228,6 +233,10 @@ package body BBS.lisp.evaluate.func is
       while statement.kind = E_CONS loop
          if cons_table(statement.ps).car.kind = E_CONS then
             ret_val := eval_dispatch(cons_table(statement.ps).car.ps);
+            if ret_val.kind = E_ERROR then
+               error("function evaluation", "Operation returned an error");
+               exit;
+            end if;
          end if;
          statement := cons_table(statement.ps).cdr;
       end loop;

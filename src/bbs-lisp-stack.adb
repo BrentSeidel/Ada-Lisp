@@ -52,6 +52,22 @@ package body BBS.lisp.stack is
       end if;
    end;
    --
+   --  Procedure for clearing stack.  This is done at the command line level.
+   --  There should be nothing on the stack at this point.  Some error conditions
+   --  may cause a return to the command line without clearing the stack.
+   --
+   procedure reset is
+      dummy : stack_entry;  --  This is never used.
+   begin
+      while not isEmpty loop
+         dummy := pop;
+      end loop;
+      stack_pointer := 0;
+      frame_pointer := 0;
+      temp_frame := 0;
+      frame_count := 0;
+   end;
+   --
    --  Operations for stack frames
    --
    procedure start_frame is
