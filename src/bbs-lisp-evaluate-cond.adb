@@ -35,8 +35,7 @@ package body BBS.lisp.evaluate.cond is
          if t.kind = E_VALUE then
             v2 := t.v;
          end if;
-         if v1.kind = V_INTEGER and
-           v2.kind = V_INTEGER then
+         if (v1.kind = V_INTEGER) and (v2.kind = V_INTEGER) then
             i1 := v1.i;
             i2 := v2.i;
             case b is
@@ -58,8 +57,7 @@ package body BBS.lisp.evaluate.cond is
                   end if;
                end case;
                return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-         elsif v1.kind = V_STRING and
-           v2.kind = V_STRING then
+         elsif (v1.kind = V_STRING) and (v2.kind = V_STRING) then
             declare
                eq : comparison;
             begin
@@ -84,8 +82,19 @@ package body BBS.lisp.evaluate.cond is
                end case;
             end;
             return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         elsif (v1.kind = V_BOOLEAN) and (v2.kind = V_BOOLEAN) then
+            case b is
+               when SYM_EQ =>
+                  return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b = v2.b));
+               when SYM_NE =>
+                  return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b /= v2.b));
+               when SYM_LT =>
+                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b < v2.b));
+               when SYM_GT =>
+                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b > v2.b));
+            end case;
          else
-            error("eval_comp", "Can only compare integers, strings, or symbols.");
+            error("eval_comp", "Can only compare integers, strings, or booleans.");
             put("First type is " & value_type'Image(v1.kind));
             put_line(", second type is " & value_type'Image(v2.kind));
             return (kind => E_ERROR);

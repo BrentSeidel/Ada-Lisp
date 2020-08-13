@@ -59,6 +59,7 @@ commands.  This may also be useful for embedding the lisp interpreter in other
 applications.
 8. Peek and Poke functions for accessing memory.  This is mainly for use on embedded
 systems.
+9. Logical and bitwise logical operations AND, OR, NOT.
 
 ### Non-Supported Features
 There are others, but here are the main missing features.  Some of these may eventually
@@ -73,12 +74,11 @@ figure out how first.
 ### Roadmap
 The following updates to the language are planned.  They may not be done in the
 order shown and other items may be added before some of these.
-1. Logical and bitwise logical operations AND, OR, NOT.
-2. Parsing string to number.
-3. Character data type and conversions.
-4. Some basic string operations.
-5. Improved error handling and general code cleanup.
-6. Make functions first class objects.
+1. Parsing string to number.
+2. Character data type and conversions.
+3. Some basic string operations.
+4. Improved error handling and general code cleanup (ongoing).
+5. Make functions first class objects.
 
 ## Internals
 

@@ -151,11 +151,19 @@ package body BBS.lisp.evaluate.func is
             --  parameter list and body to the symbol.
             --
             symb := name.sym;
+            --
+            --  If something else was attached to the symbol, deref it.
+            --
+            if symb_table(symb).kind = SY_LAMBDA then
+               BBS.lisp.memory.deref(symb_table(symb).ps);
+            elsif symb_table(symb).kind = SY_VARIABLE then
+               BBS.lisp.memory.deref(symb_table(symb).pv);
+            end if;
             temp := cons_table(e.ps).cdr;
             cons_table(e.ps).cdr := NIL_ELEM;
             symb_table(symb) := (ref => 1, str => symb_table(symb).str,
                                  kind => SY_LAMBDA, ps => temp.ps);
-            bbs.lisp.memory.ref(temp.ps);
+--            bbs.lisp.memory.ref(temp.ps);
       end case;
       return NIL_ELEM;
    end;

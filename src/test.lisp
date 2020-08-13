@@ -142,4 +142,25 @@
       (setq accum (+ accum n))))
     (verify-equal result 20 "Result returned")
     (verify-equal accum 45 "Accumulator is 45")))
+;
+;  Test logical operations
+;
+(defun test-logic ()
+  (verify-equal (not T) NIL "T -> NIL")
+  (verify-equal (not NIL) T "NIL -> T")
+  (verify-equal (not #xFFFF0000) #x0000FFFF "#xFFFF0000 -> #x0000FFFF")
+  (verify-equal (not #x5A5A5A5A) #xA5A5A5A5 "#x5A5A5A5A -> #xA5A5A5A5")
+  (verify-equal (and NIL NIL) NIL "NIL and NIL -> NIL")
+  (verify-equal (and NIL T) NIL "NIL and T -> NIL")
+  (verify-equal (and T NIL) NIL "T and NIL -> NIL")
+  (verify-equal (and T T) T "T and T -> T")
+  (verify-equal (or NIL NIL) NIL "NIL and NIL -> NIL")
+  (verify-equal (or NIL T) T "NIL and T -> T")
+  (verify-equal (or T NIL) T "T and NIL -> T")
+  (verify-equal (or T T) T "T and T -> T")
+  (verify-equal (and 15 4 3) 0 "Produces zero")
+  (verify-equal (and #xF0F #xF01F) 15 "Produces 15")
+  (verify-equal (or 1 2 4) 7 "Produces 7")
+  (verify-equal (or #xF000 #xF0) #xF0F0 "Produces #xF0F0")
+  (verify-equal (not (and T NIL)) T "T nand NIL -> T"))
 

@@ -339,7 +339,7 @@ package body bbs.lisp is
    --
    procedure dump_cons is
    begin
-      for i in cons_index loop
+      for i in 0 .. cons_index'Last loop
          if cons_table(i).ref > 0 then
             Put("Cons " & Integer'Image(Integer(i)) & " ref count " &
                   Integer'Image(Integer(cons_table(i).ref)) & " contains: <");
