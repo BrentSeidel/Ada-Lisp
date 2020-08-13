@@ -167,6 +167,19 @@ These operations work on a list of one or more parameters, with the operation in
 
 Note that division by zero is not checked.  If this occurs, an Ada exception will be thrown.  In some cases, this might be useful.
 
+\subsection{Boolean Operations}
+Three basic boolean operations are provided.  These work on either boolean or integer variables.
+\begin{lstlisting}
+(not NIL)
+(and 1 5 7)
+(or 1 2 4)
+\end{lstlisting}
+
+The \function{not} operation operates on a single parameter.  If the parameter is boolean, the return value is the inverse of the parameter (NIL $\rightarrow$ T, T $\rightarrow$ NIL).  If the parameter is integer, the individual bits of the integer are inverted and the resulting value returned.
+
+The \function{and} and \function{or} operations operate on either booleans or integers as long as they are not mixed.  These perform the logical \function{and} and \function{or} operations.
+
+
 \subsection{Comparison Operations}
 Four comparison operations are defined for both integers and strings.  The operations are equals, not equals, greater than, and less than.  For example:
 
