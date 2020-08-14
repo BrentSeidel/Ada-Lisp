@@ -33,12 +33,37 @@ package body BBS.lisp.evaluate.bool is
    end;
    --
    function eval_and(e : element_type) return element_type is
-      accum_i : int32;
-      accum_b : Boolean;
+      accum_i : int32 := -1;
+      accum_b : Boolean := True;
       int_op : Boolean;
       ptr : element_type;
       temp : element_type;
-      v : value;
+
+      function accumulate(t : element_type) return ptr_type is
+         v : value;
+      begin
+         if t.kind = E_VALUE then
+            v := t.v;
+         else
+            error("eval_and", "Can't process element " & ptr_type'Image(temp.kind));
+            BBS.lisp.memory.deref(temp);
+            return E_ERROR;
+         end if;
+         if v.kind = V_INTEGER then
+            accum_i := uint32_to_int32(int32_to_uint32(accum_i) and
+                                                        int32_to_uint32(v.i));
+            int_op := True;
+         elsif v.kind = V_BOOLEAN then
+            accum_b := accum_b and v.b;
+            int_op := False;
+         else
+            error("eval_and", "Can't process " & value_type'Image(v.kind));
+            BBS.lisp.memory.deref(temp);
+            return E_ERROR;
+         end if;
+         return E_NIL;
+      end;
+      --
    begin
       if e.kind = E_VALUE then
          if e.v.kind = V_INTEGER then
@@ -55,140 +80,42 @@ package body BBS.lisp.evaluate.bool is
          ptr := e;
          if cons_table(ptr.ps).car.kind /= E_CONS then
             temp := BBS.lisp.utilities.indirect_elem(cons_table(ptr.ps).car);
-            if temp.kind = E_VALUE then
-               v := temp.v;
-            else
-               error("eval_and", "Can't process element " & ptr_type'Image(temp.kind));
-               return (kind => E_ERROR);
-            end if;
-            if v.kind = V_INTEGER then
-               accum_i := v.i;
-               int_op := True;
-            elsif v.kind = V_BOOLEAN then
-               accum_b := v.b;
-               int_op := False;
-            else
-               error("eval_and", "Can't process " & value_type'Image(v.kind));
-               BBS.lisp.memory.deref(temp);
-               return (kind => E_ERROR);
-            end if;
          else  -- It is E_CONS
             temp := eval_dispatch(cons_table(ptr.ps).car.ps);
-            if temp.kind /= E_CONS then
-               temp := bbs.lisp.utilities.indirect_elem(temp);
-               if temp.kind = E_VALUE then
-                  v := temp.v;
-               end if;
-               if v.kind = V_INTEGER then
-                  accum_i := v.i;
-                  int_op := True;
-               elsif v.kind = V_BOOLEAN then
-                  accum_b := v.b;
-                  int_op := False;
-               else
-                  error("eval_and", "Can't process " & value_type'Image(v.kind));
-                  BBS.lisp.memory.deref(temp);
-                  return (kind => E_ERROR);
-               end if;
-            end if;
-            bbs.lisp.memory.deref(temp);
+         end if;
+         if accumulate(temp) = E_ERROR then
+            return (kind => E_ERROR);
          end if;
          if cons_table(ptr.ps).cdr.kind /= E_NIL then
             ptr := cons_table(ptr.ps).cdr;
-            loop
-               if cons_table(ptr.ps).car.kind = E_CONS then
-                  temp := eval_dispatch(cons_table(ptr.ps).car.ps);
-                  if temp.kind = E_VALUE then
-                     v := temp.v;
-                     if int_op then
-                        if v.kind = V_INTEGER then
-                           accum_i := uint32_to_int32(int32_to_uint32(accum_i) and
-                                                        int32_to_uint32(v.i));
-                        else
-                           error("eval_and", "Can't mix integers and " & value_type'Image(v.kind));
-                           BBS.lisp.memory.deref(temp);
-                           return (kind => E_ERROR);
-                        end if;
-                     else
-                        if v.kind = V_BOOLEAN then
-                           accum_b := accum_b and v.b;
-                        else
-                           error("eval_and", "Can't mix booleans and " & value_type'Image(v.kind));
-                           BBS.lisp.memory.deref(temp);
-                           return (kind => E_ERROR);
-                        end if;
-                     end if;
-                  elsif temp.kind = E_ERROR then
-                     error("eval_and", "Argument evaluation returned an error");
-                     return temp;
+            if (int_op and (accum_i /= 0)) or ((not int_op) and accum_b) then
+               loop
+                  if cons_table(ptr.ps).car.kind = E_CONS then
+                     temp := eval_dispatch(cons_table(ptr.ps).car.ps);
                   else
-                     error("eval_and", "Cannot process argument " & ptr_type'Image(temp.kind));
-                     bbs.lisp.memory.deref(temp);
+                     temp := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).car);
+                  end if;
+                  if accumulate(temp) = E_ERROR then
                      return (kind => E_ERROR);
                   end if;
-               else
-                  temp := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).car);
-                  if temp.kind = E_VALUE then
-                     v := temp.v;
-                     if int_op then
-                        if v.kind = V_INTEGER then
-                           accum_i := uint32_to_int32(int32_to_uint32(accum_i) and
-                                                        int32_to_uint32(v.i));
-                        else
-                           error("eval_and", "Can't mix integers and " & value_type'Image(v.kind));
-                           BBS.lisp.memory.deref(temp);
-                           return (kind => E_ERROR);
-                        end if;
-                     else
-                        if v.kind = V_BOOLEAN then
-                           accum_b := accum_b and v.b;
-                        else
-                           error("eval_and", "Can't mix booleans and " & value_type'Image(v.kind));
-                           BBS.lisp.memory.deref(temp);
-                           return (kind => E_ERROR);
-                        end if;
-                     end if;
-                  elsif temp.kind = E_ERROR then
-                     error("eval_and", "Argument evaluation returned an error");
-                     return temp;
-                  else
-                     error("eval_and", "Cannot process argument " & ptr_type'Image(temp.kind));
-                     bbs.lisp.memory.deref(temp);
+                  --
+                  --  Check for short circuiting operations
+                  --
+                  exit when int_op and accum_i = 0;
+                  exit when (not int_op) and (not accum_b);
+                  --
+                  --  Check for end of parameters
+                  --
+                  exit when cons_table(ptr.ps).cdr.kind /= E_CONS;
+                  ptr := cons_table(ptr.ps).cdr;
+               end loop;
+            end if;
+            if (int_op and (accum_i /= 0)) or ((not int_op) and accum_b) then
+               if cons_table(ptr.ps).cdr.kind /= E_NIL then
+                  temp := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).cdr);
+                  if accumulate(temp) = E_ERROR then
                      return (kind => E_ERROR);
                   end if;
-               end if;
-               exit when cons_table(ptr.ps).cdr.kind /= E_CONS;
-               ptr := cons_table(ptr.ps).cdr;
-            end loop;
-            if cons_table(ptr.ps).cdr.kind /= E_NIL then
-               temp := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).cdr);
-               if temp.kind = E_VALUE then
-                  v := temp.v;
-                  if int_op then
-                     if v.kind = V_INTEGER then
-                        accum_i := uint32_to_int32(int32_to_uint32(accum_i) and
-                                                     int32_to_uint32(v.i));
-                     else
-                        error("eval_and", "Can't mix integers and " & value_type'Image(v.kind));
-                        BBS.lisp.memory.deref(temp);
-                        return (kind => E_ERROR);
-                     end if;
-                  else
-                     if v.kind = V_BOOLEAN then
-                        accum_b := accum_b and v.b;
-                     else
-                        error("eval_and", "Can't mix booleans and " & value_type'Image(v.kind));
-                        BBS.lisp.memory.deref(temp);
-                        return (kind => E_ERROR);
-                     end if;
-                  end if;
-               elsif temp.kind = E_ERROR then
-                  error("eval_and", "Argument evaluation returned an error");
-                  return temp;
-               else
-                  error("eval_and", "Cannot process argument " & ptr_type'Image(temp.kind));
-                  bbs.lisp.memory.deref(temp);
-                  return (kind => E_ERROR);
                end if;
             end if;
          end if;
@@ -204,12 +131,37 @@ package body BBS.lisp.evaluate.bool is
    end;
    --
    function eval_or(e : element_type) return element_type is
-      accum_i : int32;
-      accum_b : Boolean;
+      accum_i : int32 := 0;
+      accum_b : Boolean := False;
       int_op : Boolean;
       ptr : element_type;
       temp : element_type;
-      v : value;
+
+      function accumulate(t : element_type) return ptr_type is
+         v : value;
+      begin
+         if t.kind = E_VALUE then
+            v := t.v;
+         else
+            error("eval_or", "Can't process element " & ptr_type'Image(temp.kind));
+            BBS.lisp.memory.deref(temp);
+            return E_ERROR;
+         end if;
+         if v.kind = V_INTEGER then
+            accum_i := uint32_to_int32(int32_to_uint32(accum_i) or
+                                                        int32_to_uint32(v.i));
+            int_op := True;
+         elsif v.kind = V_BOOLEAN then
+            accum_b := accum_b or v.b;
+            int_op := False;
+         else
+            error("eval_or", "Can't process " & value_type'Image(v.kind));
+            BBS.lisp.memory.deref(temp);
+            return E_ERROR;
+         end if;
+         return E_NIL;
+      end;
+      --
    begin
       if e.kind = E_VALUE then
          if e.v.kind = V_INTEGER then
@@ -226,140 +178,45 @@ package body BBS.lisp.evaluate.bool is
          ptr := e;
          if cons_table(ptr.ps).car.kind /= E_CONS then
             temp := BBS.lisp.utilities.indirect_elem(cons_table(ptr.ps).car);
-            if temp.kind = E_VALUE then
-               v := temp.v;
-            else
-               error("eval_or", "Can't process element " & ptr_type'Image(temp.kind));
-               return (kind => E_ERROR);
-            end if;
-            if v.kind = V_INTEGER then
-               accum_i := v.i;
-               int_op := True;
-            elsif v.kind = V_BOOLEAN then
-               accum_b := v.b;
-               int_op := False;
-            else
-               error("eval_or", "Can't process " & value_type'Image(v.kind));
-               BBS.lisp.memory.deref(temp);
+            if accumulate(temp) = E_ERROR then
                return (kind => E_ERROR);
             end if;
          else  -- It is E_CONS
             temp := eval_dispatch(cons_table(ptr.ps).car.ps);
-            if temp.kind /= E_CONS then
-               temp := bbs.lisp.utilities.indirect_elem(temp);
-               if temp.kind = E_VALUE then
-                  v := temp.v;
-               end if;
-               if v.kind = V_INTEGER then
-                  accum_i := v.i;
-                  int_op := True;
-               elsif v.kind = V_BOOLEAN then
-                  accum_b := v.b;
-                  int_op := False;
-               else
-                  error("eval_or", "Can't process " & value_type'Image(v.kind));
-                  BBS.lisp.memory.deref(temp);
-                  return (kind => E_ERROR);
-               end if;
-            end if;
-            bbs.lisp.memory.deref(temp);
+         end if;
+         if accumulate(temp) = E_ERROR then
+            return (kind => E_ERROR);
          end if;
          if cons_table(ptr.ps).cdr.kind /= E_NIL then
             ptr := cons_table(ptr.ps).cdr;
-            loop
-               if cons_table(ptr.ps).car.kind = E_CONS then
-                  temp := eval_dispatch(cons_table(ptr.ps).car.ps);
-                  if temp.kind = E_VALUE then
-                     v := temp.v;
-                     if int_op then
-                        if v.kind = V_INTEGER then
-                           accum_i := uint32_to_int32(int32_to_uint32(accum_i) or
-                                                        int32_to_uint32(v.i));
-                        else
-                           error("eval_or", "Can't mix integers and " & value_type'Image(v.kind));
-                           BBS.lisp.memory.deref(temp);
-                           return (kind => E_ERROR);
-                        end if;
-                     else
-                        if v.kind = V_BOOLEAN then
-                           accum_b := accum_b or v.b;
-                        else
-                           error("eval_or", "Can't mix booleans and " & value_type'Image(v.kind));
-                           BBS.lisp.memory.deref(temp);
-                           return (kind => E_ERROR);
-                        end if;
-                     end if;
-                  elsif temp.kind = E_ERROR then
-                     error("eval_or", "Argument evaluation returned an error");
-                     return temp;
+            if (int_op and (accum_i /= -1)) or ((not int_op) and (not accum_b)) then
+               loop
+                  if cons_table(ptr.ps).car.kind = E_CONS then
+                     temp := eval_dispatch(cons_table(ptr.ps).car.ps);
                   else
-                     error("eval_or", "Cannot process argument " & ptr_type'Image(temp.kind));
-                     bbs.lisp.memory.deref(temp);
+                     temp := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).car);
+                  end if;
+                  if accumulate(temp) = E_ERROR then
                      return (kind => E_ERROR);
                   end if;
-               else
-                  temp := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).car);
-                  if temp.kind = E_VALUE then
-                     v := temp.v;
-                     if int_op then
-                        if v.kind = V_INTEGER then
-                           accum_i := uint32_to_int32(int32_to_uint32(accum_i) or
-                                                        int32_to_uint32(v.i));
-                        else
-                           error("eval_or", "Can't mix integers and " & value_type'Image(v.kind));
-                           BBS.lisp.memory.deref(temp);
-                           return (kind => E_ERROR);
-                        end if;
-                     else
-                        if v.kind = V_BOOLEAN then
-                           accum_b := accum_b or v.b;
-                        else
-                           error("eval_or", "Can't mix booleans and " & value_type'Image(v.kind));
-                           BBS.lisp.memory.deref(temp);
-                           return (kind => E_ERROR);
-                        end if;
-                     end if;
-                  elsif temp.kind = E_ERROR then
-                     error("eval_or", "Argument evaluation returned an error");
-                     return temp;
-                  else
-                     error("eval_or", "Cannot process argument " & ptr_type'Image(temp.kind));
-                     bbs.lisp.memory.deref(temp);
+                  --
+                  --  Check for short circuiting operations
+                  --
+                  exit when int_op and accum_i = -1;
+                  exit when (not int_op) and accum_b;
+                  --
+                  --  Check for end of parameters
+                  --
+                  exit when cons_table(ptr.ps).cdr.kind /= E_CONS;
+                  ptr := cons_table(ptr.ps).cdr;
+               end loop;
+            end if;
+            if (int_op and (accum_i /= -1)) or ((not int_op) and (not accum_b)) then
+               if cons_table(ptr.ps).cdr.kind /= E_NIL then
+                  temp := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).cdr);
+                  if accumulate(temp) = E_ERROR then
                      return (kind => E_ERROR);
                   end if;
-               end if;
-               exit when cons_table(ptr.ps).cdr.kind /= E_CONS;
-               ptr := cons_table(ptr.ps).cdr;
-            end loop;
-            if cons_table(ptr.ps).cdr.kind /= E_NIL then
-               temp := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).cdr);
-               if temp.kind = E_VALUE then
-                  v := temp.v;
-                  if int_op then
-                     if v.kind = V_INTEGER then
-                        accum_i := uint32_to_int32(int32_to_uint32(accum_i) or
-                                                     int32_to_uint32(v.i));
-                     else
-                        error("eval_or", "Can't mix integers and " & value_type'Image(v.kind));
-                        BBS.lisp.memory.deref(temp);
-                        return (kind => E_ERROR);
-                     end if;
-                  else
-                     if v.kind = V_BOOLEAN then
-                        accum_b := accum_b or v.b;
-                     else
-                        error("eval_or", "Can't mix booleans and " & value_type'Image(v.kind));
-                        BBS.lisp.memory.deref(temp);
-                        return (kind => E_ERROR);
-                     end if;
-                  end if;
-               elsif temp.kind = E_ERROR then
-                  error("eval_or", "Argument evaluation returned an error");
-                  return temp;
-               else
-                  error("eval_or", "Cannot process argument " & ptr_type'Image(temp.kind));
-                  bbs.lisp.memory.deref(temp);
-                  return (kind => E_ERROR);
                end if;
             end if;
          end if;

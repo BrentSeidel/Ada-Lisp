@@ -79,4 +79,11 @@
               (setq max mid)
               (setq min mid)))
            (+ 0 min))))))
-
+;
+;  Logical operations
+;
+(defun xor (a b) (or (and a (not b)) (and (not a) b)))
+;
+(defun nand (a b) (not (and a b)))
+;
+(defun nor (a b) (not (or a b)))

@@ -175,10 +175,9 @@ Three basic boolean operations are provided.  These work on either boolean or in
 (or 1 2 4)
 \end{lstlisting}
 
-The \function{not} operation operates on a single parameter.  If the parameter is boolean, the return value is the inverse of the parameter (NIL $\rightarrow$ T, T $\rightarrow$ NIL).  If the parameter is integer, the individual bits of the integer are inverted and the resulting value returned.
+The \function{not} operation operates on a single parameter.  If the parameter is boolean, the return value is the inverse of the parameter (\constant{NIL} $\rightarrow$ \constant{T}, \constant{T} $\rightarrow$ \constant{NIL}).  If the parameter is integer, the individual bits of the integer are inverted and the resulting value returned.
 
-The \function{and} and \function{or} operations operate on either booleans or integers as long as they are not mixed.  These perform the logical \function{and} and \function{or} operations.
-
+The \function{and} and \function{or} operations operate on either booleans or integers as long as they are not mixed.  These perform the logical \function{and} and \function{or} operations.  Both of these operations short circuit.  As soon as the result is \constant{T} or -1 or \function{or} or \constant{NIL} or 0 for \function{and},  processing additional parameters will not change the result so evaluation of parameters stops and the result is returned.
 
 \subsection{Comparison Operations}
 Four comparison operations are defined for both integers and strings.  The operations are equals, not equals, greater than, and less than.  For example:
