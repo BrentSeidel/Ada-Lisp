@@ -6,9 +6,16 @@ package body bbs.lisp.parser is
    --  Utilities to assist in parsing
    --
    --  Is character a decimal digit?
+   --
    function isDigit(c : Character) return Boolean is
    begin
       return (c >= '0' and c <= '9');
+   end;
+   --
+   --  Is character an alphabetic character
+   function isAlpha(c : Character) return Boolean is
+   begin
+      return (c >= 'A' and c <= 'Z') or (c >= 'a' and c <= 'z');
    end;
    --
    -- Is character a hexidecimal digit?
@@ -68,6 +75,32 @@ package body bbs.lisp.parser is
       end loop;
    end;
    --
+   --  Append an element to a list.  Return true for success or false for failure.
+   --  On failure, the list is dereffed.
+   --
+   function append_to_list(head : cons_index; e : element_type) return Boolean is
+      current : cons_index;
+      flag : Boolean;
+   begin
+      flag := elem_to_cons(current, e);
+      if flag then
+         flag := append(head, current);
+         if not flag then
+            error("append_to_list", "Unable to append to list");
+            BBS.lisp.memory.deref(current);
+            BBS.lisp.memory.deref(head);
+            return False;
+         end if;
+      else
+         error("append_to_list", "Unable to convert element to cons");
+         BBS.lisp.memory.deref(current);
+         BBS.lisp.memory.deref(head);
+         return False;
+      end if;
+      return True;
+   end;
+
+   --
    --  This is the basic parser dispatcher.  Based on the first non-space character,
    --  parsing is dispatched to a lower level parser.
    --
@@ -77,6 +110,7 @@ package body bbs.lisp.parser is
       str  : string_index;
       flag : Boolean := False;
       value : int32;
+      char : Character;
    begin
       e := NIL_ELEM;
       ptr := buff'First;
@@ -140,6 +174,17 @@ package body bbs.lisp.parser is
                error("parse", "Error parsing hexidecimal integer");
                e := (kind => E_ERROR);
             end if;
+         elsif buff(ptr) = '\' then
+            --
+            --  Character literal
+            --
+            flag := parse_char(ptr, buff, last, char);
+            if flag then
+               e := (kind => E_VALUE, v => (kind => V_CHARACTER, c => char));
+            else
+               e := (kind => E_ERROR);
+               error("list", "Unable to parse character literal");
+            end if;
          else
             error("parse", "Unrecognized special form");
             e := (kind => E_ERROR);
@@ -177,6 +222,7 @@ package body bbs.lisp.parser is
       special_symb : symbol;
       begin_called : Boolean := False;
       item_count : Natural := 0;
+      char : Character;
    begin
       flag := bbs.lisp.memory.alloc(head);
       if not flag then
@@ -207,20 +253,10 @@ package body bbs.lisp.parser is
             if flag then
                if (cons_table(current).car.kind = E_NIL) and (cons_table(current).cdr.kind = E_NIL) then
                   BBS.lisp.memory.deref(current);
-                  flag := elem_to_cons(current, NIL_ELEM);
-                  if flag then
-                     flag := append(head, current);
-                     if not flag then
-                        error("list", "Unable to append to list");
-                        BBS.lisp.memory.deref(current);
-                        BBS.lisp.memory.deref(head);
-                        return False;
-                     end if;
-                  else
-                     error("list", "Unable to convert NIL_ELEM to cons");
-                     BBS.lisp.memory.deref(current);
-                     BBS.lisp.memory.deref(head);
-                     return False;
+                  flag := append_to_list(head, NIL_ELEM);
+                  if not flag then
+                     error("list", "Failure appending NIL_ELEM to list");
+                     return flag;
                   end if;
                else
                   if cons_table(head).car.kind = E_NIL then
@@ -259,22 +295,12 @@ package body bbs.lisp.parser is
             if flag then
                e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
                if cons_table(head).car.kind = E_NIL then
-                  cons_table(head).car := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+                  cons_table(head).car := e;
                else
-                  flag := elem_to_cons(current, e);
-                  if flag then
-                     flag := append(head, current);
-                     if not flag then
-                        error("list", "Unable to append to list");
-                        BBS.lisp.memory.deref(current);
-                        BBS.lisp.memory.deref(head);
-                        return False;
-                     end if;
-                  else
-                     error("list", "Unable to convert element to cons");
-                     BBS.lisp.memory.deref(current);
-                     BBS.lisp.memory.deref(head);
-                     return False;
+                  flag := append_to_list(head, e);
+                  if not flag then
+                     error("list", "Failed appending decimal integer to list");
+                     return flag;
                   end if;
                end if;
             else
@@ -296,26 +322,38 @@ package body bbs.lisp.parser is
                if flag then
                   e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
                   if cons_table(head).car.kind = E_NIL then
-                     cons_table(head).car := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+                     cons_table(head).car := e;
                   else
-                     flag := elem_to_cons(current, e);
-                     if flag then
-                        flag := append(head, current);
-                        if not flag then
-                           error("list", "Unable to append to list");
-                           BBS.lisp.memory.deref(current);
-                           BBS.lisp.memory.deref(head);
-                           return False;
-                        end if;
-                     else
-                        error("list", "Unable to convert element to cons");
-                        BBS.lisp.memory.deref(current);
-                        BBS.lisp.memory.deref(head);
-                        return False;
+                  flag := append_to_list(head, e);
+                     if not flag then
+                        error("list", "Failed appending hexidecimal integer to list");
+                        return flag;
                      end if;
                   end if;
                else
                   error("list", "Error parsing hexidecimal number");
+                  BBS.lisp.memory.deref(current);
+                  BBS.lisp.memory.deref(head);
+                  return False;
+               end if;
+            elsif buff(ptr) = '\' then
+               --
+               --  Character literal
+               --
+               flag := parse_char(ptr, buff, last, char);
+               if flag then
+                  e := (kind => E_VALUE, v => (kind => V_CHARACTER, c => char));
+                  if cons_table(head).car.kind = E_NIL then
+                     cons_table(head).car := e;
+                  else
+                     flag := append_to_list(head, e);
+                     if not flag then
+                        error("list", "Failed appending character to list");
+                        return flag;
+                     end if;
+                  end if;
+               else
+                  error("list", "Unable to parse character literal");
                   BBS.lisp.memory.deref(current);
                   BBS.lisp.memory.deref(head);
                   return False;
@@ -336,20 +374,10 @@ package body bbs.lisp.parser is
                if cons_table(head).car.kind = E_NIL then
                   cons_table(head).car := (kind => E_VALUE, v => (kind => V_STRING, s => str));
                else
-                  flag := elem_to_cons(current, e);
-                  if flag then
-                     flag := append(head, current);
-                     if not flag then
-                        error("list", "Unable to append string to list");
-                        BBS.lisp.memory.deref(current);
-                        BBS.lisp.memory.deref(head);
-                        return False;
-                     end if;
-                  else
-                     error("list", "Unable to convert string to cons");
-                     BBS.lisp.memory.deref(current);
-                     BBS.lisp.memory.deref(head);
-                     return False;
+                  flag := append_to_list(head, e);
+                  if not flag then
+                     error("list", "Failed appending string to list");
+                     return flag;
                   end if;
                end if;
             else
@@ -371,20 +399,10 @@ package body bbs.lisp.parser is
             if cons_table(head).car.kind = E_NIL then
                cons_table(head).car := e;
             else
-               flag := elem_to_cons(current, e);
-               if flag then
-                  flag := append(head, current);
-                  if not flag then
-                     error("list", "Could not append symbol to list.");
-                     BBS.lisp.memory.deref(current);
-                     BBS.lisp.memory.deref(head);
-                     return False;
-                  end if;
-               else
-                  error("list", "Could not allocate cons cell for symbol.");
-                  BBS.lisp.memory.deref(current);
-                  BBS.lisp.memory.deref(head);
-                  return False;
+               flag := append_to_list(head, e);
+               if not flag then
+                  error("list", "Failed appending symbol to list");
+                  return flag;
                end if;
             end if;
             if e.kind = E_SYMBOL then
@@ -558,4 +576,60 @@ package body bbs.lisp.parser is
       ptr := ptr + 1;
       return True;
    end;
+   --
+   --  Parse characters.  Character literals are introduced by #\.  This function
+   --  is called with the pointer pointing to the character immediately following
+   --  the #\.  Some named characters are also recognized.
+   --  Named characters recognized should include:
+   --    Space
+   --    Newline
+   --    Tab
+   --    Page
+   --    Rubout
+   --    Linefeed
+   --    Return
+   --    Backspace
+   --
+   function parse_char(ptr : in out Integer; buff : in String;
+                       last : in Integer; c : out Character) return Boolean is
+      temp : String(1 .. 10);
+      index : Natural := 1;
+   begin
+      ptr := ptr + 1;
+      c := buff(ptr);
+      ptr := ptr + 1;
+      if isAlpha(c) then
+         temp(index) := BBS.lisp.strings.To_Upper(c);
+         while isAlpha(buff(ptr)) and (ptr <= last) and index < 10 loop
+            index := index + 1;
+            temp(index) := BBS.lisp.strings.To_Upper(buff(ptr));
+            ptr := ptr + 1;
+         end loop;
+         if index = 1 then
+            return True;
+         elsif temp(1 .. index) = "SPACE" then
+            c := ' ';
+         elsif temp(1 .. index) = "NEWLINE" then
+            c := Character'Val(10);
+         elsif temp(1 .. index) = "TAB" then
+            c := Character'Val(9);
+         elsif temp(1 .. index) = "PAGE" then
+            c := Character'Val(12);
+         elsif temp(1 .. index) = "RUBOUT" then
+            c := Character'Val(127);
+         elsif temp(1 .. index) = "LINEFEED" then
+            c := Character'Val(10);
+         elsif temp(1 .. index) = "RETURN" then
+            c := Character'Val(13);
+         elsif temp(1 .. index) = "BACKSPACE" then
+            c := Character'Val(8);
+         else
+            error("parse_char", "Unrecognized character name");
+            c := Character'Val(0);
+            return False;
+         end if;
+      end if;
+      return True;
+   end;
+   --
 end;

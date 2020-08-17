@@ -228,9 +228,9 @@ package body bbs.lisp is
    begin
       case v.kind is
          when V_INTEGER =>
-            Put(int32'Image(v.i) & " ");
+            Put(int32'Image(v.i));
          when V_CHARACTER =>
-            Put("'" & v.c & "'");
+            Put("" & v.c);
          when V_STRING =>
             print(v.s);
          when V_BOOLEAN =>

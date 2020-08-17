@@ -12,6 +12,7 @@ private
    --
    --  Utilities to assist in parsing
    --
+   function append_to_list(head : cons_index; e : element_type) return Boolean;
    --
    --  Subfunction for parsing lists
    --
@@ -40,6 +41,11 @@ private
    --
    function parse_str(ptr : in out Integer; buff : in String;
                       last : in integer; s : out string_index) return Boolean;
+   --
+   --  Parse characters
+   --
+   function parse_char(ptr : in out Integer; buff : in String;
+                       last : in Integer; c : out Character) return Boolean;
    --
    --  Procedure to skip white space
    --
