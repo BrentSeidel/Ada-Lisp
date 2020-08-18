@@ -624,7 +624,8 @@ package body bbs.lisp.parser is
          elsif temp(1 .. index) = "BACKSPACE" then
             c := Character'Val(8);
          else
-            error("parse_char", "Unrecognized character name");
+            error("parse_char", "Unrecognized character name <#\" &
+                    temp(1 .. index) & ">");
             c := Character'Val(0);
             return False;
          end if;

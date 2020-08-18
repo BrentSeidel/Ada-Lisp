@@ -22,8 +22,8 @@
   (terpri))
 ;  If two values are equal, print pass message, otherwise print fail message
 (defun verify-equal (actual expected msg)
-  (if (= actual expected) (print "Pass: Actual")
-              (print "***FAIL: Actual"))
+  (if (= actual expected) (print "Pass: Actual ")
+              (print "***FAIL: Actual "))
   (print  actual ", Expected " expected " " msg)
   (terpri))
 ;
@@ -163,4 +163,20 @@
   (verify-equal (or 1 2 4) 7 "Produces 7")
   (verify-equal (or #xF000 #xF0) #xF0F0 "Produces #xF0F0")
   (verify-equal (not (and T NIL)) T "T nand NIL -> T"))
+;
+;  Test character data type and operations
+;
+(defun test-char ()
+  (if (= #\A #\A) (pass "A = A") (fail "A /= A"))
+  (if (= #\A #\B) (fail "A = B") (pass "A /= B"))
+  (if (< #\A #\B) (pass "A < B") (fail "A /< B"))
+  (if (< #\A #\A) (fail "A < A") (pass "A /< A"))
+  (if (> #\B #\A) (pass "B > A") (fail "B /> A"))
+  (if (> #\B #\B) (fail "B > B") (pass "B /> B"))
+  (if (/= #\A #\N) (pass "A /= N") (fail "A = N"))
+  (if (/= #\A #\A) (fail "A /= A") (pass "A = A"))
+  (verify-equal (char-int #\A) 65 "A has character code 65")
+  (verify-equal (int-char 66) #\B "Character code 66 is B")
+  (verify-equal (char-downcase #\A) #\a "Lower case A is a")
+  (verify-equal (char-upcase #\a) #\A "Upper case a is A"))
 

@@ -1,5 +1,6 @@
 with BBS.lisp.evaluate;
 with BBS.lisp.evaluate.bool;
+with BBS.lisp.evaluate.char;
 with BBS.lisp.evaluate.cond;
 with BBS.lisp.evaluate.func;
 with BBS.lisp.evaluate.io;
@@ -33,6 +34,9 @@ package body bbs.lisp is
       add_builtin("and", BBS.lisp.evaluate.bool.eval_and'Access);
       add_builtin("car", BBS.lisp.evaluate.car'Access);
       add_builtin("cdr", BBS.lisp.evaluate.cdr'Access);
+      add_builtin("char-downcase", BBS.lisp.evaluate.char.char_downcase'Access);
+      add_builtin("char-int", BBS.lisp.evaluate.char.char_int'Access);
+      add_builtin("char-upcase", BBS.lisp.evaluate.char.char_upcase'Access);
       add_special("defun", BBS.lisp.evaluate.func.defun'Access);
       add_builtin("dowhile", BBS.lisp.evaluate.loops.dowhile'Access);
       add_special("dotimes", BBS.lisp.evaluate.loops.dotimes'Access);
@@ -40,6 +44,7 @@ package body bbs.lisp is
       add_builtin("exit", BBS.lisp.evaluate.quit'Access);
       add_builtin("fresh-line", BBS.lisp.evaluate.io.fresh_line'Access);
       add_builtin("if", BBS.lisp.evaluate.cond.eval_if'Access);
+      add_builtin("int-char", BBS.lisp.evaluate.char.int_char'Access);
       add_special("local", BBS.lisp.evaluate.vars.local'Access);
       add_builtin("msg-off", BBS.lisp.evaluate.msg_off'Access);
       add_builtin("msg-on", BBS.lisp.evaluate.msg_on'Access);

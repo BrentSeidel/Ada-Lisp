@@ -1,6 +1,7 @@
 with BBS.lisp.memory;
 with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.bool is
+   --
    function eval_not(e : element_type) return element_type is
       t : element_type;
       p1 : element_type; --  Parameter
@@ -29,7 +30,6 @@ package body BBS.lisp.evaluate.bool is
          error("eval_not", "Cannot perform NOT of parameter of type " & value_type'Image(v.kind));
          return (kind => E_ERROR);
       end if;
---      return (kind => E_ERROR);
    end;
    --
    function eval_and(e : element_type) return element_type is

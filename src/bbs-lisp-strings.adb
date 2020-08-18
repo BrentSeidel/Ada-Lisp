@@ -1,4 +1,3 @@
---with Ada.Characters.Handling;
 with BBS.lisp.memory;
 package body bbs.lisp.strings is
    --

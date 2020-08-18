@@ -11,8 +11,8 @@ package body BBS.lisp.evaluate.cond is
       t2 : element_type;
       v1 : value;
       v2 : value;
-      i1 : int32;
-      i2 : int32;
+--      i1 : int32;
+--      i2 : int32;
    begin
       if e.kind = E_CONS then
          BBS.lisp.utilities.first_value(e, t1, t);
@@ -36,27 +36,27 @@ package body BBS.lisp.evaluate.cond is
             v2 := t.v;
          end if;
          if (v1.kind = V_INTEGER) and (v2.kind = V_INTEGER) then
-            i1 := v1.i;
-            i2 := v2.i;
             case b is
                when SYM_EQ =>
-                  if i1 = i2 then
-                     return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-                  end if;
+                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i = v2.i));
                when SYM_NE =>
-                  if i1 /= i2 then
-                     return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-                  end if;
+                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i /= v2.i));
                when SYM_LT =>
-                  if i1 < i2 then
-                     return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-                  end if;
+                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i < v2.i));
                when SYM_GT =>
-                  if i1 > i2 then
-                     return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-                  end if;
-               end case;
-               return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i > v2.i));
+            end case;
+         elsif (v1.kind = V_CHARACTER) and (v2.kind = V_CHARACTER) then
+            case b is
+               when SYM_EQ =>
+                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c = v2.c));
+               when SYM_NE =>
+                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c /= v2.c));
+               when SYM_LT =>
+                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c < v2.c));
+               when SYM_GT =>
+                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c > v2.c));
+            end case;
          elsif (v1.kind = V_STRING) and (v2.kind = V_STRING) then
             declare
                eq : comparison;
@@ -94,7 +94,7 @@ package body BBS.lisp.evaluate.cond is
                   return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b > v2.b));
             end case;
          else
-            error("eval_comp", "Can only compare integers, strings, or booleans.");
+            error("eval_comp", "Can only compare elements of the same type.");
             put("First type is " & value_type'Image(v1.kind));
             put_line(", second type is " & value_type'Image(v2.kind));
             return (kind => E_ERROR);

@@ -24,7 +24,7 @@
 %
 %  Define Tiny Lisp based on Common Lisp
 %
-\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{car, cdr, dowhile, dump, exit, fresh-line, if, local, msg-on, msg-off, peek8, peek16, peek32, poke8, poke16, poke32, quote, read-line, reset, setq}}
+\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{car, cdr, char-downcase, char-int, char-upcase, dowhile, dump, exit, fresh-line, if, int-char, local, msg-on, msg-off, peek8, peek16, peek32, poke8, poke16, poke32, quote, read-line, reset, setq}}
 %
 % Macro definitions
 %
@@ -179,6 +179,19 @@ The \function{not} operation operates on a single parameter.  If the parameter i
 
 The \function{and} and \function{or} operations operate on either booleans or integers as long as they are not mixed.  These perform the logical \function{and} and \function{or} operations.  Both of these operations short circuit.  As soon as the result is \constant{T} or -1 or \function{or} or \constant{NIL} or 0 for \function{and},  processing additional parameters will not change the result so evaluation of parameters stops and the result is returned.
 
+\subsection{Character Operations}
+The normal comparison operations work on characters.  There are also some operations defined to operate on characters.
+\begin{lstlisting}
+(char-downcase #\textbackslash{}A)
+(char-int #\textbackslash{}B)
+(char-upcase #\textbackslash{}c)
+(int-char 65)
+\end{lstlisting}
+
+The \function{char-int} and \function{int-char} operations convert between characters and their integer codes.  Given an integer in the range 0-255, \function{int-char} returns the corresponding character value.  Given a character value, the function \function{char-int} returns the corresponding integer (usually the ASCII code.
+
+The \function{char-downcase} and \function{char-upcase} operations convert characters between upper and lower case.  Non-alphabetic characters are not changed.
+
 \subsection{Comparison Operations}
 Four comparison operations are defined for integers, strings, and booleans.  The operations are equals, not equals, greater than, and less than.  For example:
 
@@ -301,6 +314,20 @@ A limited selection of data types is provided.  Think of the old Applesoft Integ
 
 \subsection{Integer}
 This is a 32 bit signed integer.  Integer literals can be given as either signed decimal integers, with a minus sign, ``-'', indicating negative numbers.  This is just as one would expect, however don't use a plus sign, ``+'', to indicate positive numbers.  Integers can also be expressed as unsigned hexadecimal numbers by preceding the number by ``\#x''.
+
+\subsection{Characters}
+Character literals are introduced by preceding the literal by ``\#\textbackslash''.  The following character is the character used, with some exceptions.  The end of a line is always the end of a line, so this cannot be used to create a character containing a newline.  If the first character is alphabetic and is followed by further alphabetic characters, it is interpreted as a character name.  The defined character names are:
+\begin{itemize}
+\item Space
+\item Newline
+\item Tab
+\item Page
+\item Rubout
+\item Linefeed
+\item Return
+\item Backspace
+\end{itemize}
+Thus, the correct way to create a character containing a newline is ``\#\textbackslash{}newline''.  Note that the character names are case insensitive.
 
 \subsection{String}
 Strings are stored in linked lists of 8-bit characters/bytes.  Each node in the list can hold 16 (adjustable by a parameter) bytes.  Unicode is not currently supported.
