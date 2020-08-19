@@ -131,6 +131,8 @@ package body bbs.lisp.memory is
          deref(e.ps);
       elsif e.kind = E_VALUE then
          deref(e.v);
+      elsif e.kind = E_STACK then
+         deref(e.st_name);
       end if;
    end;
    --
@@ -149,6 +151,7 @@ package body bbs.lisp.memory is
    --
    procedure deref(s : string_index) is
       next : string_index;
+      prev : string_index;
    begin
       if string_table(s).ref > 0 then
          string_table(s).ref := string_table(s).ref - 1;
@@ -160,13 +163,23 @@ package body bbs.lisp.memory is
       --  If the reference count goes to zero, deref the next fragment.
       --
       if string_table(s).ref = 0 then
-
-         string_table(s).len := 0;
+         prev := s;
          next := string_table(s).next;
-         if next >= (string_index'First + 1) then
-            deref(next);
-         end if;
-         string_table(s).next := -1;
+         string_table(prev).len := 0;
+         string_table(prev).next := -1;
+         while next > string_index'First loop
+            if string_table(next).ref > 0 then
+               string_table(next).ref := string_table(next).ref - 1;
+            else
+               error("deref string", "Attempt to deref an unreffed string at index "
+                     & string_index'Image(s));
+            end if;
+            exit when string_table(next).ref > 0;
+            prev := next;
+            next := string_table(prev).next;
+            string_table(prev).len := 0;
+            string_table(prev).next := -1;
+         end loop;
       end if;
    end;
    --
