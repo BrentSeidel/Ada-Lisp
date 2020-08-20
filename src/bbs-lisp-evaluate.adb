@@ -1,5 +1,5 @@
 with BBS.lisp.memory;
-with BBS.lisp.utilities;
+--with BBS.lisp.utilities;
 package body BBS.lisp.evaluate is
    --
    function reset(e : element_type) return element_type is
@@ -35,40 +35,6 @@ package body BBS.lisp.evaluate is
       dump_cons;
       dump_symbols;
       dump_strings;
-      return NIL_ELEM;
-   end;
-   --
-   --  Return the first entry in a list (it may be another list).
-   --
-   function car(e : element_type) return element_type is
-      first : element_type;
-      rest : element_type;
-      s : cons_index;
-   begin
-      BBS.lisp.utilities.first_value(e, first, rest);
-      if BBS.lisp.utilities.isList(first) then
-         s := BBS.lisp.utilities.getList(first);
-         BBS.lisp.memory.ref(cons_table(s).car);
-         BBS.lisp.memory.deref(first);
-         return cons_table(s).car;
-      end if;
-      return first;
-   end;
-   --
-   --  Return the rest of a list
-   --
-   function cdr(e : element_type) return element_type is
-      first : element_type;
-      rest : element_type;
-      s : cons_index;
-   begin
-      BBS.lisp.utilities.first_value(e, first, rest);
-      if BBS.lisp.utilities.isList(first) then
-         s := BBS.lisp.utilities.getList(first);
-         BBS.lisp.memory.ref(cons_table(s).cdr);
-         BBS.lisp.memory.deref(first);
-         return cons_table(s).cdr;
-      end if;
       return NIL_ELEM;
    end;
    --

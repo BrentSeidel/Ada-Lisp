@@ -7,8 +7,6 @@ package BBS.lisp.evaluate is
    --
    --  Functions for evaluating the various builtin functions.
    --
-   function car(e : element_type) return element_type;
-   function cdr(e : element_type) return element_type;
    function quit(e : element_type) return element_type;
    function dump(e : element_type) return element_type;
    function reset(e : element_type) return element_type;

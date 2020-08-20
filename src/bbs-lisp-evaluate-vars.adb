@@ -102,6 +102,7 @@ package body BBS.lisp.evaluate.vars is
                   else -- p3 is an element
                      ret := BBS.lisp.utilities.indirect_elem(p3);
                   end if;
+                  BBS.lisp.memory.ref(ret);
                   --
                   --  Check for stack variables
                   --
@@ -109,7 +110,6 @@ package body BBS.lisp.evaluate.vars is
                      if p1.kind = E_STACK then
                         index := BBS.lisp.stack.search_frames(p1.st_offset, p1.st_name);
                         BBS.lisp.memory.deref(BBS.lisp.stack.stack(index).st_value);
-                        BBS.lisp.memory.ref(ret);
                         if ret.kind = E_VALUE then
                            BBS.lisp.stack.stack(index).st_value := ret.v;
                         elsif ret.kind = E_CONS then
@@ -118,7 +118,6 @@ package body BBS.lisp.evaluate.vars is
                      end if;
                   else
                      deref_previous(symb);
-                     BBS.lisp.memory.ref(ret);
                      symb_table(symb) := (ref => 1, Kind => SY_VARIABLE,
                                           pv => ret, str => symb_table(symb).str);
                   end if;

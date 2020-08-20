@@ -4,6 +4,7 @@ with BBS.lisp.evaluate.char;
 with BBS.lisp.evaluate.cond;
 with BBS.lisp.evaluate.func;
 with BBS.lisp.evaluate.io;
+with BBS.lisp.evaluate.list;
 with BBS.lisp.evaluate.loops;
 with BBS.lisp.evaluate.math;
 with BBS.lisp.evaluate.mem;
@@ -13,6 +14,7 @@ with BBS.lisp.parser;
 with BBS.lisp.stack;
 use type BBS.lisp.stack.stack_entry_type;
 with BBS.lisp.strings;
+with BBS.lisp.utilities;
 --
 package body bbs.lisp is
    --
@@ -32,11 +34,12 @@ package body bbs.lisp is
       add_builtin("<", BBS.lisp.evaluate.cond.lt'Access);
       add_builtin(">", BBS.lisp.evaluate.cond.gt'Access);
       add_builtin("and", BBS.lisp.evaluate.bool.eval_and'Access);
-      add_builtin("car", BBS.lisp.evaluate.car'Access);
-      add_builtin("cdr", BBS.lisp.evaluate.cdr'Access);
+      add_builtin("car", BBS.lisp.evaluate.list.car'Access);
+      add_builtin("cdr", BBS.lisp.evaluate.list.cdr'Access);
       add_builtin("char-downcase", BBS.lisp.evaluate.char.char_downcase'Access);
       add_builtin("char-int", BBS.lisp.evaluate.char.char_int'Access);
       add_builtin("char-upcase", BBS.lisp.evaluate.char.char_upcase'Access);
+      add_builtin("cons", BBS.lisp.evaluate.list.cons'Access);
       add_special("defun", BBS.lisp.evaluate.func.defun'Access);
       add_builtin("dowhile", BBS.lisp.evaluate.loops.dowhile'Access);
       add_special("dotimes", BBS.lisp.evaluate.loops.dotimes'Access);
@@ -192,18 +195,21 @@ package body bbs.lisp is
    --
    procedure print(s : cons_index) is
       temp : element_type;
+      list : cons_index;
    begin
       Put("(");
       temp := (kind => E_CONS, ps => s);
       while temp.kind /= E_NIL loop
-         if temp.kind = E_CONS then
-            if cons_table(temp.ps).car.kind = E_CONS then
-               print(cons_table(temp.ps).car.ps);
+         if BBS.lisp.utilities.isList(temp)  then
+            list := BBS.lisp.utilities.getList(temp);
+            if BBS.lisp.utilities.isList(cons_table(list).car) then
+               print(BBS.lisp.utilities.getList(cons_table(list).car));
             else
-               print(cons_table(temp.ps).car, False, False);
+               print(cons_table(list).car, False, False);
             end if;
-            temp := cons_table(temp.ps).cdr;
+            temp := cons_table(list).cdr;
          else
+            put(" . ");
             print(temp, False, False);
             temp := NIL_ELEM;
          end if;
@@ -244,10 +250,12 @@ package body bbs.lisp is
             else
                put(" NIL");
             end if;
+         when V_LIST =>
+            print(v.l);
          when V_NONE =>
             put(" Empty");
-         when others =>
-            Put("<Unknown value kind " & value_type'Image(v.kind) & ">");
+--         when others =>
+--            Put("<Unknown value kind " & value_type'Image(v.kind) & ">");
       end case;
    end;
    --
@@ -266,6 +274,8 @@ package body bbs.lisp is
             else
                put(" NIL");
             end if;
+         when V_LIST =>
+            print(v.l);
          when others =>
             Put("<Unknown value kind " & value_type'Image(v.kind) & ">");
       end case;

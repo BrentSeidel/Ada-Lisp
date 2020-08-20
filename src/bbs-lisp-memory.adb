@@ -82,6 +82,8 @@ package body bbs.lisp.memory is
       elsif e.kind = E_VALUE then
          if e.v.kind = V_STRING then
             ref(e.v.s);
+         elsif e.v.kind = V_LIST then
+            ref(e.v.l);
          end if;
       end if;
    end;
