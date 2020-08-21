@@ -28,6 +28,8 @@ package body BBS.lisp.evaluate.list is
       if BBS.lisp.memory.alloc(s) then
          cons_table(s).car := p1;
          cons_table(s).cdr := p2;
+         BBS.lisp.memory.ref(p1);
+         BBS.lisp.memory.ref(p2);
          return (kind => E_VALUE, v => (kind => V_LIST, l => s));
       else
          error("cons", "Unable to allocate cons cell");
@@ -70,5 +72,72 @@ package body BBS.lisp.evaluate.list is
       end if;
       return NIL_ELEM;
    end;
+   --
+   --  Create a list verbatum from the parameter list
+   --
+   function quote(e : element_type) return element_type is
+   begin
+      bbs.lisp.memory.ref(e);
+      return e;
+   end;
+   --
+   --  Create a list by evaluating the parameters, similar to quote, but quote
+   --  does not evaluate the parameters.
+   --
+   function list(e : element_type) return element_type is
+      first : element_type;
+      rest : element_type := e;
+      temp : element_type;
+      head : cons_index;
+      tail : cons_index;
+      s : cons_index;
+   begin
+      if BBS.lisp.utilities.isList(e) then
+         if BBS.lisp.memory.alloc(s) then
+            BBS.lisp.utilities.first_value(e, first, rest);
+            if first.kind = E_ERROR then
+               error("list", "Parameter returned an error");
+               return first;
+            end if;
+            BBS.lisp.memory.ref(first);
+            cons_table(s).car := first;
+            head := s;
+            tail := s;
+         else
+            error("list", "Unable to allocate cons cell.");
+            return (kind => E_ERROR);
+         end if;
+      else
+         return NIL_ELEM;
+      end if;
+      while rest.kind /= E_NIL loop
+         if BBS.lisp.memory.alloc(s) then
+            BBS.lisp.utilities.first_value(rest, first, temp);
+            if first.kind = E_ERROR then
+               BBS.lisp.memory.deref(head);
+               error("list", "Parameter returned an error");
+               return first;
+            end if;
+            cons_table(tail).cdr := (kind => E_VALUE, v => (kind => V_LIST, l => s));
+            tail := s;
+            BBS.lisp.memory.ref(first);
+            cons_table(s).car := first;
+            rest := temp;
+         else
+            BBS.lisp.memory.deref(head);
+            error("list", "Unable to allocate cons cell");
+            return (kind => E_ERROR);
+         end if;
+      end loop;
+      return (kind => E_VALUE, v => (kind => V_LIST, l => head));
+   end;
+   --
+   --  Append one list to another.
+   --
+   function append(e : element_type) return element_type is
+   begin
+      return (kind => E_ERROR);
+   end;
+
    --
 end;

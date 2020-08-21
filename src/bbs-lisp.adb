@@ -48,6 +48,7 @@ package body bbs.lisp is
       add_builtin("fresh-line", BBS.lisp.evaluate.io.fresh_line'Access);
       add_builtin("if", BBS.lisp.evaluate.cond.eval_if'Access);
       add_builtin("int-char", BBS.lisp.evaluate.char.int_char'Access);
+      add_builtin("list", BBS.lisp.evaluate.list.list'Access);
       add_special("local", BBS.lisp.evaluate.vars.local'Access);
       add_builtin("msg-off", BBS.lisp.evaluate.msg_off'Access);
       add_builtin("msg-on", BBS.lisp.evaluate.msg_on'Access);
@@ -60,7 +61,7 @@ package body bbs.lisp is
       add_builtin("poke16", BBS.lisp.evaluate.mem.poke16'Access);
       add_builtin("poke32", BBS.lisp.evaluate.mem.poke32'Access);
       add_builtin("print", BBS.lisp.evaluate.io.print'Access);
-      add_builtin("quote", BBS.lisp.evaluate.quote'Access);
+      add_builtin("quote", BBS.lisp.evaluate.list.quote'Access);
       add_builtin("read-line", BBS.lisp.evaluate.io.read_line'Access);
       add_builtin("reset", BBS.lisp.evaluate.reset'Access);
       add_special("setq", BBS.lisp.evaluate.vars.setq'Access);

@@ -10,7 +10,6 @@ package BBS.lisp.evaluate is
    function quit(e : element_type) return element_type;
    function dump(e : element_type) return element_type;
    function reset(e : element_type) return element_type;
-   function quote(e : element_type) return element_type;
    function msg_on(e : element_type) return element_type;
    function msg_off(e : element_type) return element_type;
    --

@@ -1,4 +1,4 @@
-with BBS.lisp.memory;
+--with BBS.lisp.memory;
 --with BBS.lisp.utilities;
 package body BBS.lisp.evaluate is
    --
@@ -21,12 +21,6 @@ package body BBS.lisp.evaluate is
    begin
       msg_flag := False;
       return NIL_ELEM;
-   end;
-   --
-   function quote(e : element_type) return element_type is
-   begin
-      bbs.lisp.memory.ref(e);
-      return e;
    end;
    --
    function dump(e : element_type) return element_type is

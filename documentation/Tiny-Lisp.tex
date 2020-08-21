@@ -265,10 +265,16 @@ Basic list operations are provided.
 \begin{lstlisting}
 (car (1 2 3 4))
 (cdr (1 2 3 4))
+(cons 1 (cons 2 ()))
 (quote (+ 1 2) 3 4 (* 5 6 7 8))
+(list (+ 1 2) 3 4 (* 5 6 7 8))
 \end{lstlisting}
 
 Each of \function{car} and \function{cdr} take one parameter that should be a list.  \function{Car} returns the first item in the list.  This item may be a single element or it may be a list.  \function{Cdr} returns the remainder of the list.
+
+The \function{cons} operation creates a \constant{cons} cell and sets the \constant{car} field to the first parameter and the \constant{cdr} to the second parameter.  This exposes a subtle difference between \tl{} and \cl.  In \tl, \constant{NIL} is a constant of boolean type, while in \cl, it also represents an empty list.  Thus \operation{(cons 1 NIL)} produce slightly different results, \operation{(1 . NIL)} for \tl{} or \operation{(1)} for \cl.  If you wish to produce the \cl{} results, where the \constant{car} points to a value and the \constant{cdr} is an empty pointer, you can use \operation{(cons 1 ())} or \operation{(cons 1)}.  The former is preferred as it is compatible with \cl.
+
+The \function{list} operation returns its parameters as a list after evaluating each of them.  This is similar to \function{quote} except that quote does not evaluate the parameters.  Thus \operation{(quote (+ 1 2) 3 4 (* 5 6 7 8))} returns \operation{((+ 1 2) 3 4 (* 5 6 7 8))}, while \operation{(list (+ 1 2) 3 4 (* 5 6 7 8))} returns \operation{(3 3 4 1680)}.
 
 The \function{quote} operation returns its parameters as a list without evaluating any of them.  In many cases this is not needed since if the first item in a list is not a symbol representing an operation or user defined function, the list simply evaluates to itself.  At some point, this may change to be more compatible with \cl.
 
