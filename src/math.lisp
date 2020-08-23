@@ -33,7 +33,7 @@
 ;  Iterative Fibonacci function
 ;
 (defun fibi (n)
-  (local (temp (n1 0) (n2 1))
+  (let (temp (n1 0) (n2 1))
     (dotimes (iter n)
       (setq temp (+ n1 n2))
       (setq n1 n2)
@@ -57,7 +57,7 @@
     0
     (if (< n 4)
       1
-      (local ((temp 2))
+      (let ((temp 2))
         (dowhile (< (* temp temp) (+ n 1))
           (setq temp (+ temp 1)))
         (- temp 1)))))
@@ -72,7 +72,7 @@
       1
       (if (< n 9)
         3
-        (local ((min 1) (max (/ n 2)) (mid 0))
+        (let ((min 1) (max (/ n 2)) (mid 0))
           (dowhile (> (- max min) 1)
             (setq mid (/ (+ min max) 2))
             (if (> (* mid mid) n)

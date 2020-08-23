@@ -14,6 +14,6 @@
 ;  Remove an item from the stack and return it
 ;
 (defun stack-pop ()
-  (local ((temp (car *stack*)))
+  (let ((temp (car *stack*)))
     (setq *stack* (cdr *stack*))
     temp))

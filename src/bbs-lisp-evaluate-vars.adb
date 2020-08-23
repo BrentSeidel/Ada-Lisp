@@ -160,7 +160,7 @@ package body BBS.lisp.evaluate.vars is
                if locals.kind = E_CONS then
                   locals := cons_table(locals.ps).car;
                else
-                  error("local", "Improper parameters.");
+                  error("let", "Improper parameters.");
                   return (kind => E_ERROR);
                end if;
                BBS.lisp.stack.start_frame;
@@ -182,15 +182,15 @@ package body BBS.lisp.evaluate.vars is
                      end if;
                      if el.kind = E_SYMBOL then
                         str := symb_table(el.sym).str;
-                        msg("local", "Converting symbol to local variable");
+                        msg("let", "Converting symbol to local variable");
                      elsif el.kind = E_TEMPSYM then
                         str := el.tempsym;
-                        msg("local", "Converting tempsym to local variable");
+                        msg("let", "Converting tempsym to local variable");
                      elsif el.kind = E_STACK then
-                        msg("local", "Converting stack variable to local variable");
+                        msg("let", "Converting stack variable to local variable");
                         str := el.st_name;
                      else
-                        error("local", "Can't convert item into a local variable.");
+                        error("let", "Can't convert item into a local variable.");
                         print(el, False, True);
                         Put_Line("Item is of kind " & ptr_type'Image(el.kind));
                         BBS.lisp.stack.enter_frame;
@@ -213,7 +213,7 @@ package body BBS.lisp.evaluate.vars is
                end loop;
                BBS.lisp.stack.enter_frame;
             else
-               error("local", "Something went horribly wrong and local did not get a list");
+               error("let", "Something went horribly wrong and local did not get a list");
                return (kind => E_ERROR);
             end if;
          when PH_PARSE_END =>
@@ -270,7 +270,7 @@ package body BBS.lisp.evaluate.vars is
                                           st_name => el.st_name,
                                           st_value => local_val));
                   else
-                     error("local", "Local variable is not a local.");
+                     error("let", "Local variable is not a local.");
                      print(el, False, True);
                      Put_Line("Item is of kind " & ptr_type'Image(el.kind));
                      BBS.lisp.stack.enter_frame;
@@ -287,7 +287,7 @@ package body BBS.lisp.evaluate.vars is
             --
             t := execute_block(list);
             if t.kind = E_ERROR then
-               error("local", "Error occured evaluting statement");
+               error("let", "Error occured evaluting statement");
             end if;
             BBS.lisp.stack.exit_frame;
             return t;

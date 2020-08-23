@@ -75,7 +75,7 @@ figure out how first.
 The following updates to the language are planned.  They may not be done in the
 order shown and other items may be added before some of these.
 1. Parsing string to number.
-2. Character data type and conversions.
+2. Character data type and conversions (in work).
 3. Some basic string operations.
 4. Improved error handling and general code cleanup (ongoing).
 5. Make functions first class objects.

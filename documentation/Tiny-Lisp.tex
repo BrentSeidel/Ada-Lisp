@@ -297,14 +297,14 @@ The \function{poke} operations write a 8, 16, or 32 bit value to the specified m
 
 \begin{lstlisting}
 (setq variable 1)
-(local (var1 (var2 2) (var3))
+(let (var1 (var2 2) (var3))
   (print "var1 is " var1 " var2 is " var2 "var3 is " var3)
   (terpri))
 \end{lstlisting}
 
 The \function{setq} form sets a value for a symbol.  The first parameter is the symbol and the second parameter is the value.  If the symbol does not yet exist, it is created.  Symbols that already exist as builtin or special can't be used for values.  The second parameter is evaluated to return the value.
 
-The \function{local} form creates local variables on the stack and an environment for other statements that use them.  Variables can have an optional initial value.  If no initial value is provided, the variable is set to \constant{NIL}.  The value returned from the \function{local} form is the value of the last statement executed.
+The \function{let} form creates local variables on the stack and an environment for other statements that use them.  Variables can have an optional initial value.  If no initial value is provided, the variable is set to \constant{NIL}.  The value returned from the \function{let} form is the value of the last statement executed.
 
 \subsection{Other}
 There are a few operations that do things that can't be easily categorized.

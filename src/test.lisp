@@ -103,8 +103,8 @@
 ;
 ;  Test local variables with setq
 ;
-(defun test-local ()
-  (local ((a (+ 1 2)) (b 4) (c 0))
+(defun test-let ()
+  (let ((a (+ 1 2)) (b 4) (c 0))
     (verify-equal a 3 "A is 3")
     (verify-equal b 4 "B is 4")
     (verify-equal c 0 "C is 0")
@@ -114,7 +114,7 @@
     (verify-equal b -10 "B is -10")
     (setq c (+ a 2))
     (verify-equal c 6 "C is 6")
-    (local ((a 1))
+    (let ((a 1))
       (verify-equal a 1 "A is 1")
       (setq a 20)
       (verify-equal a 20 "A is 20"))
@@ -123,7 +123,7 @@
 ;  Test dowhile operation
 ;
 (defun test-dowhile ()
-  (local ((count 0) (accum 0))
+  (let ((count 0) (accum 0))
     (dowhile (< count 10)
       (setq count (+ count 1))
       (setq accum (+ accum count))
@@ -135,7 +135,7 @@
 ;  Test dotimes operation
 ;
 (defun test-dotimes ()
-  (local ((accum 0) result)
+  (let ((accum 0) result)
     (setq result (dotimes (n 10 20)
       (print "Count is " n)
       (terpri)

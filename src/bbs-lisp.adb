@@ -48,8 +48,8 @@ package body bbs.lisp is
       add_builtin("fresh-line", BBS.lisp.evaluate.io.fresh_line'Access);
       add_builtin("if", BBS.lisp.evaluate.cond.eval_if'Access);
       add_builtin("int-char", BBS.lisp.evaluate.char.int_char'Access);
+      add_special("let", BBS.lisp.evaluate.vars.local'Access);
       add_builtin("list", BBS.lisp.evaluate.list.list'Access);
-      add_special("local", BBS.lisp.evaluate.vars.local'Access);
       add_builtin("msg-off", BBS.lisp.evaluate.misc.msg_off'Access);
       add_builtin("msg-on", BBS.lisp.evaluate.misc.msg_on'Access);
       add_builtin("not", BBS.lisp.evaluate.bool.eval_not'Access);
