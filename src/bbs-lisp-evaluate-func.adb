@@ -182,7 +182,7 @@ package body BBS.lisp.evaluate.func is
       param_value : value := (kind => V_NONE);
       temp_value : element_type;
       rest : element_type;
-      statement : element_type;
+--      statement : element_type;
       name : element_type;
       ret_val : element_type;
       supplied : Integer := 0;
@@ -232,22 +232,11 @@ package body BBS.lisp.evaluate.func is
          end if;
          name  := cons_table(name.ps).cdr;
       end loop;
-      BBS.lisp.stack.enter_frame;
       --
       --  Evaluate the function
       --
-      statement := func_body;
-      ret_val := NIL_ELEM;
-      while statement.kind = E_CONS loop
-         if cons_table(statement.ps).car.kind = E_CONS then
-            ret_val := eval_dispatch(cons_table(statement.ps).car.ps);
-            if ret_val.kind = E_ERROR then
-               error("function evaluation", "Operation returned an error");
-               exit;
-            end if;
-         end if;
-         statement := cons_table(statement.ps).cdr;
-      end loop;
+      BBS.lisp.stack.enter_frame;
+      ret_val := execute_block(func_body);
       BBS.lisp.stack.exit_frame;
       return ret_val;
    end;

@@ -1,44 +1,30 @@
---with BBS.lisp.memory;
---with BBS.lisp.utilities;
+with BBS.lisp.memory;
+with BBS.lisp.utilities;
 package body BBS.lisp.evaluate is
    --
-   function reset(e : element_type) return element_type is
-      pragma Unreferenced (e);
+   function execute_block(e : element_type) return element_type is
+      statement : element_type;
+      ret_val : element_type;
    begin
-      init;
-      return NIL_ELEM;
-   end;
-   --
-   function msg_on(e : element_type) return element_type is
-      pragma Unreferenced (e);
-   begin
-      msg_flag := True;
-      return NIL_ELEM;
-   end;
-   --
-   function msg_off(e : element_type) return element_type is
-      pragma Unreferenced (e);
-   begin
-      msg_flag := False;
-      return NIL_ELEM;
-   end;
-   --
-   function dump(e : element_type) return element_type is
-      pragma Unreferenced (e);
-   begin
-      dump_cons;
-      dump_symbols;
-      dump_strings;
-      return NIL_ELEM;
-   end;
-   --
-   --  Set the quit flag to exit the lisp interpreter
-   --
-   function quit(e : element_type) return element_type is
-      pragma Unreferenced (e);
-   begin
-      exit_flag := True;
-      return NIL_ELEM;
+      --
+      --  Evaluate the function
+      --
+      statement := e;
+      ret_val := NIL_ELEM;
+      while BBS.lisp.utilities.isList(statement) loop
+         BBS.lisp.memory.deref(ret_val);
+         if BBS.lisp.utilities.isList(cons_table(statement.ps).car) then
+            ret_val := eval_dispatch(BBS.lisp.utilities.getList(cons_table(statement.ps).car));
+            if ret_val.kind = E_ERROR then
+               error("block execution", "Operation returned an error");
+               exit;
+            end if;
+         else
+            ret_val := cons_table(statement.ps).car;
+         end if;
+         statement := cons_table(statement.ps).cdr;
+      end loop;
+      return ret_val;
    end;
    --
 end;

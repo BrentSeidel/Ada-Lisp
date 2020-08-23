@@ -1,16 +1,12 @@
 --
---  This package contains functions for evaluating the various Lisp operatations.
---  Note that some groups of functions have been moved into sub-packages of this
---  one.
+--  This package contains helper functions for evaluating the various Lisp
+--  operatations.  The actual operations are in subpackages of this one.
 --
 package BBS.lisp.evaluate is
    --
-   --  Functions for evaluating the various builtin functions.
+   --  Execute the statements in a block and return the value of the last
+   --  statement executed.
    --
-   function quit(e : element_type) return element_type;
-   function dump(e : element_type) return element_type;
-   function reset(e : element_type) return element_type;
-   function msg_on(e : element_type) return element_type;
-   function msg_off(e : element_type) return element_type;
+   function execute_block(e : element_type) return element_type;
    --
 end;

@@ -147,7 +147,6 @@ package body BBS.lisp.evaluate.vars is
    function local(e : element_type; p : phase) return element_type is
       locals : element_type;
       list : element_type;
-      ptr : element_type;
       t : element_type := NIL_ELEM;
    begin
       case p is
@@ -288,19 +287,10 @@ package body BBS.lisp.evaluate.vars is
             --
             --  Now evaluate the statements in this context.
             --
-            ptr := list;
-            while ptr.kind /= E_NIL loop
-               if ptr.kind = E_CONS then
-                  if cons_table(ptr.ps).car.kind = E_CONS then
-                     t := eval_dispatch(cons_table(ptr.ps).car.ps);
-                  else
-                     t := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).car);
-                  end if;
-                  ptr := cons_table(ptr.ps).cdr;
-               else
-                  ptr := NIL_ELEM;
-               end if;
-            end loop;
+            t := execute_block(list);
+            if t.kind = E_ERROR then
+               error("local", "Error occured evaluting statement");
+            end if;
             BBS.lisp.stack.exit_frame;
             return t;
       end case;

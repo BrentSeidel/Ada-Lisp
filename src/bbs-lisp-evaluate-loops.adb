@@ -10,7 +10,6 @@ package body BBS.lisp.evaluate.loops is
    function dowhile(e : element_type) return element_type is
       cond : element_type; --  Condition to evaluate
       list : element_type; --  List of operations to execute
-      ptr : element_type;
       t : element_type := NIL_ELEM;
       temp : element_type;
    begin
@@ -26,31 +25,16 @@ package body BBS.lisp.evaluate.loops is
             return temp;
          end if;
          while bbs.lisp.utilities.isTrue(temp) loop
+            BBS.lisp.memory.deref(t);
             BBS.lisp.memory.deref(temp);
-            ptr := list;
             --
             --  Evaluate all of the items in the list.
             --
-            while ptr.kind /= E_NIL loop
-               BBS.lisp.memory.deref(t);
-               if ptr.kind = E_CONS then
-                  if cons_table(ptr.ps).car.kind = E_CONS then
-                     t := eval_dispatch(cons_table(ptr.ps).car.ps);
-                     if t.kind = E_ERROR then
-                        error("dowhile", "Error occured during evaluation of body");
-                        return t;
-                     end if;
-                  else
-                     t := cons_table(ptr.ps).car;
-                     BBS.lisp.memory.ref(t);
-                  end if;
-                  ptr := cons_table(ptr.ps).cdr;
-               else
-                  t := ptr;
-                  BBS.lisp.memory.ref(t);
-                  ptr := NIL_ELEM;
-               end if;
-            end loop;
+            t := execute_block(list);
+            if t.kind = E_ERROR then
+               error("dowhile", "Error occured during evaluation of body");
+               return t;
+            end if;
             temp := eval_dispatch(cond.ps);
             if temp.kind = E_ERROR then
                error("dowhile", "Error occured during evaluation of condition");
@@ -83,7 +67,6 @@ package body BBS.lisp.evaluate.loops is
       limit : element_type := NIL_ELEM;
       limit_value : Natural := 0;
       dummy : Natural;
-      ptr : element_type;
       t : element_type := NIL_ELEM;
    begin
       case p is
@@ -238,22 +221,12 @@ package body BBS.lisp.evaluate.loops is
                --
                --  Evaluate all of the items in the list.
                --
-               ptr := list;
-               while ptr.kind /= E_NIL loop
-                  if ptr.kind = E_CONS then
-                     if cons_table(ptr.ps).car.kind = E_CONS then
-                        t := eval_dispatch(cons_table(ptr.ps).car.ps);
-                        if t.kind = E_ERROR then
-                           error("dotimes", "Error occured in body");
-                           BBS.lisp.stack.exit_frame;
-                           return t;
-                        end if;
-                     end if;
-                     ptr := cons_table(ptr.ps).cdr;
-                  else
-                     ptr := NIL_ELEM;
-                  end if;
-               end loop;
+               t := execute_block(list);
+               if t.kind = E_ERROR then
+                  error("dotimes", "Error occured in body");
+                  BBS.lisp.stack.exit_frame;
+                  return t;
+               end if;
             end loop;
             --
             --  Exit the stack frame
