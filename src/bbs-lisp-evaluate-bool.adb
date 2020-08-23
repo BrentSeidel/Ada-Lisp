@@ -1,5 +1,4 @@
 with BBS.lisp.memory;
-with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.bool is
    --
    function eval_not(e : element_type) return element_type is
@@ -11,7 +10,7 @@ package body BBS.lisp.evaluate.bool is
          error("eval_not", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      BBS.lisp.utilities.first_value(e, p1, t);
+      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("eval_not", "Error reported evaluating parameter.");
          return p1;
@@ -79,7 +78,7 @@ package body BBS.lisp.evaluate.bool is
       elsif e.kind = E_CONS then
          ptr := e;
          if cons_table(ptr.ps).car.kind /= E_CONS then
-            temp := BBS.lisp.utilities.indirect_elem(cons_table(ptr.ps).car);
+            temp := indirect_elem(cons_table(ptr.ps).car);
          else  -- It is E_CONS
             temp := eval_dispatch(cons_table(ptr.ps).car.ps);
          end if;
@@ -93,7 +92,7 @@ package body BBS.lisp.evaluate.bool is
                   if cons_table(ptr.ps).car.kind = E_CONS then
                      temp := eval_dispatch(cons_table(ptr.ps).car.ps);
                   else
-                     temp := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).car);
+                     temp := indirect_elem(cons_table(ptr.ps).car);
                   end if;
                   if accumulate(temp) = E_ERROR then
                      return (kind => E_ERROR);
@@ -112,7 +111,7 @@ package body BBS.lisp.evaluate.bool is
             end if;
             if (int_op and (accum_i /= 0)) or ((not int_op) and accum_b) then
                if cons_table(ptr.ps).cdr.kind /= E_NIL then
-                  temp := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).cdr);
+                  temp := indirect_elem(cons_table(ptr.ps).cdr);
                   if accumulate(temp) = E_ERROR then
                      return (kind => E_ERROR);
                   end if;
@@ -177,7 +176,7 @@ package body BBS.lisp.evaluate.bool is
       elsif e.kind = E_CONS then
          ptr := e;
          if cons_table(ptr.ps).car.kind /= E_CONS then
-            temp := BBS.lisp.utilities.indirect_elem(cons_table(ptr.ps).car);
+            temp := indirect_elem(cons_table(ptr.ps).car);
             if accumulate(temp) = E_ERROR then
                return (kind => E_ERROR);
             end if;
@@ -194,7 +193,7 @@ package body BBS.lisp.evaluate.bool is
                   if cons_table(ptr.ps).car.kind = E_CONS then
                      temp := eval_dispatch(cons_table(ptr.ps).car.ps);
                   else
-                     temp := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).car);
+                     temp := indirect_elem(cons_table(ptr.ps).car);
                   end if;
                   if accumulate(temp) = E_ERROR then
                      return (kind => E_ERROR);
@@ -213,7 +212,7 @@ package body BBS.lisp.evaluate.bool is
             end if;
             if (int_op and (accum_i /= -1)) or ((not int_op) and (not accum_b)) then
                if cons_table(ptr.ps).cdr.kind /= E_NIL then
-                  temp := bbs.lisp.utilities.indirect_elem(cons_table(ptr.ps).cdr);
+                  temp := indirect_elem(cons_table(ptr.ps).cdr);
                   if accumulate(temp) = E_ERROR then
                      return (kind => E_ERROR);
                   end if;

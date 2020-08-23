@@ -4,9 +4,28 @@
 --
 package BBS.lisp.evaluate is
    --
+   function isTrue(e : element_type) return Boolean;
+   function isList(e : element_type) return Boolean;
+   function isFunction(e : element_type) return Boolean;
+   function getList(e : element_type) return cons_index
+     with pre => isList(e);
+   --
    --  Execute the statements in a block and return the value of the last
    --  statement executed.
    --
    function execute_block(e : element_type) return element_type;
+   --
+   --  The following function examines an atom.  If the atom is some sort of
+   --  variable, an element type pointing to the value.  If not, the element
+   --  points to the original atom.
+   --
+   function indirect_elem(e : element_type) return element_type;
+   --
+   --  This procedure extracts the first value from an element.  This value may
+   --  be a value, a variable, or a list.  If the list starts with an expression,
+   --  it is passed to the evaluator and the results returned.  The rest of the
+   --  expression is also returned
+   --
+   procedure first_value(e : element_type; car : out element_type; cdr : out element_type);
    --
 end;

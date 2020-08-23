@@ -15,7 +15,6 @@ with BBS.lisp.parser;
 with BBS.lisp.stack;
 use type BBS.lisp.stack.stack_entry_type;
 with BBS.lisp.strings;
-with BBS.lisp.utilities;
 --
 package body bbs.lisp is
    --
@@ -202,10 +201,10 @@ package body bbs.lisp is
       Put("(");
       temp := (kind => E_CONS, ps => s);
       while temp.kind /= E_NIL loop
-         if BBS.lisp.utilities.isList(temp)  then
-            list := BBS.lisp.utilities.getList(temp);
-            if BBS.lisp.utilities.isList(cons_table(list).car) then
-               print(BBS.lisp.utilities.getList(cons_table(list).car));
+         if BBS.lisp.evaluate.isList(temp)  then
+            list := BBS.lisp.evaluate.getList(temp);
+            if BBS.lisp.evaluate.isList(cons_table(list).car) then
+               print(BBS.lisp.evaluate.getList(cons_table(list).car));
             else
                print(cons_table(list).car, False, False);
             end if;

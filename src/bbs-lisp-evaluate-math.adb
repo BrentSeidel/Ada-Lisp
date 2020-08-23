@@ -1,7 +1,4 @@
 with BBS.lisp.memory;
---with BBS.lisp.strings;
---with BBS.lisp.stack;
-with BBS.lisp.utilities;
 
 package body BBS.lisp.evaluate.math is
    --
@@ -21,7 +18,7 @@ package body BBS.lisp.evaluate.math is
          v  : value;
          e1 : element_type;
       begin
-         e1 := bbs.lisp.utilities.indirect_elem(e);
+         e1 := indirect_elem(e);
          if e1.kind = E_VALUE then
             v := e.v;
             if v.kind = V_INTEGER then
@@ -54,7 +51,7 @@ package body BBS.lisp.evaluate.math is
       elsif e.kind = E_CONS then
          p := e.ps;
          if cons_table(p).car.kind /= E_CONS then
-            el := BBS.lisp.utilities.indirect_elem(cons_table(p).car);
+            el := indirect_elem(cons_table(p).car);
             if el.kind = E_VALUE then
                v := el.v;
             else
@@ -70,7 +67,7 @@ package body BBS.lisp.evaluate.math is
          elsif cons_table(p).car.kind = E_CONS then
             temp := eval_dispatch(cons_table(p).car.ps);
             if temp.kind /= E_CONS then
-               el := bbs.lisp.utilities.indirect_elem(temp);
+               el := indirect_elem(temp);
                if el.kind = E_VALUE then
                   v := el.v;
                end if;
@@ -100,7 +97,7 @@ package body BBS.lisp.evaluate.math is
                   end if;
                   bbs.lisp.memory.deref(temp);
                else
-                  el := bbs.lisp.utilities.indirect_elem(cons_table(p).car);
+                  el := indirect_elem(cons_table(p).car);
                   accum := process_value(el, accum, b);
                   if err then
                      error("eval_math", "Error processing parameter");
@@ -111,7 +108,7 @@ package body BBS.lisp.evaluate.math is
                p := cons_table(p).cdr.ps;
             end loop;
             if cons_table(p).cdr.kind /= E_NIL then
-               el := bbs.lisp.utilities.indirect_elem(cons_table(p).cdr);
+               el := indirect_elem(cons_table(p).cdr);
                accum := process_value(el, accum, b);
                if err then
                   error("eval_math", "Error processing parameter");

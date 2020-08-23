@@ -1,5 +1,4 @@
 with BBS.lisp.memory;
-with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.list is
 
    --
@@ -15,12 +14,12 @@ package body BBS.lisp.evaluate.list is
          error("cons(e", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      BBS.lisp.utilities.first_value(e, p1, t);
+      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("cons", "Error reported evaluating first parameter.");
          return p1;
       end if;
-      BBS.lisp.utilities.first_value(t, p2, t);
+      first_value(t, p2, t);
       if p2.kind = E_ERROR then
          error("cons", "Error reported evaluating second parameter.");
          return p2;
@@ -45,9 +44,9 @@ package body BBS.lisp.evaluate.list is
       rest : element_type;
       s : cons_index;
    begin
-      BBS.lisp.utilities.first_value(e, first, rest);
-      if BBS.lisp.utilities.isList(first) then
-         s := BBS.lisp.utilities.getList(first);
+      first_value(e, first, rest);
+      if isList(first) then
+         s := getList(first);
          temp := cons_table(s).car;
          BBS.lisp.memory.ref(temp);
          return temp;
@@ -63,9 +62,9 @@ package body BBS.lisp.evaluate.list is
       rest : element_type;
       s : cons_index;
    begin
-      BBS.lisp.utilities.first_value(e, first, rest);
-      if BBS.lisp.utilities.isList(first) then
-         s := BBS.lisp.utilities.getList(first);
+      first_value(e, first, rest);
+      if isList(first) then
+         s := getList(first);
          temp := cons_table(s).cdr;
          BBS.lisp.memory.ref(temp);
          return temp;
@@ -92,9 +91,9 @@ package body BBS.lisp.evaluate.list is
       tail : cons_index;
       s : cons_index;
    begin
-      if BBS.lisp.utilities.isList(e) then
+      if isList(e) then
          if BBS.lisp.memory.alloc(s) then
-            BBS.lisp.utilities.first_value(e, first, rest);
+            first_value(e, first, rest);
             if first.kind = E_ERROR then
                error("list", "Parameter returned an error");
                return first;
@@ -112,7 +111,7 @@ package body BBS.lisp.evaluate.list is
       end if;
       while rest.kind /= E_NIL loop
          if BBS.lisp.memory.alloc(s) then
-            BBS.lisp.utilities.first_value(rest, first, temp);
+            first_value(rest, first, temp);
             if first.kind = E_ERROR then
                BBS.lisp.memory.deref(head);
                error("list", "Parameter returned an error");

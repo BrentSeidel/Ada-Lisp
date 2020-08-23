@@ -1,4 +1,3 @@
-with BBS.lisp.utilities;
 with BBS.lisp.strings;
 package body BBS.lisp.evaluate.char is
    --
@@ -14,7 +13,7 @@ package body BBS.lisp.evaluate.char is
          error("char_int", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      BBS.lisp.utilities.first_value(e, p1, t);
+      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("char_int", "Error reported evaluating parameter.");
          return p1;
@@ -43,7 +42,7 @@ package body BBS.lisp.evaluate.char is
          error("int_char", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      BBS.lisp.utilities.first_value(e, p1, t);
+      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("int_char", "Error reported evaluating parameter.");
          return p1;
@@ -78,7 +77,7 @@ package body BBS.lisp.evaluate.char is
          error("char_upcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      BBS.lisp.utilities.first_value(e, p1, t);
+      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("char_upcase", "Error reported evaluating parameter.");
          return p1;
@@ -108,7 +107,7 @@ package body BBS.lisp.evaluate.char is
          error("char_upcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      BBS.lisp.utilities.first_value(e, p1, t);
+      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("char_upcase", "Error reported evaluating parameter.");
          return p1;

@@ -1,6 +1,5 @@
 with BBS.lisp.memory;
 with BBS.lisp.stack;
-with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.vars is
    --
    --  This sets a symbol to a value.  The first parameter must evaluate to a
@@ -100,7 +99,7 @@ package body BBS.lisp.evaluate.vars is
                   if p3.kind = E_CONS then
                      ret := eval_dispatch(p3.ps);
                   else -- p3 is an element
-                     ret := BBS.lisp.utilities.indirect_elem(p3);
+                     ret := indirect_elem(p3);
                   end if;
                   BBS.lisp.memory.ref(ret);
                   --
@@ -252,7 +251,7 @@ package body BBS.lisp.evaluate.vars is
                      if check.kind = E_CONS then
                         check := eval_dispatch(check.ps);
                      else
-                        check := bbs.lisp.utilities.indirect_elem(check);
+                        check := indirect_elem(check);
                      end if;
                      case check.kind is
                         when E_CONS =>

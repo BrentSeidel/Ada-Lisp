@@ -1,4 +1,3 @@
-with BBS.lisp.utilities;
 with Ada.Unchecked_Conversion;
 package body BBS.lisp.evaluate.mem is
    --
@@ -26,9 +25,9 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the first value
       --
-      BBS.lisp.utilities.first_value(e, param, rest);
+      first_value(e, param, rest);
       --
-      --  Check if the first value is an integer atom.
+      --  Check if the first value is an integer element.
       --
       if param.kind = E_VALUE then
          if param.v.kind = V_INTEGER then
@@ -44,8 +43,8 @@ package body BBS.lisp.evaluate.mem is
          print(param, False, True);
       end if;
       --
-      --  If the parameter is an integer and in range, then read the pin and try
-      --  to return the value.
+      --  If the parameter is an integer and in range, then read the memory
+      --  location and try to return the value.
       --
       if ok then
          value := addr.all;
@@ -68,9 +67,9 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the first value
       --
-      BBS.lisp.utilities.first_value(e, param, rest);
+      first_value(e, param, rest);
       --
-      --  Check if the first value is an integer atom.
+      --  Check if the first value is an integer element.
       --
       if param.kind = E_VALUE then
          if param.v.kind = V_INTEGER then
@@ -87,8 +86,8 @@ package body BBS.lisp.evaluate.mem is
          el := (kind => E_ERROR);
       end if;
       --
-      --  If the parameter is an integer and in range, then read the pin and try
-      --  to return the value.
+      --  If the parameter is an integer and in range, then read the memory
+      --  location and try to return the value.
       --
       if ok then
          value := addr.all;
@@ -111,9 +110,9 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the first value
       --
-      BBS.lisp.utilities.first_value(e, param, rest);
+      first_value(e, param, rest);
       --
-      --  Check if the first value is an integer atom.
+      --  Check if the first value is an integer element.
       --
       if param.kind = E_VALUE then
          if param.v.kind = V_INTEGER then
@@ -130,8 +129,8 @@ package body BBS.lisp.evaluate.mem is
          el := (kind => E_ERROR);
       end if;
       --
-      --  If the parameter is an integer and in range, then read the pin and try
-      --  to return the value.
+      --  If the parameter is an integer and in range, then read the memory
+      --  location and try to return the value.
       --
       if ok then
          value := addr.all;
@@ -157,9 +156,9 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the first parameter (address)
       --
-      BBS.lisp.utilities.first_value(e, param, rest);
+      first_value(e, param, rest);
       --
-      --  Check if the first value is an integer atom.
+      --  Check if the first value is an integer element.
       --
       if param.kind = E_VALUE then
          if param.v.kind = V_INTEGER then
@@ -177,9 +176,9 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the second parameter (value)
       --
-      BBS.lisp.utilities.first_value(rest, param, el);
+      first_value(rest, param, el);
       --
-      --  Check if the first value is an integer atom.
+      --  Check if the first value is an integer element.
       --
       if param.kind = E_VALUE then
          if param.v.kind = V_INTEGER then
@@ -194,8 +193,8 @@ package body BBS.lisp.evaluate.mem is
          print(param, False, True);
       end if;
       --
-      --  If the parameter is an integer and in range, then read the pin and try
-      --  to return the value.
+      --  If the parameter is an integer and in range, then write to the memory
+      --  location.
       --
       if ok then
          addr.all := value;
@@ -218,9 +217,9 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the first parameter (address)
       --
-      BBS.lisp.utilities.first_value(e, param, rest);
+      first_value(e, param, rest);
       --
-      --  Check if the first value is an integer atom.
+      --  Check if the first value is an integer element.
       --
       if param.kind = E_VALUE then
          if param.v.kind = V_INTEGER then
@@ -238,9 +237,9 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the second parameter (value)
       --
-      BBS.lisp.utilities.first_value(rest, param, el);
+      first_value(rest, param, el);
       --
-      --  Check if the first value is an integer atom.
+      --  Check if the first value is an integer element.
       --
       if param.kind = E_VALUE then
          if param.v.kind = V_INTEGER then
@@ -255,8 +254,8 @@ package body BBS.lisp.evaluate.mem is
          print(param, False, True);
       end if;
       --
-      --  If the parameter is an integer and in range, then read the pin and try
-      --  to return the value.
+      --  If the parameter is an integer and in range, then write to the memory
+      --  location.
       --
       if ok then
          addr.all := value;
@@ -279,9 +278,9 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the first parameter (address)
       --
-      BBS.lisp.utilities.first_value(e, param, rest);
+      first_value(e, param, rest);
       --
-      --  Check if the first value is an integer atom.
+      --  Check if the first value is an integer element.
       --
       if param.kind = E_VALUE then
          if param.v.kind = V_INTEGER then
@@ -299,9 +298,9 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the second parameter (value)
       --
-      BBS.lisp.utilities.first_value(rest, param, el);
+     first_value(rest, param, el);
       --
-      --  Check if the first value is an integer atom.
+      --  Check if the first value is an integer element.
       --
       if param.kind = E_VALUE then
          if param.v.kind = V_INTEGER then
@@ -316,8 +315,8 @@ package body BBS.lisp.evaluate.mem is
          print(param, False, True);
       end if;
       --
-      --  If the parameter is an integer and in range, then read the pin and try
-      --  to return the value.
+      --  If the parameter is an integer and in range, then write to the memory
+      --  location.
       --
       if ok then
          addr.all := value;

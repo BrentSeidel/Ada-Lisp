@@ -1,5 +1,4 @@
 with BBS.lisp.memory;
-with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.io is
    --
    --  Print stuff
@@ -12,7 +11,7 @@ package body BBS.lisp.evaluate.io is
       while t.kind = E_CONS loop
          car := cons_table(t.ps).car;
          if car.kind /= E_CONS then
-            result := bbs.lisp.utilities.indirect_elem(car);
+            result := indirect_elem(car);
             print(result, False, False);
          elsif car.kind = E_CONS then
             result := eval_dispatch(car.ps);

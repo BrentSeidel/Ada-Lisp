@@ -1,6 +1,6 @@
 with BBS.lisp.memory;
-with BBS.lisp.utilities;
 with BBS.lisp.stack;
+with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.func is
    --
    --  Defines a function.  The command is (defun name (parameters) body).
@@ -213,7 +213,7 @@ package body BBS.lisp.evaluate.func is
       BBS.lisp.stack.start_frame;
       while rest.kind = E_CONS loop
          if cons_table(name.ps).car.kind = E_STACK then
-            BBS.lisp.utilities.first_value(rest, temp_value, rest);
+            first_value(rest, temp_value, rest);
             if temp_value.kind = E_VALUE then
                param_value := temp_value.v;
             elsif temp_value.kind = E_CONS then

@@ -1,6 +1,6 @@
 with BBS.lisp.memory;
-with BBS.lisp.utilities;
 with BBS.lisp.stack;
+with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.loops is
    --
    --  Evaluates a dowhile command.  The first item is the condition.  If the
@@ -24,7 +24,7 @@ package body BBS.lisp.evaluate.loops is
             error("dowhile", "Error occured during evaluation of condition");
             return temp;
          end if;
-         while bbs.lisp.utilities.isTrue(temp) loop
+         while isTrue(temp) loop
             BBS.lisp.memory.deref(t);
             BBS.lisp.memory.deref(temp);
             --
@@ -92,7 +92,7 @@ package body BBS.lisp.evaluate.loops is
                   if limit.kind = E_CONS then
                      limit := eval_dispatch(limit.ps);
                   else
-                     limit := BBS.lisp.utilities.indirect_elem(limit);
+                     limit := indirect_elem(limit);
                   end if;
                   result := cons_table(rest.ps).cdr;
                   if result.kind = E_CONS then
@@ -162,7 +162,7 @@ package body BBS.lisp.evaluate.loops is
                   if limit.kind = E_CONS then
                      limit := eval_dispatch(limit.ps);
                   else
-                     limit := BBS.lisp.utilities.indirect_elem(limit);
+                     limit := indirect_elem(limit);
                   end if;
                   result := cons_table(rest.ps).cdr;
                   if result.kind = E_CONS then
@@ -176,7 +176,7 @@ package body BBS.lisp.evaluate.loops is
             --
             --  Next determine what the loop limit is
             --
-            BBS.lisp.utilities.first_value(limit, limit, rest);
+            first_value(limit, limit, rest);
             if limit.kind = E_VALUE then
                if limit.v.kind = V_INTEGER then
                   if limit.v.i >= 0 then
@@ -237,7 +237,7 @@ package body BBS.lisp.evaluate.loops is
             if result.kind = E_CONS then
                t := eval_dispatch(result.ps);
             else
-               t := BBS.lisp.utilities.indirect_elem(result);
+               t := indirect_elem(result);
                if t.kind = E_ERROR then
                   error("dotimes", "Error occured in body");
                end if;
