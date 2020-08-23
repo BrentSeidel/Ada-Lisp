@@ -221,6 +221,7 @@ package body BBS.lisp.evaluate.loops is
                --
                --  Evaluate all of the items in the list.
                --
+               BBS.lisp.memory.deref(t);
                t := execute_block(list);
                if t.kind = E_ERROR then
                   error("dotimes", "Error occured in body");
@@ -228,6 +229,7 @@ package body BBS.lisp.evaluate.loops is
                   return t;
                end if;
             end loop;
+            BBS.lisp.memory.deref(t);
             --
             --  Exit the stack frame
             --

@@ -20,7 +20,7 @@ package body BBS.lisp.evaluate is
                exit;
             end if;
          else
-            ret_val := cons_table(statement.ps).car;
+            ret_val := BBS.lisp.utilities.indirect_elem(cons_table(statement.ps).car);
          end if;
          statement := cons_table(statement.ps).cdr;
       end loop;

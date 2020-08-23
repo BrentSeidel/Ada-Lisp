@@ -164,7 +164,6 @@ package body BBS.lisp.evaluate.vars is
                   error("local", "Improper parameters.");
                   return (kind => E_ERROR);
                end if;
-               put_line("Local: Parse start stack frame");
                BBS.lisp.stack.start_frame;
                while locals.kind = E_CONS loop
                   --
