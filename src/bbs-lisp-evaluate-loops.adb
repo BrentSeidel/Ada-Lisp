@@ -108,29 +108,36 @@ package body BBS.lisp.evaluate.loops is
                --  First convert the loop variable to a local variable, if not already
                --  done.
                --
-               if var.kind /= E_STACK then
-                  if var.kind = E_CONS then
-                     error("dotimes", "The loop variable cannot be a list.");
+               BBS.lisp.stack.start_frame;
+               if var.kind = E_CONS then
+                  error("dotimes", "The loop variable cannot be a list.");
+                  return (kind => E_ERROR);
+               end if;
+               declare
+                  str : string_index;
+               begin
+                  if (var.kind = E_SYMBOL) then
+                     msg("dotimes", "Converting symbol to loop variable");
+                     str := symb_table(var.sym).str;
+                  elsif (var.kind = E_TEMPSYM) then
+                     msg("dotimes", "Converting tempsym to loop variable");
+                     str := var.tempsym;
+                  elsif var.kind = E_STACK then
+                     msg("dotimes", "Converting stack variable to loop variable");
+                     str := var.st_name;
+                  else
+                     error("dotimes", "Can't convert item into a loop variable.");
+                     print(var, False, True);
+                     BBS.lisp.stack.enter_frame;
+                     BBS.lisp.stack.exit_frame;
                      return (kind => E_ERROR);
                   end if;
-                  declare
-                     str : string_index;
-                  begin
-                     if (var.kind = E_SYMBOL) then
-                        msg("dotimes", "Converting symbol to parameter");
-                        str := symb_table(var.sym).str;
-                        var := (kind => E_STACK, st_name => str, st_offset => 1);
-                     elsif (var.kind = E_TEMPSYM) then
-                        msg("dotimes", "Converting tempsym to parameter");
-                        str := var.tempsym;
-                        var := (kind => E_STACK, st_name => str, st_offset => 1);
-                     else
-                        error("dotimes", "Can't convert item into a parameter.");
-                        print(var, False, True);
-                        return (kind => E_ERROR);
-                     end if;
-                  end;
-               end if;
+                  var := (kind => E_STACK, st_name => str, st_offset => 1);
+                  BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
+                                       st_name => str,
+                                       st_value => (kind => V_NONE)));
+               end;
+               BBS.lisp.stack.enter_frame;
                --
                --  Var has been converted to a local variable.  Now put it back into
                --  the list.
@@ -139,6 +146,7 @@ package body BBS.lisp.evaluate.loops is
             end if;
             return NIL_ELEM;
          when PH_PARSE_END =>
+            BBS.lisp.stack.exit_frame;
             return NIL_ELEM;
          when PH_EXECUTE =>
             --

@@ -17,3 +17,4 @@
   (let ((temp (car *stack*)))
     (setq *stack* (cdr *stack*))
     temp))
+
