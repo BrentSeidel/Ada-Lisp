@@ -19,7 +19,11 @@ package body BBS.lisp.evaluate.loops is
          --
          --  Loop while the conditions is true.
          --
-         temp := eval_dispatch(cond.ps);
+         if isList(cond) then
+            temp := eval_dispatch(getList(cond));
+         else
+            temp := indirect_elem(cond);
+         end if;
          if temp.kind = E_ERROR then
             error("dowhile", "Error occured during evaluation of condition");
             return temp;
@@ -35,7 +39,11 @@ package body BBS.lisp.evaluate.loops is
                error("dowhile", "Error occured during evaluation of body");
                return t;
             end if;
-            temp := eval_dispatch(cond.ps);
+            if isList(cond) then
+               temp := eval_dispatch(getList(cond));
+            else
+               temp := indirect_elem(cond);
+            end if;
             if temp.kind = E_ERROR then
                error("dowhile", "Error occured during evaluation of condition");
                return temp;
