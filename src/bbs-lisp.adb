@@ -57,6 +57,7 @@ package body bbs.lisp is
       add_builtin("msg-on", BBS.lisp.evaluate.misc.msg_on'Access);
       add_builtin("not", BBS.lisp.evaluate.bool.eval_not'Access);
       add_builtin("or", BBS.lisp.evaluate.bool.eval_or'Access);
+      add_builtin("parse-integer", BBS.lisp.evaluate.str.parse_integer'Access);
       add_builtin("peek8", BBS.lisp.evaluate.mem.peek8'Access);
       add_builtin("peek16", BBS.lisp.evaluate.mem.peek16'Access);
       add_builtin("peek32", BBS.lisp.evaluate.mem.peek32'Access);

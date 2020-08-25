@@ -179,4 +179,18 @@
   (verify-equal (int-char 66) #\B "Character code 66 is B")
   (verify-equal (char-downcase #\A) #\a "Lower case A is a")
   (verify-equal (char-upcase #\a) #\A "Upper case a is A"))
+;
+;  Test string operations
+;
+(defun test-str ()
+  (verify-equal 5 (length "Hello") "Length of hello")
+  (verify-equal 26 (length "abcdefghijklmnopqrstuvwxyz") "Length of alphabet")
+  (verify-equal 4 (length (list 1 2 3 4)) "Length of list")
+  (verify-equal 1 (length 1) "Length of integer")
+  (verify-equal 0 (length ()) "Length of empty list")
+  (verify-equal #\z (char "abcdefghijklmnopqrstuvwxyz" 26) "Last letter of alphabet")
+  (verify-equal #\a (char "abcdefghijklmnopqrstuvwxyz" 1) "First letter of alphabet")
+  (verify-equal 42 (parse-integer "42") "The meaning of life")
+  (verify-equal -100 (parse-integer "-100") "Negative number")
+  (verify-equal 0 (parse-integer "hello") "Not a number"))
 
