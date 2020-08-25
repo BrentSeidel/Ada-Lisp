@@ -70,6 +70,7 @@ figure out how first.
 2. Object oriented features.  This will probably never happen.
 3. Closures.  This will probably never happen.
 4. Passing functions as parameters.  This may happen.
+5. Packages and similar large program related features.  Remember *Tiny* Lisp.
 
 ### Roadmap
 The following updates to the language are planned.  They may not be done in the

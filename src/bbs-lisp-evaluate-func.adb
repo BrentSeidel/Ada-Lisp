@@ -182,7 +182,6 @@ package body BBS.lisp.evaluate.func is
       param_value : value := (kind => V_NONE);
       temp_value : element_type;
       rest : element_type;
---      statement : element_type;
       name : element_type;
       ret_val : element_type;
       supplied : Integer := 0;

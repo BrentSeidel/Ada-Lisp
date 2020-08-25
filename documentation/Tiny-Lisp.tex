@@ -293,6 +293,18 @@ The \function{peek} operations read 8, 16, or 32 bits from the specified memory 
 
 The \function{poke} operations write a 8, 16, or 32 bit value to the specified memory location.  This is even more dangerous that the \function{peek} operations.  \textbf{\textit{You have been warned!}}  The return value is the value written to the memory location.
 
+\subsection{String Related Operations}
+These operations are related to strings, but may have wider scope.
+\begin{lstlisting}
+(length "Hello, this is a test")
+(length (list 1 2 3 4 5))
+(char "This is a test string", 5)
+\end{lstlisting}
+
+The \function{length} operation works on all types.  For strings, it returns the number of characters in the string.  For lists, it returns the number of elements in a list.  For integers, characters, and booleans, it returns 1.  For an empty list, it returns 0.
+
+The \function{char} operation returns a specific character in a string, where the first character is character number 1.
+
 \subsection{Variables}
 
 \begin{lstlisting}

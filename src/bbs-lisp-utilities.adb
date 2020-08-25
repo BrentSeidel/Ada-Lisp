@@ -6,7 +6,7 @@ package body bbs.lisp.utilities is
    --
    function count(s : cons_index) return Integer is
       t : element_type := (kind => E_CONS, ps => s);
-      c : Integer := 1;
+      c : Integer := 0;
    begin
       while t.kind = E_CONS loop
          c := c + 1;
@@ -15,7 +15,7 @@ package body bbs.lisp.utilities is
       if t.kind /= E_NIL then
          c := c + 1;
       end if;
-      return c - 1;
+      return c;
    end;
    --
    --  The following routine supports parameters and local variables.
