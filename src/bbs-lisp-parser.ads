@@ -50,11 +50,4 @@ private
    --  Procedure to skip white space
    --
    procedure skip_whitespace(ptr : in out Integer; buff : String; last : Integer);
-   --
-   --  Function to determine if a character is a digit or not in different number
-   --  systems.
-   --
-   function isDigit(c : Character) return Boolean;
-   function isHex(c : Character) return Boolean;
-   function hexDigit(c : Character) return uint32;
 end;

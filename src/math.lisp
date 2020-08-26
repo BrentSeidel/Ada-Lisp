@@ -75,7 +75,7 @@
         (let ((min 1) (max (/ n 2)) (mid 0))
           (dowhile (> (- max min) 1)
             (setq mid (/ (+ min max) 2))
-            (if (> (* mid mid) n)
+            (if (> mid (/ n mid))
               (setq max mid)
               (setq min mid)))
            (+ 0 min))))))

@@ -163,4 +163,66 @@ package body bbs.lisp.utilities is
       return count;
    end;
    --
+   --  Is character a decimal digit?
+   --
+   function isDigit(c : Character) return Boolean is
+   begin
+      return (c >= '0' and c <= '9');
+   end;
+   --
+   --  Is character an alphabetic character
+   --
+   function isAlpha(c : Character) return Boolean is
+   begin
+      return (c >= 'A' and c <= 'Z') or (c >= 'a' and c <= 'z');
+   end;
+   --
+   -- Is character a hexidecimal digit?
+   --
+   function isHex(c : Character) return Boolean is
+   begin
+      return (c >= '0' and c <= '9') or (c >= 'A' and c <= 'F')
+        or (c >= 'a' and c <= 'f');
+   end;
+   --
+   function hexDigit(c : Character) return uint32 is
+   begin
+      case c is
+         when '0' =>
+            return 0;
+         when '1' =>
+            return 1;
+         when '2' =>
+            return 2;
+         when '3' =>
+            return 3;
+         when '4' =>
+            return 4;
+         when '5' =>
+            return 5;
+         when '6' =>
+            return 6;
+         when '7' =>
+            return 7;
+         when '8' =>
+            return 8;
+         when '9' =>
+            return 9;
+         when 'A' | 'a' =>
+            return 10;
+         when 'B' | 'b' =>
+            return 11;
+         when 'C' | 'c' =>
+            return 12;
+         when 'D' | 'd' =>
+            return 13;
+         when 'E' | 'e' =>
+            return 14;
+         when 'F' | 'f' =>
+            return 15;
+         when others =>
+            return 0;
+      end case;
+   end;
+   --
 end;

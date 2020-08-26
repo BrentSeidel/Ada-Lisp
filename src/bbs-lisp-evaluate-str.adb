@@ -1,3 +1,4 @@
+with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.str is
    --
    --  Return the length of a string or list.  Atoms will get a value of 1.
@@ -99,7 +100,7 @@ package body BBS.lisp.evaluate.str is
          return (kind => E_ERROR);
       end if;
       str := p1.v.s;
-      index := Integer(p2.v.i);
+      index := Integer(p2.v.i) + 1;
       if index < 0 then
          error("char", "Index out of range");
          return (kind => E_ERROR);
@@ -157,7 +158,7 @@ package body BBS.lisp.evaluate.str is
             neg := true;
             ptr := ptr + 1;
          end if;
-         while isDigit(string_table(str).str(ptr))
+         while BBS.lisp.utilities.isDigit(string_table(str).str(ptr))
            and (ptr <= string_table(str).len) loop
             accumulate := accumulate*10 + int32'Value(" " & string_table(str).str(ptr));
             ptr := ptr + 1;
@@ -169,13 +170,6 @@ package body BBS.lisp.evaluate.str is
       else
          return (kind => E_VALUE, v => (kind => V_INTEGER, i => 0));
       end if;
-   end;
-   --
-   --  Is character a decimal digit?
-   --
-   function isDigit(c : Character) return Boolean is
-   begin
-      return (c >= '0' and c <= '9');
    end;
    --
 end;

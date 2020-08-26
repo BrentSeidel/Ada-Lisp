@@ -18,16 +18,11 @@ package bbs.lisp.utilities is
    --
    function replace_sym(s : cons_index; var : element_type) return Natural;
    --
-   --  The following function examines an atom.  If the atom is some sort of
-   --  variable, an element type pointing to the value.  If not, the element
-   --  points to the original atom.
+   --  Function to determine if a character is a digit or not in different number
+   --  systems.
    --
---   function indirect_elem(e : element_type) return element_type;
-   --
-   --  This procedure extracts the first value from an element.  This value may
-   --  be a value, a variable, or a list.  If the list starts with an expression,
-   --  it is passed to the evaluator and the results returned.  The rest of the
-   --  expression is also returned
-   --
---   procedure first_value(e : element_type; car : out element_type; cdr : out element_type);
+   function isDigit(c : Character) return Boolean;
+   function isAlpha(c : Character) return Boolean;
+   function isHex(c : Character) return Boolean;
+   function hexDigit(c : Character) return uint32;
 end;

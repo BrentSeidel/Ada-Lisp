@@ -21,8 +21,4 @@ private
    --
    function length(s : cons_index) return int32;
    function length(s : string_index) return int32;
-   --
-   --  Helper function for parse-integer
-   --
-   function isDigit(c : Character) return Boolean;
 end;

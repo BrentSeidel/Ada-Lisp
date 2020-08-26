@@ -1,70 +1,11 @@
 with BBS.lisp;
 with BBS.lisp.strings;
 with BBS.lisp.memory;
+with BBS.lisp.utilities;
 package body bbs.lisp.parser is
    --
    --  Utilities to assist in parsing
    --
-   --  Is character a decimal digit?
-   --
-   function isDigit(c : Character) return Boolean is
-   begin
-      return (c >= '0' and c <= '9');
-   end;
-   --
-   --  Is character an alphabetic character
-   function isAlpha(c : Character) return Boolean is
-   begin
-      return (c >= 'A' and c <= 'Z') or (c >= 'a' and c <= 'z');
-   end;
-   --
-   -- Is character a hexidecimal digit?
-   --
-   function isHex(c : Character) return Boolean is
-   begin
-      return (c >= '0' and c <= '9') or (c >= 'A' and c <= 'F')
-        or (c >= 'a' and c <= 'f');
-   end;
-   --
-   function hexDigit(c : Character) return uint32 is
-   begin
-      case c is
-         when '0' =>
-            return 0;
-         when '1' =>
-            return 1;
-         when '2' =>
-            return 2;
-         when '3' =>
-            return 3;
-         when '4' =>
-            return 4;
-         when '5' =>
-            return 5;
-         when '6' =>
-            return 6;
-         when '7' =>
-            return 7;
-         when '8' =>
-            return 8;
-         when '9' =>
-            return 9;
-         when 'A' | 'a' =>
-            return 10;
-         when 'B' | 'b' =>
-            return 11;
-         when 'C' | 'c' =>
-            return 12;
-         when 'D' | 'd' =>
-            return 13;
-         when 'E' | 'e' =>
-            return 14;
-         when 'F' | 'f' =>
-            return 15;
-         when others =>
-            return 0;
-      end case;
-   end;
    --
    --  Procedure to skip white space
    --
@@ -140,8 +81,8 @@ package body bbs.lisp.parser is
       --
       --  Integer
       --
-      elsif isDigit(buff(ptr)) or
-        ((buff(ptr) = '-') and isDigit(buff(ptr + 1))) then
+      elsif BBS.lisp.utilities.isDigit(buff(ptr)) or
+        ((buff(ptr) = '-') and BBS.lisp.utilities.isDigit(buff(ptr + 1))) then
          flag := int(ptr, buff, last, value);
          if flag then
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
@@ -289,8 +230,8 @@ package body bbs.lisp.parser is
          --
          --  Check for the start of an integer atom
          --
-         elsif isDigit(buff(ptr)) or
-           ((buff(ptr) = '-') and isDigit(buff(ptr + 1))) then
+         elsif BBS.lisp.utilities.isDigit(buff(ptr)) or
+           ((buff(ptr) = '-') and BBS.lisp.utilities.isDigit(buff(ptr + 1))) then
             flag := int(ptr, buff, last, value);
             if flag then
                e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
@@ -509,7 +450,7 @@ package body bbs.lisp.parser is
          neg := true;
          ptr := ptr + 1;
       end if;
-      while isDigit(buff(ptr)) and (ptr <= Last) loop
+      while BBS.lisp.utilities.isDigit(buff(ptr)) and (ptr <= Last) loop
          accumulate := accumulate*10 + int32'Value(" " & buff(ptr));
          ptr := ptr + 1;
       end loop;
@@ -528,8 +469,8 @@ package body bbs.lisp.parser is
       accumulate : uint32 := 0;
    begin
       ptr := ptr + 1;
-      while isHex(buff(ptr)) and (ptr <= Last) loop
-         accumulate := accumulate*16 + hexDigit(buff(ptr));
+      while BBS.lisp.utilities.isHex(buff(ptr)) and (ptr <= Last) loop
+         accumulate := accumulate*16 + BBS.lisp.utilities.hexDigit(buff(ptr));
          ptr := ptr + 1;
       end loop;
       value := uint32_to_int32(accumulate);
@@ -598,9 +539,9 @@ package body bbs.lisp.parser is
       ptr := ptr + 1;
       c := buff(ptr);
       ptr := ptr + 1;
-      if isAlpha(c) then
+      if BBS.lisp.utilities.isAlpha(c) then
          temp(index) := BBS.lisp.strings.To_Upper(c);
-         while isAlpha(buff(ptr)) and (ptr <= last) and index < 10 loop
+         while BBS.lisp.utilities.isAlpha(buff(ptr)) and (ptr <= last) and index < 10 loop
             index := index + 1;
             temp(index) := BBS.lisp.strings.To_Upper(buff(ptr));
             ptr := ptr + 1;
