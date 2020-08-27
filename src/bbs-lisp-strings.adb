@@ -71,8 +71,6 @@ package body bbs.lisp.strings is
          next1 := string_table(nxt1).next;
          next2 := string_table(nxt2).next;
       end loop;
---      put_line("Checking fragment 1 index " & string_index'Image(nxt1) &
---         " and fragment 2 index " & string_index'Image(nxt2));
       if string_table(nxt1).len < string_table(nxt2).len then
          return CMP_LT;
       elsif string_table(nxt1).len > string_table(nxt2).len then
@@ -113,8 +111,8 @@ package body bbs.lisp.strings is
       flag : Boolean;
    begin
       flag := bbs.lisp.memory.alloc(prev);
-      string_table(prev).len := 0;
-      string_table(prev).next := -1;
+--      string_table(prev).len := 0;
+--      string_table(prev).next := -1;
       s := prev;
       first := prev;
       if flag then

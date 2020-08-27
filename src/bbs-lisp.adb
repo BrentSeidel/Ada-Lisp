@@ -69,6 +69,7 @@ package body bbs.lisp is
       add_builtin("read-line", BBS.lisp.evaluate.io.read_line'Access);
       add_builtin("reset", BBS.lisp.evaluate.misc.reset'Access);
       add_special("setq", BBS.lisp.evaluate.vars.setq'Access);
+      add_builtin("subseq", BBS.lisp.evaluate.str.subseq'Access);
       add_builtin("terpri", BBS.lisp.evaluate.io.terpri'Access);
    end;
    --

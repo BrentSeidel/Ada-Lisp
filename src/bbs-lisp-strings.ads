@@ -15,6 +15,7 @@ private package bbs.lisp.strings is
    --  Compare two strings
    --
    --   type comparison is (CMP_EQ, CMP_LT, CMP_GT, CMP_NE);
+   --
    function compare(s1 : string_index; s2 : string_index) return comparison;
    --
    --  Returns the length of a string in characters

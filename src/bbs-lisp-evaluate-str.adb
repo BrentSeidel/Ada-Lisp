@@ -1,3 +1,4 @@
+with BBS.lisp.memory;
 with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.str is
    --
@@ -170,6 +171,223 @@ package body BBS.lisp.evaluate.str is
       else
          return (kind => E_VALUE, v => (kind => V_INTEGER, i => 0));
       end if;
+   end;
+   --
+   --  Return a substring of the original string
+   --
+   function subseq(e : element_type) return element_type is
+      t : element_type;
+      p1 : element_type;  --  Parameter 1 (string)
+      source : string_index;  -- Source string
+      p2 : element_type;  --  Parameter 2 (starting position)
+      start : Integer;
+      p3 : element_type;  --  Parameter 3 (ending position) (optional)
+      stop : Integer;
+      flag : Boolean;
+      done : Boolean := False;
+      head : string_index;
+      new_frag : string_index;
+      temp : string_index;
+   begin
+      if e.kind /= E_CONS then
+         error("subseq", "Internal error.  Should have a list.");
+         return (kind => E_ERROR);
+      end if;
+      --
+      --  First parameter
+      --
+      first_value(e, p1, t);
+      if p1.kind = E_ERROR then
+         error("subseq", "Error reported evaluating first parameter.");
+         return p1;
+      end if;
+      if p1.kind /= E_VALUE then
+         error("subseq", "First parameter does not evaluate to a value");
+         return (kind => E_ERROR);
+      elsif p1.v.kind /= V_STRING then
+         error("subseq", "First parameter is not a string");
+         return (kind => E_ERROR);
+      end if;
+      source := p1.v.s;
+      --
+      --  Second parameter
+      --
+      first_value(t, p2, t);
+      if p2.kind = E_ERROR then
+         error("subseq", "Error reported evaluating second parameter.");
+         return p2;
+      end if;
+      if p2.kind /= E_VALUE then
+         error("subseq", "Second parameter does not evaluate to a value");
+         return (kind => E_ERROR);
+      elsif p2.v.kind /= V_INTEGER then
+         error("subseq", "Second parameter is not an integer");
+         return (kind => E_ERROR);
+      end if;
+      start := Integer(p2.v.i) + 1;
+      --
+      --  Third parameter (optional)
+      --
+      if t.kind /= E_NIL then
+         first_value(t, p3, t);
+         if p3.kind = E_ERROR then
+            error("subseq", "Error reported evaluating third parameter.");
+            return p3;
+         end if;
+         if p3.kind /= E_VALUE then
+            error("subseq", "Third parameter does not evaluate to a value");
+            return (kind => E_ERROR);
+         elsif p3.v.kind /= V_INTEGER then
+            error("subseq", "Third parameter is not an integer");
+            return (kind => E_ERROR);
+         end if;
+         stop := Integer(p3.v.i);
+         if stop < start then
+            error("subseq", "Ending character must be greater than starting character.");
+            return (kind => E_ERROR);
+         end if;
+         stop := stop - start + 1;
+      else
+         stop := -1;
+      end if;
+      if start < 0 then
+         error("subseq", "Starting character must not be less than 0.");
+         return (kind => E_ERROR);
+      end if;
+      --
+      --  Now do the processing.  Find the starting character.
+      --
+      while (source > string_index'First) and then (start > string_table(source).len) loop
+         start := start - string_table(source).len;
+         source := string_table(source).next;
+      end loop;
+      if source > string_index'First then
+         if start > string_table(source).len then
+            error("subseq", "Index out of range");
+            return (kind => E_ERROR);
+         end if;
+      else
+         error("subseq", "Index out of range");
+         return (kind => E_ERROR);
+      end if;
+      --
+      --  Now source and start are pointing at the first character.  Allocate
+      --  The first fragment of the destination.
+      --
+      flag := BBS.lisp.memory.alloc(head);
+      if not flag then
+         error("subseq", "Unable to allocate string fragment.");
+         return (kind => E_ERROR);
+      end if;
+      new_frag := head;
+      for index in 1 .. fragment_len loop
+         string_table(new_frag).str(index) := string_table(source).str(start);
+         string_table(new_frag).len := string_table(new_frag).len + 1;
+         if stop /= -1 then
+            stop := stop - 1;
+         end if;
+         exit when stop = 0;
+         start := start + 1;
+         exit when (start > string_table(source).len) and (start <= fragment_len);
+         if start > fragment_len then
+            start := 1;
+            source := string_table(source).next;
+         end if;
+         exit when source = string_index'First;
+      end loop;
+      while (source /= 0) and ((stop = -1) or (stop > 0)) loop
+         flag := BBS.lisp.memory.alloc(temp);
+         if not flag then
+            error("subseq", "Unable to allocate string fragment.");
+            BBS.lisp.memory.deref(head);
+            return (kind => E_ERROR);
+         end if;
+         string_table(new_frag).next := temp;
+         new_frag := temp;
+         for index in 1 .. fragment_len loop
+            string_table(new_frag).str(index) := string_table(source).str(start);
+            string_table(new_frag).len := string_table(new_frag).len + 1;
+            if stop /= -1 then
+               stop := stop - 1;
+            end if;
+            exit when stop = 0;
+            start := start + 1;
+            if (start > string_table(source).len) and (start <= fragment_len) then
+               done := True;
+            end if;
+            exit when done;
+            if start > fragment_len then
+               start := 1;
+               source := string_table(source).next;
+               if source = string_index'First then
+                  done := True;
+               end if;
+            end if;
+            exit when done;
+         end loop;
+         exit when done;
+      end loop;
+      return (kind => E_VALUE, v => (kind => V_STRING, s => head));
+   end;
+   --
+   --  Convert a string to upper case
+   --
+   function string_upcase(e : element_type) return element_type is
+      t : element_type;
+      p1 : element_type; --  Parameter
+      v : value;
+   begin
+      if e.kind /= E_CONS then
+         error("string_upcase", "Internal error.  Should have a list.");
+         return (kind => E_ERROR);
+      end if;
+      first_value(e, p1, t);
+      if p1.kind = E_ERROR then
+         error("string_upcase", "Error reported evaluating parameter.");
+         return p1;
+      end if;
+      if p1.kind = E_VALUE then
+         v := p1.v;
+      else
+         error("string_upcase", "Parameter does not evaluate to a value");
+      end if;
+      if v.kind = V_STRING then
+         null;
+      else
+         error("string_upcase", "Parameter must be of string type, not " & value_type'Image(v.kind));
+         return (kind => E_ERROR);
+      end if;
+      return (kind => E_ERROR);
+   end;
+   --
+   --  Convert a string to lower case
+   --
+   function string_downcase(e : element_type) return element_type is
+      t : element_type;
+      p1 : element_type; --  Parameter
+      v : value;
+   begin
+      if e.kind /= E_CONS then
+         error("string_downcase", "Internal error.  Should have a list.");
+         return (kind => E_ERROR);
+      end if;
+      first_value(e, p1, t);
+      if p1.kind = E_ERROR then
+         error("string_downcase", "Error reported evaluating parameter.");
+         return p1;
+      end if;
+      if p1.kind = E_VALUE then
+         v := p1.v;
+      else
+         error("string_downcase", "Parameter does not evaluate to a value");
+      end if;
+      if v.kind = V_STRING then
+         null;
+      else
+         error("string_downcase", "Parameter must be of string type, not " & value_type'Image(v.kind));
+         return (kind => E_ERROR);
+      end if;
+      return (kind => E_ERROR);
    end;
    --
 end;

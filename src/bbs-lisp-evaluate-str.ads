@@ -15,6 +15,18 @@ package BBS.lisp.evaluate.str is
    --  Parse a string as an integer and return the integer value.
    --
    function parse_integer(e : element_type) return element_type;
+   --
+   --  Return a substring of the original string
+   --
+   function subseq(e : element_type) return element_type;
+   --
+   --  Convert a string to upper case
+   --
+   function string_upcase(e : element_type) return element_type;
+   --
+   --  Convert a string to lower case
+   --
+   function string_downcase(e : element_type) return element_type;
 private
    --
    --  Helper functions for length
