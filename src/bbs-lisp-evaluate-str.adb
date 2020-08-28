@@ -288,7 +288,7 @@ package body BBS.lisp.evaluate.str is
          end if;
          exit when stop = 0;
          start := start + 1;
-         exit when (start > string_table(source).len) and (start <= fragment_len);
+         exit when (start >= string_table(source).len) and (start <= fragment_len);
          if start > fragment_len then
             start := 1;
             source := string_table(source).next;
