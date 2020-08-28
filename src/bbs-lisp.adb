@@ -116,8 +116,6 @@ package body bbs.lisp is
    --  The read procedure reads text from an input device and parses it into
    --  a S-expression.
    --
-   --  Right now, it just creates a simple one for test purposes.
-   --
    function read return Element_Type is
       buff : String(1 .. 256);
       size : Natural;
@@ -126,7 +124,7 @@ package body bbs.lisp is
    begin
       Put("LISP> ");
       Get_Line(buff, size);
-      dummy := bbs.lisp.parser.parse(buff, size, el);
+      dummy := BBS.lisp.parser.parse(buff, size, el);
       return el;
    end;
    --
@@ -142,7 +140,7 @@ package body bbs.lisp is
          when E_CONS =>
             s := e.ps;
             r := eval_dispatch(s);
-            bbs.lisp.memory.deref(s);
+            BBS.lisp.memory.deref(s);
          when E_SYMBOL =>
             sym := e.sym;
             if symb_table(sym).kind = SY_VARIABLE then
@@ -188,13 +186,16 @@ package body bbs.lisp is
    --
    procedure dump(e : element_type) is
    begin
-      if e.kind = E_CONS then
-         dump(e.ps);
-      elsif e.kind = E_NIL then
-         Put(" NIL");
-      else
-         Put("Tried to print an unknown element type " & ptr_type'Image(e.kind));
-      end if;
+      case e.kind is
+         when E_CONS =>
+            dump(e.ps);
+         when E_NIL =>
+            put(" NIL");
+         when E_VALUE =>
+            dump(e.v);
+         when others =>
+            Put("Tried to print an unknown element type " & ptr_type'Image(e.kind));
+      end case;
    end;
    --
    --  This procedure print a S-expression.
@@ -273,6 +274,7 @@ package body bbs.lisp is
          when V_CHARACTER =>
             Put("'" & v.c & "'");
          when V_STRING =>
+            put(" STR: Ref: " & Natural'Image(string_table(v.s).ref) & " Value: ");
             print(v.s);
          when V_BOOLEAN =>
             if v.b then
@@ -281,6 +283,7 @@ package body bbs.lisp is
                put(" NIL");
             end if;
          when V_LIST =>
+            put(" LIST: Ref: " & Natural'Image(cons_table(v.l).ref) & " Value: ");
             print(v.l);
          when others =>
             Put("<Unknown value kind " & value_type'Image(v.kind) & ">");

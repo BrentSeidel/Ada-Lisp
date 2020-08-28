@@ -150,9 +150,11 @@ package body BBS.lisp.evaluate is
             end if;
          else
             car := indirect_elem(first);
+            BBS.lisp.memory.ref(car);
          end if;
       else
          car := indirect_elem(e);
+         BBS.lisp.memory.ref(car);
          cdr := NIL_ELEM;
       end if;
    end;

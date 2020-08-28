@@ -16,7 +16,8 @@ package body BBS.lisp.evaluate.vars is
       p1 : element_type;
       p2 : element_type;
       p3 : element_type;
-      ret : element_type;
+      temp : element_type;
+--      ret : element_type;
       str : string_index;
       stacked : Boolean := False;
       index : stack_index;
@@ -70,7 +71,6 @@ package body BBS.lisp.evaluate.vars is
             msg("setq", "Called during execute phase.");
             if e.kind = E_CONS then
                p1 := cons_table(e.ps).car;  --  Should be symbol name
-               p2 := cons_table(e.ps).cdr;  --  Should be value to be assigned
                if p1.kind = E_SYMBOL then
                   symb := p1.sym;
                elsif p1.kind = E_STACK then
@@ -94,45 +94,27 @@ package body BBS.lisp.evaluate.vars is
                --
                --  Now determine what value to attach to the symbol.
                --
-               if p2.kind = E_CONS then
-                  p3 := cons_table(p2.ps).car;
-                  if p3.kind = E_CONS then
-                     ret := eval_dispatch(p3.ps);
-                  else -- p3 is an element
-                     ret := indirect_elem(p3);
-                  end if;
-                  BBS.lisp.memory.ref(ret);
+               first_value(cons_table(e.ps).cdr, p2, temp);
+               BBS.lisp.memory.ref(p2);
                   --
                   --  Check for stack variables
                   --
-                  if stacked then
-                     if p1.kind = E_STACK then
-                        index := BBS.lisp.stack.search_frames(p1.st_offset, p1.st_name);
-                        BBS.lisp.memory.deref(BBS.lisp.stack.stack(index).st_value);
-                        if ret.kind = E_VALUE then
-                           BBS.lisp.stack.stack(index).st_value := ret.v;
-                        elsif ret.kind = E_CONS then
-                           BBS.lisp.stack.stack(index).st_value := (kind => V_LIST, l => ret.ps);
-                        end if;
+               if stacked then
+                  if p1.kind = E_STACK then
+                     index := BBS.lisp.stack.search_frames(p1.st_offset, p1.st_name);
+                     BBS.lisp.memory.deref(BBS.lisp.stack.stack(index).st_value);
+                     if p2.kind = E_VALUE then
+                        BBS.lisp.stack.stack(index).st_value := p2.v;
+                     elsif p2.kind = E_CONS then
+                        BBS.lisp.stack.stack(index).st_value := (kind => V_LIST, l => p2.ps);
                      end if;
-                  else
-                     deref_previous(symb);
-                     symb_table(symb) := (ref => 1, Kind => SY_VARIABLE,
-                                          pv => ret, str => symb_table(symb).str);
                   end if;
-                  return ret;
-               elsif p2.kind = E_VALUE then -- Rare, CDR is an value.
+               else
                   deref_previous(symb);
-                  --
-                  --  At some point, this needs to be updated to check for stack variables.
-                  --
                   symb_table(symb) := (ref => 1, Kind => SY_VARIABLE,
                                        pv => p2, str => symb_table(symb).str);
-                  return p2;
-               else
-                  error("setq", "Not enough arguments.");
-                  return (kind => E_ERROR);
                end if;
+               return p2;
             else
                error("setq", "Not enough arguments.");
                return (kind => E_ERROR);

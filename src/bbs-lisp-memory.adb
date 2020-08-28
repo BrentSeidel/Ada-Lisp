@@ -104,13 +104,13 @@ package body bbs.lisp.memory is
    procedure deref(s : cons_index) is
    begin
       if s > cons_index'First then
-         msg("deref cons", "Dereffing cons at " & Integer'Image(Integer(s)) &
+         msg("deref cons", "Dereffing cons at " & cons_index'Image(s) &
             " Ref count was " & Integer'Image(Integer(cons_table(s).ref)));
          if cons_table(s).ref > 0 then
             cons_table(s).ref := cons_table(s).ref - 1;
          else
             error("deref cons", "Attempt to deref an unreffed cons at index "
-               & Integer'Image(Integer(s)));
+               & cons_index'Image(s));
          end if;
          --
          --  If the reference count goes to zero, deref the things that the cons
