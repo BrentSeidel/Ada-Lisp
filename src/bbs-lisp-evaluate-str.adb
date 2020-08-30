@@ -207,6 +207,7 @@ package body BBS.lisp.evaluate.str is
          return (kind => E_ERROR);
       elsif p1.v.kind /= V_STRING then
          error("subseq", "First parameter is not a string");
+         BBS.lisp.memory.deref(p1);
          return (kind => E_ERROR);
       end if;
       source := p1.v.s;
@@ -216,13 +217,16 @@ package body BBS.lisp.evaluate.str is
       first_value(t, p2, t);
       if p2.kind = E_ERROR then
          error("subseq", "Error reported evaluating second parameter.");
+         BBS.lisp.memory.deref(p1);
          return p2;
       end if;
       if p2.kind /= E_VALUE then
          error("subseq", "Second parameter does not evaluate to a value");
+         BBS.lisp.memory.deref(p1);
          return (kind => E_ERROR);
       elsif p2.v.kind /= V_INTEGER then
          error("subseq", "Second parameter is not an integer");
+         BBS.lisp.memory.deref(p1);
          return (kind => E_ERROR);
       end if;
       start := Integer(p2.v.i) + 1;
@@ -233,18 +237,22 @@ package body BBS.lisp.evaluate.str is
          first_value(t, p3, t);
          if p3.kind = E_ERROR then
             error("subseq", "Error reported evaluating third parameter.");
+            BBS.lisp.memory.deref(p1);
             return p3;
          end if;
          if p3.kind /= E_VALUE then
             error("subseq", "Third parameter does not evaluate to a value");
+            BBS.lisp.memory.deref(p1);
             return (kind => E_ERROR);
          elsif p3.v.kind /= V_INTEGER then
             error("subseq", "Third parameter is not an integer");
+            BBS.lisp.memory.deref(p1);
             return (kind => E_ERROR);
          end if;
          stop := Integer(p3.v.i);
          if stop < start then
             error("subseq", "Ending character must be greater than starting character.");
+            BBS.lisp.memory.deref(p1);
             return (kind => E_ERROR);
          end if;
          stop := stop - start + 1;
@@ -253,6 +261,7 @@ package body BBS.lisp.evaluate.str is
       end if;
       if start < 0 then
          error("subseq", "Starting character must not be less than 0.");
+         BBS.lisp.memory.deref(p1);
          return (kind => E_ERROR);
       end if;
       --
@@ -265,6 +274,7 @@ package body BBS.lisp.evaluate.str is
       if source > string_index'First then
          if start > string_table(source).len then
             error("subseq", "Index out of range");
+            BBS.lisp.memory.deref(p1);
             return (kind => E_ERROR);
          end if;
       else
@@ -278,6 +288,7 @@ package body BBS.lisp.evaluate.str is
       flag := BBS.lisp.memory.alloc(head);
       if not flag then
          error("subseq", "Unable to allocate string fragment.");
+         BBS.lisp.memory.deref(p1);
          return (kind => E_ERROR);
       end if;
       new_frag := head;
@@ -301,6 +312,7 @@ package body BBS.lisp.evaluate.str is
          if not flag then
             error("subseq", "Unable to allocate string fragment.");
             BBS.lisp.memory.deref(head);
+            BBS.lisp.memory.deref(p1);
             return (kind => E_ERROR);
          end if;
          string_table(new_frag).next := temp;
@@ -328,6 +340,7 @@ package body BBS.lisp.evaluate.str is
          end loop;
          exit when done;
       end loop;
+      BBS.lisp.memory.deref(p1);
       return (kind => E_VALUE, v => (kind => V_STRING, s => head));
    end;
    --
@@ -356,9 +369,12 @@ package body BBS.lisp.evaluate.str is
          v := p1.v;
       else
          error("string_upcase", "Parameter does not evaluate to a value");
+         BBS.lisp.memory.deref(p1);
+         return (kind => E_ERROR);
       end if;
       if v.kind /= V_STRING then
          error("string_upcase", "Parameter must be of string type, not " & value_type'Image(v.kind));
+         BBS.lisp.memory.deref(p1);
          return (kind => E_ERROR);
       end if;
       source := p1.v.s;
@@ -369,6 +385,7 @@ package body BBS.lisp.evaluate.str is
       flag := BBS.lisp.memory.alloc(head);
       if not flag then
          error("string_upcase", "Unable to allocate string fragment.");
+         BBS.lisp.memory.deref(p1);
          return (kind => E_ERROR);
       end if;
       new_frag := head;
@@ -382,6 +399,7 @@ package body BBS.lisp.evaluate.str is
          if not flag then
             error("string_upcase", "Unable to allocate string fragment.");
             BBS.lisp.memory.deref(head);
+         BBS.lisp.memory.deref(p1);
             return (kind => E_ERROR);
          end if;
          string_table(new_frag).next := temp;
@@ -392,6 +410,7 @@ package body BBS.lisp.evaluate.str is
          end loop;
          source := string_table(source).next;
       end loop;
+         BBS.lisp.memory.deref(p1);
       return (kind => E_VALUE, v => (kind => V_STRING, s => head));
    end;
    --
@@ -420,9 +439,12 @@ package body BBS.lisp.evaluate.str is
          v := p1.v;
       else
          error("string_downcase", "Parameter does not evaluate to a value");
+         BBS.lisp.memory.deref(p1);
+         return (kind => E_ERROR);
       end if;
       if v.kind /= V_STRING then
          error("string_downcase", "Parameter must be of string type, not " & value_type'Image(v.kind));
+         BBS.lisp.memory.deref(p1);
          return (kind => E_ERROR);
       end if;
       source := p1.v.s;
@@ -433,6 +455,7 @@ package body BBS.lisp.evaluate.str is
       flag := BBS.lisp.memory.alloc(head);
       if not flag then
          error("string_downcase", "Unable to allocate string fragment.");
+         BBS.lisp.memory.deref(p1);
          return (kind => E_ERROR);
       end if;
       new_frag := head;
@@ -445,6 +468,7 @@ package body BBS.lisp.evaluate.str is
          flag := BBS.lisp.memory.alloc(temp);
          if not flag then
             error("string_downcase", "Unable to allocate string fragment.");
+            BBS.lisp.memory.deref(p1);
             BBS.lisp.memory.deref(head);
             return (kind => E_ERROR);
          end if;
@@ -456,6 +480,7 @@ package body BBS.lisp.evaluate.str is
          end loop;
          source := string_table(source).next;
       end loop;
+      BBS.lisp.memory.deref(p1);
       return (kind => E_VALUE, v => (kind => V_STRING, s => head));
    end;
    --

@@ -24,7 +24,7 @@
 %
 %  Define Tiny Lisp based on Common Lisp
 %
-\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{car, cdr, char-downcase, char-int, char-upcase, dowhile, dump, exit, fresh-line, if, int-char, local, msg-on, msg-off, parse-integer, peek8, peek16, peek32, poke8, poke16, poke32, quote, read-line, reset, setq}}
+\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{car, cdr, char-downcase, char-int, char-upcase, dowhile, dump, exit, fresh-line, if, int-char, local, msg-on, msg-off, parse-integer, peek8, peek16, peek32, poke8, poke16, poke32, quote, read-line, reset, setq, string-downcase, string-upcase}}
 %
 % Macro definitions
 %
@@ -182,9 +182,9 @@ The \function{and} and \function{or} operations operate on either booleans or in
 \subsection{Character Operations}
 The normal comparison operations work on characters.  There are also some operations defined to operate on characters.
 \begin{lstlisting}
-(char-downcase #\textbackslash{}A)
-(char-int #\textbackslash{}B)
-(char-upcase #\textbackslash{}c)
+(char-downcase #\A)
+(char-int #\B)
+(char-upcase #\c)
 (int-char 65)
 \end{lstlisting}
 
@@ -300,6 +300,9 @@ These operations are related to strings, but may have wider scope.
 (length (list 1 2 3 4 5))
 (char "This is a test string", 5)
 (parse-integer "42")
+(string-downcase "HELLO")
+(string-upcase "hello")
+(subseq "This is a test of a subsequence" 5 10)
 \end{lstlisting}
 
 The \function{length} operation works on all types.  For strings, it returns the number of characters in the string.  For lists, it returns the number of elements in a list.  For integers, characters, and booleans, it returns 1.  For an empty list, it returns 0.
@@ -307,6 +310,10 @@ The \function{length} operation works on all types.  For strings, it returns the
 The \function{char} operation returns a specific character in a string, where the first character is character number 0.
 
 The \function{parse-integer} operation parses the passed string as an integer.  Positive and negative decimal integers are supported.  Parsing ends when a non-decimal character is encountered.
+
+The \function{string-downcase} and \function{string-upcase} operations make a copy of the passed string and convert it to all upper or all lower case.  The original string is unchanged.
+
+The \function{subseq} operation returns a substring of the original string.  The first parameter is the string.  The second parameter is the starting character (0 based).  The third parameter is optional.  If present, it is the index (not length of the substring) of the first character  not part of the substring.  If absent, the substring extends to the end of the original string.
 
 \subsection{Variables}
 

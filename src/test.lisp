@@ -192,5 +192,10 @@
   (verify-equal #\a (char "abcdefghijklmnopqrstuvwxyz" 0) "First letter of alphabet")
   (verify-equal 42 (parse-integer "42") "The meaning of life")
   (verify-equal -100 (parse-integer "-100") "Negative number")
-  (verify-equal 0 (parse-integer "hello") "Not a number"))
+  (verify-equal 0 (parse-integer "hello") "Not a number")
+  (verify-equal "HELLO" (string-upcase "hello") "Upper case text")
+  (verify-equal "hello" (string-downcase "HELLO") "Lower case text")
+  (verify-equal "-bye" (subseq "Good-bye" 4) "Subsequence with default end")
+  (verify-equal "d-b" (subseq "Good-bye" 3 6) "Subsequence with specified end"))
+
 
