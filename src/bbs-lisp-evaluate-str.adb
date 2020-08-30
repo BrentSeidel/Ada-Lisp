@@ -1,4 +1,5 @@
 with BBS.lisp.memory;
+with BBS.lisp.strings;
 with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.str is
    --
@@ -295,7 +296,7 @@ package body BBS.lisp.evaluate.str is
          end if;
          exit when source = string_index'First;
       end loop;
-      while (source /= 0) and ((stop = -1) or (stop > 0)) loop
+      while (source /= string_index'First) and ((stop = -1) or (stop > 0)) loop
          flag := BBS.lisp.memory.alloc(temp);
          if not flag then
             error("subseq", "Unable to allocate string fragment.");
@@ -335,7 +336,12 @@ package body BBS.lisp.evaluate.str is
    function string_upcase(e : element_type) return element_type is
       t : element_type;
       p1 : element_type; --  Parameter
+      source : string_index;  -- Source string
       v : value;
+      flag : Boolean;
+      head : string_index;
+      new_frag : string_index;
+      temp : string_index;
    begin
       if e.kind /= E_CONS then
          error("string_upcase", "Internal error.  Should have a list.");
@@ -351,13 +357,42 @@ package body BBS.lisp.evaluate.str is
       else
          error("string_upcase", "Parameter does not evaluate to a value");
       end if;
-      if v.kind = V_STRING then
-         null;
-      else
+      if v.kind /= V_STRING then
          error("string_upcase", "Parameter must be of string type, not " & value_type'Image(v.kind));
          return (kind => E_ERROR);
       end if;
-      return (kind => E_ERROR);
+      source := p1.v.s;
+      --
+      --  Now that the parameter is determined to be of the correct type,
+      --  copy it while converting to uppercase.
+      --
+      flag := BBS.lisp.memory.alloc(head);
+      if not flag then
+         error("string_upcase", "Unable to allocate string fragment.");
+         return (kind => E_ERROR);
+      end if;
+      new_frag := head;
+      string_table(new_frag).len := string_table(source).len;
+      for index in 1 .. fragment_len loop
+         string_table(new_frag).str(index) := BBS.lisp.strings.To_Upper(string_table(source).str(index));
+      end loop;
+      source := string_table(source).next;
+      while source /= string_index'First loop
+         flag := BBS.lisp.memory.alloc(temp);
+         if not flag then
+            error("string_upcase", "Unable to allocate string fragment.");
+            BBS.lisp.memory.deref(head);
+            return (kind => E_ERROR);
+         end if;
+         string_table(new_frag).next := temp;
+         new_frag := temp;
+         string_table(new_frag).len := string_table(source).len;
+         for index in 1 .. fragment_len loop
+            string_table(new_frag).str(index) := BBS.lisp.strings.To_Upper(string_table(source).str(index));
+         end loop;
+         source := string_table(source).next;
+      end loop;
+      return (kind => E_VALUE, v => (kind => V_STRING, s => head));
    end;
    --
    --  Convert a string to lower case
@@ -365,7 +400,12 @@ package body BBS.lisp.evaluate.str is
    function string_downcase(e : element_type) return element_type is
       t : element_type;
       p1 : element_type; --  Parameter
+      source : string_index;  -- Source string
       v : value;
+      flag : Boolean;
+      head : string_index;
+      new_frag : string_index;
+      temp : string_index;
    begin
       if e.kind /= E_CONS then
          error("string_downcase", "Internal error.  Should have a list.");
@@ -381,13 +421,42 @@ package body BBS.lisp.evaluate.str is
       else
          error("string_downcase", "Parameter does not evaluate to a value");
       end if;
-      if v.kind = V_STRING then
-         null;
-      else
+      if v.kind /= V_STRING then
          error("string_downcase", "Parameter must be of string type, not " & value_type'Image(v.kind));
          return (kind => E_ERROR);
       end if;
-      return (kind => E_ERROR);
+      source := p1.v.s;
+      --
+      --  Now that the parameter is determined to be of the correct type,
+      --  copy it while converting to lowercase.
+      --
+      flag := BBS.lisp.memory.alloc(head);
+      if not flag then
+         error("string_downcase", "Unable to allocate string fragment.");
+         return (kind => E_ERROR);
+      end if;
+      new_frag := head;
+      string_table(new_frag).len := string_table(source).len;
+      for index in 1 .. fragment_len loop
+         string_table(new_frag).str(index) := BBS.lisp.strings.To_Lower(string_table(source).str(index));
+      end loop;
+      source := string_table(source).next;
+      while source /= string_index'First loop
+         flag := BBS.lisp.memory.alloc(temp);
+         if not flag then
+            error("string_downcase", "Unable to allocate string fragment.");
+            BBS.lisp.memory.deref(head);
+            return (kind => E_ERROR);
+         end if;
+         string_table(new_frag).next := temp;
+         new_frag := temp;
+         string_table(new_frag).len := string_table(source).len;
+         for index in 1 .. fragment_len loop
+            string_table(new_frag).str(index) := BBS.lisp.strings.To_Lower(string_table(source).str(index));
+         end loop;
+         source := string_table(source).next;
+      end loop;
+      return (kind => E_VALUE, v => (kind => V_STRING, s => head));
    end;
    --
 end;
