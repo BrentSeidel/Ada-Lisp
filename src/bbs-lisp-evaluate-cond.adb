@@ -19,6 +19,7 @@ package body BBS.lisp.evaluate.cond is
             first_value(t, t2, t);
          else
             error("eval_comp", "Cannot compare a single element.");
+            BBS.lisp.memory.deref(t1);
             return (kind => E_ERROR);
          end if;
       else
@@ -61,6 +62,8 @@ package body BBS.lisp.evaluate.cond is
                eq : comparison;
             begin
                eq := bbs.lisp.strings.compare(v1.s, v2.s);
+               BBS.lisp.memory.deref(v1.s);
+               BBS.lisp.memory.deref(v2.s);
                case b is
                   when SYM_EQ =>
                      if eq = CMP_EQ then
@@ -96,12 +99,16 @@ package body BBS.lisp.evaluate.cond is
             error("eval_comp", "Can only compare elements of the same type.");
             put("First type is " & value_type'Image(v1.kind));
             put_line(", second type is " & value_type'Image(v2.kind));
+            BBS.lisp.memory.deref(v1);
+            BBS.lisp.memory.deref(v2);
             return (kind => E_ERROR);
          end if;
       else
          error("eval_comp", "Can only compare two elements.");
          put("First type is " & ptr_type'Image(t1.kind));
          put_line(", second type is " & ptr_type'Image(t2.kind));
+         BBS.lisp.memory.deref(t1);
+         BBS.lisp.memory.deref(t2);
          return (kind => E_ERROR);
       end if;
    end;

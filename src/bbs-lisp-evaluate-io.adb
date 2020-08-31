@@ -5,22 +5,14 @@ package body BBS.lisp.evaluate.io is
    --
    function print(e : element_type) return element_type is
       t : element_type := e;
-      result : element_type;
       car : element_type;
    begin
-      while t.kind = E_CONS loop
-         car := cons_table(t.ps).car;
-         if car.kind /= E_CONS then
-            result := indirect_elem(car);
-            print(result, False, False);
-         elsif car.kind = E_CONS then
-            result := eval_dispatch(car.ps);
-            print(result, True, False);
-         end if;
-         t := cons_table(t.ps).cdr;
+      while isList(t) loop
+         first_value(t, car, t);
+         print(car, True, False);
       end loop;
       if t.kind /= E_NIL then
-         print(t, False, True);
+         print(t, True, True);
       end if;
       return NIL_ELEM;
    end;
