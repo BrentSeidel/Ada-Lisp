@@ -52,7 +52,7 @@ PI under Raspberian.
 2. Comparisons
 3. List operations - CAR and CDR
 4. DOWHILE/DOTIMES
-5. User defined functions.
+5. User defined functions and lambda functions.
 6. Local variables.
 7. Hardware access.  This is done by allowing the host software to add custom lisp
 commands.  This may also be useful for embedding the lisp interpreter in other
@@ -69,8 +69,7 @@ little language, not another port of Common Lisp.
 figure out how first.
 2. Object oriented features.  This will probably never happen.
 3. Closures.  This will probably never happen.
-4. Passing functions as parameters.  This may happen.
-5. Packages and similar large program related features.  Remember *Tiny* Lisp.
+4. Packages and similar large program related features.  Remember *Tiny* Lisp.
 
 ### Roadmap
 The following updates to the language are planned.  They may not be done in the
@@ -79,7 +78,6 @@ order shown and other items may be added before some of these.
 2. Character data type and conversions (in work).
 3. Some basic string operations.
 4. Improved error handling and general code cleanup (ongoing).
-5. Make functions first class objects.
 
 ## Internals
 
