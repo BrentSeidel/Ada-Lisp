@@ -24,7 +24,7 @@
 %
 %  Define Tiny Lisp based on Common Lisp
 %
-\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{car, cdr, char-downcase, char-int, char-upcase, dowhile, dump, exit, fresh-line, if, int-char, local, msg-on, msg-off, parse-integer, peek8, peek16, peek32, poke8, poke16, poke32, quote, read-line, reset, setq, string-downcase, string-upcase}}
+\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{car, cdr, char-downcase, char-int, char-upcase, dowhile, dump, exit, fresh-line, if, int-char, lambda, msg-on, msg-off, parse-integer, peek8, peek16, peek32, poke8, poke16, poke32, quote, read-line, reset, setq, string-downcase, string-upcase}}
 %
 % Macro definitions
 %
@@ -238,9 +238,12 @@ The \function{reset} operation is intended to reset the interpreter to an initia
   (if (< n 2)
     1
     (+ (fib (- n 2)) (fib (- n 1)))))
+(lambda (a b) (+ a b))
 \end{lstlisting}
 
 the \function{defun} form is used to create a user defined function.  The first parameter is a symbol for the function name.  The second parameter is a list of the parameters for the function.  If the function has no parameters, the empty list ``()'' is used.  Following this is a list of statements for the function.  The function returns the value from the last statement to return a value.\\
+
+The \function{lambda} form returns a user defined function.  This function can be assigned to a variable or passed as a parameter to another function.
 
 \subsection{Input/Output}
 As this Lisp may run on systems without filesystems, only a few operations are provided for input and output.  These are:

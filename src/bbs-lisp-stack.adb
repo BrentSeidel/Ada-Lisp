@@ -43,7 +43,7 @@ package body BBS.lisp.stack is
       if not isFull then
          if v.kind = ST_VALUE then
             BBS.lisp.memory.ref(v.st_name);
-            BBS.lisp.memory.ref(v.st_value);
+--            BBS.lisp.memory.ref(v.st_value);
          end if;
          stack_pointer := stack_pointer + 1;
          stack(stack_pointer) := v;
@@ -124,13 +124,6 @@ package body BBS.lisp.stack is
                put(", Value => ");
                print(e.st_value);
                new_line;
---            when ST_LOCAL =>
---               put(stack_index'Image(i) & " " & stack_entry_type'Image(e.kind));
---               put(", Name => ");
---               print(e.l_name);
---               put(", Value => ");
---               print(e.l_value);
---               new_line;
 --            when others =>
 --               put_line(stack_index'Image(i) & " Unknown stack entry kind.");
          end case;
@@ -152,16 +145,12 @@ package body BBS.lisp.stack is
          test := stack(frame + offset);
          if test.kind = ST_VALUE then
             test_name := test.st_name;
---         elsif test.kind = ST_LOCAL then
---            test_name := test.l_name;
          end if;
          if test.kind /= ST_EMPTY then
             eq := BBS.lisp.strings.compare(name, test_name);
             if eq = CMP_EQ then
                if test.kind = ST_VALUE then
                   return test.st_value;
---               elsif test.kind = ST_LOCAL then
---                  return test.l_value;
                else
                   error("search_frames", "Found unexpected entry type " & stack_entry_type'Image(test.kind));
                   put("Searching for variable <");
@@ -244,8 +233,6 @@ package body BBS.lisp.stack is
                fp := item.next;
             when ST_VALUE =>
                eq := BBS.lisp.strings.compare(name, item.st_name);
---            when ST_PARAM =>
---               eq := BBS.lisp.strings.compare(name, item.p_name);
             when others =>
                null;
          end case;

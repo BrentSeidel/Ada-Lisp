@@ -229,7 +229,7 @@ package body BBS.lisp.evaluate.func is
                      elsif (el.kind = E_TEMPSYM) then
                         msg("lambda", "Converting tempsym to parameter");
                         str := el.tempsym;
-                        BBS.lisp.memory.ref(str);
+--                        BBS.lisp.memory.ref(str);
                         el := (kind => E_STACK, st_name => str,
                                st_offset => offset);
                         BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE, st_name =>
