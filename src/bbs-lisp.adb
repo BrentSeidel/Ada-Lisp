@@ -50,6 +50,7 @@ package body bbs.lisp is
       add_builtin("fresh-line", BBS.lisp.evaluate.io.fresh_line'Access);
       add_builtin("if", BBS.lisp.evaluate.cond.eval_if'Access);
       add_builtin("int-char", BBS.lisp.evaluate.char.int_char'Access);
+      add_special("lambda", BBS.lisp.evaluate.func.lambda'Access);
       add_builtin("length", BBS.lisp.evaluate.str.length'Access);
       add_special("let", BBS.lisp.evaluate.vars.local'Access);
       add_builtin("list", BBS.lisp.evaluate.list.list'Access);
@@ -261,6 +262,10 @@ package body bbs.lisp is
             end if;
          when V_LIST =>
             print(v.l);
+         when V_LAMBDA =>
+            print(v.lam);
+         when V_SYMBOL =>
+            print(v.sym);
          when V_NONE =>
             put(" Empty");
 --         when others =>
@@ -647,6 +652,7 @@ package body bbs.lisp is
       e : element_type := NIL_ELEM;
       first : constant element_type := cons_table(s).car;
       rest : constant element_type := cons_table(s).cdr;
+      val : value;
    begin
       if first.kind /= E_CONS then
          if first.kind = E_SYMBOL then
@@ -679,8 +685,17 @@ package body bbs.lisp is
                      print(sym.str);
                      new_line;
                   end if;
-                  BBS.lisp.memory.ref(sym.pv);
-                  e := sym.pv;
+                  if (sym.pv.kind = E_VALUE) and then (sym.pv.v.kind = V_LAMBDA) then
+                     if msg_flag then
+                        Put("eval_dispatch: Evaluating lambda ");
+                        print(sym.ps);
+                        new_line;
+                     end if;
+                     e := bbs.lisp.evaluate.func.eval_function(sym.pv.v.lam, rest);
+                  else
+                     BBS.lisp.memory.ref(sym.pv);
+                     e := sym.pv;
+                  end if;
                when others =>
                   if msg_flag then
                      Put("eval_dispatch: Evaluating unknown ");
@@ -689,6 +704,26 @@ package body bbs.lisp is
                   end if;
                   e := NIL_ELEM;
             end case;
+         elsif first.kind = E_VALUE then
+            if first.v.kind = V_LAMBDA then
+               if msg_flag then
+                  Put("eval_dispatch: Evaluating lambda ");
+                  print(sym.ps);
+                  new_line;
+               end if;
+               e := bbs.lisp.evaluate.func.eval_function(first.v.lam, rest);
+            else
+               BBS.lisp.memory.ref(s);
+               e := (kind => E_CONS, ps => s);
+            end if;
+         elsif first.kind = E_STACK then
+            val := BBS.lisp.stack.search_frames(first.st_offset, first.st_name);
+            if val.kind = V_LAMBDA then
+               e := bbs.lisp.evaluate.func.eval_function(val.lam, rest);
+            else
+               BBS.lisp.memory.ref(s);
+               e := (kind => E_CONS, ps => s);
+            end if;
          else -- Not a symbol, just return the value.
             if msg_flag then
                Put("eval_dispatch: Evaluating non-symbol ");

@@ -36,7 +36,7 @@ package bbs.lisp is
    --  data types.
    --
    type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
-                      V_NONE);
+                      V_LAMBDA, V_SYMBOL, V_NONE);
    --
    --  This indicates what kind of data is in a symbol.
    --
@@ -86,6 +86,10 @@ package bbs.lisp is
             b : Boolean;
          when V_LIST =>
             l : cons_index;
+         when V_LAMBDA =>
+            lam : cons_index;
+         when V_SYMBOL =>
+            sym : symb_index;
          when V_NONE =>
             null;
          end case;

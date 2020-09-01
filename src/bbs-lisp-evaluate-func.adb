@@ -163,7 +163,119 @@ package body BBS.lisp.evaluate.func is
             cons_table(e.ps).cdr := NIL_ELEM;
             symb_table(symb) := (ref => 1, str => symb_table(symb).str,
                                  kind => SY_LAMBDA, ps => temp.ps);
---            bbs.lisp.memory.ref(temp.ps);
+      end case;
+      return NIL_ELEM;
+   end;
+   --
+   --  Defines a function.  The command is (lambda (parameters) body).
+   --    params is a list of the parameters for the function.  It must be a
+   --      list of elements that translate to symbols or tempsyms.  Defun translates
+   --      these to parameter elements.
+   --    body is a list of the actions for the function.  This needs to be
+   --      scanned and any symbol or tempsym that matches one of the params is
+   --      translated to point to the parameter atom in the parameter list.  It
+   --      also could concievable be a single atom or even NIL.
+   --    The returned value is an variable element of type V_LAMBDA.
+   --
+   function lambda(e : element_type; p : phase) return element_type is
+      params : element_type;
+      temp : element_type;
+--      p2 : element_type;
+   begin
+      --
+      --  Begin should be called at item 2 so that the parameter list is available.
+      --
+      case p is
+         when PH_QUERY =>
+            return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
+            --
+            --  First identify the name, parameter list, and body.  Then perform
+            --  initial checks to verify that they are the appropriate kind of object.
+            --
+         when PH_PARSE_BEGIN =>
+            if e.kind = E_CONS then
+               --
+               --  Process the parameter list.  Note that currently, defun
+               --  is intended to be used at the command level, not within other
+               --  functions or local blocks.  Thus there should be no stack
+               --  variables to check when processing the parameter list.
+               --
+               params := cons_table(e.ps).cdr;
+               if params.kind = E_CONS then
+                  params := cons_table(params.ps).car;
+               else
+                  error("lambda", "Improper parameters.");
+                  return (kind => E_ERROR);
+               end if;
+               temp := params;
+               BBS.lisp.stack.start_frame;
+               while temp.kind = E_CONS loop
+                  if cons_table(temp.ps).car.kind = E_CONS then
+                     error("lambda", "A parameter cannot be a list.");
+                     return (kind => E_ERROR);
+                  end if;
+                  declare
+                     el : element_type := cons_table(temp.ps).car;
+                     str : string_index;
+                     offset : stack_index := 1;
+                  begin
+                     if (el.kind = E_SYMBOL) then
+                        str := symb_table(el.sym).str;
+                        msg("lambda", "Converting symbol to parameter");
+                        el := (kind => E_STACK, st_name => str,
+                               st_offset => offset);
+                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE, st_name =>
+                                               str, st_value => (kind => V_NONE)));
+                     elsif (el.kind = E_TEMPSYM) then
+                        msg("lambda", "Converting tempsym to parameter");
+                        str := el.tempsym;
+                        BBS.lisp.memory.ref(str);
+                        el := (kind => E_STACK, st_name => str,
+                               st_offset => offset);
+                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE, st_name =>
+                                               str, st_value => (kind => V_NONE)));
+                     else
+                        error("lambda", "Can't convert item into a parameter.");
+                        print(el, False, True);
+                        Put_Line("Item is of kind " & ptr_type'Image(el.kind));
+                     end if;
+                     offset := offset + 1;
+                     cons_table(temp.ps).car := el;
+                  end;
+                  temp := cons_table(temp.ps).cdr;
+               end loop;
+               BBS.lisp.stack.enter_frame;
+            else
+               error("lambda", "Something went horribly wrong and lambda did not get a list");
+               return (kind => E_ERROR);
+            end if;
+         when PH_PARSE_END =>
+            BBS.lisp.stack.exit_frame;
+            --
+            --  EXECUTE Phase
+            --
+         when PH_EXECUTE =>
+            if e.kind /= E_CONS then
+               error("lambda", "No parameters given to lambda.");
+               return (kind => E_ERROR);
+            end if;
+            temp := e;
+            if temp.kind = E_CONS then
+               params := cons_table(temp.ps).car;
+            else
+               error("lambda", "Improper parameters.");
+               return (kind => E_ERROR);
+            end if;
+            if (params.kind /= E_CONS) and (params.kind /= E_NIL) then
+               error("lambda", "Parameter list must be a list or NIL.");
+               return (kind => E_ERROR);
+            end if;
+            --
+            --  To get to this point, all checks have passed, so return the
+            --  parameter list and body.
+            --
+            BBS.lisp.memory.ref(temp);
+            return (kind => E_VALUE, v => (kind => V_LAMBDA, lam => temp.ps));
       end case;
       return NIL_ELEM;
    end;
@@ -200,7 +312,7 @@ package body BBS.lisp.evaluate.func is
          requested := 1;
       end if;
       if supplied /= requested then
-         error("function", "Parameter count mismatch. "  & Integer'Image(supplied)
+         error("function evaluation", "Parameter count mismatch. "  & Integer'Image(supplied)
               & " elements supplied, " & Integer'Image(requested) & " requested.");
          return (kind => E_ERROR);
       end if;

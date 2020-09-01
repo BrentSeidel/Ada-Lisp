@@ -17,4 +17,10 @@
   (let ((temp (car *stack*)))
     (setq *stack* (cdr *stack*))
     temp))
+;
+;  Function that needs a lambda
+;
+(defun op (a) (a 2 3))
+
+(op (lambda (a b) (+ a b)))
 

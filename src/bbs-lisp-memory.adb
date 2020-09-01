@@ -84,6 +84,8 @@ package body bbs.lisp.memory is
             ref(e.v.s);
          elsif e.v.kind = V_LIST then
             ref(e.v.l);
+         elsif e.v.kind = V_LAMBDA then
+            ref(e.v.lam);
          end if;
       end if;
    end;
@@ -96,6 +98,8 @@ package body bbs.lisp.memory is
          ref(v.s);
       elsif v.kind = V_LIST then
          ref(v.l);
+      elsif v.kind = V_LAMBDA then
+         ref(v.lam);
       end if;
    end;
    --
@@ -146,6 +150,8 @@ package body bbs.lisp.memory is
          deref(v.s);
       elsif v.kind = V_LIST then
          deref(v.l);
+      elsif v.kind = V_LAMBDA then
+         deref(v.lam);
       end if;
    end;
    --
