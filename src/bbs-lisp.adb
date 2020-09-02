@@ -54,8 +54,7 @@ package body bbs.lisp is
       add_builtin("length", BBS.lisp.evaluate.str.length'Access);
       add_special("let", BBS.lisp.evaluate.vars.local'Access);
       add_builtin("list", BBS.lisp.evaluate.list.list'Access);
-      add_builtin("msg-off", BBS.lisp.evaluate.misc.msg_off'Access);
-      add_builtin("msg-on", BBS.lisp.evaluate.misc.msg_on'Access);
+      add_builtin("msg", BBS.lisp.evaluate.misc.msg'Access);
       add_builtin("not", BBS.lisp.evaluate.bool.eval_not'Access);
       add_builtin("or", BBS.lisp.evaluate.bool.eval_or'Access);
       add_builtin("parse-integer", BBS.lisp.evaluate.str.parse_integer'Access);
@@ -70,6 +69,7 @@ package body bbs.lisp is
       add_builtin("read-line", BBS.lisp.evaluate.io.read_line'Access);
       add_builtin("reset", BBS.lisp.evaluate.misc.reset'Access);
       add_special("setq", BBS.lisp.evaluate.vars.setq'Access);
+      add_builtin("sleep", BBS.lisp.evaluate.misc.sleep'Access);
       add_builtin("string-downcase", BBS.lisp.evaluate.str.string_downcase'Access);
       add_builtin("string-upcase", BBS.lisp.evaluate.str.string_upcase'Access);
       add_builtin("subseq", BBS.lisp.evaluate.str.subseq'Access);
