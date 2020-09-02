@@ -5,21 +5,21 @@ package body BBS.lisp.evaluate.list is
    --  Create a list out of two elements.
    --
    function cons(e : element_type) return element_type is
+      t  : element_type := e;  --  Temporary value
       p1 : element_type;  --  First parameter
       p2 : element_type;  --  Second parameter
-      t  : element_type;  --  Temporary value
       s  : cons_index;    --  Created cons cell
    begin
       if e.kind /= E_CONS then
          error("cons(e", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
       if p1.kind = E_ERROR then
          error("cons", "Error reported evaluating first parameter.");
          return p1;
       end if;
-      first_value(t, p2, t);
+      p2 := first_value(t);
       if p2.kind = E_ERROR then
          error("cons", "Error reported evaluating second parameter.");
          return p2;
@@ -41,10 +41,10 @@ package body BBS.lisp.evaluate.list is
    function car(e : element_type) return element_type is
       first : element_type;
       temp : element_type;
-      rest : element_type;
+      rest : element_type := e;
       s : cons_index;
    begin
-      first_value(e, first, rest);
+      first := first_value(rest);
       if isList(first) then
          s := getList(first);
          temp := cons_table(s).car;
@@ -59,10 +59,10 @@ package body BBS.lisp.evaluate.list is
    function cdr(e : element_type) return element_type is
       first : element_type;
       temp : element_type;
-      rest : element_type;
+      rest : element_type := e;
       s : cons_index;
    begin
-      first_value(e, first, rest);
+      first := first_value(rest);
       if isList(first) then
          s := getList(first);
          temp := cons_table(s).cdr;
@@ -86,14 +86,13 @@ package body BBS.lisp.evaluate.list is
    function list(e : element_type) return element_type is
       first : element_type;
       rest : element_type := e;
-      temp : element_type;
       head : cons_index;
       tail : cons_index;
       s : cons_index;
    begin
       if isList(e) then
          if BBS.lisp.memory.alloc(s) then
-            first_value(e, first, rest);
+            first := first_value(rest);
             if first.kind = E_ERROR then
                error("list", "Parameter returned an error");
                return first;
@@ -111,7 +110,7 @@ package body BBS.lisp.evaluate.list is
       end if;
       while rest.kind /= E_NIL loop
          if BBS.lisp.memory.alloc(s) then
-            first_value(rest, first, temp);
+            first := first_value(rest);
             if first.kind = E_ERROR then
                BBS.lisp.memory.deref(head);
                error("list", "Parameter returned an error");
@@ -121,7 +120,6 @@ package body BBS.lisp.evaluate.list is
             tail := s;
             BBS.lisp.memory.ref(first);
             cons_table(s).car := first;
-            rest := temp;
          else
             BBS.lisp.memory.deref(head);
             error("list", "Unable to allocate cons cell");
@@ -134,6 +132,7 @@ package body BBS.lisp.evaluate.list is
    --  Append one list to another.
    --
    function append(e : element_type) return element_type is
+      pragma Unreferenced (e);
    begin
       return (kind => E_ERROR);
    end;

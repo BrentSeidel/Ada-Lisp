@@ -5,18 +5,16 @@ package body BBS.lisp.evaluate.cond is
    --  Perform comparison operations.
    --
    function eval_comp(e : element_type; b : compops) return element_type is
-      t  : element_type;
+      t  : element_type := e;
       t1 : element_type;
       t2 : element_type;
       v1 : value;
       v2 : value;
---      i1 : int32;
---      i2 : int32;
    begin
       if e.kind = E_CONS then
-         first_value(e, t1, t);
+         t1 := first_value(t);
          if t.kind = E_CONS then
-            first_value(t, t2, t);
+            t2 := first_value(t);
          else
             error("eval_comp", "Cannot compare a single element.");
             BBS.lisp.memory.deref(t1);
@@ -134,7 +132,7 @@ package body BBS.lisp.evaluate.cond is
    end;
    --
    function eval_if(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type; --  Condition
       p2 : element_type; --  True expression
       p3 : element_type; --  False expression
@@ -143,7 +141,7 @@ package body BBS.lisp.evaluate.cond is
          error("eval_if", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
       if p1.kind = E_ERROR then
          error("eval_if", "Condition reported an error.");
          return p1;

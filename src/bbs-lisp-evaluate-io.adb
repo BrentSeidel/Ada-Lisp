@@ -8,7 +8,7 @@ package body BBS.lisp.evaluate.io is
       car : element_type;
    begin
       while isList(t) loop
-         first_value(t, car, t);
+         car := first_value(t);
          print(car, True, False);
       end loop;
       if t.kind /= E_NIL then

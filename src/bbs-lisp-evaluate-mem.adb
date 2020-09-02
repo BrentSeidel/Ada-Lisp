@@ -17,7 +17,7 @@ package body BBS.lisp.evaluate.mem is
       param : element_type;
       addr1 : intermediate;
       addr : p_uint8;
-      rest : element_type;
+      rest : element_type := e;
       el : element_type;
       value : uint8;
       ok : Boolean := True;
@@ -25,7 +25,8 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the first value
       --
-      first_value(e, param, rest);
+      param := first_value(rest);
+--      first_value(e, param, rest);
       --
       --  Check if the first value is an integer element.
       --
@@ -59,7 +60,7 @@ package body BBS.lisp.evaluate.mem is
       param : element_type;
       addr1 : intermediate;
       addr : p_uint16;
-      rest : element_type;
+      rest : element_type := e;
       el : element_type;
       value : uint16;
       ok : Boolean := True;
@@ -67,7 +68,8 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the first value
       --
-      first_value(e, param, rest);
+      param := first_value(rest);
+--      first_value(e, param, rest);
       --
       --  Check if the first value is an integer element.
       --
@@ -102,7 +104,7 @@ package body BBS.lisp.evaluate.mem is
       param : element_type;
       addr1 : intermediate;
       addr : p_uint32;
-      rest : element_type;
+      rest : element_type := e;
       el : element_type;
       value : uint32;
       ok : Boolean := True;
@@ -110,7 +112,8 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the first value
       --
-      first_value(e, param, rest);
+      param := first_value(rest);
+--      first_value(e, param, rest);
       --
       --  Check if the first value is an integer element.
       --
@@ -148,7 +151,7 @@ package body BBS.lisp.evaluate.mem is
       param : element_type;
       addr1 : intermediate;
       addr : p_uint8;
-      rest : element_type;
+      rest : element_type := e;
       el : element_type;
       value : uint8;
       ok : Boolean := True;
@@ -156,7 +159,8 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the first parameter (address)
       --
-      first_value(e, param, rest);
+      param := first_value(rest);
+--      first_value(e, param, rest);
       --
       --  Check if the first value is an integer element.
       --
@@ -176,7 +180,8 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the second parameter (value)
       --
-      first_value(rest, param, el);
+      param := first_value(rest);
+--      first_value(rest, param, el);
       --
       --  Check if the first value is an integer element.
       --
@@ -209,7 +214,7 @@ package body BBS.lisp.evaluate.mem is
       param : element_type;
       addr1 : intermediate;
       addr : p_uint16;
-      rest : element_type;
+      rest : element_type := e;
       el : element_type;
       value : uint16;
       ok : Boolean := True;
@@ -217,7 +222,8 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the first parameter (address)
       --
-      first_value(e, param, rest);
+      param := first_value(rest);
+--      first_value(e, param, rest);
       --
       --  Check if the first value is an integer element.
       --
@@ -237,7 +243,8 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the second parameter (value)
       --
-      first_value(rest, param, el);
+      param := first_value(rest);
+--      first_value(rest, param, el);
       --
       --  Check if the first value is an integer element.
       --
@@ -270,7 +277,7 @@ package body BBS.lisp.evaluate.mem is
       param : element_type;
       addr1 : intermediate;
       addr : p_uint32;
-      rest : element_type;
+      rest : element_type := e;
       el : element_type;
       value : uint32;
       ok : Boolean := True;
@@ -278,7 +285,8 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the first parameter (address)
       --
-      first_value(e, param, rest);
+      param := first_value(rest);
+--      first_value(e, param, rest);
       --
       --  Check if the first value is an integer element.
       --
@@ -298,7 +306,8 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Get the second parameter (value)
       --
-     first_value(rest, param, el);
+      param := first_value(rest);
+--     first_value(rest, param, el);
       --
       --  Check if the first value is an integer element.
       --

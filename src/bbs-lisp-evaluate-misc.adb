@@ -13,16 +13,15 @@ package body BBS.lisp.evaluate.misc is
    --  passed as a parameter.
    --
    function msg(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type; --  Parameter
       v : value;
    begin
-
-      if e.kind /= E_CONS then
+      if t.kind /= E_CONS then
          error("msg", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
       if p1.kind = E_ERROR then
          error("msg", "Error reported evaluating parameter.");
          return p1;
@@ -62,7 +61,7 @@ package body BBS.lisp.evaluate.misc is
    --  Sleep for a specified period of time in mS.
    --
    function sleep(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type; --  Parameter
       v : value;
    begin
@@ -70,7 +69,7 @@ package body BBS.lisp.evaluate.misc is
          error("sleep", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
       if p1.kind = E_ERROR then
          error("sleep", "Error reported evaluating parameter.");
          return p1;

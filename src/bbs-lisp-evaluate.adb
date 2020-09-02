@@ -128,13 +128,14 @@ package body BBS.lisp.evaluate is
    --  it is passed to the evaluator and the results returned.  The rest of the
    --  expression is also returned
    --
-   procedure first_value(e : element_type; car : out element_type; cdr : out element_type) is
+   function first_value(e : in out element_type) return element_type is
       first : element_type;
+      car : element_type;
+      cdr : element_type;
       s : cons_index;
    begin
       if e.kind = E_NIL then
-         car := NIL_ELEM;
-         cdr := NIL_ELEM;
+         return NIL_ELEM;
       elsif isList(e) then
          s := e.ps;
          first := cons_table(s).car;
@@ -157,6 +158,7 @@ package body BBS.lisp.evaluate is
          BBS.lisp.memory.ref(car);
          cdr := NIL_ELEM;
       end if;
+      e := cdr;
+      return car;
    end;
-   --
 end;

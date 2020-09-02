@@ -2,7 +2,7 @@ with BBS.lisp.memory;
 package body BBS.lisp.evaluate.bool is
    --
    function eval_not(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type; --  Parameter
       v : value;
    begin
@@ -10,7 +10,7 @@ package body BBS.lisp.evaluate.bool is
          error("eval_not", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
       if p1.kind = E_ERROR then
          error("eval_not", "Error reported evaluating parameter.");
          return p1;
@@ -77,24 +77,17 @@ package body BBS.lisp.evaluate.bool is
          end if;
       elsif e.kind = E_CONS then
          ptr := e;
-         if cons_table(ptr.ps).car.kind /= E_CONS then
-            temp := indirect_elem(cons_table(ptr.ps).car);
-         else  -- It is E_CONS
-            temp := eval_dispatch(cons_table(ptr.ps).car.ps);
-         end if;
+         temp := first_value(ptr);
          if accumulate(temp) = E_ERROR then
+            error("eval_and", "Error processing parameter.");
             return (kind => E_ERROR);
          end if;
-         if cons_table(ptr.ps).cdr.kind /= E_NIL then
-            ptr := cons_table(ptr.ps).cdr;
+         if ptr.kind /= E_NIL then
             if (int_op and (accum_i /= 0)) or ((not int_op) and accum_b) then
                loop
-                  if cons_table(ptr.ps).car.kind = E_CONS then
-                     temp := eval_dispatch(cons_table(ptr.ps).car.ps);
-                  else
-                     temp := indirect_elem(cons_table(ptr.ps).car);
-                  end if;
+                  temp := first_value(ptr);
                   if accumulate(temp) = E_ERROR then
+                     error("eval_and", "Error processing parameter.");
                      return (kind => E_ERROR);
                   end if;
                   --
@@ -105,17 +98,8 @@ package body BBS.lisp.evaluate.bool is
                   --
                   --  Check for end of parameters
                   --
-                  exit when cons_table(ptr.ps).cdr.kind /= E_CONS;
-                  ptr := cons_table(ptr.ps).cdr;
+                  exit when not isList(ptr);
                end loop;
-            end if;
-            if (int_op and (accum_i /= 0)) or ((not int_op) and accum_b) then
-               if cons_table(ptr.ps).cdr.kind /= E_NIL then
-                  temp := indirect_elem(cons_table(ptr.ps).cdr);
-                  if accumulate(temp) = E_ERROR then
-                     return (kind => E_ERROR);
-                  end if;
-               end if;
             end if;
          end if;
       else
@@ -175,27 +159,17 @@ package body BBS.lisp.evaluate.bool is
          end if;
       elsif e.kind = E_CONS then
          ptr := e;
-         if cons_table(ptr.ps).car.kind /= E_CONS then
-            temp := indirect_elem(cons_table(ptr.ps).car);
-            if accumulate(temp) = E_ERROR then
-               return (kind => E_ERROR);
-            end if;
-         else  -- It is E_CONS
-            temp := eval_dispatch(cons_table(ptr.ps).car.ps);
-         end if;
+         temp := first_value(ptr);
          if accumulate(temp) = E_ERROR then
+            error("eval_ok", "Error processing parameter.");
             return (kind => E_ERROR);
          end if;
-         if cons_table(ptr.ps).cdr.kind /= E_NIL then
-            ptr := cons_table(ptr.ps).cdr;
+         if ptr.kind /= E_NIL then
             if (int_op and (accum_i /= -1)) or ((not int_op) and (not accum_b)) then
                loop
-                  if cons_table(ptr.ps).car.kind = E_CONS then
-                     temp := eval_dispatch(cons_table(ptr.ps).car.ps);
-                  else
-                     temp := indirect_elem(cons_table(ptr.ps).car);
-                  end if;
+                  temp := first_value(ptr);
                   if accumulate(temp) = E_ERROR then
+                     error("eval_ok", "Error processing parameter.");
                      return (kind => E_ERROR);
                   end if;
                   --
@@ -206,17 +180,8 @@ package body BBS.lisp.evaluate.bool is
                   --
                   --  Check for end of parameters
                   --
-                  exit when cons_table(ptr.ps).cdr.kind /= E_CONS;
-                  ptr := cons_table(ptr.ps).cdr;
+                  exit when not isList(ptr);
                end loop;
-            end if;
-            if (int_op and (accum_i /= -1)) or ((not int_op) and (not accum_b)) then
-               if cons_table(ptr.ps).cdr.kind /= E_NIL then
-                  temp := indirect_elem(cons_table(ptr.ps).cdr);
-                  if accumulate(temp) = E_ERROR then
-                     return (kind => E_ERROR);
-                  end if;
-               end if;
             end if;
          end if;
       else

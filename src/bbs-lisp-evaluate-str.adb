@@ -7,14 +7,15 @@ package body BBS.lisp.evaluate.str is
    --  A nil pointer returns a length of 0.
    --
    function length(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type; --  Parameter
    begin
       if e.kind /= E_CONS then
          error("length", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
+--      first_value(e, p1, t);
       if isList(p1) then
          return (kind => E_VALUE, v => (kind => V_INTEGER,
                                        i => length(getList(p1))));
@@ -64,7 +65,7 @@ package body BBS.lisp.evaluate.str is
    --  Return a specified character from a string.
    --
    function char(e : element_type) return element_type is
-      t : element_type;   --  Temporary variable
+      t : element_type := e;   --  Temporary variable
       p1 : element_type;  --  First parameter (string)
       p2 : element_type;  --  Second parameter (integer)
       str : string_index;
@@ -77,7 +78,8 @@ package body BBS.lisp.evaluate.str is
       --
       --  Get first parameter.  It should be a string
       --
-      first_value(e, p1, t);
+      p1 := first_value(t);
+--      first_value(e, p1, t);
       if p1.kind = E_VALUE then
          if p1.v.kind /= V_STRING then
             error("char", "First parameter should be a string, not "
@@ -89,7 +91,8 @@ package body BBS.lisp.evaluate.str is
                  ptr_type'Image(p1.kind));
          return (kind => E_ERROR);
       end if;
-      first_value(t, p2, t);
+      p2 := first_value(t);
+--      first_value(t, p2, t);
       if p2.kind = E_VALUE then
          if p2.v.kind /= V_INTEGER then
             error("char", "Second parameter should be an integer, not "
@@ -126,7 +129,7 @@ package body BBS.lisp.evaluate.str is
    --  Parse a string as an integer and return the integer value.
    --
    function parse_integer(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type; --  Parameter
       str : string_index;
       accumulate : int32 := 0;
@@ -137,7 +140,8 @@ package body BBS.lisp.evaluate.str is
          error("length", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
+--      first_value(e, p1, t);
       if p1.kind = E_VALUE then
          if p1.v.kind /= V_STRING then
             error("parse-integer", "Parameter must be a string, not " &
@@ -177,7 +181,7 @@ package body BBS.lisp.evaluate.str is
    --  Return a substring of the original string
    --
    function subseq(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type;  --  Parameter 1 (string)
       source : string_index;  -- Source string
       p2 : element_type;  --  Parameter 2 (starting position)
@@ -197,7 +201,8 @@ package body BBS.lisp.evaluate.str is
       --
       --  First parameter
       --
-      first_value(e, p1, t);
+      p1 := first_value(t);
+--      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("subseq", "Error reported evaluating first parameter.");
          return p1;
@@ -214,7 +219,8 @@ package body BBS.lisp.evaluate.str is
       --
       --  Second parameter
       --
-      first_value(t, p2, t);
+      p2 := first_value(t);
+--      first_value(t, p2, t);
       if p2.kind = E_ERROR then
          error("subseq", "Error reported evaluating second parameter.");
          BBS.lisp.memory.deref(p1);
@@ -234,7 +240,8 @@ package body BBS.lisp.evaluate.str is
       --  Third parameter (optional)
       --
       if t.kind /= E_NIL then
-         first_value(t, p3, t);
+         p3 := first_value(t);
+--         first_value(t, p3, t);
          if p3.kind = E_ERROR then
             error("subseq", "Error reported evaluating third parameter.");
             BBS.lisp.memory.deref(p1);
@@ -351,7 +358,7 @@ package body BBS.lisp.evaluate.str is
    --  Convert a string to upper case
    --
    function string_upcase(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type; --  Parameter
       source : string_index;  -- Source string
       v : value;
@@ -364,7 +371,8 @@ package body BBS.lisp.evaluate.str is
          error("string_upcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
+--      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("string_upcase", "Error reported evaluating parameter.");
          return p1;
@@ -421,7 +429,7 @@ package body BBS.lisp.evaluate.str is
    --  Convert a string to lower case
    --
    function string_downcase(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type; --  Parameter
       source : string_index;  -- Source string
       v : value;
@@ -434,7 +442,8 @@ package body BBS.lisp.evaluate.str is
          error("string_downcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
+--      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("string_downcase", "Error reported evaluating parameter.");
          return p1;

@@ -20,11 +20,13 @@
 (defun fail (n)
   (print "***FAIL: " n)
   (terpri))
+;
 ;  If two values are equal, print pass message, otherwise print fail message
-(defun verify-equal (actual expected msg)
+;
+(defun verify-equal (actual expected text)
   (if (= actual expected) (print "Pass: Actual ")
               (print "***FAIL: Actual "))
-  (print  actual ", Expected " expected " " msg)
+  (print  actual ", Expected " expected " " text)
   (terpri))
 ;
 ;  Test cases.  Load and run the desired test.
@@ -154,10 +156,10 @@
   (verify-equal (and NIL T) NIL "NIL and T -> NIL")
   (verify-equal (and T NIL) NIL "T and NIL -> NIL")
   (verify-equal (and T T) T "T and T -> T")
-  (verify-equal (or NIL NIL) NIL "NIL and NIL -> NIL")
-  (verify-equal (or NIL T) T "NIL and T -> T")
-  (verify-equal (or T NIL) T "T and NIL -> T")
-  (verify-equal (or T T) T "T and T -> T")
+  (verify-equal (or NIL NIL) NIL "NIL or NIL -> NIL")
+  (verify-equal (or NIL T) T "NIL or T -> T")
+  (verify-equal (or T NIL) T "T or NIL -> T")
+  (verify-equal (or T T) T "T or T -> T")
   (verify-equal (and 15 4 3) 0 "Produces zero")
   (verify-equal (and #xF0F #xF01F) 15 "Produces 15")
   (verify-equal (or 1 2 4) 7 "Produces 7")

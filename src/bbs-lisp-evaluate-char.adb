@@ -5,7 +5,7 @@ package body BBS.lisp.evaluate.char is
    --  the ASCII value.
    --
    function char_int(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type; --  Parameter
       v : value;
    begin
@@ -13,7 +13,8 @@ package body BBS.lisp.evaluate.char is
          error("char_int", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
+--      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("char_int", "Error reported evaluating parameter.");
          return p1;
@@ -34,7 +35,7 @@ package body BBS.lisp.evaluate.char is
    --  Given an integer, return the character with that code or an error.
    --
    function int_char(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type; --  Parameter
       v : value;
    begin
@@ -42,7 +43,8 @@ package body BBS.lisp.evaluate.char is
          error("int_char", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
+--      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("int_char", "Error reported evaluating parameter.");
          return p1;
@@ -69,7 +71,7 @@ package body BBS.lisp.evaluate.char is
    --  If character is alphabetic, convert to upper case.
    --
    function char_upcase(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type; --  Parameter
       v : value;
    begin
@@ -77,7 +79,8 @@ package body BBS.lisp.evaluate.char is
          error("char_upcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
+--      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("char_upcase", "Error reported evaluating parameter.");
          return p1;
@@ -99,7 +102,7 @@ package body BBS.lisp.evaluate.char is
    --  If character is alphabetic, convert to lower case.
    --
    function char_downcase(e : element_type) return element_type is
-      t : element_type;
+      t : element_type := e;
       p1 : element_type; --  Parameter
       v : value;
    begin
@@ -107,7 +110,8 @@ package body BBS.lisp.evaluate.char is
          error("char_upcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      first_value(e, p1, t);
+      p1 := first_value(t);
+--      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("char_upcase", "Error reported evaluating parameter.");
          return p1;

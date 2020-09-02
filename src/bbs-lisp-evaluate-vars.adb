@@ -94,7 +94,9 @@ package body BBS.lisp.evaluate.vars is
                --
                --  Now determine what value to attach to the symbol.
                --
-               first_value(cons_table(e.ps).cdr, p2, temp);
+               temp := cons_table(e.ps).cdr;
+               p2 := first_value(temp);
+--               first_value(cons_table(e.ps).cdr, p2, temp);
                BBS.lisp.memory.ref(p2);
                   --
                   --  Check for stack variables

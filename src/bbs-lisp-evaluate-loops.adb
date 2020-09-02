@@ -192,7 +192,8 @@ package body BBS.lisp.evaluate.loops is
             --
             --  Next determine what the loop limit is
             --
-            first_value(limit, limit, rest);
+            rest := limit;
+            limit := first_value(rest);
             if limit.kind = E_VALUE then
                if limit.v.kind = V_INTEGER then
                   if limit.v.i >= 0 then
