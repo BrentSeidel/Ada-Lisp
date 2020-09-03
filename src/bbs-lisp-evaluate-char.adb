@@ -14,7 +14,6 @@ package body BBS.lisp.evaluate.char is
          return (kind => E_ERROR);
       end if;
       p1 := first_value(t);
---      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("char_int", "Error reported evaluating parameter.");
          return p1;
@@ -44,7 +43,6 @@ package body BBS.lisp.evaluate.char is
          return (kind => E_ERROR);
       end if;
       p1 := first_value(t);
---      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("int_char", "Error reported evaluating parameter.");
          return p1;
@@ -80,7 +78,6 @@ package body BBS.lisp.evaluate.char is
          return (kind => E_ERROR);
       end if;
       p1 := first_value(t);
---      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("char_upcase", "Error reported evaluating parameter.");
          return p1;
@@ -111,7 +108,6 @@ package body BBS.lisp.evaluate.char is
          return (kind => E_ERROR);
       end if;
       p1 := first_value(t);
---      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("char_upcase", "Error reported evaluating parameter.");
          return p1;

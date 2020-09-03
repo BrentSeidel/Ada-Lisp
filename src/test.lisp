@@ -9,7 +9,7 @@
 ;  that are not explicitly tested, such as defun, but are used throughout so
 ;  failures should be obvious with other things not working properly.
 ;
-;
+;-----------------------------------------
 ;  Support functions.  Load these first.
 ;
 ; Prints a pass message
@@ -28,7 +28,7 @@
               (print "***FAIL: Actual "))
   (print  actual ", Expected " expected " " text)
   (terpri))
-;
+;  --------------------------------------------
 ;  Test cases.  Load and run the desired test.
 ;
 ;  Test if and booleans
@@ -78,12 +78,12 @@
 ;  Test basic math functions
 ;
 (defun test-basic-math ()
-  (verify-equal 6 (+ 1 2 3) "Add positive")
-  (verify-equal 0 (+ 1 2 -3) "Add mixed")
-  (verify-equal -6 (+ -1 -2 -3) "Add negative")
+  (verify-equal (+ 1 2 3) 6 "Add positive")
+  (verify-equal (+ 1 2 -3) 0 "Add mixed")
+  (verify-equal (+ -1 -2 -3) -6 "Add negative")
   (verify-equal (* 2 3 4) 24 "Mul positive")
   (verify-equal (* -2 3 4) -24 "Mul mixed")
-  (verify-equal 24 (* -6 -4) "Mul negative")
+  (verify-equal (* -6 -4) 24 "Mul negative")
   (verify-equal (- 1 2 3) -4 "Sub result negative")
   (verify-equal (- 4 1) 3 "Sub positive")
   (verify-equal (- -2 -3) 1 "Sub negative")

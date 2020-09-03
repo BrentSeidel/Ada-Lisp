@@ -11,102 +11,106 @@ package body BBS.lisp.evaluate.cond is
       v1 : value;
       v2 : value;
    begin
-      if e.kind = E_CONS then
-         t1 := first_value(t);
-         if t.kind = E_CONS then
-            t2 := first_value(t);
-         else
-            error("eval_comp", "Cannot compare a single element.");
-            BBS.lisp.memory.deref(t1);
-            return (kind => E_ERROR);
-         end if;
-      else
-         error("eval_comp", "Cannot compare a single element.");
+      if e.kind /= E_CONS then
+         error("eval_comp", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      if (t1.kind /= E_CONS) and (t2.kind /= E_CONS) then
-         t := indirect_elem(t1);
-         if t.kind = E_VALUE then
-            v1 := t.v;
-         end if;
-         t := indirect_elem(t2);
-         if t.kind = E_VALUE then
-            v2 := t.v;
-         end if;
-         if (v1.kind = V_INTEGER) and (v2.kind = V_INTEGER) then
-            case b is
-               when SYM_EQ =>
-                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i = v2.i));
-               when SYM_NE =>
-                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i /= v2.i));
-               when SYM_LT =>
-                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i < v2.i));
-               when SYM_GT =>
-                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i > v2.i));
-            end case;
-         elsif (v1.kind = V_CHARACTER) and (v2.kind = V_CHARACTER) then
-            case b is
-               when SYM_EQ =>
-                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c = v2.c));
-               when SYM_NE =>
-                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c /= v2.c));
-               when SYM_LT =>
-                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c < v2.c));
-               when SYM_GT =>
-                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c > v2.c));
-            end case;
-         elsif (v1.kind = V_STRING) and (v2.kind = V_STRING) then
-            declare
-               eq : comparison;
-            begin
-               eq := bbs.lisp.strings.compare(v1.s, v2.s);
-               BBS.lisp.memory.deref(v1.s);
-               BBS.lisp.memory.deref(v2.s);
-               case b is
-                  when SYM_EQ =>
-                     if eq = CMP_EQ then
-                        return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-                     end if;
-                  when SYM_LT =>
-                     if eq = CMP_LT then
-                        return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-                     end if;
-                  when SYM_GT =>
-                     if eq = CMP_GT then
-                        return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-                     end if;
-                  when SYM_NE =>
-                     if eq /= CMP_EQ then
-                        return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-                     end if;
-               end case;
-            end;
-            return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-         elsif (v1.kind = V_BOOLEAN) and (v2.kind = V_BOOLEAN) then
-            case b is
-               when SYM_EQ =>
-                  return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b = v2.b));
-               when SYM_NE =>
-                  return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b /= v2.b));
-               when SYM_LT =>
-                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b < v2.b));
-               when SYM_GT =>
-                  return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b > v2.b));
-            end case;
-         else
-            error("eval_comp", "Can only compare elements of the same type.");
-            put("First type is " & value_type'Image(v1.kind));
-            put_line(", second type is " & value_type'Image(v2.kind));
-            BBS.lisp.memory.deref(v1);
-            BBS.lisp.memory.deref(v2);
-            return (kind => E_ERROR);
-         end if;
+      t1 := first_value(t);
+      if t1.kind = E_ERROR then
+         error("eval_comp", "Error reported evaluating first parameter.");
+         return t1;
+      end if;
+      if t1.kind = E_VALUE then
+         v1 := t1.v;
       else
-         error("eval_comp", "Can only compare two elements.");
-         put("First type is " & ptr_type'Image(t1.kind));
-         put_line(", second type is " & ptr_type'Image(t2.kind));
+         error("eval_comp", "First parameter does not evaluate to a value");
+         return (kind => E_ERROR);
+      end if;
+      if isList(t) then
+         t2 := first_value(t);
+      else
+         error("eval_comp", "Cannot compare a single element.");
          BBS.lisp.memory.deref(t1);
-         BBS.lisp.memory.deref(t2);
+         return (kind => E_ERROR);
+      end if;
+      if t2.kind = E_ERROR then
+         error("eval_comp", "Error reported evaluating second parameter.");
+         BBS.lisp.memory.deref(t1);
+         return t2;
+      end if;
+      if t2.kind = E_VALUE then
+         v2 := t2.v;
+      else
+         error("eval_comp", "Second parameter does not evaluate to a value");
+         BBS.lisp.memory.deref(t1);
+         return (kind => E_ERROR);
+      end if;
+      if (v1.kind = V_INTEGER) and (v2.kind = V_INTEGER) then
+         case b is
+            when SYM_EQ =>
+               return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i = v2.i));
+            when SYM_NE =>
+               return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i /= v2.i));
+            when SYM_LT =>
+               return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i < v2.i));
+            when SYM_GT =>
+               return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i > v2.i));
+         end case;
+      elsif (v1.kind = V_CHARACTER) and (v2.kind = V_CHARACTER) then
+         case b is
+            when SYM_EQ =>
+               return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c = v2.c));
+            when SYM_NE =>
+               return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c /= v2.c));
+            when SYM_LT =>
+               return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c < v2.c));
+            when SYM_GT =>
+               return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c > v2.c));
+         end case;
+      elsif (v1.kind = V_STRING) and (v2.kind = V_STRING) then
+         declare
+            eq : comparison;
+         begin
+            eq := bbs.lisp.strings.compare(v1.s, v2.s);
+            BBS.lisp.memory.deref(v1.s);
+            BBS.lisp.memory.deref(v2.s);
+            case b is
+               when SYM_EQ =>
+                  if eq = CMP_EQ then
+                     return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+                  end if;
+               when SYM_LT =>
+                  if eq = CMP_LT then
+                     return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+                  end if;
+               when SYM_GT =>
+                  if eq = CMP_GT then
+                     return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+                  end if;
+               when SYM_NE =>
+                  if eq /= CMP_EQ then
+                     return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+                  end if;
+            end case;
+         end;
+         return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+      elsif (v1.kind = V_BOOLEAN) and (v2.kind = V_BOOLEAN) then
+         case b is
+            when SYM_EQ =>
+               return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b = v2.b));
+            when SYM_NE =>
+               return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b /= v2.b));
+            when SYM_LT =>
+               return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b < v2.b));
+            when SYM_GT =>
+               return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b > v2.b));
+         end case;
+      else
+         error("eval_comp", "Can only compare elements of the same type.");
+         put("First type is " & value_type'Image(v1.kind));
+         put_line(", second type is " & value_type'Image(v2.kind));
+         BBS.lisp.memory.deref(v1);
+         BBS.lisp.memory.deref(v2);
          return (kind => E_ERROR);
       end if;
    end;

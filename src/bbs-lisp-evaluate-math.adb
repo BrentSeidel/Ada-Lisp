@@ -5,117 +5,84 @@ package body BBS.lisp.evaluate.math is
    --  This function evaluates the basic arithmatic operation (+, -, *, /).
    --
    function eval_math(e : element_type; b : mathops) return element_type is
+      t : element_type := e;
       accum : int32 := 0;
       v : value;
-      p : cons_index;
       el: element_type;
-      temp : element_type;
-      err : Boolean := False;
       --
       --  Subfunction to do the actual evaluation.
       --
-      function process_value(e : element_type; accum : int32; b : mathops) return int32 is
-         v  : value;
-         e1 : element_type;
+      function process_value(i : int32; accum : int32; b : mathops) return int32 is
       begin
-         e1 := indirect_elem(e);
-         if e1.kind = E_VALUE then
-            v := e.v;
-            if v.kind = V_INTEGER then
-               case (b) is
-               when PLUS =>
-                  return accum + v.i;
-               when MUL =>
-                  return accum * v.i;
-               when MINUS =>
-                  return accum - v.i;
-               when DIV =>
-                  return accum / v.i;
-               end case;
-            else
-               error("eval_math.process_atom", "Can't process " & value_type'Image(v.kind));
-               err := True;
-            end if;
-         else
-            error("eval_math.process_atom", "Can't process " & ptr_type'Image(e1.kind));
-            err := True;
-         end if;
-         return accum;
+         case (b) is
+            when PLUS =>
+               return accum + i;
+            when MUL =>
+               return accum * i;
+            when MINUS =>
+               return accum - i;
+            when DIV =>
+               return accum / i;
+         end case;
       end;
 
    begin
       if e.kind = E_VALUE then
          if e.v.kind = V_INTEGER then
-            accum := e.v.i;
+            return (Kind => E_VALUE, v => (kind => V_INTEGER, i => e.v.i));
+         else
+            error("eval_math", "Internal error.  Not an integer.");
+            BBS.lisp.memory.deref(e);
+            return (kind => E_ERROR);
          end if;
-      elsif e.kind = E_CONS then
-         p := e.ps;
-         if cons_table(p).car.kind /= E_CONS then
-            el := indirect_elem(cons_table(p).car);
-            if el.kind = E_VALUE then
-               v := el.v;
-            else
-               error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
-               return (kind => E_ERROR);
-            end if;
-            if v.kind = V_INTEGER then
-               accum := v.i;
-            else
-               error("eval_math", "Can't process " & value_type'Image(v.kind));
-               return (kind => E_ERROR);
-            end if;
-         elsif cons_table(p).car.kind = E_CONS then
-            temp := eval_dispatch(cons_table(p).car.ps);
-            if temp.kind /= E_CONS then
-               el := indirect_elem(temp);
-               if el.kind = E_VALUE then
-                  v := el.v;
-               end if;
-               if v.kind = V_INTEGER then
-                  accum := v.i;
-               else
-                  error("eval_math", "Can't process " & value_type'Image(v.kind));
-                  return (kind => E_ERROR);
-               end if;
-            end if;
-            bbs.lisp.memory.deref(temp);
+      elsif e.kind /= E_CONS then
+         error("eval_math", "Internal error.  Should have a list.");
+         return (kind => E_ERROR);
+      end if;
+      el := first_value(t);
+      if el.kind = E_VALUE then
+         v := el.v;
+      else
+         error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
+         return (kind => E_ERROR);
+      end if;
+      if v.kind = V_INTEGER then
+         accum := v.i;
+      else
+         error("eval_math", "Can't process " & value_type'Image(v.kind));
+         return (kind => E_ERROR);
+      end if;
+      bbs.lisp.memory.deref(el);
+      while isList(t) loop
+         el := first_value(t);
+         if el.kind = E_VALUE then
+            v := el.v;
+         else
+            error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
+            return (kind => E_ERROR);
          end if;
-         if cons_table(p).cdr.kind /= E_NIL then
-            p := cons_table(p).cdr.ps;
-            loop
-               if cons_table(p).car.kind = E_CONS then
-                  temp := eval_dispatch(cons_table(p).car.ps);
-                  if temp.kind = E_VALUE then
-                     accum := process_value(temp, accum, b);
-                     if err then
-                        error("eval_math", "Error processing parameter");
-                        return (kind => E_ERROR);
-                     end if;
-                  elsif temp.kind = E_ERROR then
-                     error("eval_math", "Argument evaluation returned an error");
-                     return temp;
-                  end if;
-                  bbs.lisp.memory.deref(temp);
-               else
-                  el := indirect_elem(cons_table(p).car);
-                  accum := process_value(el, accum, b);
-                  if err then
-                     error("eval_math", "Error processing parameter");
-                     return (kind => E_ERROR);
-                  end if;
-               end if;
-               exit when cons_table(p).cdr.kind /= E_CONS;
-               p := cons_table(p).cdr.ps;
-            end loop;
-            if cons_table(p).cdr.kind /= E_NIL then
-               el := indirect_elem(cons_table(p).cdr);
-               accum := process_value(el, accum, b);
-               if err then
-                  error("eval_math", "Error processing parameter");
-                  return (kind => E_ERROR);
-               end if;
-            end if;
+         if v.kind /= V_INTEGER then
+            error("eval_math", "Can't process " & value_type'Image(v.kind));
+            BBS.lisp.memory.deref(el);
+            return (kind => E_ERROR);
          end if;
+         accum := process_value(v.i, accum, b);
+         bbs.lisp.memory.deref(el);
+      end loop;
+      if t.kind /= E_NIL then
+         el := indirect_elem(t);
+         if el.kind /= E_VALUE then
+            error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
+            return (kind => E_ERROR);
+         end if;
+         v := el.v;
+         if v.kind /= V_INTEGER then
+            error("eval_math", "Can't process " & value_type'Image(v.kind));
+            BBS.lisp.memory.deref(el);
+            return (kind => E_ERROR);
+         end if;
+         print(el, False, True);
+         accum := process_value(v.i, accum, b);
       end if;
       return (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum));
    end;

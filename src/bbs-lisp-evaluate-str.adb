@@ -15,7 +15,6 @@ package body BBS.lisp.evaluate.str is
          return (kind => E_ERROR);
       end if;
       p1 := first_value(t);
---      first_value(e, p1, t);
       if isList(p1) then
          return (kind => E_VALUE, v => (kind => V_INTEGER,
                                        i => length(getList(p1))));
@@ -79,7 +78,6 @@ package body BBS.lisp.evaluate.str is
       --  Get first parameter.  It should be a string
       --
       p1 := first_value(t);
---      first_value(e, p1, t);
       if p1.kind = E_VALUE then
          if p1.v.kind /= V_STRING then
             error("char", "First parameter should be a string, not "
@@ -92,7 +90,6 @@ package body BBS.lisp.evaluate.str is
          return (kind => E_ERROR);
       end if;
       p2 := first_value(t);
---      first_value(t, p2, t);
       if p2.kind = E_VALUE then
          if p2.v.kind /= V_INTEGER then
             error("char", "Second parameter should be an integer, not "
@@ -141,7 +138,6 @@ package body BBS.lisp.evaluate.str is
          return (kind => E_ERROR);
       end if;
       p1 := first_value(t);
---      first_value(e, p1, t);
       if p1.kind = E_VALUE then
          if p1.v.kind /= V_STRING then
             error("parse-integer", "Parameter must be a string, not " &
@@ -202,7 +198,6 @@ package body BBS.lisp.evaluate.str is
       --  First parameter
       --
       p1 := first_value(t);
---      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("subseq", "Error reported evaluating first parameter.");
          return p1;
@@ -220,7 +215,6 @@ package body BBS.lisp.evaluate.str is
       --  Second parameter
       --
       p2 := first_value(t);
---      first_value(t, p2, t);
       if p2.kind = E_ERROR then
          error("subseq", "Error reported evaluating second parameter.");
          BBS.lisp.memory.deref(p1);
@@ -241,7 +235,6 @@ package body BBS.lisp.evaluate.str is
       --
       if t.kind /= E_NIL then
          p3 := first_value(t);
---         first_value(t, p3, t);
          if p3.kind = E_ERROR then
             error("subseq", "Error reported evaluating third parameter.");
             BBS.lisp.memory.deref(p1);
@@ -372,7 +365,6 @@ package body BBS.lisp.evaluate.str is
          return (kind => E_ERROR);
       end if;
       p1 := first_value(t);
---      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("string_upcase", "Error reported evaluating parameter.");
          return p1;
@@ -443,7 +435,6 @@ package body BBS.lisp.evaluate.str is
          return (kind => E_ERROR);
       end if;
       p1 := first_value(t);
---      first_value(e, p1, t);
       if p1.kind = E_ERROR then
          error("string_downcase", "Error reported evaluating parameter.");
          return p1;

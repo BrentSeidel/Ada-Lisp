@@ -17,7 +17,6 @@ package body BBS.lisp.evaluate.vars is
       p2 : element_type;
       p3 : element_type;
       temp : element_type;
---      ret : element_type;
       str : string_index;
       stacked : Boolean := False;
       index : stack_index;
@@ -96,7 +95,6 @@ package body BBS.lisp.evaluate.vars is
                --
                temp := cons_table(e.ps).cdr;
                p2 := first_value(temp);
---               first_value(cons_table(e.ps).cdr, p2, temp);
                BBS.lisp.memory.ref(p2);
                   --
                   --  Check for stack variables
