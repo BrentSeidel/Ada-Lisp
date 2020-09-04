@@ -32,6 +32,11 @@ finished, they can be translated into Ada and compiled.
 
 ## Status
 
+While the only guarentee is that this contains bugs and is missing features, it
+is usable.  I've been able to write some small programs in it both on the Mac and
+on the Arduino Due.  It is nice to be able to change what the Arduino Due is doing
+without having to do a whole compile-load cycle.
+
 ### Porting
 It now runs on the Arduino Due.  It took a bit of work to remove all dependencies
 on Ada libraries that aren't available on the Arduino Due.  Another feature added

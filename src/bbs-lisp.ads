@@ -16,8 +16,8 @@ package bbs.lisp is
    --
    --  Sizes for the global data structures.  These can be adjusted as needed.
    --
-   max_cons : constant Integer := 300;
-   max_symb : constant Integer := 200;
+   max_cons : constant Integer := 500;
+   max_symb : constant Integer := 300;
    max_string : constant Integer := 500;
    max_stack : constant Integer := 100;
    --
