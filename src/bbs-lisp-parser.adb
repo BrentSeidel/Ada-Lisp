@@ -130,11 +130,24 @@ package body bbs.lisp.parser is
             error("parse", "Unrecognized special form");
             e := (kind => E_ERROR);
          end if;
+         --
+         --  A quoted symbol.  This will eventually have to change to allow for
+         --  quoting lists.
+         --
+      elsif buff(ptr) = ''' then
+         ptr := ptr + 1;
+         e := symb(ptr, buff, last, True);
+         if e.kind /= E_ERROR then
+            flag := true;
+         else
+            error("parse", "Error parsing symbol");
+            flag := False;
+         end if;
       --
       --  Anything that doesn't match something else is treated as a symbol
       --
       else
-         e := symb(ptr, buff, last);
+         e := symb(ptr, buff, last, False);
          if e.kind /= E_ERROR then
             flag := true;
          else
@@ -333,10 +346,26 @@ package body bbs.lisp.parser is
          elsif buff(ptr) = ';' then
             ptr := last + 1;
          --
+         --  A quoted symbol.  This will eventually have to change to allow for
+         --  quoting lists.
+         --
+         elsif buff(ptr) = ''' then
+            ptr := ptr + 1;
+            e := symb(ptr, buff, last, True);
+            if cons_table(head).car.kind = E_NIL then
+               cons_table(head).car := e;
+            else
+               flag := append_to_list(head, e);
+               if not flag then
+                  error("list", "Failed appending symbol to list");
+                  return flag;
+               end if;
+            end if;
+         --
          --  If nothing else, parse it as a symbol
          --
          else
-            e := symb(ptr, buff, last);
+            e := symb(ptr, buff, last, False);
             if cons_table(head).car.kind = E_NIL then
                cons_table(head).car := e;
             else
@@ -403,10 +432,11 @@ package body bbs.lisp.parser is
    --
    --  Parse a symbol.  The boolean values "T" and "NIL" are also detected here.
    --
-   function symb(ptr : in out integer; buff : String; last : Integer)
+   function symb(ptr : in out integer; buff : String; last : Integer; quoted : Boolean)
                  return element_type is
       test : string_index;
       el : element_type;
+      symb : symb_index;
       flag : Boolean;
    begin
       flag := BBS.lisp.memory.alloc(test);
@@ -430,13 +460,22 @@ package body bbs.lisp.parser is
          --
          -- Now check for symbols
          --
-         el := find_variable(test, False);
+         if not quoted then
+            el := find_variable(test, False);
+         else
+            if get_symb(symb, test) then
+               el := (Kind => E_QSYMBOL, qsym => symb);
+            else
+               el := (kind => E_ERROR);
+               error("parse symbol", "Unable to allocate string fragment.");
+            end if;
+         end if;
          BBS.lisp.memory.deref(test);
          return el;
       else
          error("parse symbol", "Unable to allocate string fragment.");
       end if;
-      return (kind => E_NIL);
+      return (kind => E_ERROR);
    end;
    --
    --  Parse an integer.

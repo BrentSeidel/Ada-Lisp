@@ -23,7 +23,7 @@ private
    --  to either the symbol or temp symbol.  Returns false if the symbol or temp
    --  symbol can't be found or created or if the atom can't be created.
    --
-   function symb(ptr : in out Integer; buff : String; last : Integer)
+   function symb(ptr : in out Integer; buff : String; last : Integer; quoted : Boolean)
                  return element_type;
    --
    --  Subfunction for parsing integers

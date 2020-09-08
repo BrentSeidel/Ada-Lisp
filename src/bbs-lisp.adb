@@ -197,6 +197,9 @@ package body bbs.lisp is
             print(e.v);
          when E_SYMBOL =>
             print(e.sym);
+         when E_QSYMBOL =>
+            put("'");
+            print(e.qsym);
          when E_TEMPSYM =>
             put("Tempsym");
          when E_STACK =>
@@ -289,6 +292,9 @@ package body bbs.lisp is
             print(v.lam);
          when V_SYMBOL =>
             print(v.sym);
+         when V_QSYMBOL =>
+            put("'");
+            print(v.qsym);
          when V_NONE =>
             put(" Empty");
 --         when others =>

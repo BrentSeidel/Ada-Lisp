@@ -30,13 +30,14 @@ package bbs.lisp is
    --  can be a cons cell, a value, a symbol, a temporary symbol a stack
    --  variable, or nothing.
    --
-   type ptr_type is (E_CONS, E_ERROR, E_NIL, E_STACK, E_SYMBOL, E_TEMPSYM, E_VALUE);
+   type ptr_type is (E_CONS, E_ERROR, E_NIL, E_STACK, E_SYMBOL, E_QSYMBOL,
+                     E_TEMPSYM, E_VALUE);
    --
    --  This indicates what kind of data is in a value.  These are the allowed
    --  data types.
    --
    type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
-                      V_LAMBDA, V_SYMBOL, V_NONE);
+                      V_LAMBDA, V_SYMBOL, V_QSYMBOL, V_NONE);
    --
    --  This indicates what kind of data is in a symbol.
    --
@@ -90,6 +91,8 @@ package bbs.lisp is
             lam : cons_index;
          when V_SYMBOL =>
             sym : symb_index;
+         when V_QSYMBOL =>
+            qsym : symb_index;
          when V_NONE =>
             null;
          end case;
@@ -110,6 +113,8 @@ package bbs.lisp is
                tempsym : string_index;
             when E_SYMBOL =>
                sym : symb_index;
+            when E_QSYMBOL =>
+               qsym : symb_index;
             when E_STACK =>
                st_name : string_index;
                st_offset : stack_index;
