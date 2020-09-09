@@ -52,15 +52,23 @@ package body bbs.lisp.parser is
       flag : Boolean := False;
       value : int32;
       char : Character;
+      qtemp : Boolean := False;
    begin
       e := NIL_ELEM;
       ptr := buff'First;
       skip_whitespace(ptr, buff, last);
       --
+      --  A quoted element.
+      --
+      if buff(ptr) = ''' then
+         qtemp := True;
+         ptr := ptr + 1;
+      end if;
+      --
       --  Start of a list
       --
       if buff(ptr) = '(' then
-         flag := list(ptr, buff, last, head);
+         flag := list(ptr, buff, last, head, qtemp);
          if flag then
             if (cons_table(head).car.kind = E_NIL) and (cons_table(head).cdr.kind = E_NIL) then
                e := NIL_ELEM;
@@ -73,11 +81,13 @@ package body bbs.lisp.parser is
             BBS.lisp.memory.deref(head);
             e := (kind => E_ERROR);
          end if;
+         qtemp := False;
       --
       --  Comment
       --
       elsif buff(ptr) = ';' then
          e := (Kind => E_NIL);
+         qtemp := False;
       --
       --  Integer
       --
@@ -90,6 +100,7 @@ package body bbs.lisp.parser is
             error("parse", "Error parsing number");
             e := (kind => E_ERROR);
          end if;
+         qtemp := False;
       --
       -- String
       --
@@ -102,6 +113,7 @@ package body bbs.lisp.parser is
             BBS.lisp.memory.deref(str);
             e := (kind => E_ERROR);
          end if;
+         qtemp := False;
       --
       -- Special
       --
@@ -130,30 +142,19 @@ package body bbs.lisp.parser is
             error("parse", "Unrecognized special form");
             e := (kind => E_ERROR);
          end if;
-         --
-         --  A quoted symbol.  This will eventually have to change to allow for
-         --  quoting lists.
-         --
-      elsif buff(ptr) = ''' then
-         ptr := ptr + 1;
-         e := symb(ptr, buff, last, True);
-         if e.kind /= E_ERROR then
-            flag := true;
-         else
-            error("parse", "Error parsing symbol");
-            flag := False;
-         end if;
+         qtemp := False;
       --
       --  Anything that doesn't match something else is treated as a symbol
       --
       else
-         e := symb(ptr, buff, last, False);
+         e := symb(ptr, buff, last, qtemp);
          if e.kind /= E_ERROR then
             flag := true;
          else
             error("parse", "Error parsing symbol");
             flag := False;
          end if;
+         qtemp := False;
       end if;
       return flag;
    end;
@@ -161,7 +162,9 @@ package body bbs.lisp.parser is
    --  Subfunction for parsing lists.  If the buffer ends before the end of the
    --  list is reached, more input is read and the parsing continues.
    --
-   function list(ptr : in out integer; buff : in out String; last : in out Integer; s_expr : out cons_index)
+   function list(ptr : in out integer; buff : in out String;
+                 last : in out Integer; s_expr : out cons_index;
+                 qfixed : Boolean)
                  return Boolean is
       head : cons_index := -1;
       current : cons_index := -1;
@@ -177,6 +180,7 @@ package body bbs.lisp.parser is
       begin_called : Boolean := False;
       item_count : Natural := 0;
       char : Character;
+      qtemp : Boolean := False;
    begin
       flag := bbs.lisp.memory.alloc(head);
       if not flag then
@@ -198,11 +202,12 @@ package body bbs.lisp.parser is
                   error("list", "Internal error, parse end attempted to be called before parse begin");
                end if;
             end if;
+            qtemp := False;
          --
          -- Check for starting a new sub-list
          --
          elsif buff(ptr) = '(' then
-            flag := list(ptr, buff, last, current);
+            flag := list(ptr, buff, last, current, qfixed or qtemp);
             ptr := ptr + 1;
             if flag then
                if (cons_table(current).car.kind = E_NIL) and (cons_table(current).cdr.kind = E_NIL) then
@@ -240,6 +245,7 @@ package body bbs.lisp.parser is
                BBS.lisp.memory.deref(head);
                return False;
             end if;
+            qtemp := False;
          --
          --  Check for the start of an integer atom
          --
@@ -263,6 +269,7 @@ package body bbs.lisp.parser is
                BBS.lisp.memory.deref(head);
                return False;
             end if;
+            qtemp := False;
          --
          --  Check for special sequences.
          --
@@ -318,6 +325,7 @@ package body bbs.lisp.parser is
                BBS.lisp.memory.deref(head);
                return False;
             end if;
+            qtemp := False;
          --
          --  Check for the start of a string
          --
@@ -340,32 +348,24 @@ package body bbs.lisp.parser is
                BBS.lisp.memory.deref(head);
                return False;
             end if;
+            qtemp := False;
          --
          --  Check for a comment
          --
          elsif buff(ptr) = ';' then
             ptr := last + 1;
+            qtemp := False;
          --
-         --  A quoted symbol.  This will eventually have to change to allow for
-         --  quoting lists.
+         --  Quote the next element.
          --
          elsif buff(ptr) = ''' then
             ptr := ptr + 1;
-            e := symb(ptr, buff, last, True);
-            if cons_table(head).car.kind = E_NIL then
-               cons_table(head).car := e;
-            else
-               flag := append_to_list(head, e);
-               if not flag then
-                  error("list", "Failed appending symbol to list");
-                  return flag;
-               end if;
-            end if;
+            qtemp := True;
          --
          --  If nothing else, parse it as a symbol
          --
          else
-            e := symb(ptr, buff, last, False);
+            e := symb(ptr, buff, last, qfixed or qtemp);
             if cons_table(head).car.kind = E_NIL then
                cons_table(head).car := e;
             else
@@ -375,7 +375,7 @@ package body bbs.lisp.parser is
                   return flag;
                end if;
             end if;
-            if e.kind = E_SYMBOL then
+            if (e.kind = E_SYMBOL) and not (qtemp or qfixed) then
                if (symb_table(e.sym).kind = SY_SPECIAL) and (item = 0) then
                   special_flag := True;
                   special_symb := symb_table(e.sym);
@@ -404,6 +404,7 @@ package body bbs.lisp.parser is
                   end if;
                end if;
             end if;
+            qtemp := False;
          end if;
          --
          --  If there is no text left to parse and it's not the end of a list,

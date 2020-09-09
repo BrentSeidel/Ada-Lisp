@@ -16,7 +16,9 @@ private
    --
    --  Subfunction for parsing lists
    --
-   function list(ptr : in out Integer; buff : in out String; last : in out Integer; s_expr : out cons_index)
+   function list(ptr : in out Integer; buff : in out String;
+                 last : in out Integer; s_expr : out cons_index;
+                 qfixed : Boolean)
                  return Boolean;
    --
    --  Subfunction for parsing symbols or temp symbols.  A is an atom that points
