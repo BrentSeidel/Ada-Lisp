@@ -43,23 +43,32 @@ package body BBS.lisp.evaluate is
    --
    function isFunction(e : element_type) return Boolean is
       temp : element_type;
+      sym_kind : symbol_type;
+      list : cons_index;
+      val : value;
    begin
-      if e.kind = E_CONS then
-         temp := cons_table(e.ps).car;
-         if temp.kind = E_SYMBOL then
-            if (symb_table(temp.sym).kind = SY_BUILTIN) or
-              (symb_table(temp.sym).kind = SY_SPECIAL) or
-              (symb_table(temp.sym).kind = SY_LAMBDA) then
-               return True;
-            end if;
-         end if;
+      if isList(e) then
+         list := getList(e);
+         temp := cons_table(list).car;
       else
-         if e.kind = E_SYMBOL then
-            if (symb_table(e.sym).kind = SY_BUILTIN) or
-              (symb_table(e.sym).kind = SY_SPECIAL) or
-              (symb_table(e.sym).kind = SY_LAMBDA) then
-               return True;
-            end if;
+         temp := e;
+      end if;
+
+      if temp.kind = E_SYMBOL then
+         sym_kind := symb_table(temp.sym).kind;
+         if (sym_kind = SY_BUILTIN) or
+           (sym_kind = SY_SPECIAL) or
+           (sym_kind = SY_LAMBDA) then
+            return True;
+         end if;
+      elsif temp.kind = E_VALUE then
+         if temp.v.kind = V_LAMBDA then
+            return True;
+         end if;
+      elsif temp.kind = E_STACK then
+         val := BBS.lisp.stack.search_frames(temp.st_offset, temp.st_name);
+         if val.kind = V_LAMBDA then
+            return True;
          end if;
       end if;
       return False;
@@ -144,8 +153,8 @@ package body BBS.lisp.evaluate is
             car := NIL_ELEM;
          elsif isList(first) then
             car := first;
-            if isFunction(first) then
-               car := eval_dispatch(first.ps);
+            if isFunction(car) then
+               car := eval_dispatch(car.ps);
             else
                BBS.lisp.memory.ref(car);
             end if;
