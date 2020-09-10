@@ -33,4 +33,9 @@ private
    --
    function length(s : cons_index) return int32;
    function length(s : string_index) return int32;
+   --
+   --  Copy string with transformations
+   --
+   type transform is (NONE, UPPER, LOWER);
+   function copy(s : string_index; t : transform) return element_type;
 end;

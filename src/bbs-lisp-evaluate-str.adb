@@ -348,17 +348,57 @@ package body BBS.lisp.evaluate.str is
       return (kind => E_VALUE, v => (kind => V_STRING, s => head));
    end;
    --
+   --  Copy helper function
+   --
+   function copy(s : string_index; t : transform) return element_type is
+      flag : Boolean;
+      source : string_index := s;
+      new_frag : string_index;
+      head : string_index;
+      temp : string_index;
+   begin
+      flag := BBS.lisp.memory.alloc(head);
+      if not flag then
+         error("string copy", "Unable to allocate string fragment.");
+         return (kind => E_ERROR);
+      end if;
+      new_frag := head;
+      string_table(new_frag).len := string_table(source).len;
+      for index in 1 .. fragment_len loop
+         case t is
+            when NONE =>
+               string_table(new_frag).str(index) := string_table(source).str(index);
+            when UPPER =>
+               string_table(new_frag).str(index) := BBS.lisp.strings.To_Upper(string_table(source).str(index));
+            when LOWER =>
+               string_table(new_frag).str(index) := BBS.lisp.strings.To_Lower(string_table(source).str(index));
+         end case;
+      end loop;
+      source := string_table(source).next;
+      while source /= string_index'First loop
+         flag := BBS.lisp.memory.alloc(temp);
+         if not flag then
+            error("string copy", "Unable to allocate string fragment.");
+            BBS.lisp.memory.deref(head);
+            return (kind => E_ERROR);
+         end if;
+         string_table(new_frag).next := temp;
+         new_frag := temp;
+         string_table(new_frag).len := string_table(source).len;
+         for index in 1 .. fragment_len loop
+            string_table(new_frag).str(index) := BBS.lisp.strings.To_Upper(string_table(source).str(index));
+         end loop;
+         source := string_table(source).next;
+      end loop;
+      return (kind => E_VALUE, v => (kind => V_STRING, s => head));
+   end;
+   --
    --  Convert a string to upper case
    --
    function string_upcase(e : element_type) return element_type is
       t : element_type := e;
       p1 : element_type; --  Parameter
-      source : string_index;  -- Source string
       v : value;
-      flag : Boolean;
-      head : string_index;
-      new_frag : string_index;
-      temp : string_index;
    begin
       if e.kind /= E_CONS then
          error("string_upcase", "Internal error.  Should have a list.");
@@ -381,41 +421,16 @@ package body BBS.lisp.evaluate.str is
          BBS.lisp.memory.deref(p1);
          return (kind => E_ERROR);
       end if;
-      source := p1.v.s;
       --
       --  Now that the parameter is determined to be of the correct type,
       --  copy it while converting to uppercase.
       --
-      flag := BBS.lisp.memory.alloc(head);
-      if not flag then
-         error("string_upcase", "Unable to allocate string fragment.");
-         BBS.lisp.memory.deref(p1);
-         return (kind => E_ERROR);
+      t := copy(p1.v.s, UPPER);
+      if t = NIL_ELEM then
+         error("string_upcase", "Error occured copying string");
       end if;
-      new_frag := head;
-      string_table(new_frag).len := string_table(source).len;
-      for index in 1 .. fragment_len loop
-         string_table(new_frag).str(index) := BBS.lisp.strings.To_Upper(string_table(source).str(index));
-      end loop;
-      source := string_table(source).next;
-      while source /= string_index'First loop
-         flag := BBS.lisp.memory.alloc(temp);
-         if not flag then
-            error("string_upcase", "Unable to allocate string fragment.");
-            BBS.lisp.memory.deref(head);
-         BBS.lisp.memory.deref(p1);
-            return (kind => E_ERROR);
-         end if;
-         string_table(new_frag).next := temp;
-         new_frag := temp;
-         string_table(new_frag).len := string_table(source).len;
-         for index in 1 .. fragment_len loop
-            string_table(new_frag).str(index) := BBS.lisp.strings.To_Upper(string_table(source).str(index));
-         end loop;
-         source := string_table(source).next;
-      end loop;
-         BBS.lisp.memory.deref(p1);
-      return (kind => E_VALUE, v => (kind => V_STRING, s => head));
+      BBS.lisp.memory.deref(p1);
+      return t;
    end;
    --
    --  Convert a string to lower case
@@ -423,12 +438,7 @@ package body BBS.lisp.evaluate.str is
    function string_downcase(e : element_type) return element_type is
       t : element_type := e;
       p1 : element_type; --  Parameter
-      source : string_index;  -- Source string
       v : value;
-      flag : Boolean;
-      head : string_index;
-      new_frag : string_index;
-      temp : string_index;
    begin
       if e.kind /= E_CONS then
          error("string_downcase", "Internal error.  Should have a list.");
@@ -451,41 +461,16 @@ package body BBS.lisp.evaluate.str is
          BBS.lisp.memory.deref(p1);
          return (kind => E_ERROR);
       end if;
-      source := p1.v.s;
       --
       --  Now that the parameter is determined to be of the correct type,
       --  copy it while converting to lowercase.
       --
-      flag := BBS.lisp.memory.alloc(head);
-      if not flag then
-         error("string_downcase", "Unable to allocate string fragment.");
-         BBS.lisp.memory.deref(p1);
-         return (kind => E_ERROR);
+      t := copy(p1.v.s, LOWER);
+      if t = NIL_ELEM then
+         error("string_downcase", "Error occured copying string");
       end if;
-      new_frag := head;
-      string_table(new_frag).len := string_table(source).len;
-      for index in 1 .. fragment_len loop
-         string_table(new_frag).str(index) := BBS.lisp.strings.To_Lower(string_table(source).str(index));
-      end loop;
-      source := string_table(source).next;
-      while source /= string_index'First loop
-         flag := BBS.lisp.memory.alloc(temp);
-         if not flag then
-            error("string_downcase", "Unable to allocate string fragment.");
-            BBS.lisp.memory.deref(p1);
-            BBS.lisp.memory.deref(head);
-            return (kind => E_ERROR);
-         end if;
-         string_table(new_frag).next := temp;
-         new_frag := temp;
-         string_table(new_frag).len := string_table(source).len;
-         for index in 1 .. fragment_len loop
-            string_table(new_frag).str(index) := BBS.lisp.strings.To_Lower(string_table(source).str(index));
-         end loop;
-         source := string_table(source).next;
-      end loop;
       BBS.lisp.memory.deref(p1);
-      return (kind => E_VALUE, v => (kind => V_STRING, s => head));
+      return t;
    end;
    --
 end;
