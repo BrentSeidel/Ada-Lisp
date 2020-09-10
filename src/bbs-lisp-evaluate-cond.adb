@@ -22,6 +22,8 @@ package body BBS.lisp.evaluate.cond is
       end if;
       if t1.kind = E_VALUE then
          v1 := t1.v;
+      elsif t1.kind = E_QSYMBOL then
+         v1 := (kind => V_QSYMBOL, qsym => t1.qsym);
       else
          error("eval_comp", "First parameter does not evaluate to a value");
          return (kind => E_ERROR);
@@ -40,6 +42,8 @@ package body BBS.lisp.evaluate.cond is
       end if;
       if t2.kind = E_VALUE then
          v2 := t2.v;
+      elsif t2.kind = E_QSYMBOL then
+         v2 := (kind => V_QSYMBOL, qsym => t2.qsym);
       else
          error("eval_comp", "Second parameter does not evaluate to a value");
          BBS.lisp.memory.deref(t1);
@@ -104,6 +108,19 @@ package body BBS.lisp.evaluate.cond is
                return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b < v2.b));
             when SYM_GT =>
                return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b > v2.b));
+         end case;
+      elsif (v1.kind = V_QSYMBOL) and (v2.kind = V_QSYMBOL) then
+         case b is
+            when SYM_EQ =>
+               return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.qsym = v2.qsym));
+            when SYM_NE =>
+               return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.qsym /= v2.qsym));
+            when SYM_LT =>
+               error("eval_comp", "Can only compare symbols for equality.");
+               return (Kind => E_ERROR);
+            when SYM_GT =>
+               error("eval_comp", "Can only compare symbols for equality.");
+               return (Kind => E_ERROR);
          end case;
       else
          error("eval_comp", "Can only compare elements of the same type.");

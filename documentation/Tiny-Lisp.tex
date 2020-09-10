@@ -202,7 +202,7 @@ The \function{char-int} and \function{int-char} operations convert between chara
 The \function{char-downcase} and \function{char-upcase} operations convert characters between upper and lower case.  Non-alphabetic characters are not changed.
 
 \subsection{Comparison Operations}
-Four comparison operations are defined for integers, strings, and booleans.  The operations are equals, not equals, greater than, and less than.  For example:
+Four comparison operations are defined for integers, strings, and booleans  Note that this is different from \cl{} which has separate operations defined for different types.  The operations are equals, not equals, greater than, and less than.  Equality and not equality is also defined for quoted symbols.  For example:
 
 \begin{lstlisting}
 (= 1 2)
