@@ -370,8 +370,24 @@ The \function{string-downcase} and \function{string-upcase} operations make a co
 
 The \function{subseq} operation returns a substring of the original string.  The first parameter is the string.  The second parameter is the starting character (0 based).  The third parameter is optional.  If present, it is the index (not length of the substring) of the first character  not part of the substring.  If absent, the substring extends to the end of the original string.
 
-\subsection{Variables}
+\subsection{Symbol Related Operations}
+Some operations use a quoted symbol to indicate what type of operation should be performed or what type of date should be returned.  These thus require a bit more description than some of the other operations.
+\begin{lstlisting}
+(coerce 'integer t)
+\end{lstlisting}
 
+The \function{coerce} operation is used to convert data of one type to another.  The current supported conversions are:
+\begin{itemize}
+\item Boolean $\rightarrow$ Integer
+\item Boolean $\rightarrow$ String
+\item Character $\rightarrow$ String
+\item Integer $\rightarrow$ Boolean
+\end{itemize}
+
+Converting a type to itself is supported, but probably isn't very useful.  Also of note is that coercing a string to a string returns a string object that points to the original string data structure, not a copy.
+
+\subsection{Variables}
+Both global and local variables are supported.
 \begin{lstlisting}
 (setq variable 1)
 (let (var1 (var2 2) (var3))
@@ -541,8 +557,8 @@ The phases are:
 \label{sec:Values}
 The value type represent a (surprise) value.  It can be either an atomic type such as integer or boolean, or a more complex type such as a list or a string.  
 \begin{lstlisting}
-   type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
-                      V_LAMBDA, V_SYMBOL, V_NONE);
+   type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN,
+                      V_LIST,  V_LAMBDA, V_SYMBOL, V_NONE);
    type int32 is range -(2**31) .. 2**31 - 1
      with Size => 32;
    type value(kind : value_type := V_INTEGER) is

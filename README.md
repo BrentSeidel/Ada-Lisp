@@ -51,7 +51,8 @@ PI under Raspberian.
 1. Integers are the standard Ada integer type.
 2. Strings are variable length and implemented using a linked list.
 3. Booleans are either "T" (true) or "NIL" (false).
-4. Lists are linked lists of elements that can be of any datatype (even other lists)
+4. Characters are single ASCII characters (Unicode is not supported).
+5. Lists are linked lists of elements that can be of any datatype (even other lists)
 
 ### Supported Operations
 1. Basic arithmetic
@@ -80,8 +81,9 @@ figure out how first.
 ### Roadmap
 The following updates to the language are planned.  They may not be done in the
 order shown and other items may be added before some of these.
-1. Character data type and conversions (in work).
-2. Improved error handling and general code cleanup (ongoing).
+1. Improved error handling and general code cleanup (ongoing).
+2. Convert the BBS.lisp package to a generic with the data structure sizes as
+parameters.  This will make it easier to resize things for specific targets.
 
 ## Internals
 

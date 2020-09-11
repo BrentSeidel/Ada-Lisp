@@ -24,7 +24,7 @@
 ;  If two values are equal, print pass message, otherwise print fail message
 ;
 (defun verify-equal (actual expected text)
-  (if (= actual expected) (print "Pass: Actual ")
+  (if (= actual expected) (print "PASS: Actual ")
               (print "***FAIL: Actual "))
   (print  actual ", Expected " expected " " text)
   (terpri))
@@ -299,6 +299,23 @@
 (test-pred)
 (setq test-pred 0)
 ;
-(dump)
+;  Test coerce and quoted symbols
+;
+(defun test-coerce ()
+  (verify-equal 1 (coerce 'integer t) "Boolean to integer")
+  (verify-equal 0 (coerce 'integer nil) "Boolean to integer")
+  (verify-equal "T" (coerce 'string t) "Boolean to string")
+  (verify-equal "NIL" (coerce 'string nil) "Boolean to string")
+  (verify-equal "A" (coerce 'string #\A) "Character to string")
+  (verify-equal "@" (coerce 'string #\@) "Character to string")
+  (verify-equal T (coerce 'boolean 1) "Integer to boolean")
+  (verify-equal NIL (coerce 'boolean 0) "Integer to boolean"))
+;
+(print "===> Testing coercion")
+(terpri)
+(test-coerce)
+(setq test-coerce 0)
+;
+;(dump)
 (exit)
 
