@@ -39,6 +39,11 @@
   (if nil (fail "NIL literal does not work")
           (pass "NIL literal works")))
 ;
+(print "===> Testing booleans")
+(terpri)
+(test-bool)
+(setq test-bool 0)
+;
 ;  Test integer comparisons
 ;
 (defun test-int-cmp ()
@@ -59,6 +64,11 @@
   (if (> -2 -1) (fail "-2 > -1") (pass "-2 > -1"))
   (if (/= -2 -1) (pass "-2 /= -1") (fail "-2 /= -1")))
 ;
+(print "===> Testing integer comparisons")
+(terpri)
+(test-int-cmp)
+(setq test-int-cmp 0)
+;
 ;  Test string comparisons
 ;
 (defun test-str-cmp ()
@@ -74,6 +84,11 @@
   (if (< "A" "AA") (pass "A < AA") (fail "A < AA"))
   (if (> "A" "AA") (fail "A > AA") (pass "A > AA"))
   (if (/= "A" "AA") (pass "A /= AA") (fail "A /= AA")))
+;
+(print "===> Testing string comparisons")
+(terpri)
+(test-str-cmp)
+(setq test-str-cmp 0)
 ;
 ;  Test basic math functions
 ;
@@ -93,6 +108,11 @@
   (verify-equal (/ -24 -3) 8 "Div negative")
   (verify-equal (/ 24 5) 4 "Div inexact"))
 ;
+(print "===> Testing basic math operations")
+(terpri)
+(test-basic-math)
+(setq test-basic-math 0)
+;
 ;  Test global variables with setq
 ;
 (defun test-global ()
@@ -102,6 +122,11 @@
   (verify-equal **GLOB** 2 "Increment global")
   (setq **GLOB** "Hello")
   (verify-equal **GLOB** "Hello" "Set global to string"))
+;
+(print "===> Testing globals")
+(terpri)
+(test-global)
+(setq test-global 0)
 ;
 ;  Test local variables with setq
 ;
@@ -122,6 +147,11 @@
       (verify-equal a 20 "A is 20"))
     (verify-equal a 4 "A is 4")))
 ;
+(print "===> Testing let")
+(terpri)
+(test-let)
+(setq test-let 0)
+;
 ;  Test dowhile operation
 ;
 (defun test-dowhile ()
@@ -134,6 +164,11 @@
     (verify-equal count 10 "Count is 10")
     (verify-equal accum 55 "Accumulator is 55")))
 ;
+(print "===> Testing dowhile")
+(terpri)
+(test-dowhile)
+(setq test-dowhile 0)
+;
 ;  Test dotimes operation
 ;
 (defun test-dotimes ()
@@ -144,6 +179,11 @@
       (setq accum (+ accum n))))
     (verify-equal result 20 "Result returned")
     (verify-equal accum 45 "Accumulator is 45")))
+;
+(print "===> Testing dotimes")
+(terpri)
+(test-dotimes)
+(setq test-dotimes 0)
 ;
 ;  Test logical operations
 ;
@@ -166,6 +206,11 @@
   (verify-equal (or #xF000 #xF0) #xF0F0 "Produces #xF0F0")
   (verify-equal (not (and T NIL)) T "T nand NIL -> T"))
 ;
+(print "===> Testing logic operations")
+(terpri)
+(test-logic)
+(setq test-logic 0)
+;
 ;  Test character data type and operations
 ;
 (defun test-char ()
@@ -181,6 +226,11 @@
   (verify-equal (int-char 66) #\B "Character code 66 is B")
   (verify-equal (char-downcase #\A) #\a "Lower case A is a")
   (verify-equal (char-upcase #\a) #\A "Upper case a is A"))
+;
+(print "===> Testing characters")
+(terpri)
+(test-char)
+(setq test-char 0)
 ;
 ;  Test string operations
 ;
@@ -199,6 +249,11 @@
   (verify-equal "hello" (string-downcase "HELLO") "Lower case text")
   (verify-equal "-bye" (subseq "Good-bye" 4) "Subsequence with default end")
   (verify-equal "d-b" (subseq "Good-bye" 3 6) "Subsequence with specified end"))
+;
+(print "===> Testing strings")
+(terpri)
+(test-str)
+(setq test-str 0)
 ;
 ;  Test predicates
 ;
@@ -238,4 +293,12 @@
   (if (stringp #\C) (fail "simple-string-p is true") (pass "simple-string-p is false"))
   (if (symbolp car) (pass "symbolp is true") (fail "symbolp is false"))
   (if (symbolp #\@) (fail "symbolp is true") (pass "symbolp is true")))
+;
+(print "===> Testing predicates")
+(terpri)
+(test-pred)
+(setq test-pred 0)
+;
+(dump)
+(exit)
 

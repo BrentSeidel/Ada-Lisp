@@ -22,7 +22,7 @@ package bbs.lisp is
    max_stack : constant Integer := 100;
    --
    type cons_index is range -1 .. max_cons;
-   type symb_index is range 0 .. max_symb;
+   type symb_index is range -1 .. max_symb;
    type string_index is range -1 .. max_string;
    type stack_index is range 0 .. max_stack;
    --
@@ -30,7 +30,7 @@ package bbs.lisp is
    --  can be a cons cell, a value, a symbol, a temporary symbol a stack
    --  variable, or nothing.
    --
-   type ptr_type is (E_CONS, E_ERROR, E_NIL, E_STACK, E_SYMBOL, E_QSYMBOL,
+   type ptr_type is (E_CONS, E_ERROR, E_NIL, E_STACK, E_SYMBOL,
                      E_TEMPSYM, E_VALUE);
    --
    --  This indicates what kind of data is in a value.  These are the allowed
@@ -113,8 +113,6 @@ package bbs.lisp is
                tempsym : string_index;
             when E_SYMBOL =>
                sym : symb_index;
-            when E_QSYMBOL =>
-               qsym : symb_index;
             when E_STACK =>
                st_name : string_index;
                st_offset : stack_index;
@@ -178,7 +176,7 @@ package bbs.lisp is
    --  sizes for statically allocated data structures is defined here.
    --
    cons_table : array (cons_index'First + 1 .. cons_index'Last) of cons;
-   symb_table : array (symb_index) of symbol;
+   symb_table : array (symb_index'First + 1 .. symb_index'Last) of symbol;
    --
    --  Do initialization and define text I/O routines
    --

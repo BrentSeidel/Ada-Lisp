@@ -465,7 +465,7 @@ package body bbs.lisp.parser is
             el := find_variable(test, False);
          else
             if get_symb(symb, test) then
-               el := (Kind => E_QSYMBOL, qsym => symb);
+               el := (Kind => E_VALUE, v => (kind => V_QSYMBOL, qsym => symb));
             else
                el := (kind => E_ERROR);
                error("parse symbol", "Unable to allocate string fragment.");

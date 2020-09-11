@@ -9,7 +9,7 @@ package body bbs.lisp.memory is
          cons_table(i).car := (Kind => E_NIL);
          cons_table(i).cdr := (Kind => E_NIL);
       end loop;
-      for i in symb_index loop
+      for i in symb_index'First + 1 .. symb_index'Last loop
          symb_table(i).ref := 0;
       end loop;
       for i in string_index'First + 1 .. string_index'Last loop

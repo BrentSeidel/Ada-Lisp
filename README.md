@@ -51,6 +51,7 @@ PI under Raspberian.
 1. Integers are the standard Ada integer type.
 2. Strings are variable length and implemented using a linked list.
 3. Booleans are either "T" (true) or "NIL" (false).
+4. Lists are linked lists of elements that can be of any datatype (even other lists)
 
 ### Supported Operations
 1. Basic arithmetic
@@ -79,8 +80,8 @@ figure out how first.
 ### Roadmap
 The following updates to the language are planned.  They may not be done in the
 order shown and other items may be added before some of these.
-2. Character data type and conversions (in work).
-4. Improved error handling and general code cleanup (ongoing).
+1. Character data type and conversions (in work).
+2. Improved error handling and general code cleanup (ongoing).
 
 ## Internals
 

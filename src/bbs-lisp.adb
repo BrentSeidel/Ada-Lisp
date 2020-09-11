@@ -11,6 +11,7 @@ with BBS.lisp.evaluate.mem;
 with BBS.lisp.evaluate.misc;
 with BBS.lisp.evaluate.pred;
 with BBS.lisp.evaluate.str;
+with BBS.lisp.evaluate.symb;
 with BBS.lisp.evaluate.vars;
 with BBS.lisp.memory;
 with BBS.lisp.parser;
@@ -46,6 +47,7 @@ package body bbs.lisp is
       add_builtin("char-int", BBS.lisp.evaluate.char.char_int'Access);
       add_builtin("char-upcase", BBS.lisp.evaluate.char.char_upcase'Access);
       add_builtin("characterp", BBS.lisp.evaluate.pred.characterp'Access);
+      add_builtin("coerce", BBS.lisp.evaluate.symb.coerce'Access);
       add_builtin("compiled-function-p", BBS.lisp.evaluate.pred.compiled_function_p'Access);
       add_builtin("complexp", BBS.lisp.evaluate.pred.return_false'Access);
       add_builtin("cons", BBS.lisp.evaluate.list.cons'Access);
@@ -197,9 +199,6 @@ package body bbs.lisp is
             print(e.v);
          when E_SYMBOL =>
             print(e.sym);
-         when E_QSYMBOL =>
-            put("'");
-            print(e.qsym);
          when E_TEMPSYM =>
             put("Tempsym");
          when E_STACK =>
@@ -413,7 +412,7 @@ package body bbs.lisp is
    --
    procedure dump_symbols is
    begin
-      for i in symb_index loop
+      for i in symb_index'First + 1 .. symb_index'Last loop
          if symb_table(i).ref > 0 then
             Put("Symbol " & Integer'Image(Integer(i))
                             & " Name ");
@@ -469,7 +468,7 @@ package body bbs.lisp is
       flag := BBS.lisp.strings.str_to_lisp(temp, n);
       if flag then
          BBS.lisp.strings.uppercase(temp);
-         for i in symb_index loop
+         for i in symb_index'First + 1 .. symb_index'Last loop
             if symb_table(i).ref = 0 then
                free := i;
                available := True;
@@ -496,7 +495,7 @@ package body bbs.lisp is
       available : Boolean := False;
    begin
       BBS.lisp.strings.uppercase(n);
-      for i in symb_index loop
+      for i in symb_index'First + 1 .. symb_index'Last loop
          if symb_table(i).ref = 0 then
             free := i;
             available := True;
@@ -539,7 +538,7 @@ package body bbs.lisp is
       --
       --  Search the symbol table
       --
-      for i in symb_index loop
+      for i in symb_index'First + 1 .. symb_index'Last loop
          if bbs.lisp.strings.compare(n, symb_table(i).str) = CMP_EQ then
             temp := i;
             symb := symb_table(temp);

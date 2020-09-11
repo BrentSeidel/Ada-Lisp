@@ -22,8 +22,6 @@ package body BBS.lisp.evaluate.cond is
       end if;
       if t1.kind = E_VALUE then
          v1 := t1.v;
-      elsif t1.kind = E_QSYMBOL then
-         v1 := (kind => V_QSYMBOL, qsym => t1.qsym);
       else
          error("eval_comp", "First parameter does not evaluate to a value");
          return (kind => E_ERROR);
@@ -42,8 +40,6 @@ package body BBS.lisp.evaluate.cond is
       end if;
       if t2.kind = E_VALUE then
          v2 := t2.v;
-      elsif t2.kind = E_QSYMBOL then
-         v2 := (kind => V_QSYMBOL, qsym => t2.qsym);
       else
          error("eval_comp", "Second parameter does not evaluate to a value");
          BBS.lisp.memory.deref(t1);
