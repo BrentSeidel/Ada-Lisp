@@ -7,7 +7,7 @@ package BBS.lisp.evaluate.symb is
    --    integer -> boolean (0 -> NIL, /= 0 -> T)
    --
    function coerce(e : element_type) return element_type;
---   function eval_not(e : element_type) return element_type;
+   function concatenate(e : element_type) return element_type;
 
 private
    --

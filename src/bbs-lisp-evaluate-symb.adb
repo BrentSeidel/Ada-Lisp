@@ -48,27 +48,9 @@ package body BBS.lisp.evaluate.symb is
          return (kind => E_ERROR);
       end if;
       --
-      --  Get first parameter
-      --
-      t1 := first_value(t);
-      if t1.kind = E_ERROR then
-         error("coerce", "Error reported evaluating first parameter.");
-         return t1;
-      end if;
-      if t1.kind = E_VALUE then
-         v1 := t1.v;
-      else
-         error("coerce", "First parameter does not evaluate to a value.");
-         BBS.lisp.memory.deref(t1);
-         return (kind => E_ERROR);
-      end if;
-      if v1.kind /= V_QSYMBOL then
-         error("coerce", "First parameter must be a quoted symbol.");
-         BBS.lisp.memory.deref(t1);
-         return (kind => E_ERROR);
-      end if;
-      --
-      --  Get second parameter
+      --  Get first parameter.  Note that t1 and t2 are swapped around because in
+      --  the first version of this function, the parameters were swapped.  This
+      --  was not consistent with Common Lisp and has been changed.
       --
       if isList(t) then
          t2 := first_value(t);
@@ -88,9 +70,30 @@ package body BBS.lisp.evaluate.symb is
          return (kind => E_ERROR);
       end if;
       --
+      --  Get second parameter
+      --
+      t1 := first_value(t);
+      if t1.kind = E_ERROR then
+         error("coerce", "Error reported evaluating first parameter.");
+         return t1;
+      end if;
+      if t1.kind = E_VALUE then
+         v1 := t1.v;
+      else
+         error("coerce", "First parameter does not evaluate to a value.");
+         BBS.lisp.memory.deref(t1);
+         return (kind => E_ERROR);
+      end if;
+      if v1.kind /= V_QSYMBOL then
+         error("coerce", "First parameter must be a quoted symbol.");
+         BBS.lisp.memory.deref(t1);
+         return (kind => E_ERROR);
+      end if;
+      --
       --  Now do the processing
       --
       if v1.qsym = sym_char then
+         --  character -> character
          if v2.kind = V_CHARACTER then
             return (kind => E_VALUE, v => v2);
          else
@@ -100,10 +103,11 @@ package body BBS.lisp.evaluate.symb is
             return (kind => E_ERROR);
          end if;
       elsif v1.qsym = sym_int then
-         --    boolean -> integer (NIL -> 0, T -> 1)
          if v2.kind = V_INTEGER then
+            --  integer -> integer
             return (kind => E_VALUE, v => v2);
          elsif v2.kind = V_BOOLEAN then
+            --  boolean -> integer (NIL -> 0, T -> 1)
             if v2.b then
                return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
             else
@@ -116,10 +120,11 @@ package body BBS.lisp.evaluate.symb is
             return (kind => E_ERROR);
          end if;
       elsif v1.qsym = sym_bool then
-         --    integer -> boolean (0 -> NIL, /= 0 -> T)
          if v2.kind = V_BOOLEAN then
+            -- boolean -> boolean
             return (kind => E_VALUE, v => v2);
          elsif v2.kind = V_INTEGER then
+            --  integer -> boolean (0 -> NIL, /= 0 -> T)
             if v2.i = 0 then
                return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
             else
@@ -132,11 +137,11 @@ package body BBS.lisp.evaluate.symb is
             return (kind => E_ERROR);
          end if;
       elsif v1.qsym = sym_str then
-   --    character -> string
-   --    boolean -> string
          if v2.kind = V_STRING then
+            -- string -> string
             return (kind => E_VALUE, v => v2);
          elsif v2.kind = V_CHARACTER then
+            --  character -> string
             if BBS.lisp.memory.alloc(str) then
                string_table(str).str(1) := v2.c;
                string_table(str).len := 1;
@@ -146,6 +151,7 @@ package body BBS.lisp.evaluate.symb is
                return (kind => E_ERROR);
             end if;
          elsif v2.kind = V_BOOLEAN then
+            --  boolean -> string
             if BBS.lisp.memory.alloc(str) then
                if v2.b then
                   string_table(str).str(1) := 'T';
@@ -177,4 +183,49 @@ package body BBS.lisp.evaluate.symb is
       BBS.lisp.memory.deref(t2);
       return (kind => E_ERROR);
    end;
+   --
+   function concatenate(e : element_type) return element_type is
+      t  : element_type := e;
+      t1 : element_type;
+--      t2 : element_type;
+      v1 : value;
+--      v2 : value;
+--      str : string_index;
+   begin
+      if not_initialized then
+         if not init_syms then
+            error("coerce", "Unable to initialize symbols");
+            return(kind => E_ERROR);
+         end if;
+      end if;
+      if e.kind /= E_CONS then
+         error("coerce", "Internal error.  Should have a list.");
+         return (kind => E_ERROR);
+      end if;
+      --
+      --  Get first parameter
+      --
+      t1 := first_value(t);
+      if t1.kind = E_ERROR then
+         error("coerce", "Error reported evaluating first parameter.");
+         return t1;
+      end if;
+      if t1.kind = E_VALUE then
+         v1 := t1.v;
+      else
+         error("coerce", "First parameter does not evaluate to a value.");
+         BBS.lisp.memory.deref(t1);
+         return (kind => E_ERROR);
+      end if;
+      if v1.kind /= V_QSYMBOL then
+         error("coerce", "First parameter must be a quoted symbol.");
+         BBS.lisp.memory.deref(t1);
+         return (kind => E_ERROR);
+      end if;
+      --
+      --  Get second parameter
+      --
+      return (kind => E_ERROR);
+   end;
+   --
 end;

@@ -373,7 +373,7 @@ The \function{subseq} operation returns a substring of the original string.  The
 \subsection{Symbol Related Operations}
 Some operations use a quoted symbol to indicate what type of operation should be performed or what type of date should be returned.  These thus require a bit more description than some of the other operations.
 \begin{lstlisting}
-(coerce 'integer t)
+(coerce t 'integer)
 \end{lstlisting}
 
 The \function{coerce} operation is used to convert data of one type to another.  The current supported conversions are:
@@ -558,7 +558,7 @@ The phases are:
 The value type represent a (surprise) value.  It can be either an atomic type such as integer or boolean, or a more complex type such as a list or a string.  
 \begin{lstlisting}
    type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN,
-                      V_LIST,  V_LAMBDA, V_SYMBOL, V_NONE);
+                      V_LIST,  V_LAMBDA, V_SYMBOL, V_QSYMBOL, V_NONE);
    type int32 is range -(2**31) .. 2**31 - 1
      with Size => 32;
    type value(kind : value_type := V_INTEGER) is
@@ -578,6 +578,8 @@ The value type represent a (surprise) value.  It can be either an atomic type su
             lam : cons_index;
          when V_SYMBOL =>
             sym : symb_index;
+         when V_QSYMBOL =>
+            qsym : symb_index;
          when V_NONE =>
             null;
          end case;
@@ -592,6 +594,8 @@ The data types available are:
   \item[V\_BOOLEAN] is a boolean data type that can represent false or true.  Comparison operations return boolean values and certain functions expect boolean values.
   \item[V\_LIST] is a list data type.  It is approximately equal to an element type of \constant{E\_CONS} (see section \ref{sec:Cons}).  The value structure contains an index into the cons cell array.
   \item[V\_LAMBDA] is a list data type that is used to represent a user defined function.  It is approximately equivalent to the symbol type of \constant{SY\_LAMBDA}, except that it can be assigned to stack variables.
+  \item[V\_QSYMBOL] is a quoted symbol.
+  \item[V\_SYMBOL] is a symbol.  This is currently not used and may be deleted.
 \end{description}
 
 \subsection{Strings}
@@ -625,6 +629,20 @@ Memory management is done by reference counting.  When the number of references 
 
 \section{Embedding}
 This section covers how to embed the list interpreter in another program.
+
+\section{Opportunities for Optimizing}
+No big effort has gone into optimizing the interpreter.  Should the need arise, there are a few places where things could be optimized.
+
+\subsection{Memory Management}
+If allocation becomes a bottleneck, the free items could be linked together in a list.  That way a new item could be picked off the head of the list instead of searching through all the items.  This would also require the list to be created at initialization.
+
+\subsection{Constant expressions}
+During parsing, it may be possible to recognize some constant expressions are replace them by their result.  For example:
+\lstset{language=[Tiny]Lisp}
+\begin{lstlisting}
+(+ 1 2 3) -> 6
+\end{lstlisting}
+
 
 \end{document}
 

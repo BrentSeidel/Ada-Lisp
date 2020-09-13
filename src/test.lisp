@@ -302,14 +302,14 @@
 ;  Test coerce and quoted symbols
 ;
 (defun test-coerce ()
-  (verify-equal 1 (coerce 'integer t) "Boolean to integer")
-  (verify-equal 0 (coerce 'integer nil) "Boolean to integer")
-  (verify-equal "T" (coerce 'string t) "Boolean to string")
-  (verify-equal "NIL" (coerce 'string nil) "Boolean to string")
-  (verify-equal "A" (coerce 'string #\A) "Character to string")
-  (verify-equal "@" (coerce 'string #\@) "Character to string")
-  (verify-equal T (coerce 'boolean 1) "Integer to boolean")
-  (verify-equal NIL (coerce 'boolean 0) "Integer to boolean"))
+  (verify-equal 1 (coerce t 'integer) "Boolean to integer")
+  (verify-equal 0 (coerce nil 'integer) "Boolean to integer")
+  (verify-equal "T" (coerce t 'string) "Boolean to string")
+  (verify-equal "NIL" (coerce nil 'string) "Boolean to string")
+  (verify-equal "A" (coerce #\A 'string) "Character to string")
+  (verify-equal "@" (coerce #\@ 'string) "Character to string")
+  (verify-equal T (coerce 1 'boolean) "Integer to boolean")
+  (verify-equal NIL (coerce 0 'boolean) "Integer to boolean"))
 ;
 (print "===> Testing coercion")
 (terpri)
