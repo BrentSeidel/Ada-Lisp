@@ -14,6 +14,9 @@ package body BBS.lisp.evaluate.symb is
       if not get_symb(sym_int, "INTEGER") then
          return False;
       end if;
+      if not get_symb(sym_list, "LIST") then
+         return False;
+      end if;
       if not get_symb(sym_str, "STRING") then
          return False;
       end if;
@@ -187,19 +190,26 @@ package body BBS.lisp.evaluate.symb is
    function concatenate(e : element_type) return element_type is
       t  : element_type := e;
       t1 : element_type;
---      t2 : element_type;
+      t2 : element_type;
       v1 : value;
---      v2 : value;
---      str : string_index;
+      v2 : value;
+      str_head : string_index := string_index'First;
+      dest_str : string_index := string_index'First;
+      src_str  : string_index := string_index'First;
+      temp_str : string_index := string_index'First;
+      dest_ptr : Integer;
+      src_ptr  : integer;
+--      cons_head : cons_index := -1;
+--      cons_new : cons_index := -1;
    begin
       if not_initialized then
          if not init_syms then
-            error("coerce", "Unable to initialize symbols");
+            error("concatenate", "Unable to initialize symbols");
             return(kind => E_ERROR);
          end if;
       end if;
       if e.kind /= E_CONS then
-         error("coerce", "Internal error.  Should have a list.");
+         error("concatenate", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
       --
@@ -207,23 +217,108 @@ package body BBS.lisp.evaluate.symb is
       --
       t1 := first_value(t);
       if t1.kind = E_ERROR then
-         error("coerce", "Error reported evaluating first parameter.");
+         error("concatenate", "Error reported evaluating first parameter.");
          return t1;
       end if;
       if t1.kind = E_VALUE then
          v1 := t1.v;
       else
-         error("coerce", "First parameter does not evaluate to a value.");
+         error("concatenate", "First parameter does not evaluate to a value.");
          BBS.lisp.memory.deref(t1);
          return (kind => E_ERROR);
       end if;
       if v1.kind /= V_QSYMBOL then
-         error("coerce", "First parameter must be a quoted symbol.");
+         error("concatenate", "First parameter must be a quoted symbol.");
          BBS.lisp.memory.deref(t1);
          return (kind => E_ERROR);
       end if;
+      if (v1.qsym /= sym_str) and (v1.qsym /= sym_list) then
+         error("concatenate", "Can only concatinate strings and lists");
+         put("Unrecognized type: ");
+         print(v1);
+         new_line;
+      end if;
+      --
+      --  Second parameter - will probably move
+      --
+      --
+      --  Process strings or lists
+      --
+      if v1.qsym = sym_str then
+         --
+         --  Concatinate strings
+         --
+         if not BBS.lisp.memory.alloc(str_head) then
+            error("concatinate", "Unable to allocate string fragment.");
+            BBS.lisp.memory.deref(t2);
+            return (kind => E_ERROR);
+         end if;
+         dest_str := str_head;
+         dest_ptr := 1;
+         while isList(t) loop
+            if isList(t) then
+               t2 := first_value(t);
+            else
+               error("concatenate", "Cannot compare a single element.");
+               return (kind => E_ERROR);
+            end if;
+            if t2.kind = E_ERROR then
+               error("concatenate", "Error reported evaluating second parameter.");
+               return t2;
+            end if;
+            if t2.kind = E_VALUE then
+               v2 := t2.v;
+            else
+               error("concatenate", "Second parameter does not evaluate to a value");
+               BBS.lisp.memory.deref(t2);
+               return (kind => E_ERROR);
+            end if;
+            if v2.kind /= V_STRING then
+               error("concatinate", "Unable to concatinate " & value_type'Image(v2.kind) &
+                    " to a string.");
+               BBS.lisp.memory.deref(v2);
+               return(kind => E_ERROR);
+            end if;
+            src_ptr := 1;
+            src_str := v2.s;
+            loop
+               string_table(dest_str).str(dest_ptr) := string_table(src_str).str(src_ptr);
+               string_table(dest_str).len := string_table(dest_str).len + 1;
+               dest_ptr := dest_ptr + 1;
+               src_ptr := src_ptr + 1;
+               if (src_ptr > fragment_len) or (src_ptr > string_table(src_str).len) then
+                  src_str := string_table(src_str).next;
+                  src_ptr := 1;
+               end if;
+               exit when src_str = string_index'First;
+               if dest_ptr > fragment_len then
+                  if not BBS.lisp.memory.alloc(temp_str) then
+                     error("concatinate", "Unable to allocate string fragment");
+                     BBS.lisp.memory.deref(str_head);
+                     return (kind => E_ERROR);
+                  end if;
+                  string_table(dest_str).next := temp_str;
+                  dest_str := temp_str;
+                  dest_ptr := 1;
+               end if;
+            end loop;
+         end loop;
+         return (kind => E_VALUE, v => (kind => V_STRING, s => str_head));
+      elsif v1.qsym = sym_list then
+         --
+         -- Concatinate lists
+         --
+         null;
+--         if v2.kind /= V_LIST then
+--            error("concatinate", "Unable to concatinate " & value_type'Image(v2.kind) &
+--                    " to a string.");
+--            BBS.lisp.memory.deref(v2);
+--            return(kind => E_ERROR);
+--         end if;
+      end if;
       --
       --  Get second parameter
+      --
       --
       return (kind => E_ERROR);
    end;
