@@ -189,8 +189,8 @@ package body BBS.lisp.evaluate.symb is
    --
    function concatenate(e : element_type) return element_type is
       t  : element_type := e;
-      t1 : element_type;
-      t2 : element_type;
+      t1 : element_type := NIL_ELEM;
+      t2 : element_type := NIL_ELEM;
       v1 : value;
       v2 : value;
       str_head : string_index := string_index'First;
@@ -302,6 +302,7 @@ package body BBS.lisp.evaluate.symb is
                   dest_ptr := 1;
                end if;
             end loop;
+            BBS.lisp.memory.deref(t2);
          end loop;
          return (kind => E_VALUE, v => (kind => V_STRING, s => str_head));
       elsif v1.qsym = sym_list then
