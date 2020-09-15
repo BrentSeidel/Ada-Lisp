@@ -374,6 +374,8 @@ The \function{subseq} operation returns a substring of the original string.  The
 Some operations use a quoted symbol to indicate what type of operation should be performed or what type of date should be returned.  These thus require a bit more description than some of the other operations.
 \begin{lstlisting}
 (coerce t 'integer)
+(concatinate 'string "First string, " "second string, "
+   "and finally the third string.")
 \end{lstlisting}
 
 The \function{coerce} operation is used to convert data of one type to another.  The current supported conversions are:
@@ -385,6 +387,8 @@ The \function{coerce} operation is used to convert data of one type to another. 
 \end{itemize}
 
 Converting a type to itself is supported, but probably isn't very useful.  Also of note is that coercing a string to a string returns a string object that points to the original string data structure, not a copy.
+
+The \function{concatenate} operation works on both strings and lists.  It constructs a new list or string that is the concatenation of the parameters.  Note that in the case of a list, elements that are lists or strings are not copied.  Only the references are copied.
 
 \subsection{Variables}
 Both global and local variables are supported.

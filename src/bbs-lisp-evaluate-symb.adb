@@ -193,14 +193,6 @@ package body BBS.lisp.evaluate.symb is
       t2 : element_type := NIL_ELEM;
       v1 : value;
       v2 : value;
-      str_head : string_index := string_index'First;
-      dest_str : string_index := string_index'First;
-      src_str  : string_index := string_index'First;
-      temp_str : string_index := string_index'First;
-      dest_ptr : Integer;
-      src_ptr  : integer;
---      cons_head : cons_index := -1;
---      cons_new : cons_index := -1;
    begin
       if not_initialized then
          if not init_syms then
@@ -248,74 +240,127 @@ package body BBS.lisp.evaluate.symb is
          --
          --  Concatinate strings
          --
-         if not BBS.lisp.memory.alloc(str_head) then
-            error("concatinate", "Unable to allocate string fragment.");
-            BBS.lisp.memory.deref(t2);
-            return (kind => E_ERROR);
-         end if;
-         dest_str := str_head;
-         dest_ptr := 1;
-         while isList(t) loop
-            if isList(t) then
-               t2 := first_value(t);
-            else
-               error("concatenate", "Cannot compare a single element.");
-               return (kind => E_ERROR);
-            end if;
-            if t2.kind = E_ERROR then
-               error("concatenate", "Error reported evaluating second parameter.");
-               return t2;
-            end if;
-            if t2.kind = E_VALUE then
-               v2 := t2.v;
-            else
-               error("concatenate", "Second parameter does not evaluate to a value");
+         declare
+            str_head : string_index := string_index'First;
+            dest_str : string_index := string_index'First;
+            src_str  : string_index := string_index'First;
+            temp_str : string_index := string_index'First;
+            dest_ptr : Integer;
+            src_ptr  : integer;
+         begin
+            if not BBS.lisp.memory.alloc(str_head) then
+               error("concatinate", "Unable to allocate string fragment.");
                BBS.lisp.memory.deref(t2);
                return (kind => E_ERROR);
             end if;
-            if v2.kind /= V_STRING then
-               error("concatinate", "Unable to concatinate " & value_type'Image(v2.kind) &
-                    " to a string.");
-               BBS.lisp.memory.deref(v2);
-               return(kind => E_ERROR);
-            end if;
-            src_ptr := 1;
-            src_str := v2.s;
-            loop
-               string_table(dest_str).str(dest_ptr) := string_table(src_str).str(src_ptr);
-               string_table(dest_str).len := string_table(dest_str).len + 1;
-               dest_ptr := dest_ptr + 1;
-               src_ptr := src_ptr + 1;
-               if (src_ptr > fragment_len) or (src_ptr > string_table(src_str).len) then
-                  src_str := string_table(src_str).next;
-                  src_ptr := 1;
+            dest_str := str_head;
+            dest_ptr := 1;
+            while isList(t) loop
+               if isList(t) then
+                  t2 := first_value(t);
+               else
+                  error("concatenate", "Cannot compare a single element.");
+                  return (kind => E_ERROR);
                end if;
-               exit when src_str = string_index'First;
-               if dest_ptr > fragment_len then
-                  if not BBS.lisp.memory.alloc(temp_str) then
-                     error("concatinate", "Unable to allocate string fragment");
-                     BBS.lisp.memory.deref(str_head);
-                     return (kind => E_ERROR);
+               if t2.kind = E_ERROR then
+                  error("concatenate", "Error reported evaluating second parameter.");
+                  return t2;
+               end if;
+               if t2.kind = E_VALUE then
+                  v2 := t2.v;
+               else
+                  error("concatenate", "Second parameter does not evaluate to a value");
+                  BBS.lisp.memory.deref(t2);
+                  return (kind => E_ERROR);
+               end if;
+               if v2.kind /= V_STRING then
+                  error("concatinate", "Unable to concatinate " & value_type'Image(v2.kind) &
+                          " to a string.");
+                  BBS.lisp.memory.deref(v2);
+                  return(kind => E_ERROR);
+               end if;
+               src_ptr := 1;
+               src_str := v2.s;
+               loop
+                  string_table(dest_str).str(dest_ptr) := string_table(src_str).str(src_ptr);
+                  string_table(dest_str).len := string_table(dest_str).len + 1;
+                  dest_ptr := dest_ptr + 1;
+                  src_ptr := src_ptr + 1;
+                  if (src_ptr > fragment_len) or (src_ptr > string_table(src_str).len) then
+                     src_str := string_table(src_str).next;
+                     src_ptr := 1;
                   end if;
-                  string_table(dest_str).next := temp_str;
-                  dest_str := temp_str;
-                  dest_ptr := 1;
-               end if;
+                  exit when src_str = string_index'First;
+                  if dest_ptr > fragment_len then
+                     if not BBS.lisp.memory.alloc(temp_str) then
+                        error("concatinate", "Unable to allocate string fragment");
+                        BBS.lisp.memory.deref(str_head);
+                        BBS.lisp.memory.deref(t2);
+                        return (kind => E_ERROR);
+                     end if;
+                     string_table(dest_str).next := temp_str;
+                     dest_str := temp_str;
+                     dest_ptr := 1;
+                  end if;
+               end loop;
+               BBS.lisp.memory.deref(t2);
             end loop;
-            BBS.lisp.memory.deref(t2);
-         end loop;
-         return (kind => E_VALUE, v => (kind => V_STRING, s => str_head));
+            return (kind => E_VALUE, v => (kind => V_STRING, s => str_head));
+         end;
       elsif v1.qsym = sym_list then
          --
          -- Concatinate lists
          --
-         null;
---         if v2.kind /= V_LIST then
---            error("concatinate", "Unable to concatinate " & value_type'Image(v2.kind) &
---                    " to a string.");
---            BBS.lisp.memory.deref(v2);
---            return(kind => E_ERROR);
---         end if;
+         declare
+            cons_head : cons_index := cons_index'First;
+            dest_cons : cons_index := cons_index'First;
+            temp_cons : cons_index := cons_index'First;
+            src_cons : cons_index := cons_index'First;
+         begin
+            while isList(t) loop
+               if isList(t) then
+                  t2 := first_value(t);
+               else
+                  error("concatenate", "Cannot compare a single element.");
+                  return (kind => E_ERROR);
+               end if;
+               if t2.kind = E_ERROR then
+                  error("concatenate", "Error reported evaluating second parameter.");
+                  return t2;
+               end if;
+               if isList(t2) then
+                  src_cons := getList(t2);
+               else
+                  error("concatenate", "Second parameter does not evaluate to a list");
+                  BBS.lisp.memory.deref(t2);
+                  return (kind => E_ERROR);
+               end if;
+               loop
+                  if not BBS.lisp.memory.alloc(temp_cons) then
+                     error("concatinate", "Unable to allocate cons.");
+                     BBS.lisp.memory.deref(t2);
+                     BBS.lisp.memory.deref(cons_head);
+                     return (kind => E_ERROR);
+                  end if;
+                  if cons_head = cons_index'First then
+                     cons_head := temp_cons;
+                     dest_cons := temp_cons;
+                  else
+                     cons_table(dest_cons).cdr := (kind => E_VALUE, v => (kind => V_LIST, l => temp_cons));
+                     dest_cons := temp_cons;
+                  end if;
+                  cons_table(dest_cons).car := cons_table(src_cons).car;
+                  BBS.lisp.memory.ref(cons_table(dest_cons).car);
+                  if isList(cons_table(src_cons).cdr) then
+                     src_cons := getList(cons_table(src_cons).cdr);
+                  else
+                     exit;
+                  end if;
+               end loop;
+               BBS.lisp.memory.deref(t2);
+            end loop;
+            return (kind => E_VALUE, v => (kind => V_LIST, l => cons_head));
+         end;
       end if;
       --
       --  Get second parameter
