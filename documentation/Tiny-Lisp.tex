@@ -11,6 +11,8 @@
 
 \usepackage{fancyvrb}
 \usepackage{fancybox}
+
+\usepackage{url}
 %
 % Rules to allow import of graphics files in EPS format
 %
@@ -632,7 +634,52 @@ Memory management is done by reference counting.  When the number of references 
 \section{Utility Functions}
 
 \section{Embedding}
-This section covers how to embed the list interpreter in another program.
+This section covers how to embed the list interpreter in another program.  Here is a minimal host program:
+\begin{lstlisting}
+with Ada.Text_IO;
+with bbs.lisp;
+with new_line;
+--
+--  This is a simple shell routine to call the embedded lisp
+--  interpreter.
+--
+procedure Lisp is
+begin
+   Ada.Text_IO.Put_Line("Tiny lisp interpreter written in Ada.");
+   bbs.lisp.init(Ada.Text_IO.Put_Line'Access, Ada.Text_IO.Put'Access,
+                new_line.New_Line'Access, Ada.Text_IO.Get_Line'Access);
+   bbs.lisp.repl;
+end Lisp;
+\end{lstlisting}
+
+With \function{new\_line} defined as:
+\begin{lstlisting}
+--
+--  The text_io version of newline contains an optional parameter
+--  indicating the number of lines to skip.  The type of this parameter
+--  is defined in Ada.Text_IO.  This makes it awkward to define a
+--  function prototype that can be used both when Ada.Text_IO is
+--  available and when it isn't.  This is a crude hack to define
+--  locally a new_line that has no parameters and uses the
+--  Ada.Text_IO new_line with the default value.
+--
+package new_line is
+   procedure new_line;
+end new_line;
+
+with Ada.Text_IO;
+package body new_line is
+
+   procedure new_line is
+   begin
+      Ada.Text_IO.New_Line;
+   end;
+
+end new_line;
+\end{lstlisting}
+
+It's fairly simple.  Initialize the interpreter and call it.  The only wrinkle is the need to define \function{new\_line}.  The Ada version has an optional parameter of a type defined in \constant{Ada.Text\_IO}.  This is a problem when trying to eliminate dependencies on \constant{Ada.Text\_IO}.  A more complex example of embedding is found in the \url{https://github.com/BrentSeidel/Ada-Arduino-Due} repository.  This repository contains code that runs on an Arduino Due and includes the definition of several \tl{} operations to access attached hardware.
+
 
 \section{Opportunities for Optimizing}
 No big effort has gone into optimizing the interpreter.  Should the need arise, there are a few places where things could be optimized.

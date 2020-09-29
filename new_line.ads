@@ -1,4 +1,3 @@
---with Ada.Text_IO;
 --
 --  The text_io version of newline contains an optional parameter indicating
 --  the number of lines to skip.  The type of this parameter is defined in

@@ -748,6 +748,11 @@ package body bbs.lisp is
          elsif first.kind = E_STACK then
             val := BBS.lisp.stack.search_frames(first.st_offset, first.st_name);
             if val.kind = V_LAMBDA then
+               if msg_flag then
+                  Put("eval_dispatch: Evaluating lambda ");
+                  print(val);
+                  new_line;
+               end if;
                e := bbs.lisp.evaluate.func.eval_function(val.lam, rest);
             else
                BBS.lisp.memory.ref(s);

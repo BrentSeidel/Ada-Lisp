@@ -8,16 +8,16 @@ package body BBS.lisp.evaluate is
    begin
       if e.kind = E_NIL then
          return False;
-      end if;
-      if e.kind = E_VALUE then
+      elsif e.kind = E_VALUE then
          if e.v.kind = V_BOOLEAN  then
             return e.v.b;
          end if;
          return True;
-      end if;
-      if (cons_table(e.ps).car.kind = E_NIL)
-        and (cons_table(e.ps).cdr.kind = E_NIL) then
-         return False;
+      elsif e.kind = E_CONS then
+         if (cons_table(e.ps).car.kind = E_NIL)
+           and (cons_table(e.ps).cdr.kind = E_NIL) then
+            return False;
+         end if;
       end if;
       return True;
    end;

@@ -35,7 +35,7 @@ package body BBS.lisp.evaluate.misc is
          msg_flag := v.b;
          return NIL_ELEM;
       else
-         error("msg", "Parameter must be of integer type, not " & value_type'Image(v.kind));
+         error("msg", "Parameter must be of boolean type, not " & value_type'Image(v.kind));
          return (kind => E_ERROR);
       end if;
    end;

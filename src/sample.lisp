@@ -34,3 +34,21 @@
 (let ((a 20)) (test 7))
 
 (let ((b 30)) (test 8))
+;
+;  Example of a lambda as a condition.
+;
+(setq *value* 10)
+
+(defun test-example ()
+  (setq *value* (- *value* 1))
+  (< 0 *value*))
+
+(defun test-work ()
+  (print "Value is " *value*)
+  (terpri))
+
+(defun test-lam (test-func work-func)
+  (dowhile (test-func) (work-func)))
+
+(test-lam (lambda () (test-example)) (lambda () (test-work)))
+
