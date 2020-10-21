@@ -447,6 +447,327 @@ The Boolean values \constant{NIL} and \constant{T} correspond to \constant{True}
 The list is the basic complex data type.  A list element has two slots (historically called \constant{car} and \constant{cdr}).  Typically the \constant{car} slot contains a data value and the \constant{cdr} slot contains a pointer to the next list element.  The end of a list is indicated by a \constant{NIL} value in the \constant{cdr} slot.
 
 %----------------------------------------------------------
+\chapter{Operation Reference}
+This is an alphabetical list of all the operations.
+\section{Template}
+This is the template for each operation.
+\subsection{Inputs}
+The inputs are listed here.
+\subsection{Output}
+Any output is listed here.
+\subsection{Example}
+An example of the operation is listed here.
+\subsection{Description}
+This describes the operation.  In many cases, it will be fairly simple.
+\subsection{Common Lisp Compatibility}
+This subsection discusses compatibility with Common Lisp.  Usually, this will be a subset of Common Lisp.  In some cases, it may be a supserset.  For example the comparison operators work on more types than Common Lisp supports.
+
+\section{+}
+Addition
+\subsection{Inputs}
+Any number of integers.
+\subsection{Output}
+An integer representing the sum of the inputs.
+\subsection{Example}
+\begin{lstlisting}
+(+ 1 2 3)
+\end{lstlisting}
+Returns the value 6.
+\subsection{Description}
+This operation adds a series of integers.  Note that there is a possibility for integer overflow.
+\subsection{Common Lisp Compatibility}
+This is a subset of Common Lisp in that it only works on integers.
+
+\section{-}
+Subtraction
+\subsection{Inputs}
+Any number of integers.
+\subsection{Output}
+An integer representing the difference of the inputs.  Note that there is a possibility for integer overflow.
+\subsection{Example}
+\begin{lstlisting}
+(- 1 2 3)
+\end{lstlisting}
+Returns the value -4.
+\subsection{Description}
+This operation subtracts a series of integers.  This is done by starting with the first value, then subtracting the second value (if any).  The next value is subtracted from the result.
+\subsection{Common Lisp Compatibility}
+This is a subset of Common Lisp in that it only works on integers.
+
+\section{*}
+Multiplication
+\subsection{Inputs}
+Any number of integers.
+\subsection{Output}
+An integer representing the product of the inputs.  Note that there is a possibility for integer overflow.
+\subsection{Example}
+\begin{lstlisting}
+(* 1 2 3)
+\end{lstlisting}
+Returns the value 6.
+\subsection{Description}
+This operation multiplies a series of integers.
+\subsection{Common Lisp Compatibility}
+This is a subset of Common Lisp in that it only works on integers.
+
+\section{/}
+Division
+\subsection{Inputs}
+Any number of integers.
+\subsection{Output}
+An integer representing the quotient of the inputs.  Division by zero is not checked and will cause an exception.
+\subsection{Example}
+\begin{lstlisting}
+(/ 1 2 3)
+\end{lstlisting}
+Returns the value 0.
+\subsection{Description}
+This operation divides a series of integers.  This is done by starting with the first value, then dividing by the second value (if any).  The result is then divided by the next value, and so on.
+\subsection{Common Lisp Compatibility}
+This is a subset of Common Lisp in that it only works on integers.
+
+\section{=}
+Equals
+\subsection{Inputs}
+Compares two values of the same type.
+\subsection{Output}
+\constant{T} if the values are equal, otherwise \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(= 1 2)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+This operation compares two values of the same type for equality.
+\subsection{Common Lisp Compatibility}
+This operation works on integers, booleans, strings, and quoted symbols.
+
+\section{/=}
+Not-equals
+\subsection{Inputs}
+Compares two values of the same type.
+\subsection{Output}
+\constant{T} if the values are not equal, otherwise \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(= 1 2)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+This operation compares two values of the same type for not equality.
+\subsection{Common Lisp Compatibility}
+This operation works on integers, booleans, strings, and quoted symbols.
+\\
+      "$<$"
+      "$>$"
+      "and"
+
+\section{arrayp}
+Is parameter an array?
+\subsection{Inputs}
+A single value.  Any additional values are ignored..
+\subsection{Output}
+NIL.
+\subsection{Example}
+\begin{lstlisting}
+(arrayp 1 2 3)
+\end{lstlisting}
+Returns the value NIL.
+\subsection{Description}
+Since arrays are not a supported datatype, this always returns NIL.
+\subsection{Common Lisp Compatibility}
+This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+\\
+      "atomp"
+
+\section{bit-vector-p}
+Is parameter a bit vector?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+NIL.
+\subsection{Example}
+\begin{lstlisting}
+(bit-vector-p 1 2 3)
+\end{lstlisting}
+Returns the value NIL.
+\subsection{Description}
+Since bit vectors are not a supported datatype, this always returns NIL.
+\subsection{Common Lisp Compatibility}
+This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+\\
+      "car"
+      "cdr"
+      "char"
+      "char-downcase"
+      "char-int"
+      "char-upcase"
+      "characterp"
+      "coerce"
+      "compiled-function-p",
+
+\section{complexp}
+Is parameter a complex number?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+NIL.
+\subsection{Example}
+\begin{lstlisting}
+(complexp 1 2 3)
+\end{lstlisting}
+Returns the value NIL.
+\subsection{Description}
+Since complex numbers are not a supported datatype, this always returns NIL.
+\subsection{Common Lisp Compatibility}
+This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+\\
+      "concatinate"
+      "cons"
+      "consp"
+      "defun"
+      "dowhile"
+      "dotimes"
+      "dump"
+      "exit"
+      "floatp"
+      "fresh-line"
+      "functionp"
+      "if"
+      "int-char"
+      "integerp"
+      "lambda"
+      "length"
+      "let"
+      "list"
+      "listp"
+      "msg"
+      "not"
+      "nullp"
+      "numberp"
+      "or"
+
+\section{packagep}
+Is parameter a package?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+NIL.
+\subsection{Example}
+\begin{lstlisting}
+(packagep 1 2 3)
+\end{lstlisting}
+Returns the value NIL.
+\subsection{Description}
+Since packages are not a supported datatype, this always returns NIL.
+\subsection{Common Lisp Compatibility}
+This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+\\
+      "parse-integer"
+      "peek8"
+      "peek16"
+      "peek32"
+      "poke8"
+      "poke16"
+      "poke32"
+      "print"
+      "quote"
+
+\section{rationalp}
+Is parameter a rational number?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+NIL.
+\subsection{Example}
+\begin{lstlisting}
+(rationalp 1 2 3)
+\end{lstlisting}
+Returns the value NIL.
+\subsection{Description}
+Since rational numbers are not a supported datatype, this always returns NIL.
+\subsection{Common Lisp Compatibility}
+This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+\\
+      "read-line"
+
+\section{realp}
+Is parameter a real number?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+NIL.
+\subsection{Example}
+\begin{lstlisting}
+(realp 1 2 3)
+\end{lstlisting}
+Returns the value NIL.
+\subsection{Description}
+Since real numbers are not a supported datatype, this always returns NIL.
+\subsection{Common Lisp Compatibility}
+This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+\\
+      "reset"
+      "setq"
+
+\section{simple-bit-vector-p}
+Is parameter a simple bit vector?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+NIL.
+\subsection{Example}
+\begin{lstlisting}
+(simple-bit-vector-p 1 2 3)
+\end{lstlisting}
+Returns the value NIL.
+\subsection{Description}
+Since bit vectors (simple or otherwise) are not a supported datatype, this always returns NIL.
+\subsection{Common Lisp Compatibility}
+This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+\\
+      "simple-string-p"
+
+\section{simple-vector-p}
+Is parameter a simple vector?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+NIL.
+\subsection{Example}
+\begin{lstlisting}
+(simple-vector-p 1 2 3)
+\end{lstlisting}
+Returns the value NIL.
+\subsection{Description}
+Since vectors (simple or otherwise) are not a supported datatype, this always returns NIL.
+\subsection{Common Lisp Compatibility}
+This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+\\
+      "sleep"
+      "string-downcase"
+      "string-upcase"
+      "stringp"
+      "subseq"
+      "symbolp"
+      "terpri"
+
+\section{vectorp}
+Is parameter a vector?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+NIL.
+\subsection{Example}
+\begin{lstlisting}
+(vectorp 1 2 3)
+\end{lstlisting}
+Returns the value NIL.
+\subsection{Description}
+Since vectorps are not a supported datatype, this always returns NIL.
+\subsection{Common Lisp Compatibility}
+This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+%----------------------------------------------------------
 \chapter{Internals}
 As the interpreter is under active development, this section is subject to change without notice.
 
