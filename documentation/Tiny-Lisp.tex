@@ -34,6 +34,8 @@
 \newcommand{\package}[1]{\texttt{#1}}
 \newcommand{\function}[1]{\texttt{#1}}
 \newcommand{\constant}[1]{\emph{\texttt{#1}}}
+\newcommand{\keyword}[1]{\texttt{#1}}
+\newcommand{\datatype}[1]{\texttt{#1}}
 \newcommand{\tl}{Tiny-Lisp}
 \newcommand{\cl}{Common Lisp}
 %
@@ -465,66 +467,66 @@ This subsection discusses compatibility with Common Lisp.  Usually, this will be
 \section{+}
 Addition
 \subsection{Inputs}
-Any number of integers.
+Any number of \datatype{integers}.
 \subsection{Output}
-An integer representing the sum of the inputs.
+An \datatype{integer} representing the sum of the inputs.
 \subsection{Example}
 \begin{lstlisting}
 (+ 1 2 3)
 \end{lstlisting}
 Returns the value 6.
 \subsection{Description}
-This operation adds a series of integers.  Note that there is a possibility for integer overflow.
+This operation adds a series of \datatype{integers}.  Note that there is a possibility for integer overflow.
 \subsection{Common Lisp Compatibility}
-This is a subset of Common Lisp in that it only works on integers.
+This is a subset of Common Lisp in that it only works on \datatype{integers}.
 
 \section{-}
 Subtraction
 \subsection{Inputs}
-Any number of integers.
+Any number of \datatype{integers}.
 \subsection{Output}
-An integer representing the difference of the inputs.  Note that there is a possibility for integer overflow.
+An \datatype{integer} representing the difference of the inputs.  Note that there is a possibility for integer overflow.
 \subsection{Example}
 \begin{lstlisting}
 (- 1 2 3)
 \end{lstlisting}
 Returns the value -4.
 \subsection{Description}
-This operation subtracts a series of integers.  This is done by starting with the first value, then subtracting the second value (if any).  The next value is subtracted from the result.
+This operation subtracts a series of \datatype{integers}.  This is done by starting with the first value, then subtracting the second value (if any).  The next value is subtracted from the result.
 \subsection{Common Lisp Compatibility}
-This is a subset of Common Lisp in that it only works on integers.
+This is a subset of Common Lisp in that it only works on \datatype{integers}.
 
 \section{*}
 Multiplication
 \subsection{Inputs}
-Any number of integers.
+Any number of \datatype{integers}.
 \subsection{Output}
-An integer representing the product of the inputs.  Note that there is a possibility for integer overflow.
+An \datatype{integer} representing the product of the inputs.  Note that there is a possibility for integer overflow.
 \subsection{Example}
 \begin{lstlisting}
 (* 1 2 3)
 \end{lstlisting}
 Returns the value 6.
 \subsection{Description}
-This operation multiplies a series of integers.
+This operation multiplies a series of \datatype{integers}.
 \subsection{Common Lisp Compatibility}
-This is a subset of Common Lisp in that it only works on integers.
+This is a subset of Common Lisp in that it only works on \datatype{integers}.
 
 \section{/}
 Division
 \subsection{Inputs}
-Any number of integers.
+Any number of \datatype{integers}.
 \subsection{Output}
-An integer representing the quotient of the inputs.  Division by zero is not checked and will cause an exception.
+An \datatype{integer} representing the quotient of the inputs.  Division by zero is not checked and will cause an exception.
 \subsection{Example}
 \begin{lstlisting}
 (/ 1 2 3)
 \end{lstlisting}
 Returns the value 0.
 \subsection{Description}
-This operation divides a series of integers.  This is done by starting with the first value, then dividing by the second value (if any).  The result is then divided by the next value, and so on.
+This operation divides a series of \datatype{integers}.  This is done by starting with the first value, then dividing by the second value (if any).  The result is then divided by the next value, and so on.
 \subsection{Common Lisp Compatibility}
-This is a subset of Common Lisp in that it only works on integers.
+This is a subset of Common Lisp in that it only works on \datatype{integers}.
 
 \section{=}
 Equals
@@ -540,7 +542,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 This operation compares two values of the same type for equality.
 \subsection{Common Lisp Compatibility}
-This operation works on integers, booleans, strings, and quoted symbols.
+This operation works on \datatype{integers}, \datatype{booleans}, \datatype{strings}, and quoted \datatype{symbols}.
 
 \section{/=}
 Not-equals
@@ -556,43 +558,101 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 This operation compares two values of the same type for not equality.
 \subsection{Common Lisp Compatibility}
-This operation works on integers, booleans, strings, and quoted symbols.
-\\
-      "$<$"
-      "$>$"
-      "and"
+This operation works on \datatype{integers}, \datatype{booleans}, \datatype{strings}, and quoted \datatype{symbols}.
+
+\section{$<$}
+Less Than
+\subsection{Inputs}
+Compares two values of the same type.
+\subsection{Output}
+\constant{T} if the first value is less than the second value, otherwise \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(< 1 2)
+\end{lstlisting}
+Returns the value \constant{T}.
+\subsection{Description}
+This operation compares two values of the same type for less than.
+\subsection{Common Lisp Compatibility}
+This operation works on \datatype{integers}, \datatype{booleans}, and \datatype{strings}.
+
+\section{$>$}
+Greater Than
+\subsection{Inputs}
+Compares two values of the same type.
+\subsection{Output}
+\constant{T} if the first value is greater than the second value, otherwise \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(> 1 2)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+This operation compares two values of the same type for greater than.
+\subsection{Common Lisp Compatibility}
+This operation works on \datatype{integers}, \datatype{booleans}, and \datatype{strings}.
+
+\section{and}
+Logical or bitwise \operation{and}.
+\subsection{Inputs}
+Performs the logical or bitwise \operation{and} on values of the same type.
+\subsection{Output}
+If the input parameters are \datatype{boolean} then the output is \datatype{boolean}.  If the input parameters are \constant{integer}, the output is \datatype{integer}.
+\subsection{Example}
+\begin{lstlisting}
+(and 1 3 4)
+\end{lstlisting}
+Returns the value 1.
+\subsection{Description}
+If the two parameters are \datatype{boolean}, the result is the logical and of the parameters.  If the two parameters are \datatype{integer}, then the result is the bitwise and of the parameters.  Processing of parameters stop when the result is either \constant{NIL} of \datatype{boolean} values, or 0 (zero) for \datatype{integer} values.
+\subsection{Common Lisp Compatibility}
+This operation performs a bitwise \keyword{and} for integers.  This is probably more useful for embedded systems.
 
 \section{arrayp}
-Is parameter an array?
+Is parameter an \datatype{array}?
 \subsection{Inputs}
 A single value.  Any additional values are ignored..
 \subsection{Output}
-NIL.
+\constant{NIL}.
 \subsection{Example}
 \begin{lstlisting}
 (arrayp 1 2 3)
 \end{lstlisting}
-Returns the value NIL.
+Returns the value \constant{NIL}.
 \subsection{Description}
-Since arrays are not a supported datatype, this always returns NIL.
+Since \datatype{arrays} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
-\\
-      "atomp"
+
+\section{atomp}
+Is parameter an atom?
+\subsection{Inputs}
+A single value.  Any additional values are ignored..
+\subsection{Output}
+\constant{T} or \constant{NIL}
+\subsection{Example}
+\begin{lstlisting}
+(atomp 1 2 3)
+\end{lstlisting}
+Returns the value \constant{T}.
+\subsection{Description}
+Returns \constant{T} if the first value is an atom.  Returns \constant{NIL} otherwise.  Since the only non-atom datatype supported is a list, this really just checks if the value is a list.
+\subsection{Common Lisp Compatibility}
+This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
 
 \section{bit-vector-p}
-Is parameter a bit vector?
+Is parameter a \datatype{bit vector}?
 \subsection{Inputs}
 A single value.  Any additional values are ignored.
 \subsection{Output}
-NIL.
+\constant{NIL}.
 \subsection{Example}
 \begin{lstlisting}
 (bit-vector-p 1 2 3)
 \end{lstlisting}
-Returns the value NIL.
+Returns the value \constant{NIL}.
 \subsection{Description}
-Since bit vectors are not a supported datatype, this always returns NIL.
+Since \datatype{bit vectors} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
@@ -607,18 +667,18 @@ This is compatible with Common Lisp, except that no error is thrown with extra p
       "compiled-function-p",
 
 \section{complexp}
-Is parameter a complex number?
+Is parameter a \datatype{complex number}?
 \subsection{Inputs}
 A single value.  Any additional values are ignored.
 \subsection{Output}
-NIL.
+\constant{NIL}.
 \subsection{Example}
 \begin{lstlisting}
 (complexp 1 2 3)
 \end{lstlisting}
-Returns the value NIL.
+Returns the value \constant{NIL}.
 \subsection{Description}
-Since complex numbers are not a supported datatype, this always returns NIL.
+Since \datatype{complex numbers} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
@@ -648,18 +708,18 @@ This is compatible with Common Lisp, except that no error is thrown with extra p
       "or"
 
 \section{packagep}
-Is parameter a package?
+Is parameter a \datatype{package}?
 \subsection{Inputs}
 A single value.  Any additional values are ignored.
 \subsection{Output}
-NIL.
+\constant{NIL}.
 \subsection{Example}
 \begin{lstlisting}
 (packagep 1 2 3)
 \end{lstlisting}
-Returns the value NIL.
+Returns the value \constant{NIL}.
 \subsection{Description}
-Since packages are not a supported datatype, this always returns NIL.
+Since \datatype{packages} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
@@ -674,36 +734,36 @@ This is compatible with Common Lisp, except that no error is thrown with extra p
       "quote"
 
 \section{rationalp}
-Is parameter a rational number?
+Is parameter a \datatype{rational number}?
 \subsection{Inputs}
 A single value.  Any additional values are ignored.
 \subsection{Output}
-NIL.
+\constant{NIL}.
 \subsection{Example}
 \begin{lstlisting}
 (rationalp 1 2 3)
 \end{lstlisting}
-Returns the value NIL.
+Returns the value \constant{NIL}.
 \subsection{Description}
-Since rational numbers are not a supported datatype, this always returns NIL.
+Since \datatype{rational numbers} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
       "read-line"
 
 \section{realp}
-Is parameter a real number?
+Is parameter a \datatype{real number}?
 \subsection{Inputs}
 A single value.  Any additional values are ignored.
 \subsection{Output}
-NIL.
+\constant{NIL}.
 \subsection{Example}
 \begin{lstlisting}
 (realp 1 2 3)
 \end{lstlisting}
-Returns the value NIL.
+Returns the value \constant{NIL}.
 \subsection{Description}
-Since real numbers are not a supported datatype, this always returns NIL.
+Since \datatype{real numbers} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
@@ -711,36 +771,36 @@ This is compatible with Common Lisp, except that no error is thrown with extra p
       "setq"
 
 \section{simple-bit-vector-p}
-Is parameter a simple bit vector?
+Is parameter a \datatype{simple bit vector}?
 \subsection{Inputs}
 A single value.  Any additional values are ignored.
 \subsection{Output}
-NIL.
+\constant{NIL}.
 \subsection{Example}
 \begin{lstlisting}
 (simple-bit-vector-p 1 2 3)
 \end{lstlisting}
-Returns the value NIL.
+Returns the value \constant{NIL}.
 \subsection{Description}
-Since bit vectors (simple or otherwise) are not a supported datatype, this always returns NIL.
+Since \datatype{bit vectors} (simple or otherwise) are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
       "simple-string-p"
 
 \section{simple-vector-p}
-Is parameter a simple vector?
+Is parameter a \datatype{simple vector}?
 \subsection{Inputs}
 A single value.  Any additional values are ignored.
 \subsection{Output}
-NIL.
+\constant{NIL}.
 \subsection{Example}
 \begin{lstlisting}
 (simple-vector-p 1 2 3)
 \end{lstlisting}
-Returns the value NIL.
+Returns the value \constant{NIL}.
 \subsection{Description}
-Since vectors (simple or otherwise) are not a supported datatype, this always returns NIL.
+Since \datatype{vectors} (simple or otherwise) are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
@@ -753,18 +813,18 @@ This is compatible with Common Lisp, except that no error is thrown with extra p
       "terpri"
 
 \section{vectorp}
-Is parameter a vector?
+Is parameter a \datatype{vector}?
 \subsection{Inputs}
 A single value.  Any additional values are ignored.
 \subsection{Output}
-NIL.
+\constant{NIL}.
 \subsection{Example}
 \begin{lstlisting}
 (vectorp 1 2 3)
 \end{lstlisting}
-Returns the value NIL.
+Returns the value \constant{NIL}.
 \subsection{Description}
-Since vectorps are not a supported datatype, this always returns NIL.
+Since \datatype{vectors} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
 %----------------------------------------------------------
@@ -818,7 +878,7 @@ The different types of elements are:
   \item[E\_VALUE] This represents a value as described in section \ref{sec:Values}.  It can contain any of the defined data types.  Note that for \constant{V\_STRING} or \constant{V\_LIST} data types, the value actually contains an index into the \emph{string} or \emph{cons} array.
 \end{description}
 
-There is a bit of ambiguity right now about lists.  Since recursively defined records aren't possible, elements of type  \constant{E\_STACK} can't contain an \emph{element\_type}.  So in order for them to be able to have lists, the \emph{value} type also contains a list pointer.  This means that right now, an \emph{element\_type} can point to a list either directly by having a kind of \constant{E\_CONS}, or by having a kind that contains a \emph{value} with a kind of \constant{V\_LIST}.  This really should be fixed at some point.  On the other hand, one could make the distinction that the kind \constant{E\_CONS} represents a list that can be evaluated, while a \emph{value} of kind \constant{V\_LIST} is just data.
+There is a bit of ambiguity right now about lists.  Since recursively defined records aren't possible, elements of type  \constant{E\_STACK} can't contain an \datatype{element\_type}.  So in order for them to be able to have lists, the \datatype{value} type also contains a list pointer.  This means that right now, an \datatype{element\_type} can point to a list either directly by having a kind of \constant{E\_CONS}, or by having a kind that contains a \datatype{value} with a kind of \constant{V\_LIST}.  This really should be fixed at some point.  On the other hand, one could make the distinction that the kind \constant{E\_CONS} represents a list that can be evaluated, while a \datatype{value} of kind \constant{V\_LIST} is just data.
 
 \subsection{Cons}
 \label{sec:Cons}
@@ -999,7 +1059,7 @@ package body new_line is
 end new_line;
 \end{lstlisting}
 
-It's fairly simple.  Initialize the interpreter and call it.  The only wrinkle is the need to define \function{new\_line}.  The Ada version has an optional parameter of a type defined in \constant{Ada.Text\_IO}.  This is a problem when trying to eliminate dependencies on \constant{Ada.Text\_IO}.  A more complex example of embedding is found in the \url{https://github.com/BrentSeidel/Ada-Arduino-Due} repository.  This repository contains code that runs on an Arduino Due and includes the definition of several \tl{} operations to access attached hardware.
+It's fairly simple.  Initialize the interpreter and call it.  The only wrinkle is the need to define \function{new\_line}.  The Ada version has an optional parameter of a type defined in \package{Ada.Text\_IO}.  This is a problem when trying to eliminate dependencies on \package{Ada.Text\_IO}.  A more complex example of embedding is found in the \url{https://github.com/BrentSeidel/Ada-Arduino-Due} repository.  This repository contains code that runs on an Arduino Due and includes the definition of several \tl{} operations to access attached hardware.
 
 
 \section{Opportunities for Optimizing}
