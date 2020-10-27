@@ -357,7 +357,7 @@ These operations are related to strings, but may have wider scope.
 \begin{lstlisting}
 (length "Hello, this is a test")
 (length (list 1 2 3 4 5))
-(char "This is a test string", 5)
+(char "This is a test string" 5)
 (parse-integer "42")
 (string-downcase "HELLO")
 (string-upcase "hello")
@@ -462,7 +462,7 @@ An example of the operation is listed here.
 \subsection{Description}
 This describes the operation.  In many cases, it will be fairly simple.
 \subsection{Common Lisp Compatibility}
-This subsection discusses compatibility with Common Lisp.  Usually, this will be a subset of Common Lisp.  In some cases, it may be a supserset.  For example the comparison operators work on more types than Common Lisp supports.
+This subsection discusses compatibility with \cl.  Usually, this will be a subset of \cl.  In some cases, it may be a superset.  For example the comparison operators work on more types than \cl{} supports.
 
 \section{+}
 Addition
@@ -478,7 +478,7 @@ Returns the value 6.
 \subsection{Description}
 This operation adds a series of \datatype{integers}.  Note that there is a possibility for integer overflow.
 \subsection{Common Lisp Compatibility}
-This is a subset of Common Lisp in that it only works on \datatype{integers}.
+This is a subset of \cl{} in that it only works on \datatype{integers}.
 
 \section{-}
 Subtraction
@@ -494,7 +494,7 @@ Returns the value -4.
 \subsection{Description}
 This operation subtracts a series of \datatype{integers}.  This is done by starting with the first value, then subtracting the second value (if any).  The next value is subtracted from the result.
 \subsection{Common Lisp Compatibility}
-This is a subset of Common Lisp in that it only works on \datatype{integers}.
+This is a subset of \cl{} in that it only works on \datatype{integers}.
 
 \section{*}
 Multiplication
@@ -510,7 +510,7 @@ Returns the value 6.
 \subsection{Description}
 This operation multiplies a series of \datatype{integers}.
 \subsection{Common Lisp Compatibility}
-This is a subset of Common Lisp in that it only works on \datatype{integers}.
+This is a subset of \cl{} in that it only works on \datatype{integers}.
 
 \section{/}
 Division
@@ -526,7 +526,7 @@ Returns the value 0.
 \subsection{Description}
 This operation divides a series of \datatype{integers}.  This is done by starting with the first value, then dividing by the second value (if any).  The result is then divided by the next value, and so on.
 \subsection{Common Lisp Compatibility}
-This is a subset of Common Lisp in that it only works on \datatype{integers}.
+This is a subset of \cl{} in that it only works on \datatype{integers}.
 
 \section{=}
 Equals
@@ -622,7 +622,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 Since \datatype{arrays} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
-This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
 \section{atomp}
 Is parameter an atom?
@@ -638,7 +638,7 @@ Returns the value \constant{T}.
 \subsection{Description}
 Returns \constant{T} if the first value is an atom.  Returns \constant{NIL} otherwise.  Since the only non-atom datatype supported is a list, this really just checks if the value is a list.
 \subsection{Common Lisp Compatibility}
-This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
 \section{bit-vector-p}
 Is parameter a \datatype{bit vector}?
@@ -654,10 +654,56 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 Since \datatype{bit vectors} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
-This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
+\section{car}
+Returns the first element of a list
+\subsection{Inputs}
+If the first value is a list, return the first value of that.  Otherwise return the first value.
+\subsection{Output}
+The first value of a list.
+\subsection{Example}
+\begin{lstlisting}
+(car 1 2 3)
+\end{lstlisting}
+Returns the value 1.
+\subsection{Description}
+Returns the first value of a list.  If the first value passed is a list, then return the first value of that.  Otherwise the list of parameters is treated as a list and the first value is returned.
+\subsection{Common Lisp Compatibility}
+If multiple parameters are passed, the first one is returned.  Compatible with \cl{} if only one parameter is passed.
+
+\section{cdr}
+Returns all but the first element of a list
+\subsection{Inputs}
+If the first value is a list, return all but the first value of that.  Otherwise return all but the first value.
+\subsection{Output}
+All but he first value of a list.
+\subsection{Example}
+\begin{lstlisting}
+(cdr 1 2 3)
+\end{lstlisting}
+Returns the value (2 3).
+\subsection{Description}
+Returns all but the first value of a list.  If the first value passed is a list, then return all but the first value of that.  Otherwise the list of parameters is treated as a list and all but the first value is returned.
+\subsection{Common Lisp Compatibility}
+If multiple parameters are passed, all but the first one is returned.  Compatible with \cl{} if only one parameter is passed.
+
+\section{char}
+Returns a specified character in a string.
+\subsection{Inputs}
+A string and an integer.
+\subsection{Output}
+A character.
+\subsection{Example}
+\begin{lstlisting}
+(char "This is a string" 5)
+\end{lstlisting}
+Returns the character ``i''.
+\subsection{Description}
+Returns the specified character in a string where the first character is number 0.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "car"
-      "cdr"
       "char"
       "char-downcase"
       "char-int"
@@ -680,7 +726,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 Since \datatype{complex numbers} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
-This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
       "concatinate"
       "cons"
@@ -721,7 +767,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 Since \datatype{packages} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
-This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
       "parse-integer"
       "peek8"
@@ -747,7 +793,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 Since \datatype{rational numbers} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
-This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
       "read-line"
 
@@ -765,7 +811,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 Since \datatype{real numbers} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
-This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
       "reset"
       "setq"
@@ -784,7 +830,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 Since \datatype{bit vectors} (simple or otherwise) are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
-This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
       "simple-string-p"
 
@@ -802,7 +848,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 Since \datatype{vectors} (simple or otherwise) are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
-This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
       "sleep"
       "string-downcase"
@@ -826,7 +872,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 Since \datatype{vectors} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
-This is compatible with Common Lisp, except that no error is thrown with extra parameters.  They are just silently ignored.
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 %----------------------------------------------------------
 \chapter{Internals}
 As the interpreter is under active development, this section is subject to change without notice.
