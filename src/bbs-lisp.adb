@@ -683,96 +683,94 @@ package body bbs.lisp is
       rest : constant element_type := cons_table(s).cdr;
       val : value;
    begin
-      if first.kind /= E_CONS then
-         if first.kind = E_SYMBOL then
-            sym := symb_table(first.sym);
-            case sym.kind is
-               when SY_BUILTIN =>
-                  if msg_flag then
-                     Put("eval_dispatch: Evaluating builtin ");
-                     Print(sym.str);
-                     New_Line;
-                  end if;
-                  e := sym.f.all(rest);
-               when SY_SPECIAL =>
-                  if msg_flag then
-                     Put("eval_dispatch: Evaluating special ");
-                     Print(sym.str);
-                     New_Line;
-                  end if;
-                  e := sym.s.all(rest, PH_EXECUTE);
-               when SY_LAMBDA =>
-                  if msg_flag then
-                     Put("eval_dispatch: Evaluating lambda ");
-                     print(sym.ps);
-                     new_line;
-                  end if;
-                  e := bbs.lisp.evaluate.func.eval_function(sym.ps, rest);
-               when SY_VARIABLE =>
-                  if msg_flag then
-                     Put("eval_dispatch: Evaluating variable ");
-                     print(sym.str);
-                     new_line;
-                  end if;
-                  if (sym.pv.kind = E_VALUE) and then (sym.pv.v.kind = V_LAMBDA) then
-                     if msg_flag then
-                        Put("eval_dispatch: Evaluating lambda ");
-                        print(sym.ps);
-                        new_line;
-                     end if;
-                     e := bbs.lisp.evaluate.func.eval_function(sym.pv.v.lam, rest);
-                  else
-                     BBS.lisp.memory.ref(sym.pv);
-                     e := sym.pv;
-                  end if;
-               when others =>
-                  if msg_flag then
-                     Put("eval_dispatch: Evaluating unknown ");
-                     print(sym.str);
-                     new_line;
-                  end if;
-                  e := NIL_ELEM;
-            end case;
-         elsif first.kind = E_VALUE then
-            if first.v.kind = V_LAMBDA then
+      if first.kind = E_SYMBOL then
+         sym := symb_table(first.sym);
+         case sym.kind is
+            when SY_BUILTIN =>
+               if msg_flag then
+                  Put("eval_dispatch: Evaluating builtin ");
+                  Print(sym.str);
+                  New_Line;
+               end if;
+               e := sym.f.all(rest);
+            when SY_SPECIAL =>
+               if msg_flag then
+                  Put("eval_dispatch: Evaluating special ");
+                  Print(sym.str);
+                  New_Line;
+               end if;
+               e := sym.s.all(rest, PH_EXECUTE);
+            when SY_LAMBDA =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating lambda ");
                   print(sym.ps);
                   new_line;
                end if;
-               e := bbs.lisp.evaluate.func.eval_function(first.v.lam, rest);
-            else
-               BBS.lisp.memory.ref(s);
-               e := (kind => E_CONS, ps => s);
-            end if;
-         elsif first.kind = E_STACK then
-            val := BBS.lisp.stack.search_frames(first.st_offset, first.st_name);
-            if val.kind = V_LAMBDA then
+               e := bbs.lisp.evaluate.func.eval_function(sym.ps, rest);
+            when SY_VARIABLE =>
                if msg_flag then
-                  Put("eval_dispatch: Evaluating lambda ");
-                  print(val);
+                  Put("eval_dispatch: Evaluating variable ");
+                  print(sym.str);
                   new_line;
                end if;
-               e := bbs.lisp.evaluate.func.eval_function(val.lam, rest);
-            else
-               BBS.lisp.memory.ref(s);
-               e := (kind => E_CONS, ps => s);
-            end if;
-         else -- Not a symbol, just return the value.
+               if (sym.pv.kind = E_VALUE) and then (sym.pv.v.kind = V_LAMBDA) then
+                  if msg_flag then
+                     Put("eval_dispatch: Evaluating lambda ");
+                     print(sym.ps);
+                     new_line;
+                  end if;
+                  e := bbs.lisp.evaluate.func.eval_function(sym.pv.v.lam, rest);
+               else
+                  BBS.lisp.memory.ref(sym.pv);
+                  e := sym.pv;
+               end if;
+            when others =>
+               if msg_flag then
+                  Put("eval_dispatch: Evaluating unknown ");
+                  print(sym.str);
+                  new_line;
+               end if;
+               e := NIL_ELEM;
+         end case;
+      elsif first.kind = E_VALUE then
+         if first.v.kind = V_LAMBDA then
             if msg_flag then
-               Put("eval_dispatch: Evaluating non-symbol ");
-               print(first, False, True);
+               Put("eval_dispatch: Evaluating lambda ");
+               print(first.v.lam);
                new_line;
             end if;
+            e := bbs.lisp.evaluate.func.eval_function(first.v.lam, rest);
+         else
             BBS.lisp.memory.ref(s);
             e := (kind => E_CONS, ps => s);
          end if;
-      else -- It a cons, just return the value
+      elsif first.kind = E_STACK then
+         val := BBS.lisp.stack.search_frames(first.st_offset, first.st_name);
+         if val.kind = V_LAMBDA then
+            if msg_flag then
+               Put("eval_dispatch: Evaluating lambda ");
+               print(val);
+               new_line;
+            end if;
+            e := bbs.lisp.evaluate.func.eval_function(val.lam, rest);
+         else
+            BBS.lisp.memory.ref(s);
+            e := (kind => E_CONS, ps => s);
+         end if;
+      elsif first.kind = E_CONS then
          if msg_flag then
             Put("eval_dispatch: Evaluating cons ");
             print(first.ps);
             new_line;
          end if;
+         e := (kind => E_CONS, ps => s);
+      else -- Not a symbol, just return the value.
+         if msg_flag then
+            Put("eval_dispatch: Evaluating non-symbol ");
+            print(first, False, True);
+            new_line;
+         end if;
+         BBS.lisp.memory.ref(s);
          e := (kind => E_CONS, ps => s);
       end if;
       if msg_flag then
