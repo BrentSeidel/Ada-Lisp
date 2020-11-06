@@ -12,17 +12,17 @@ package body BBS.lisp.evaluate.math is
       --
       --  Subfunction to do the actual evaluation.
       --
-      function process_value(i : int32; accum : int32; b : mathops) return int32 is
+      procedure process_value(i : int32; b : mathops) is
       begin
          case (b) is
             when PLUS =>
-               return accum + i;
+               accum := accum + i;
             when MUL =>
-               return accum * i;
+               accum := accum * i;
             when MINUS =>
-               return accum - i;
+               accum := accum - i;
             when DIV =>
-               return accum / i;
+               accum := accum / i;
          end case;
       end;
 
@@ -66,7 +66,7 @@ package body BBS.lisp.evaluate.math is
             BBS.lisp.memory.deref(el);
             return (kind => E_ERROR);
          end if;
-         accum := process_value(v.i, accum, b);
+         process_value(v.i, b);
          bbs.lisp.memory.deref(el);
       end loop;
       if t.kind /= E_NIL then
@@ -82,7 +82,7 @@ package body BBS.lisp.evaluate.math is
             return (kind => E_ERROR);
          end if;
          print(el, False, True);
-         accum := process_value(v.i, accum, b);
+         process_value(v.i, b);
       end if;
       return (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum));
    end;

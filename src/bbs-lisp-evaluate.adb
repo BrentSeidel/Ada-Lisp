@@ -139,8 +139,6 @@ package body BBS.lisp.evaluate is
    --
    function first_value(e : in out element_type) return element_type is
       first : element_type;
-      car : element_type;
-      cdr : element_type;
       s : cons_index;
    begin
       if e.kind = E_NIL then
@@ -148,26 +146,24 @@ package body BBS.lisp.evaluate is
       elsif isList(e) then
          s := e.ps;
          first := cons_table(s).car;
-         cdr :=  cons_table(s).cdr;
+         e :=  cons_table(s).cdr;
          if first.kind = E_NIL then
-            car := NIL_ELEM;
+            null;
          elsif isList(first) then
-            car := first;
-            if isFunction(car) then
-               car := eval_dispatch(car.ps);
+            if isFunction(first) then
+               first := eval_dispatch(getList(first));
             else
-               BBS.lisp.memory.ref(car);
+               BBS.lisp.memory.ref(first);
             end if;
          else
-            car := indirect_elem(first);
-            BBS.lisp.memory.ref(car);
+            first := indirect_elem(first);
+            BBS.lisp.memory.ref(first);
          end if;
       else
-         car := indirect_elem(e);
-         BBS.lisp.memory.ref(car);
-         cdr := NIL_ELEM;
+         first := indirect_elem(e);
+         BBS.lisp.memory.ref(first);
+         e := NIL_ELEM;
       end if;
-      e := cdr;
-      return car;
+      return first;
    end;
 end;

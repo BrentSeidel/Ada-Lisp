@@ -161,15 +161,13 @@ package body bbs.lisp is
    --  evaluated, it is dereffed.
    --
    function  eval(e : element_type) return element_type is
-      s : cons_index;
       r : element_type;
       sym : symb_index;
    begin
       case e.kind is
          when E_CONS =>
-            s := e.ps;
-            r := eval_dispatch(s);
-            BBS.lisp.memory.deref(s);
+            r := eval_dispatch(e.ps);
+            BBS.lisp.memory.deref(e.ps);
          when E_SYMBOL =>
             sym := e.sym;
             if symb_table(sym).kind = SY_VARIABLE then
@@ -599,10 +597,8 @@ package body bbs.lisp is
    --
    procedure add_builtin(n : String; f : execute_function) is
       sym : symb_index;
-      flag : Boolean;
    begin
-      flag := get_symb(sym, n);
-      if flag then
+      if get_symb(sym, n) then
          symb_table(sym) := (ref => 1, Kind => SY_BUILTIN, f => f,
                              str => symb_table(sym).str);
       else
@@ -612,10 +608,8 @@ package body bbs.lisp is
    --
    procedure add_special(n : String; f : special_function) is
       sym : symb_index;
-      flag : Boolean;
    begin
-      flag := get_symb(sym, n);
-      if flag then
+      if get_symb(sym, n) then
          symb_table(sym) := (ref => 1, Kind => SY_SPECIAL, s => f,
                              str => symb_table(sym).str);
       else

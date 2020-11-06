@@ -703,12 +703,71 @@ Returns the character ``i''.
 Returns the specified character in a string where the first character is number 0.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
+\section{char-downcase}
+Converts a character to lower case.
+\subsection{Inputs}
+A character.
+\subsection{Output}
+A character.
+\subsection{Example}
+\begin{lstlisting}
+(char-downcase #\A)
+\end{lstlisting}
+Returns the character ``a''.
+\subsection{Description}
+If the character passed is uppercase, convert it to lowercase and return it.  Otherwise return the character unchanged.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
+\section{char-int}
+Returns the integer ASCII value of a character.
+\subsection{Inputs}
+A character.
+\subsection{Output}
+A character.
+\subsection{Example}
+\begin{lstlisting}
+(char-int #\A)
+\end{lstlisting}
+Returns the integer 65.
+\subsection{Description}
+This returns the integer ASCII (you might be able to find some odd systems where this is not true) code for the provided character.  Unicode is not currently supported.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
+\section{char-upcase}
+Converts a character to upper case.
+\subsection{Inputs}
+A character.
+\subsection{Output}
+A character.
+\subsection{Example}
+\begin{lstlisting}
+(char-upcase #\a)
+\end{lstlisting}
+Returns the character ``A''.
+\subsection{Description}
+If the character passed is lowercase, convert it to uppercase and return it.  Otherwise return the character unchanged.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
+\section{characterp}
+Is parameter a \datatype{character}?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+A boolean value
+\subsection{Example}
+\begin{lstlisting}
+(characterp 1)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+Returns \constant{T} if the first value is a character.  Otherwise it returns \constant{NIL}.  Note that a string containing a single character is not the same as a character.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "char"
-      "char-downcase"
-      "char-int"
-      "char-upcase"
-      "characterp"
       "coerce"
       "compiled-function-p",
 
