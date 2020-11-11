@@ -767,9 +767,46 @@ Returns the value \constant{NIL}.
 Returns \constant{T} if the first value is a character.  Otherwise it returns \constant{NIL}.  Note that a string containing a single character is not the same as a character.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
-\\
-      "coerce"
-      "compiled-function-p",
+
+\section{coerce}
+Converts a value of one type to another type
+\subsection{Inputs}
+Two values.  The first value is the item to be converted.  The second value is a quoted symbol representing the result type.
+\subsection{Output}
+A value of the desired type.
+\subsection{Example}
+\begin{lstlisting}
+(coerce NIL `integer)
+\end{lstlisting}
+Returns the integer value 0.
+\subsection{Description}
+The result is a representation of the first value in the desired type.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
+Only the following coercions are supported:
+\begin{itemize}
+  \item character $\rightarrow$ string
+  \item boolean $\rightarrow$ string
+  \item boolean $\rightarrow$ integer (\constant{NIL} $\rightarrow$ 0, \constant{T} $\rightarrow$ 1).
+  \item integer $\rightarrow$ boolean (0 $\rightarrow$ \constant{NIL}, $\neq$ 0 $\rightarrow$ \constant{T})
+\end{itemize}
+
+\section{compiled-function-p}
+Is parameter a compiled function?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+A boolean value
+\subsection{Example}
+\begin{lstlisting}
+(compiled-function-p print)
+\end{lstlisting}
+Returns the value \constant{T}.
+\subsection{Description}
+Returns \constant{T} if the first value is a compiled function.  Otherwise it returns \constant{NIL}.  \tl() considers the builtin intrinsic functions to be compiled.  User defined functions are not compiled..
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
 \section{complexp}
 Is parameter a \datatype{complex number}?
@@ -787,30 +824,61 @@ Since \datatype{complex numbers} are not a supported datatype, this always retur
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "concatinate"
-      "cons"
-      "consp"
-      "defun"
-      "dowhile"
-      "dotimes"
-      "dump"
-      "exit"
-      "floatp"
-      "fresh-line"
-      "functionp"
-      "if"
-      "int-char"
-      "integerp"
-      "lambda"
-      "length"
-      "let"
-      "list"
-      "listp"
-      "msg"
-      "not"
-      "nullp"
-      "numberp"
-      "or"
+      "concatinate"\\
+      "cons"\\
+      "consp"\\
+      "defun"\\
+      "dowhile"\\
+      "dotimes"\\
+      "dump"\\
+      "exit"\\
+
+\section{floatp}
+Is parameter a \datatype{floating point number}?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+\constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(floatp 1 2 3)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+Since \datatype{floating point numbers} are not a supported datatype, this always returns \constant{NIL}.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+\\
+      "fresh-line"\\
+      "functionp"\\
+      "if"\\
+      "int-char"\\
+      "integerp"\\
+      "lambda"\\
+      "length"\\
+      "let"\\
+      "list"\\
+      "listp"\\
+      "msg"\\
+      "not"\\
+      "nullp"\\
+      "numberp"\\
+
+\section{or}
+Logical or bitwise \operation{or}.
+\subsection{Inputs}
+Performs the logical or bitwise \operation{and} on values of the same type.
+\subsection{Output}
+If the input parameters are \datatype{boolean} then the output is \datatype{boolean}.  If the input parameters are \constant{integer}, the output is \datatype{integer}.
+\subsection{Example}
+\begin{lstlisting}
+(or 1 3 4)
+\end{lstlisting}
+Returns the value 7.
+\subsection{Description}
+If the two parameters are \datatype{boolean}, the result is the logical and of the parameters.  If the two parameters are \datatype{integer}, then the result is the bitwise and of the parameters.  Processing of parameters stop when the result is either \constant{NIL} of \datatype{boolean} values, or 0 (zero) for \datatype{integer} values.
+\subsection{Common Lisp Compatibility}
+This operation performs a bitwise \keyword{or} for integers.  This is probably more useful for embedded systems.
 
 \section{packagep}
 Is parameter a \datatype{package}?
@@ -828,15 +896,15 @@ Since \datatype{packages} are not a supported datatype, this always returns \con
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "parse-integer"
-      "peek8"
-      "peek16"
-      "peek32"
-      "poke8"
-      "poke16"
-      "poke32"
-      "print"
-      "quote"
+      "parse-integer"\\
+      "peek8"\\
+      "peek16"\\
+      "peek32"\\
+      "poke8"\\
+      "poke16"\\
+      "poke32"\\
+      "print"\\
+      "quote"\\
 
 \section{rationalp}
 Is parameter a \datatype{rational number}?
@@ -854,7 +922,7 @@ Since \datatype{rational numbers} are not a supported datatype, this always retu
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "read-line"
+      "read-line"\\
 
 \section{realp}
 Is parameter a \datatype{real number}?
@@ -872,8 +940,8 @@ Since \datatype{real numbers} are not a supported datatype, this always returns 
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "reset"
-      "setq"
+      "reset"\\
+      "setq"\\
 
 \section{simple-bit-vector-p}
 Is parameter a \datatype{simple bit vector}?
@@ -891,7 +959,7 @@ Since \datatype{bit vectors} (simple or otherwise) are not a supported datatype,
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "simple-string-p"
+      "simple-string-p"\\
 
 \section{simple-vector-p}
 Is parameter a \datatype{simple vector}?
@@ -909,13 +977,13 @@ Since \datatype{vectors} (simple or otherwise) are not a supported datatype, thi
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "sleep"
-      "string-downcase"
-      "string-upcase"
-      "stringp"
-      "subseq"
-      "symbolp"
-      "terpri"
+      "sleep"\\
+      "string-downcase"\\
+      "string-upcase"\\
+      "stringp"\\
+      "subseq"\\
+      "symbolp"\\
+      "terpri"\\
 
 \section{vectorp}
 Is parameter a \datatype{vector}?
