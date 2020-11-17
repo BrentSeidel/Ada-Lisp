@@ -50,7 +50,7 @@ package body bbs.lisp is
       add_builtin("coerce", BBS.lisp.evaluate.symb.coerce'Access);
       add_builtin("compiled-function-p", BBS.lisp.evaluate.pred.compiled_function_p'Access);
       add_builtin("complexp", BBS.lisp.evaluate.pred.return_false'Access);
-      add_builtin("concatinate", BBS.lisp.evaluate.symb.concatenate'Access);
+      add_builtin("concatenate", BBS.lisp.evaluate.symb.concatenate'Access);
       add_builtin("cons", BBS.lisp.evaluate.list.cons'Access);
       add_builtin("consp", BBS.lisp.evaluate.pred.consp'Access);
       add_special("defun", BBS.lisp.evaluate.func.defun'Access);

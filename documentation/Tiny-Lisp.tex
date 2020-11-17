@@ -378,7 +378,7 @@ The \function{subseq} operation returns a substring of the original string.  The
 Some operations use a quoted symbol to indicate what type of operation should be performed or what type of date should be returned.  These thus require a bit more description than some of the other operations.
 \begin{lstlisting}
 (coerce t 'integer)
-(concatinate 'string "First string, " "second string, "
+(concatenate 'string "First string, " "second string, "
    "and finally the third string.")
 \end{lstlisting}
 
@@ -823,8 +823,23 @@ Returns the value \constant{NIL}.
 Since \datatype{complex numbers} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
+\section{concatenate}
+Concatenates strings or lists.
+\subsection{Inputs}
+A quoted symbol (either \constant{LIST} or \constant{STRING}) followed by either lists or strings
+\subsection{Output}
+A list or string consisting of the concatenation of the lists or strings
+\subsection{Example}
+\begin{lstlisting}
+(concatenate 'string "One " "Two")
+\end{lstlisting}
+Returns the string ``One Two''.
+\subsection{Description}
+Concatenates either string or lists.  The first parameter is a symbol that specifies what to concatenate.  The following parameters must be of the appropriate type.
+\subsection{Common Lisp Compatibility}
+This is probably a subset of the \cl{} function.  Normal cases will operate the same, but error handling is different.
 \\
-      "concatinate"\\
       "cons"\\
       "consp"\\
       "defun"\\
