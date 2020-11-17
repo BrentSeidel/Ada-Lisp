@@ -9,7 +9,7 @@ library project Bbs_Lisp is
    for Library_Dir use "lib";
 
    package Compiler is
-      for Switches ("ada") use ("-gnatf", "-fcallgraph-info=su,da", "-gnat12", "-g", "-O", "-gnatVa", "-gnatw.Xa");
+      for Switches ("ada") use ("-gnatf", "-gnat12", "-g", "-O", "-gnatVa", "-gnatw.Xa");
    end Compiler;
 
 end Bbs_Lisp;

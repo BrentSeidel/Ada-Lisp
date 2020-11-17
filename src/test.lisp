@@ -316,16 +316,16 @@
 (test-coerce)
 (setq test-coerce 0)
 ;
-;  Test concatination of strings.  Lists can't be compared so
+;  Test concatenation of strings.  Lists can't be compared so
 ;  they aren't tested.
 ;
-(defun test-concatinate ()
-  (verify-equal "Hello world!" (concatinate 'string "Hello" " " "world" "!") "String concatination"))
+(defun test-concatenate ()
+  (verify-equal "Hello world!" (concatenate 'string "Hello" " " "world" "!") "String concatenation"))
 ;
-(print "==> Testing concatination")
+(print "==> Testing concatenation")
 (terpri)
-(test-concatinate)
-(setq test-concatinate 0)
+(test-concatenate)
+(setq test-concatenate 0)
 ;
 ;(dump)
 (exit)
