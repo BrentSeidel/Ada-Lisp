@@ -827,7 +827,7 @@ This is compatible with \cl, except that no error is thrown with extra parameter
 \section{concatenate}
 Concatenates strings or lists.
 \subsection{Inputs}
-A quoted symbol (either \constant{LIST} or \constant{STRING}) followed by either lists or strings
+A quoted symbol (either \constant{LIST} or \constant{STRING}) followed by either lists or strings.
 \subsection{Output}
 A list or string consisting of the concatenation of the lists or strings
 \subsection{Example}
@@ -839,10 +839,55 @@ Returns the string ``One Two''.
 Concatenates either string or lists.  The first parameter is a symbol that specifies what to concatenate.  The following parameters must be of the appropriate type.
 \subsection{Common Lisp Compatibility}
 This is probably a subset of the \cl{} function.  Normal cases will operate the same, but error handling is different.
+
+\section{cons}
+Combines elements into a list.
+\subsection{Inputs}
+One or two values
+\subsection{Output}
+A list consisting of the provided inputs.
+\subsection{Example}
+\begin{lstlisting}
+(cons 1 2)
+\end{lstlisting}
+Returns the list (1 . 2).
+\subsection{Description}
+The \function{cons} operation creates a \constant{cons} cell and sets the \constant{car} field to the first parameter and the \constant{cdr} to the second parameter..
+\subsection{Common Lisp Compatibility}
+There is a subtle difference between \tl{} and \cl.  In \tl, \constant{NIL} is a constant of boolean type, while in \cl, it also represents an empty list.  Thus \operation{(cons 1 NIL)} produce slightly different results, \operation{(1 . NIL)} for \tl{} or \operation{(1)} for \cl.  If you wish to produce the \cl{} results, where the \constant{car} points to a value and the \constant{cdr} is an empty pointer, you can use \operation{(cons 1 ())} or \operation{(cons 1)}.  The former is preferred as it is compatible with \cl.
+
+\section{consp}
+Is parameter a \datatype{cons}?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+A boolean.
+\subsection{Example}
+\begin{lstlisting}
+(consp (1 2 3))
+\end{lstlisting}
+Returns the value \constant{T}.
+\subsection{Description}
+If the supplied parameter is a \datatype{cons} (a list), return \constant{T}, otherwise return \constant{NIL}.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
+\section{defun}
+Defines a function.
+\subsection{Inputs}
+Three or more values.  The first is a symbol that becomes the function's name.  The second is a list of parameters for the function.  The remaining values are the code for the function
+\subsection{Output}
+\constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(defun hello (name) (print "Hello " name))
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+This creates a user defined function.
+\subsection{Common Lisp Compatibility}
+This is more or less a subset of \cl, except that there are probably many corner cases where things don't quite match..
 \\
-      "cons"\\
-      "consp"\\
-      "defun"\\
       "dowhile"\\
       "dotimes"\\
       "dump"\\
