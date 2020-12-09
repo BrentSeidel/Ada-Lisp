@@ -887,11 +887,79 @@ Returns the value \constant{NIL}.
 This creates a user defined function.
 \subsection{Common Lisp Compatibility}
 This is more or less a subset of \cl, except that there are probably many corner cases where things don't quite match..
-\\
-      "dowhile"\\
-      "dotimes"\\
-      "dump"\\
-      "exit"\\
+
+\section{dowhile}
+Repeats a series of statements while a condition is \constant{T}.
+\subsection{Inputs}
+Two or more values.  The first value is evaluated as the condition, the remaining values are the statements to be executed while the condition is true.
+\subsection{Output}
+A value.
+\subsection{Example}
+\begin{lstlisting}
+(dowhile (> (- max min) 1)
+  (setq mid (/ (+ min max) 2))
+  (if (> mid (/ n mid))
+    (setq max mid)
+    (setq min mid))
+   (+ 0 min))
+\end{lstlisting}
+Returns the value of the last statement in the loop, \keyword{min}
+\subsection{Description}
+The condition is evaluated on each pass through the loop.  If the condition evaluates to \constant{T}, the rest of the statements are executed.  If the condition evaluates to \constant{NIL}, the loop is exited.  Thus, if the first time the condition is evaluated it returns \constant{NIL}, the statements in the loop are never executed.
+\subsection{Common Lisp Compatibility}
+This doesn't appear to exist in \cl.  It is similar to the \cl{} \keyword{do} loop, except that the condition comes first.
+
+\section{dotimes}
+Repeats a series of statements a specific number of times.
+\subsection{Inputs}
+Two or more values.  The first value is a list containing a local variable and the numb, the remaining values are the statements to be executed the specified number of times.
+\subsection{Output}
+A constant \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(setq sum 0)
+(dotimes (x 10)
+  (print "The sum is " sum)
+  (terpri)
+  (setq sum (+ sum x)))
+\end{lstlisting}
+Returns the constant \constant{NIL}.
+\subsection{Description}
+On each pass through the loop, the local variable is set to the next value in the range 0 to the loop limit.  The supplied statements are evaluated.  It is not recommended to change the value of the local variable in the body of the loop.
+\subsection{Common Lisp Compatibility}
+The result-form, declarations, and tags are not supported.
+
+\section{dump}
+Prints out some internal tables.
+\subsection{Inputs}
+None.
+\subsection{Output}
+A value.
+\subsection{Example}
+\begin{lstlisting}
+(dump)
+\end{lstlisting}
+Returns the constant \constant{NIL}.
+\subsection{Description}
+This is intended for debugging purposes.  It prints the contents of the cons, symbol, and string tables.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl.
+
+\section{exit}
+Exits the \tl{} interpreter.
+\subsection{Inputs}
+None.
+\subsection{Output}
+A value.
+\subsection{Example}
+\begin{lstlisting}
+(exit)
+\end{lstlisting}
+No value can be returned as the interpreter exits..
+\subsection{Description}
+This is a way to exit the \tl{} iterpreter.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl, but some implementations (i.e. SBCL) do have it.
 
 \section{floatp}
 Is parameter a \datatype{floating point number}?
