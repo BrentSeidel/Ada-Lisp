@@ -976,9 +976,39 @@ Returns the value \constant{NIL}.
 Since \datatype{floating point numbers} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
+\section{fresh-line}
+Prints a newline if not already at the start of a line.
+\subsection{Inputs}
+None, any values are ignored.
+\subsection{Output}
+\constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(fresh-line)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+Checks if the internal first character flag is set.  If not, prints a newline, otherwise does nothing.
+\subsection{Common Lisp Compatibility}
+There is no optional output-stream parameter as \tl{} only has one output stream.  It also always returns \constant{NIL}.
+
+\section{functionp}
+Is parameter a function?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+\constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(functionp 1 2 3)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+Returns \constant{T} if the value is a builtin function, a user defined function, or a lambda function.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "fresh-line"\\
-      "functionp"\\
       "if"\\
       "int-char"\\
       "integerp"\\
