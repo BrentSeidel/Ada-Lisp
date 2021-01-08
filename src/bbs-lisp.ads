@@ -172,8 +172,8 @@ package bbs.lisp is
    --
    --
    --  Since this interpreter is designed to be used on embedded computers with
-   --  no operating system and possibly no dynamic memory allocation, The max
-   --  sizes for statically allocated data structures is defined here.
+   --  no operating system and possibly no dynamic memory allocation, The
+   --  statically allocated data structures are defined here.
    --
    cons_table : array (cons_index'First + 1 .. cons_index'Last) of cons;
    symb_table : array (symb_index'First + 1 .. symb_index'Last) of symbol;

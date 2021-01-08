@@ -30,7 +30,7 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if not isList(e) then
-         error("nullp", "Internal error, not passed a list.");
+         error("characterp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
       p := first_value(t);
@@ -46,7 +46,7 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if not isList(e) then
-         error("nullp", "Internal error, not passed a list.");
+         error("compiled_function_p", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
       p := first_value(t);
@@ -81,7 +81,7 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if not isList(e) then
-         error("nullp", "Internal error, not passed a list.");
+         error("functionp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
       p := first_value(t);
@@ -105,7 +105,7 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if not isList(e) then
-         error("nullp", "Internal error, not passed a list.");
+         error("integerp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
       p := first_value(t);
@@ -154,7 +154,7 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if not isList(e) then
-         error("nullp", "Internal error, not passed a list.");
+         error("numberp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
       p := first_value(t);
@@ -170,7 +170,7 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if not isList(e) then
-         error("nullp", "Internal error, not passed a list.");
+         error("simple_string_p", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
       p := first_value(t);
@@ -186,7 +186,7 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if not isList(e) then
-         error("nullp", "Internal error, not passed a list.");
+         error("stringp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
       p := first_value(t);

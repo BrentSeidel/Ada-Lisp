@@ -1008,19 +1008,36 @@ Returns the value \constant{NIL}.
 Returns \constant{T} if the value is a builtin function, a user defined function, or a lambda function.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
-\\
-      "if"\\
-      "int-char"\\
-      "integerp"\\
-      "lambda"\\
-      "length"\\
-      "let"\\
-      "list"\\
-      "listp"\\
-      "msg"\\
-      "not"\\
-      "nullp"\\
-      "numberp"\\
+
+\section{if}
+Conditionally executes a statement.
+\subsection{Inputs}
+Two or three parameters.  The first is a condition.  If the condition evaluates to \constant{T}, the second parameter is evaluated.  If the condition evaluates to \constant{NIL}, the third parameter, if present, is evaluated.
+\subsection{Output}
+Returns the value of the parameter evaluated.
+\subsection{Example}
+\begin{lstlisting}
+(if (> 1 2)
+  (print "Greater")
+  (print "Not greater"))
+\end{lstlisting}
+Prints the string "Not greater".
+\subsection{Description}
+Evaluates the condition and then depending on the condition, evaluates one of the other parameters.  If the third parameter is omitted, this is approximately equivalent to an \keyword{IF-THEN} statement in other languages.  If the third parameter is present, this is similar to an \keyword{IF-THEN-ELSE} statement.  The value of the evaluated parameter is returned.  If no parameter is evaluated (only two parameters passed and the condition evaluates to \constant{NIL}), then \constant{NIL} is returned.
+\subsection{Common Lisp Compatibility}
+This seems to be mostly compatible with \cl.
+
+\section{int-char}
+\section{integerp}
+\section{lambda}
+\section{length}
+\section{let}
+\section{list}
+\section{listp}
+\section{msg}
+\section{not}
+\section{nullp}
+\section{numberp}
 
 \section{or}
 Logical or bitwise \operation{or}.
@@ -1054,15 +1071,15 @@ Since \datatype{packages} are not a supported datatype, this always returns \con
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "parse-integer"\\
-      "peek8"\\
-      "peek16"\\
-      "peek32"\\
-      "poke8"\\
-      "poke16"\\
-      "poke32"\\
-      "print"\\
-      "quote"\\
+\subsection{parse-integer}
+\subsection{peek8}
+\subsection{peek16}
+\subsection{peek32}
+\subsection{poke8}
+\subsection{poke16}
+\subsection{poke32}
+\subsection{print}
+\subsection{quote}
 
 \section{rationalp}
 Is parameter a \datatype{rational number}?
