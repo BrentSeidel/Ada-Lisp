@@ -1028,16 +1028,100 @@ Evaluates the condition and then depending on the condition, evaluates one of th
 This seems to be mostly compatible with \cl.
 
 \section{int-char}
+Converts an integer to a character where the integer is the ASCII representation of the character.  The integer is limited to the range 0-255.
+\subsection{Inputs}
+A single integer.  Any other parameters are ignored.
+\subsection{Output}
+The character represented by the ASCII code input.
+\subsection{Example}
+\begin{lstlisting}
+(int-char 65)
+\end{lstlisting}
+Returns the character `A'.
+\subsection{Description}
+This can be used to generate any 8 bit ASCII character.
+\subsection{Common Lisp Compatibility}
+The operation \keyword(int-char) has been removed from \cl.  The proper operation to use is \keyword{code-char}.  Note that \cl{} also allows a larger range than 0-255 since Unicode is supported.
+
 \section{integerp}
+Is the parameter an integer?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+The value \constant{T} if the parameter is an integer, otherwise \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(integerp 1 2 3)
+\end{lstlisting}
+Returns the value \constant{T}.
+\subsection{Description}
+This is used to check if a parameter is of integer type or not.  Currently the only number type supported is integer so this is equivalent to \keyword{numberp} in \tl.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
 \section{lambda}
+Creates a variable record that can be assigned to a variable or passed as a parameter to a function.
+\subsection{Inputs}
+The first parameter is a list of the parameters for the function.  The remaining parameters are the operation for the function.
+\subsection{Output}
+A variable record pointing to the created function.
+\subsection{Example}
+\begin{lstlisting}
+(setq hello (lambda (name) (print "Hello " name)))
+\end{lstlisting}
+Sets the symbol (or variable depending on context) \keyword{hello} to point to the created function.
+\subsection{Description}
+Creates a function that can be assigned to a variable or passed as a parameter.  Note that \keyword{(setq var (lambda \dots))} is slightly different from \keyword{(defun var \dots}).  The first creates a variable record and assigns it to \keyword{var} while the second directly sets \keyword{var} to point to the function.  This difference may be removed in future versions.
+\subsection{Common Lisp Compatibility}
+This is mostly a subset of \cl.
+
 \section{length}
+Returns the length of an object.
+\subsection{Inputs}
+The first parameter is a list of the object to measure.
+\subsection{Output}
+An integer.
+\subsection{Example}
+\begin{lstlisting}
+(length "Hello")
+\end{lstlisting}
+Returns the value 5.
+\subsection{Description}
+Returns the length of an object.  For \datatype{strings} this is the number of characters in a string.  For \datatype{lists} this is the number of items in a list not descending into sublists.  All other datatypes return a value of 1.
+\subsection{Common Lisp Compatibility}
+This is mostly compatible with \cl, except that errors are not thrown if the parameter is not a sequence.
+
 \section{let}
+\subsection{Inputs}
+\subsection{Output}
+\subsection{Example}
+\begin{lstlisting}
+\end{lstlisting}
+\subsection{Description}
+\subsection{Common Lisp Compatibility}
+
 \section{list}
 \section{listp}
 \section{msg}
 \section{not}
 \section{nullp}
+
 \section{numberp}
+Is the parameter a number?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+The value \constant{T} if the parameter is a number, otherwise \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(numberp 1 2 3)
+\end{lstlisting}
+Returns the value \constant{T}.
+\subsection{Description}
+This is used to check if a parameter is of number type or not.  Currently the only number type supported is integer so this is equivalent to \keyword{integerp} in \tl.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
 
 \section{or}
 Logical or bitwise \operation{or}.
@@ -1097,7 +1181,7 @@ Since \datatype{rational numbers} are not a supported datatype, this always retu
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "read-line"\\
+\section{read-line}
 
 \section{realp}
 Is parameter a \datatype{real number}?
@@ -1115,8 +1199,8 @@ Since \datatype{real numbers} are not a supported datatype, this always returns 
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "reset"\\
-      "setq"\\
+\section{reset}
+\section{setq}
 
 \section{simple-bit-vector-p}
 Is parameter a \datatype{simple bit vector}?
@@ -1134,7 +1218,7 @@ Since \datatype{bit vectors} (simple or otherwise) are not a supported datatype,
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "simple-string-p"\\
+\section{simple-string-p}
 
 \section{simple-vector-p}
 Is parameter a \datatype{simple vector}?
@@ -1152,13 +1236,13 @@ Since \datatype{vectors} (simple or otherwise) are not a supported datatype, thi
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-      "sleep"\\
-      "string-downcase"\\
-      "string-upcase"\\
-      "stringp"\\
-      "subseq"\\
-      "symbolp"\\
-      "terpri"\\
+\section{sleep}
+\section{string-downcase}
+\section{string-upcase}
+\section{stringp}
+\section{subseq}
+\section{symbolp}
+\section{terpri}
 
 \section{vectorp}
 Is parameter a \datatype{vector}?
