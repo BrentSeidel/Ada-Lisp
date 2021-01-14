@@ -4,29 +4,29 @@
 package BBS.lisp.evaluate.str is
    --
    --  Return the length of a string or list.  Atoms will get a value of 1.
-   --  A nil pointer returns a length of 0.
+   --  A NIL pointer returns a length of 0.
    --
-   function length(e : element_type) return element_type;
+   function length(s : cons_index) return element_type;
    --
    --  Return a specified character from a string.
    --
-   function char(e : element_type) return element_type;
+   function char(s : cons_index) return element_type;
    --
    --  Parse a string as an integer and return the integer value.
    --
-   function parse_integer(e : element_type) return element_type;
+   function parse_integer(s : cons_index) return element_type;
    --
    --  Return a substring of the original string
    --
-   function subseq(e : element_type) return element_type;
+   function subseq(s : cons_index) return element_type;
    --
    --  Convert a string to upper case
    --
-   function string_upcase(e : element_type) return element_type;
+   function string_upcase(s : cons_index) return element_type;
    --
    --  Convert a string to lower case
    --
-   function string_downcase(e : element_type) return element_type;
+   function string_downcase(s : cons_index) return element_type;
 private
    --
    --  Helper functions for length

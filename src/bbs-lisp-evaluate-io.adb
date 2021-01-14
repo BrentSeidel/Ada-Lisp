@@ -3,8 +3,8 @@ package body BBS.lisp.evaluate.io is
    --
    --  Print stuff
    --
-   function print(e : element_type) return element_type is
-      t : element_type := e;
+   function print(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       car : element_type;
    begin
       while isList(t) loop
@@ -17,8 +17,8 @@ package body BBS.lisp.evaluate.io is
       return NIL_ELEM;
    end;
    --
-   function fresh_line(e : element_type) return element_type is
-      pragma Unreferenced (e);
+   function fresh_line(s : cons_index) return element_type is
+      pragma Unreferenced (s);
    begin
       if not first_char_flag then
          New_Line;
@@ -26,8 +26,8 @@ package body BBS.lisp.evaluate.io is
       return NIL_ELEM;
    end;
    --
-   function read_line(e : element_type) return element_type is
-      pragma Unreferenced (e);
+   function read_line(s : cons_index) return element_type is
+      pragma Unreferenced (s);
       buff : String(1 .. 256);
       size : Natural;
       ptr : Natural := buff'First;
@@ -66,8 +66,8 @@ package body BBS.lisp.evaluate.io is
       return (kind => E_VALUE, v => (kind => V_STRING, s => first));
    end;
    --
-   function terpri(e : element_type) return element_type is
-      pragma Unreferenced (e);
+   function terpri(s : cons_index) return element_type is
+      pragma Unreferenced (s);
    begin
       New_Line;
       return NIL_ELEM;

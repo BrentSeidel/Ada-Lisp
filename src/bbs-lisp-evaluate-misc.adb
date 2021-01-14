@@ -2,8 +2,8 @@ with Ada.Real_Time;
 use type Ada.Real_Time.Time;
 package body BBS.lisp.evaluate.misc is
    --
-   function reset(e : element_type) return element_type is
-      pragma Unreferenced (e);
+   function reset(s : cons_index) return element_type is
+      pragma Unreferenced (s);
    begin
       init;
       return NIL_ELEM;
@@ -12,12 +12,12 @@ package body BBS.lisp.evaluate.misc is
    --  Turn display of messages on or off depending on the boolean value
    --  passed as a parameter.
    --
-   function msg(e : element_type) return element_type is
-      t : element_type := e;
+   function msg(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if t.kind /= E_CONS then
+      if s = cons_index'First then
          error("msg", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -40,8 +40,8 @@ package body BBS.lisp.evaluate.misc is
       end if;
    end;
    --
-   function dump(e : element_type) return element_type is
-      pragma Unreferenced (e);
+   function dump(s : cons_index) return element_type is
+      pragma Unreferenced (s);
    begin
       dump_cons;
       dump_symbols;
@@ -51,8 +51,8 @@ package body BBS.lisp.evaluate.misc is
    --
    --  Set the quit flag to exit the lisp interpreter
    --
-   function quit(e : element_type) return element_type is
-      pragma Unreferenced (e);
+   function quit(s : cons_index) return element_type is
+      pragma Unreferenced (s);
    begin
       exit_flag := True;
       return NIL_ELEM;
@@ -60,12 +60,12 @@ package body BBS.lisp.evaluate.misc is
    --
    --  Sleep for a specified period of time in mS.
    --
-   function sleep(e : element_type) return element_type is
-      t : element_type := e;
+   function sleep(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("sleep", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;

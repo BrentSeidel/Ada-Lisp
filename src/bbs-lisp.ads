@@ -139,11 +139,12 @@ package bbs.lisp is
    --
    --  Type for access to function that implement lisp operations.
    --
-   type execute_function is access function(e : element_type) return element_type;
+--   type execute_function is access function(w : element_type) return element_type;
+   type execute_function is access function(s : cons_index) return element_type;
    --
    --  Type for access to functions that implement lisp special operations
    --
-   type special_function is access function(e : element_type; p : phase) return element_type;
+   type special_function is access function(s : cons_index; p : phase) return element_type;
    --
    --  A symbol give a perminant name to a piece of data.  These can be global
    --  variables, user defined functions, or builtin functions.  The builtin

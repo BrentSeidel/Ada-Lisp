@@ -8,16 +8,16 @@ package BBS.lisp.evaluate.mem is
    --  Read memory locations returning 8, 16, or 32 bit elements from the
    --  location.  Some systems may throw exceptions for unaligned access.
    --
-   function peek8(e : element_type) return element_type;
-   function peek16(e : element_type) return element_type;
-   function peek32(e : element_type) return element_type;
-   --
+   function peek8(s : cons_index) return element_type;
+   function peek16(s : cons_index) return element_type;
+   function peek32(s : cons_index) return element_type;
+  --
    --  Write 8, 16, or 32 bit elements to memory locations.  Some systems may
    --  throw exceptions for unaligned access.
    --
-   function poke8(e : element_type) return element_type;
-   function poke16(e : element_type) return element_type;
-   function poke32(e : element_type) return element_type;
+   function poke8(s : cons_index) return element_type;
+   function poke16(s : cons_index) return element_type;
+   function poke32(s : cons_index) return element_type;
 private
    type uint8 is mod 2**8
      with size => 8;

@@ -13,11 +13,11 @@ package body BBS.lisp.evaluate.mem is
    --  Read memory locations returning 8, 16, or 32 bit elements from the
    --  location.  Some systems may throw exceptions for unaligned access.
    --
-   function peek8(e : element_type) return element_type is
+   function peek8(s : cons_index) return element_type is
       param : element_type;
       addr1 : intermediate;
       addr : p_uint8;
-      rest : element_type := e;
+      rest : element_type := (kind => E_CONS, ps => s);
       el : element_type;
       value : uint8;
       ok : Boolean := True;
@@ -55,11 +55,11 @@ package body BBS.lisp.evaluate.mem is
       return el;
    end;
    --
-   function peek16(e : element_type) return element_type is
+   function peek16(s : cons_index) return element_type is
       param : element_type;
       addr1 : intermediate;
       addr : p_uint16;
-      rest : element_type := e;
+      rest : element_type := (kind => E_CONS, ps => s);
       el : element_type;
       value : uint16;
       ok : Boolean := True;
@@ -98,11 +98,11 @@ package body BBS.lisp.evaluate.mem is
       return el;
    end;
    --
-   function peek32(e : element_type) return element_type is
+   function peek32(s : cons_index) return element_type is
       param : element_type;
       addr1 : intermediate;
       addr : p_uint32;
-      rest : element_type := e;
+      rest : element_type := (kind => E_CONS, ps => s);
       el : element_type;
       value : uint32;
       ok : Boolean := True;
@@ -144,11 +144,11 @@ package body BBS.lisp.evaluate.mem is
    --  Write 8, 16, or 32 bit elements to memory locations.  Some systems may
    --  throw exceptions for unaligned access.
    --
-   function poke8(e : element_type) return element_type is
+   function poke8(s : cons_index) return element_type is
       param : element_type;
       addr1 : intermediate;
       addr : p_uint8;
-      rest : element_type := e;
+      rest : element_type := (kind => E_CONS, ps => s);
       el : element_type;
       value : uint8;
       ok : Boolean := True;
@@ -205,11 +205,11 @@ package body BBS.lisp.evaluate.mem is
       return el;
    end;
    --
-   function poke16(e : element_type) return element_type is
+   function poke16(s : cons_index) return element_type is
       param : element_type;
       addr1 : intermediate;
       addr : p_uint16;
-      rest : element_type := e;
+      rest : element_type := (kind => E_CONS, ps => s);
       el : element_type;
       value : uint16;
       ok : Boolean := True;
@@ -266,11 +266,11 @@ package body BBS.lisp.evaluate.mem is
       return el;
    end;
    --
-   function poke32(e : element_type) return element_type is
+   function poke32(s : cons_index) return element_type is
       param : element_type;
       addr1 : intermediate;
       addr : p_uint32;
-      rest : element_type := e;
+      rest : element_type := (kind => E_CONS, ps => s);
       el : element_type;
       value : uint32;
       ok : Boolean := True;

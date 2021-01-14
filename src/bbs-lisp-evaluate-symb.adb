@@ -32,8 +32,8 @@ package body BBS.lisp.evaluate.symb is
    --
    --  (coerce <object> <result type>)
    --
-   function coerce(e : element_type) return element_type is
-      t  : element_type := e;
+   function coerce(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       t1 : element_type;
       t2 : element_type;
       v1 : value;
@@ -46,7 +46,7 @@ package body BBS.lisp.evaluate.symb is
             return(kind => E_ERROR);
          end if;
       end if;
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("coerce", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -187,8 +187,8 @@ package body BBS.lisp.evaluate.symb is
       return (kind => E_ERROR);
    end;
    --
-   function concatenate(e : element_type) return element_type is
-      t  : element_type := e;
+   function concatenate(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       t1 : element_type := NIL_ELEM;
       t2 : element_type := NIL_ELEM;
       v1 : value;
@@ -200,7 +200,7 @@ package body BBS.lisp.evaluate.symb is
             return(kind => E_ERROR);
          end if;
       end if;
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("concatenate", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;

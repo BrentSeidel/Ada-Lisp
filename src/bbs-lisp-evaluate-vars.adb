@@ -11,7 +11,7 @@ package body BBS.lisp.evaluate.vars is
    --  to use as a return value.  Currently, the REPL deallocates the returned
    --  value after printing it.
    --
-   function setq(e : element_type; p : phase) return element_type is
+   function setq(s : cons_index; p : phase) return element_type is
       symb : symb_index;
       p1 : element_type;
       p2 : element_type;
@@ -37,9 +37,9 @@ package body BBS.lisp.evaluate.vars is
             return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
          when PH_PARSE_BEGIN =>
               msg("setq", "Called during parse begin phase.");
-            if e.kind = E_CONS then
-               p1 := cons_table(e.ps).car;  --  Should be symbol for setq
-               p2 := cons_table(e.ps).cdr;
+            if s > cons_index'First then
+               p1 := cons_table(s).car;  --  Should be symbol for setq
+               p2 := cons_table(s).cdr;
                p3 := cons_table(p2.ps).car; --  Should be a symbol or tempsym
                if p3.kind = E_SYMBOL then
                   symb := p3.sym;
@@ -68,8 +68,8 @@ package body BBS.lisp.evaluate.vars is
             null;
          when PH_EXECUTE =>
             msg("setq", "Called during execute phase.");
-            if e.kind = E_CONS then
-               p1 := cons_table(e.ps).car;  --  Should be symbol name
+            if s > cons_index'First then
+               p1 := cons_table(s).car;  --  Should be symbol name
                if p1.kind = E_SYMBOL then
                   symb := p1.sym;
                elsif p1.kind = E_STACK then
@@ -93,7 +93,7 @@ package body BBS.lisp.evaluate.vars is
                --
                --  Now determine what value to attach to the symbol.
                --
-               temp := cons_table(e.ps).cdr;
+               temp := cons_table(s).cdr;
                p2 := first_value(temp);
                BBS.lisp.memory.ref(p2);
                   --
@@ -125,7 +125,7 @@ package body BBS.lisp.evaluate.vars is
    --
    --  Define local variables and optionally assign values to them.
    --
-   function local(e : element_type; p : phase) return element_type is
+   function local(s : cons_index; p : phase) return element_type is
       locals : element_type;
       list : element_type;
       t : element_type := NIL_ELEM;
@@ -134,11 +134,11 @@ package body BBS.lisp.evaluate.vars is
          when PH_QUERY =>
             return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
          when PH_PARSE_BEGIN =>
-            if e.kind = E_CONS then
+            if s > cons_index'First then
                --
                --  First process the list of local variables
                --
-               locals := cons_table(e.ps).cdr;  --  Should be local variable list.
+               locals := cons_table(s).cdr;  --  Should be local variable list.
                if locals.kind = E_CONS then
                   locals := cons_table(locals.ps).car;
                else
@@ -204,8 +204,8 @@ package body BBS.lisp.evaluate.vars is
             --
             --  First process the list of local variables
             --
-            locals := cons_table(e.ps).car;  --  Should be parameter list.
-            list := cons_table(e.ps).cdr;
+            locals := cons_table(s).car;  --  Should be parameter list.
+            list := cons_table(s).cdr;
             --
             --  Next process the parameter list.
             --

@@ -4,8 +4,8 @@ package body BBS.lisp.evaluate.math is
    --
    --  This function evaluates the basic arithmatic operation (+, -, *, /).
    --
-   function eval_math(e : element_type; b : mathops) return element_type is
-      t : element_type := e;
+   function eval_math(s : cons_index; b : mathops) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       accum : int32 := 0;
       v : value;
       el: element_type;
@@ -27,15 +27,7 @@ package body BBS.lisp.evaluate.math is
       end;
 
    begin
-      if e.kind = E_VALUE then
-         if e.v.kind = V_INTEGER then
-            return (Kind => E_VALUE, v => (kind => V_INTEGER, i => e.v.i));
-         else
-            error("eval_math", "Internal error.  Not an integer.");
-            BBS.lisp.memory.deref(e);
-            return (kind => E_ERROR);
-         end if;
-      elsif e.kind /= E_CONS then
+      if s = cons_index'First then
          error("eval_math", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -87,23 +79,23 @@ package body BBS.lisp.evaluate.math is
       return (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum));
    end;
    --
-   function add(e : element_type) return element_type is
+   function add(s : cons_index) return element_type is
    begin
-      return eval_math(e, PLUS);
+      return eval_math(s, PLUS);
    end;
    --
-   function sub(e : element_type) return element_type is
+   function sub(s : cons_index) return element_type is
    begin
-      return eval_math(e, MINUS);
+      return eval_math(s, MINUS);
    end;
    --
-   function mul(e : element_type) return element_type is
+   function mul(s : cons_index) return element_type is
    begin
-      return eval_math(e, MUL);
+      return eval_math(s, MUL);
    end;
    --
-   function div(e : element_type) return element_type is
+   function div(s : cons_index) return element_type is
    begin
-      return eval_math(e, DIV);
+      return eval_math(s, DIV);
    end;
 end;

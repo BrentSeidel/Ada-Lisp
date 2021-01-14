@@ -7,15 +7,15 @@ package body BBS.lisp.evaluate.loops is
    --  condition evaluates to true, the rest of the items in the list are
    --  evaluated.  This is repeated until the condition evaluates to false.
    --
-   function dowhile(e : element_type) return element_type is
+   function dowhile(s : cons_index) return element_type is
       cond : element_type; --  Condition to evaluate
       list : element_type; --  List of operations to execute
       t : element_type := NIL_ELEM;
       temp : element_type;
    begin
-      if e.kind = E_CONS then
-         cond := cons_table(e.ps).car;
-         list := cons_table(e.ps).cdr;
+      if s > cons_index'First then
+         cond := cons_table(s).car;
+         list := cons_table(s).cdr;
          --
          --  Loop while the conditions is true.
          --
@@ -66,7 +66,7 @@ package body BBS.lisp.evaluate.loops is
    --  executed the specified number of times.
    --  (dotimes (local count [result]) <body>).
    --
-   function dotimes(e : element_type; p : phase) return element_type is
+   function dotimes(s : cons_index; p : phase) return element_type is
       limits : element_type; --  Condition to evaluate
       list : element_type; --  List of operations to execute
       result : element_type := NIL_ELEM;
@@ -81,9 +81,9 @@ package body BBS.lisp.evaluate.loops is
          when PH_QUERY =>
             return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
          when PH_PARSE_BEGIN =>
-            if e.kind = E_CONS then
-               list := cons_table(e.ps).car;   -- This is the dotimes symbol and ignored here
-               limits := cons_table(e.ps).cdr;
+            if s > cons_index'First then
+               list := cons_table(s).car;   -- This is the dotimes symbol and ignored here
+               limits := cons_table(s).cdr;
                --
                --  Extract local variable, limit, and optional result
                --
@@ -160,9 +160,9 @@ package body BBS.lisp.evaluate.loops is
             --
             --  EXECUTE Phase
             --
-            if e.kind = E_CONS then
-               limits := cons_table(e.ps).car;
-               list := cons_table(e.ps).cdr;
+            if s > cons_index'First then
+               limits := cons_table(s).car;
+               list := cons_table(s).cdr;
                --
                --  Extract local variable, limit, and optional result
                --

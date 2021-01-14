@@ -4,12 +4,12 @@ package body BBS.lisp.evaluate.char is
    --  Given a character, return the integer code for the character.  Typically
    --  the ASCII value.
    --
-   function char_int(e : element_type) return element_type is
-      t : element_type := e;
+   function char_int(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("char_int", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -33,12 +33,12 @@ package body BBS.lisp.evaluate.char is
    --
    --  Given an integer, return the character with that code or an error.
    --
-   function int_char(e : element_type) return element_type is
-      t : element_type := e;
+   function int_char(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("int_char", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -68,12 +68,12 @@ package body BBS.lisp.evaluate.char is
    --
    --  If character is alphabetic, convert to upper case.
    --
-   function char_upcase(e : element_type) return element_type is
-      t : element_type := e;
+   function char_upcase(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("char_upcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -98,12 +98,12 @@ package body BBS.lisp.evaluate.char is
    --
    --  If character is alphabetic, convert to lower case.
    --
-   function char_downcase(e : element_type) return element_type is
-      t : element_type := e;
+   function char_downcase(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("char_upcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;

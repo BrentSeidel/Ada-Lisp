@@ -1,12 +1,12 @@
 with BBS.lisp.memory;
 package body BBS.lisp.evaluate.bool is
    --
-   function eval_not(e : element_type) return element_type is
-      t : element_type := e;
+   function eval_not(s : cons_index) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("eval_not", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -31,7 +31,7 @@ package body BBS.lisp.evaluate.bool is
       end if;
    end;
    --
-   function eval_and(e : element_type) return element_type is
+   function eval_and(s : cons_index) return element_type is
       accum_i : int32 := -1;
       accum_b : Boolean := True;
       int_op : Boolean;
@@ -64,19 +64,8 @@ package body BBS.lisp.evaluate.bool is
       end;
       --
    begin
-      if e.kind = E_VALUE then
-         if e.v.kind = V_INTEGER then
-            accum_i := e.v.i;
-            int_op := True;
-         elsif e.v.kind = V_BOOLEAN then
-            accum_b := e.v.b;
-            int_op := False;
-         else
-            error("eval_and", "Can only operate on integers and booleans.");
-            return (kind => E_ERROR);
-         end if;
-      elsif e.kind = E_CONS then
-         ptr := e;
+      if s > cons_index'First then
+         ptr := (kind => E_CONS, ps => s);
          temp := first_value(ptr);
          if accumulate(temp) = E_ERROR then
             error("eval_and", "Error processing parameter.");
@@ -103,7 +92,7 @@ package body BBS.lisp.evaluate.bool is
             end if;
          end if;
       else
-         error("eval_and", "Can't operate on " & ptr_type'Image(e.kind));
+         error("eval_and", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
       if int_op then
@@ -113,7 +102,7 @@ package body BBS.lisp.evaluate.bool is
       end if;
    end;
    --
-   function eval_or(e : element_type) return element_type is
+   function eval_or(s : cons_index) return element_type is
       accum_i : int32 := 0;
       accum_b : Boolean := False;
       int_op : Boolean;
@@ -146,19 +135,8 @@ package body BBS.lisp.evaluate.bool is
       end;
       --
    begin
-      if e.kind = E_VALUE then
-         if e.v.kind = V_INTEGER then
-            accum_i := e.v.i;
-            int_op := True;
-         elsif e.v.kind = V_BOOLEAN then
-            accum_b := e.v.b;
-            int_op := False;
-         else
-            error("eval_or", "Can only operate on integers and booleans.");
-            return (kind => E_ERROR);
-         end if;
-      elsif e.kind = E_CONS then
-         ptr := e;
+      if s > cons_index'First then
+         ptr := (kind => E_CONS, ps => s);
          temp := first_value(ptr);
          if accumulate(temp) = E_ERROR then
             error("eval_ok", "Error processing parameter.");
@@ -185,7 +163,7 @@ package body BBS.lisp.evaluate.bool is
             end if;
          end if;
       else
-         error("eval_or", "Can't operate on " & ptr_type'Image(e.kind));
+         error("eval_or", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
       if int_op then

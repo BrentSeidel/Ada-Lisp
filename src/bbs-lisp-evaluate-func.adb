@@ -13,7 +13,7 @@ package body BBS.lisp.evaluate.func is
    --      translated to point to the parameter atom in the parameter list.  It
    --      also could concievable be a single atom or even NIL.
    --
-   function defun(e : element_type; p : phase) return element_type is
+   function defun(s : cons_index; p : phase) return element_type is
       params : element_type;
       name : element_type;
       temp : element_type;
@@ -33,11 +33,11 @@ package body BBS.lisp.evaluate.func is
             --  initial checks to verify that they are the appropriate kind of object.
             --
          when PH_PARSE_BEGIN =>
-            if e.kind = E_CONS then
+            if s > cons_index'First then
                --
                --  First process the symbol for the function.
                --
-               p2 := cons_table(e.ps).cdr;
+               p2 := cons_table(s).cdr;
                p3 := cons_table(p2.ps).car;   --  Should be a symbol or tempsym
                temp := cons_table(p2.ps).cdr; --  Should be parameter list.
 
@@ -125,12 +125,12 @@ package body BBS.lisp.evaluate.func is
             --  EXECUTE Phase
             --
          when PH_EXECUTE =>
-            if e.kind /= E_CONS then
+            if s = cons_index'First then
                error("defun", "No parameters given to defun.");
                return (kind => E_ERROR);
             end if;
-            name := cons_table(e.ps).car;
-            temp := cons_table(e.ps).cdr;
+            name := cons_table(s).car;
+            temp := cons_table(s).cdr;
             if temp.kind = E_CONS then
                params := cons_table(temp.ps).car;
             else
@@ -159,8 +159,8 @@ package body BBS.lisp.evaluate.func is
             elsif symb_table(symb).kind = SY_VARIABLE then
                BBS.lisp.memory.deref(symb_table(symb).pv);
             end if;
-            temp := cons_table(e.ps).cdr;
-            cons_table(e.ps).cdr := NIL_ELEM;
+            temp := cons_table(s).cdr;
+            cons_table(s).cdr := NIL_ELEM;
             symb_table(symb) := (ref => 1, str => symb_table(symb).str,
                                  kind => SY_LAMBDA, ps => temp.ps);
       end case;
@@ -177,10 +177,9 @@ package body BBS.lisp.evaluate.func is
    --      also could concievable be a single atom or even NIL.
    --    The returned value is an variable element of type V_LAMBDA.
    --
-   function lambda(e : element_type; p : phase) return element_type is
+   function lambda(s : cons_index; p : phase) return element_type is
       params : element_type;
       temp : element_type;
---      p2 : element_type;
    begin
       --
       --  Begin should be called at item 2 so that the parameter list is available.
@@ -193,14 +192,14 @@ package body BBS.lisp.evaluate.func is
             --  initial checks to verify that they are the appropriate kind of object.
             --
          when PH_PARSE_BEGIN =>
-            if e.kind = E_CONS then
+            if s > cons_index'First then
                --
                --  Process the parameter list.  Note that currently, defun
                --  is intended to be used at the command level, not within other
                --  functions or local blocks.  Thus there should be no stack
                --  variables to check when processing the parameter list.
                --
-               params := cons_table(e.ps).cdr;
+               params := cons_table(s).cdr;
                if params.kind = E_CONS then
                   params := cons_table(params.ps).car;
                else
@@ -229,7 +228,6 @@ package body BBS.lisp.evaluate.func is
                      elsif (el.kind = E_TEMPSYM) then
                         msg("lambda", "Converting tempsym to parameter");
                         str := el.tempsym;
---                        BBS.lisp.memory.ref(str);
                         el := (kind => E_STACK, st_name => str,
                                st_offset => offset);
                         BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE, st_name =>
@@ -255,15 +253,8 @@ package body BBS.lisp.evaluate.func is
             --  EXECUTE Phase
             --
          when PH_EXECUTE =>
-            if e.kind /= E_CONS then
+            if s = cons_index'First then
                error("lambda", "No parameters given to lambda.");
-               return (kind => E_ERROR);
-            end if;
-            temp := e;
-            if temp.kind = E_CONS then
-               params := cons_table(temp.ps).car;
-            else
-               error("lambda", "Improper parameters.");
                return (kind => E_ERROR);
             end if;
             if (params.kind /= E_CONS) and (params.kind /= E_NIL) then
@@ -274,8 +265,8 @@ package body BBS.lisp.evaluate.func is
             --  To get to this point, all checks have passed, so return the
             --  parameter list and body.
             --
-            BBS.lisp.memory.ref(temp);
-            return (kind => E_VALUE, v => (kind => V_LAMBDA, lam => temp.ps));
+            BBS.lisp.memory.ref(s);
+            return (kind => E_VALUE, v => (kind => V_LAMBDA, lam => s));
       end case;
       return NIL_ELEM;
    end;

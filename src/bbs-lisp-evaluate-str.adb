@@ -6,11 +6,11 @@ package body BBS.lisp.evaluate.str is
    --  Return the length of a string or list.  Atoms will get a value of 1.
    --  A nil pointer returns a length of 0.
    --
-   function length(e : element_type) return element_type is
-      t : element_type := e;
+   function length(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Parameter
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("length", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -63,14 +63,14 @@ package body BBS.lisp.evaluate.str is
    --
    --  Return a specified character from a string.
    --
-   function char(e : element_type) return element_type is
-      t : element_type := e;   --  Temporary variable
+   function char(s : cons_index) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       p1 : element_type;  --  First parameter (string)
       p2 : element_type;  --  Second parameter (integer)
       str : string_index;
       index : Integer;
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("char", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -125,15 +125,15 @@ package body BBS.lisp.evaluate.str is
    --
    --  Parse a string as an integer and return the integer value.
    --
-   function parse_integer(e : element_type) return element_type is
-      t : element_type := e;
+   function parse_integer(s : cons_index) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Parameter
       str : string_index;
       accumulate : int32 := 0;
       neg : Boolean := False;
       ptr : Integer;
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("length", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -176,8 +176,8 @@ package body BBS.lisp.evaluate.str is
    --
    --  Return a substring of the original string
    --
-   function subseq(e : element_type) return element_type is
-      t : element_type := e;
+   function subseq(s : cons_index) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       p1 : element_type;  --  Parameter 1 (string)
       source : string_index;  -- Source string
       p2 : element_type;  --  Parameter 2 (starting position)
@@ -190,7 +190,7 @@ package body BBS.lisp.evaluate.str is
       new_frag : string_index;
       temp : string_index;
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("subseq", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -395,12 +395,12 @@ package body BBS.lisp.evaluate.str is
    --
    --  Convert a string to upper case
    --
-   function string_upcase(e : element_type) return element_type is
-      t : element_type := e;
+   function string_upcase(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("string_upcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -435,12 +435,12 @@ package body BBS.lisp.evaluate.str is
    --
    --  Convert a string to lower case
    --
-   function string_downcase(e : element_type) return element_type is
-      t : element_type := e;
+   function string_downcase(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("string_downcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;

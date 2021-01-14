@@ -4,14 +4,14 @@ package body BBS.lisp.evaluate.cond is
    --
    --  Perform comparison operations.
    --
-   function eval_comp(e : element_type; b : compops) return element_type is
-      t  : element_type := e;
+   function eval_comp(s : cons_index; b : compops) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       t1 : element_type;
       t2 : element_type;
       v1 : value;
       v2 : value;
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("eval_comp", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -128,33 +128,33 @@ package body BBS.lisp.evaluate.cond is
       end if;
    end;
    --
-   function eq(e : element_type) return element_type is
+   function eq(s : cons_index) return element_type is
    begin
-      return eval_comp(e, SYM_EQ);
+      return eval_comp(s, SYM_EQ);
    end;
    --
-   function ne(e : element_type) return element_type is
+   function ne(s : cons_index) return element_type is
    begin
-      return eval_comp(e, SYM_NE);
+      return eval_comp(s, SYM_NE);
    end;
    --
-   function lt(e : element_type) return element_type is
+   function lt(s : cons_index) return element_type is
    begin
-      return eval_comp(e, SYM_LT);
+      return eval_comp(s, SYM_LT);
    end;
    --
-   function gt(e : element_type) return element_type is
+   function gt(s : cons_index) return element_type is
    begin
-      return eval_comp(e, SYM_GT);
+      return eval_comp(s, SYM_GT);
    end;
    --
-   function eval_if(e : element_type) return element_type is
-      t : element_type := e;
+   function eval_if(s : cons_index) return element_type is
+      t  : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Condition
       p2 : element_type; --  True expression
       p3 : element_type; --  False expression
    begin
-      if e.kind /= E_CONS then
+      if s = cons_index'First then
          error("eval_if", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;

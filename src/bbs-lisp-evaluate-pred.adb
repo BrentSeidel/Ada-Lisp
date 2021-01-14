@@ -8,15 +8,13 @@ package body BBS.lisp.evaluate.pred is
    --
    --  These return true of false depending on the type of data passed.
    --
-   function atomp(e : element_type) return element_type is
+   function atomp(s : cons_index) return element_type is
       p : element_type;
-      s : cons_index;
    begin
-      if not isList(e) then
+      if s = cons_index'First then
          error("symbolp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
-      s := getList(e);
       p := cons_table(s).car;
       if not isList(p) then
          return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
@@ -25,11 +23,11 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
-   function characterp(e : element_type) return element_type is
-      t : element_type := e;
+   function characterp(s : cons_index) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       p : element_type;
    begin
-      if not isList(e) then
+      if s = cons_index'First then
          error("characterp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
@@ -41,11 +39,11 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
-   function compiled_function_p(e : element_type) return element_type is
-      t : element_type := e;
+   function compiled_function_p(s : cons_index) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       p : element_type;
    begin
-      if not isList(e) then
+      if s = cons_index'First then
          error("compiled_function_p", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
@@ -59,15 +57,13 @@ package body BBS.lisp.evaluate.pred is
       return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
    end;
    --
-   function consp(e : element_type) return element_type is
+   function consp(s : cons_index) return element_type is
       p : element_type;
-      s : cons_index;
    begin
-      if not isList(e) then
+      if s = cons_index'First then
          error("symbolp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
-      s := getList(e);
       p := cons_table(s).car;
       if isList(p) then
          return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
@@ -76,11 +72,11 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
-   function functionp(e : element_type) return element_type is
-      t : element_type := e;
+   function functionp(s : cons_index) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       p : element_type;
    begin
-      if not isList(e) then
+      if s = cons_index'First then
          error("functionp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
@@ -100,11 +96,11 @@ package body BBS.lisp.evaluate.pred is
       return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
    end;
    --
-   function integerp(e : element_type) return element_type is
-      t : element_type := e;
+   function integerp(s : cons_index) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       p : element_type;
    begin
-      if not isList(e) then
+      if s = cons_index'First then
          error("integerp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
@@ -116,15 +112,13 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
-   function listp(e : element_type) return element_type is
+   function listp(s : cons_index) return element_type is
       p : element_type;
-      s : cons_index;
    begin
-      if not isList(e) then
-         error("symbolp", "Internal error, not passed a list.");
+      if s = cons_index'First then
+         error("listp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
-      s := getList(e);
       p := cons_table(s).car;
       if isList(p) or (p = NIL_ELEM) then
          return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
@@ -133,11 +127,11 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
-   function nullp(e : element_type) return element_type is
-      t : element_type := e;
+   function nullp(s : cons_index) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       p : element_type;
    begin
-      if not isList(e) then
+      if s = cons_index'First then
          error("nullp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
@@ -149,11 +143,11 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
-   function numberp(e : element_type) return element_type is
-      t : element_type := e;
+   function numberp(s : cons_index) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       p : element_type;
    begin
-      if not isList(e) then
+      if s = cons_index'First then
          error("numberp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
@@ -165,11 +159,11 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
-   function simple_string_p(e : element_type) return element_type is
-      t : element_type := e;
+   function simple_string_p(s : cons_index) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       p : element_type;
    begin
-      if not isList(e) then
+      if s = cons_index'First then
          error("simple_string_p", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
@@ -181,11 +175,11 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
-   function stringp(e : element_type) return element_type is
-      t : element_type := e;
+   function stringp(s : cons_index) return element_type is
+      t : element_type := (kind => E_CONS, ps => s);
       p : element_type;
    begin
-      if not isList(e) then
+      if s = cons_index'First then
          error("stringp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
@@ -197,15 +191,13 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
-   function symbolp(e : element_type) return element_type is
+   function symbolp(s : cons_index) return element_type is
       p : element_type;
-      s : cons_index;
    begin
-      if not isList(e) then
+      if s = cons_index'First then
          error("symbolp", "Internal error, not passed a list.");
          return (kind => E_ERROR);
       end if;
-      s := getList(e);
       p := cons_table(s).car;
       if p.kind = E_SYMBOL then
          return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
@@ -218,8 +210,8 @@ package body BBS.lisp.evaluate.pred is
    --  actually no reason to have all of these functions coded.  They can just
    --  use one function that returns NIL (False).
    --
-   function return_false(e : element_type) return element_type is
-      pragma Unreferenced (e);
+   function return_false(s : cons_index) return element_type is
+      pragma Unreferenced (s);
    begin
       return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
    end;
