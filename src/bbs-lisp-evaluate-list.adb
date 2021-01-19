@@ -5,21 +5,20 @@ package body BBS.lisp.evaluate.list is
    --  Create a list out of two elements.
    --
    function cons(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      s1 : cons_index := s;
       p1 : element_type;  --  First parameter
       p2 : element_type;  --  Second parameter
-      s1 : cons_index;    --  Created cons cell
    begin
-      if s = cons_index'First then
+      if s = NIL_CONS then
          error("cons(e", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      p1 := first_value(t);
+      p1 := first_value(s1);
       if p1.kind = E_ERROR then
          error("cons", "Error reported evaluating first parameter.");
          return p1;
       end if;
-      p2 := first_value(t);
+      p2 := first_value(s1);
       if p2.kind = E_ERROR then
          error("cons", "Error reported evaluating second parameter.");
          return p2;
@@ -39,9 +38,9 @@ package body BBS.lisp.evaluate.list is
    --  Return the first entry in a list (it may be another list).
    --
    function car(s : cons_index) return element_type is
+      rest : cons_index := s;
       first : element_type;
       temp : element_type;
-      rest : element_type := (kind => E_CONS, ps => s);
       s1 : cons_index;
    begin
       first := first_value(rest);
@@ -57,9 +56,9 @@ package body BBS.lisp.evaluate.list is
    --  Return the rest of a list
    --
    function cdr(s : cons_index) return element_type is
+      rest : cons_index := s;
       first : element_type;
       temp : element_type;
-      rest : element_type := (kind => E_CONS, ps => s);
       s1 : cons_index;
    begin
       first := first_value(rest);
@@ -86,7 +85,7 @@ package body BBS.lisp.evaluate.list is
    --
    function list(s : cons_index) return element_type is
       first : element_type;
-      rest : element_type := (kind => E_CONS, ps => s);
+      rest : cons_index := s;
       head : cons_index;
       tail : cons_index;
       s1 : cons_index;
@@ -109,7 +108,7 @@ package body BBS.lisp.evaluate.list is
       else
          return NIL_ELEM;
       end if;
-      while rest.kind /= E_NIL loop
+      while rest > NIL_CONS loop
          if BBS.lisp.memory.alloc(s1) then
             first := first_value(rest);
             if first.kind = E_ERROR then

@@ -16,7 +16,7 @@ package body BBS.lisp.evaluate.vars is
       p1 : element_type;
       p2 : element_type;
       p3 : element_type;
-      temp : element_type;
+      temp : cons_index;
       str : string_index;
       stacked : Boolean := False;
       index : stack_index;
@@ -68,7 +68,7 @@ package body BBS.lisp.evaluate.vars is
             null;
          when PH_EXECUTE =>
             msg("setq", "Called during execute phase.");
-            if s > cons_index'First then
+            if s > NIL_CONS then
                p1 := cons_table(s).car;  --  Should be symbol name
                if p1.kind = E_SYMBOL then
                   symb := p1.sym;
@@ -93,8 +93,12 @@ package body BBS.lisp.evaluate.vars is
                --
                --  Now determine what value to attach to the symbol.
                --
-               temp := cons_table(s).cdr;
-               p2 := first_value(temp);
+               if isList(cons_table(s).cdr) then
+                  temp := getList(cons_table(s).cdr);
+                  p2 := first_value(temp);
+               else
+                  p2 := cons_table(s).cdr;
+               end if;
                BBS.lisp.memory.ref(p2);
                   --
                   --  Check for stack variables
@@ -134,7 +138,7 @@ package body BBS.lisp.evaluate.vars is
          when PH_QUERY =>
             return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
          when PH_PARSE_BEGIN =>
-            if s > cons_index'First then
+            if s > NIL_CONS then
                --
                --  First process the list of local variables
                --

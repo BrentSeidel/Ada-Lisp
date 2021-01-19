@@ -4,7 +4,7 @@ package body bbs.lisp.memory is
    --
    procedure reset_tables is
    begin
-      for i in cons_index'First + 1 .. cons_index'Last loop
+      for i in NIL_CONS + 1 .. cons_index'Last loop
          cons_table(i).ref := 0;
          cons_table(i).car := (Kind => E_NIL);
          cons_table(i).cdr := (Kind => E_NIL);
@@ -22,7 +22,7 @@ package body bbs.lisp.memory is
    --
    function alloc(s : out cons_index) return Boolean is
    begin
-      for i in cons_index'First + 1 .. cons_index'Last loop
+      for i in NIL_CONS + 1 .. cons_index'Last loop
          if cons_table(i).ref = 0 then
             s := i;
             cons_table(i).ref := 1;
@@ -107,7 +107,7 @@ package body bbs.lisp.memory is
    --
    procedure deref(s : cons_index) is
    begin
-      if s > cons_index'First then
+      if s > NIL_CONS then
          msg("deref cons", "Dereffing cons at " & cons_index'Image(s) &
             " Ref count was " & Integer'Image(Integer(cons_table(s).ref)));
          if cons_table(s).ref > 0 then

@@ -40,7 +40,6 @@ package body BBS.lisp.evaluate.func is
                p2 := cons_table(s).cdr;
                p3 := cons_table(p2.ps).car;   --  Should be a symbol or tempsym
                temp := cons_table(p2.ps).cdr; --  Should be parameter list.
-
                --
                --  Process the function name
                --
@@ -125,7 +124,7 @@ package body BBS.lisp.evaluate.func is
             --  EXECUTE Phase
             --
          when PH_EXECUTE =>
-            if s = cons_index'First then
+            if s = NIL_CONS then
                error("defun", "No parameters given to defun.");
                return (kind => E_ERROR);
             end if;
@@ -192,7 +191,7 @@ package body BBS.lisp.evaluate.func is
             --  initial checks to verify that they are the appropriate kind of object.
             --
          when PH_PARSE_BEGIN =>
-            if s > cons_index'First then
+            if s > NIL_CONS then
                --
                --  Process the parameter list.  Note that currently, defun
                --  is intended to be used at the command level, not within other
@@ -253,7 +252,7 @@ package body BBS.lisp.evaluate.func is
             --  EXECUTE Phase
             --
          when PH_EXECUTE =>
-            if s = cons_index'First then
+            if s = NIL_CONS then
                error("lambda", "No parameters given to lambda.");
                return (kind => E_ERROR);
             end if;
@@ -279,12 +278,14 @@ package body BBS.lisp.evaluate.func is
    --  the parameters that can be passed to the function.  The second is the
    --  function body.
    --
+   --  TODO: Change e to cons_index.
+   --
    function eval_function(s : cons_index; e : element_type) return element_type is
       params : element_type ;
       func_body : element_type;
       param_value : value := (kind => V_NONE);
       temp_value : element_type;
-      rest : element_type;
+      rest : cons_index;
       name : element_type;
       ret_val : element_type;
       supplied : Integer := 0;
@@ -310,10 +311,14 @@ package body BBS.lisp.evaluate.func is
       --
       --  Assign parameters to values.
       --
-      rest := e;       --  Supplied parameter values
+      if isList(e) then
+         rest := getList(e);
+      else
+         rest := NIL_CONS;
+      end if;
       name := params;  --  List of parameter names
       BBS.lisp.stack.start_frame;
-      while rest.kind = E_CONS loop
+      while rest > NIL_CONS loop
          if cons_table(name.ps).car.kind = E_STACK then
             temp_value := first_value(rest);
             if temp_value.kind = E_VALUE then

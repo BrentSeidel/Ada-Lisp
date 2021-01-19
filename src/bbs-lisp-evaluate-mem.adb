@@ -14,10 +14,10 @@ package body BBS.lisp.evaluate.mem is
    --  location.  Some systems may throw exceptions for unaligned access.
    --
    function peek8(s : cons_index) return element_type is
+      rest : cons_index := s;
       param : element_type;
       addr1 : intermediate;
       addr : p_uint8;
-      rest : element_type := (kind => E_CONS, ps => s);
       el : element_type;
       value : uint8;
       ok : Boolean := True;
@@ -56,10 +56,10 @@ package body BBS.lisp.evaluate.mem is
    end;
    --
    function peek16(s : cons_index) return element_type is
+      rest : cons_index := s;
       param : element_type;
       addr1 : intermediate;
       addr : p_uint16;
-      rest : element_type := (kind => E_CONS, ps => s);
       el : element_type;
       value : uint16;
       ok : Boolean := True;
@@ -99,10 +99,10 @@ package body BBS.lisp.evaluate.mem is
    end;
    --
    function peek32(s : cons_index) return element_type is
+      rest : cons_index := s;
       param : element_type;
       addr1 : intermediate;
       addr : p_uint32;
-      rest : element_type := (kind => E_CONS, ps => s);
       el : element_type;
       value : uint32;
       ok : Boolean := True;
@@ -145,10 +145,10 @@ package body BBS.lisp.evaluate.mem is
    --  throw exceptions for unaligned access.
    --
    function poke8(s : cons_index) return element_type is
+      rest : cons_index := s;
       param : element_type;
       addr1 : intermediate;
       addr : p_uint8;
-      rest : element_type := (kind => E_CONS, ps => s);
       el : element_type;
       value : uint8;
       ok : Boolean := True;
@@ -206,10 +206,10 @@ package body BBS.lisp.evaluate.mem is
    end;
    --
    function poke16(s : cons_index) return element_type is
+      rest : cons_index := s;
       param : element_type;
       addr1 : intermediate;
       addr : p_uint16;
-      rest : element_type := (kind => E_CONS, ps => s);
       el : element_type;
       value : uint16;
       ok : Boolean := True;
@@ -267,10 +267,10 @@ package body BBS.lisp.evaluate.mem is
    end;
    --
    function poke32(s : cons_index) return element_type is
+      rest : cons_index := s;
       param : element_type;
       addr1 : intermediate;
       addr : p_uint32;
-      rest : element_type := (kind => E_CONS, ps => s);
       el : element_type;
       value : uint32;
       ok : Boolean := True;

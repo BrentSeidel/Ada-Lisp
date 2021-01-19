@@ -5,7 +5,7 @@ package body BBS.lisp.evaluate.cond is
    --  Perform comparison operations.
    --
    function eval_comp(s : cons_index; b : compops) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      s1 : cons_index := s;
       t1 : element_type;
       t2 : element_type;
       v1 : value;
@@ -15,7 +15,7 @@ package body BBS.lisp.evaluate.cond is
          error("eval_comp", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      t1 := first_value(t);
+      t1 := first_value(s1);
       if t1.kind = E_ERROR then
          error("eval_comp", "Error reported evaluating first parameter.");
          return t1;
@@ -26,8 +26,8 @@ package body BBS.lisp.evaluate.cond is
          error("eval_comp", "First parameter does not evaluate to a value");
          return (kind => E_ERROR);
       end if;
-      if isList(t) then
-         t2 := first_value(t);
+      if s1 > NIL_CONS then
+         t2 := first_value(s1);
       else
          error("eval_comp", "Cannot compare a single element.");
          BBS.lisp.memory.deref(t1);
@@ -149,7 +149,8 @@ package body BBS.lisp.evaluate.cond is
    end;
    --
    function eval_if(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      t  : element_type;
+      s1 : cons_index := s;
       p1 : element_type; --  Condition
       p2 : element_type; --  True expression
       p3 : element_type; --  False expression
@@ -158,21 +159,21 @@ package body BBS.lisp.evaluate.cond is
          error("eval_if", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      p1 := first_value(t);
+      p1 := first_value(s1);
       if p1.kind = E_ERROR then
          error("eval_if", "Condition reported an error.");
          return p1;
       end if;
-      if t.kind = E_CONS then
-         p2 := cons_table(t.ps).car;
-         t := cons_table(t.ps).cdr;
-         if t.kind = E_CONS then
-            p3 := cons_table(t.ps).car;
+      if s1 > NIL_CONS then
+         p2 := cons_table(s1).car;
+         if isList(cons_table(s1).cdr) then
+            s1 := cons_table(s1).cdr.ps;
+            p3 := cons_table(s1).car;
          else
-            p3 := t;
+            p3 := cons_table(s1).cdr;
          end if;
       else
-         p2 := t;
+         p2 := cons_table(s).cdr;
          p3 := NIL_ELEM;
       end if;
       --

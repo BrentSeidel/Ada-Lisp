@@ -2,15 +2,15 @@ with BBS.lisp.memory;
 package body BBS.lisp.evaluate.bool is
    --
    function eval_not(s : cons_index) return element_type is
-      t : element_type := (kind => E_CONS, ps => s);
       p1 : element_type; --  Parameter
+      s1 : cons_index := s;
       v : value;
    begin
-      if s = cons_index'First then
+      if s = NIL_CONS then
          error("eval_not", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
-      p1 := first_value(t);
+      p1 := first_value(s1);
       if p1.kind = E_ERROR then
          error("eval_not", "Error reported evaluating parameter.");
          return p1;
@@ -35,7 +35,7 @@ package body BBS.lisp.evaluate.bool is
       accum_i : int32 := -1;
       accum_b : Boolean := True;
       int_op : Boolean;
-      ptr : element_type;
+      ptr : cons_index;
       temp : element_type;
 
       function accumulate(t : element_type) return ptr_type is
@@ -64,14 +64,14 @@ package body BBS.lisp.evaluate.bool is
       end;
       --
    begin
-      if s > cons_index'First then
-         ptr := (kind => E_CONS, ps => s);
+      if s > NIL_CONS then
+         ptr := s;
          temp := first_value(ptr);
          if accumulate(temp) = E_ERROR then
             error("eval_and", "Error processing parameter.");
             return (kind => E_ERROR);
          end if;
-         if ptr.kind /= E_NIL then
+         if ptr > NIL_CONS then
             if (int_op and (accum_i /= 0)) or ((not int_op) and accum_b) then
                loop
                   temp := first_value(ptr);
@@ -87,7 +87,7 @@ package body BBS.lisp.evaluate.bool is
                   --
                   --  Check for end of parameters
                   --
-                  exit when not isList(ptr);
+                  exit when ptr = NIL_CONS;
                end loop;
             end if;
          end if;
@@ -106,7 +106,7 @@ package body BBS.lisp.evaluate.bool is
       accum_i : int32 := 0;
       accum_b : Boolean := False;
       int_op : Boolean;
-      ptr : element_type;
+      ptr : cons_index;
       temp : element_type;
 
       function accumulate(t : element_type) return ptr_type is
@@ -135,14 +135,14 @@ package body BBS.lisp.evaluate.bool is
       end;
       --
    begin
-      if s > cons_index'First then
-         ptr := (kind => E_CONS, ps => s);
+      if s > NIL_CONS then
+         ptr := s;
          temp := first_value(ptr);
          if accumulate(temp) = E_ERROR then
             error("eval_ok", "Error processing parameter.");
             return (kind => E_ERROR);
          end if;
-         if ptr.kind /= E_NIL then
+         if ptr > NIL_CONS then
             if (int_op and (accum_i /= -1)) or ((not int_op) and (not accum_b)) then
                loop
                   temp := first_value(ptr);
@@ -158,7 +158,7 @@ package body BBS.lisp.evaluate.bool is
                   --
                   --  Check for end of parameters
                   --
-                  exit when not isList(ptr);
+                  exit when ptr = NIL_CONS;
                end loop;
             end if;
          end if;

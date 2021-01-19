@@ -74,6 +74,7 @@ package body BBS.lisp.evaluate.loops is
       rest : element_type := NIL_ELEM;
       limit : element_type := NIL_ELEM;
       limit_value : Natural := 0;
+      s1 : cons_index;
       dummy : Natural;
       t : element_type := NIL_ELEM;
    begin
@@ -81,7 +82,7 @@ package body BBS.lisp.evaluate.loops is
          when PH_QUERY =>
             return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
          when PH_PARSE_BEGIN =>
-            if s > cons_index'First then
+            if s > NIL_CONS then
                list := cons_table(s).car;   -- This is the dotimes symbol and ignored here
                limits := cons_table(s).cdr;
                --
@@ -160,7 +161,7 @@ package body BBS.lisp.evaluate.loops is
             --
             --  EXECUTE Phase
             --
-            if s > cons_index'First then
+            if s > NIL_CONS then
                limits := cons_table(s).car;
                list := cons_table(s).cdr;
                --
@@ -192,8 +193,10 @@ package body BBS.lisp.evaluate.loops is
             --
             --  Next determine what the loop limit is
             --
-            rest := limit;
-            limit := first_value(rest);
+            if limit.kind = E_CONS then
+               s1 := limit.ps;
+               limit := first_value(s1);
+            end if;
             if limit.kind = E_VALUE then
                if limit.v.kind = V_INTEGER then
                   if limit.v.i >= 0 then

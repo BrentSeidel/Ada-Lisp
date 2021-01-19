@@ -4,16 +4,13 @@ package body BBS.lisp.evaluate.io is
    --  Print stuff
    --
    function print(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
       car : element_type;
    begin
-      while isList(t) loop
+      while t > NIL_CONS loop
          car := first_value(t);
          print(car, True, False);
       end loop;
-      if t.kind /= E_NIL then
-         print(t, True, True);
-      end if;
       return NIL_ELEM;
    end;
    --

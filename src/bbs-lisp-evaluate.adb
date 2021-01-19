@@ -137,16 +137,18 @@ package body BBS.lisp.evaluate is
    --  it is passed to the evaluator and the results returned.  The rest of the
    --  expression is also returned
    --
-   function first_value(e : in out element_type) return element_type is
+   function first_value(s : in out cons_index) return element_type is
       first : element_type;
-      s : cons_index;
    begin
-      if e.kind = E_NIL then
+      if s = NIL_CONS then
          return NIL_ELEM;
-      elsif isList(e) then
-         s := e.ps;
+      else
          first := cons_table(s).car;
-         e :=  cons_table(s).cdr;
+         if isList(cons_table(s).cdr) then
+            s := getList(cons_table(s).cdr);
+         else
+            s := NIL_CONS;
+         end if;
          if first.kind = E_NIL then
             null;
          elsif isList(first) then
@@ -159,10 +161,6 @@ package body BBS.lisp.evaluate is
             first := indirect_elem(first);
             BBS.lisp.memory.ref(first);
          end if;
-      else
-         first := indirect_elem(e);
-         BBS.lisp.memory.ref(first);
-         e := NIL_ELEM;
       end if;
       return first;
    end;

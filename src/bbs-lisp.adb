@@ -686,11 +686,10 @@ package body bbs.lisp is
                   Print(sym.str);
                   New_Line;
                end if;
---               e := sym.f.all(rest);
                if rest.kind = E_CONS then
                   e := sym.f.all(rest.ps);
                else
-                  e := sym.f.all(cons_index'First);
+                  e := sym.f.all(NIL_CONS);
                end if;
             when SY_SPECIAL =>
                if msg_flag then
@@ -701,7 +700,7 @@ package body bbs.lisp is
                if rest.kind = E_CONS then
                   e := sym.s.all(rest.ps, PH_EXECUTE);
                else
-                  e := sym.s.all(cons_index'First, PH_EXECUTE);
+                  e := sym.s.all(NIL_CONS, PH_EXECUTE);
                end if;
             when SY_LAMBDA =>
                if msg_flag then

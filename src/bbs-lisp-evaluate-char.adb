@@ -5,11 +5,11 @@ package body BBS.lisp.evaluate.char is
    --  the ASCII value.
    --
    function char_int(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if s = cons_index'First then
+      if t = NIL_CONS then
          error("char_int", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -34,11 +34,11 @@ package body BBS.lisp.evaluate.char is
    --  Given an integer, return the character with that code or an error.
    --
    function int_char(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if s = cons_index'First then
+      if t = NIL_CONS then
          error("int_char", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -69,11 +69,11 @@ package body BBS.lisp.evaluate.char is
    --  If character is alphabetic, convert to upper case.
    --
    function char_upcase(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if s = cons_index'First then
+      if t = NIL_CONS then
          error("char_upcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -99,11 +99,11 @@ package body BBS.lisp.evaluate.char is
    --  If character is alphabetic, convert to lower case.
    --
    function char_downcase(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if s = cons_index'First then
+      if t = NIL_CONS then
          error("char_upcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;

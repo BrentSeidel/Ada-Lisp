@@ -13,7 +13,7 @@ package body BBS.lisp.evaluate.misc is
    --  passed as a parameter.
    --
    function msg(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
       p1 : element_type; --  Parameter
       v : value;
    begin
@@ -61,11 +61,11 @@ package body BBS.lisp.evaluate.misc is
    --  Sleep for a specified period of time in mS.
    --
    function sleep(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if s = cons_index'First then
+      if s = NIL_CONS then
          error("sleep", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;

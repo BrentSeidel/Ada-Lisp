@@ -33,7 +33,7 @@ package body BBS.lisp.evaluate.symb is
    --  (coerce <object> <result type>)
    --
    function coerce(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      s1 : cons_index := s;
       t1 : element_type;
       t2 : element_type;
       v1 : value;
@@ -55,8 +55,8 @@ package body BBS.lisp.evaluate.symb is
       --  the first version of this function, the parameters were swapped.  This
       --  was not consistent with Common Lisp and has been changed.
       --
-      if isList(t) then
-         t2 := first_value(t);
+      if s1 > NIL_CONS then
+         t2 := first_value(s1);
       else
          error("coerce", "Cannot compare a single element.");
          return (kind => E_ERROR);
@@ -75,7 +75,7 @@ package body BBS.lisp.evaluate.symb is
       --
       --  Get second parameter
       --
-      t1 := first_value(t);
+      t1 := first_value(s1);
       if t1.kind = E_ERROR then
          error("coerce", "Error reported evaluating first parameter.");
          return t1;
@@ -188,7 +188,7 @@ package body BBS.lisp.evaluate.symb is
    end;
    --
    function concatenate(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      s1 : cons_index := s;
       t1 : element_type := NIL_ELEM;
       t2 : element_type := NIL_ELEM;
       v1 : value;
@@ -207,7 +207,7 @@ package body BBS.lisp.evaluate.symb is
       --
       --  Get first parameter
       --
-      t1 := first_value(t);
+      t1 := first_value(s1);
       if t1.kind = E_ERROR then
          error("concatenate", "Error reported evaluating first parameter.");
          return t1;
@@ -255,13 +255,12 @@ package body BBS.lisp.evaluate.symb is
             end if;
             dest_str := str_head;
             dest_ptr := 1;
-            while isList(t) loop
-               if isList(t) then
-                  t2 := first_value(t);
-               else
-                  error("concatenate", "Cannot compare a single element.");
-                  return (kind => E_ERROR);
-               end if;
+            if s1 = NIL_CONS then
+               error("concatenate", "Cannot compare a single element.");
+               return (kind => E_ERROR);
+            end if;
+            while s1 > NIL_CONS loop
+               t2 := first_value(s1);
                if t2.kind = E_ERROR then
                   error("concatenate", "Error reported evaluating second parameter.");
                   return t2;
@@ -317,13 +316,12 @@ package body BBS.lisp.evaluate.symb is
             temp_cons : cons_index := cons_index'First;
             src_cons : cons_index := cons_index'First;
          begin
-            while isList(t) loop
-               if isList(t) then
-                  t2 := first_value(t);
-               else
-                  error("concatenate", "Cannot compare a single element.");
-                  return (kind => E_ERROR);
-               end if;
+            if s1 = NIL_CONS then
+               error("concatenate", "Cannot compare a single element.");
+               return (kind => E_ERROR);
+            end if;
+            while s1 > NIL_CONS loop
+                  t2 := first_value(s1);
                if t2.kind = E_ERROR then
                   error("concatenate", "Error reported evaluating second parameter.");
                   return t2;

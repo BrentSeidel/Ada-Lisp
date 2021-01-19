@@ -139,7 +139,6 @@ package bbs.lisp is
    --
    --  Type for access to function that implement lisp operations.
    --
---   type execute_function is access function(w : element_type) return element_type;
    type execute_function is access function(s : cons_index) return element_type;
    --
    --  Type for access to functions that implement lisp special operations
@@ -215,6 +214,7 @@ package bbs.lisp is
    --  Some useful constants
    --
    NIL_ELEM : constant element_type := (Kind => E_NIL);
+   NIL_CONS : constant cons_index := cons_index'First;
 
 private
    --

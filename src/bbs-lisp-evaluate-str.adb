@@ -7,10 +7,10 @@ package body BBS.lisp.evaluate.str is
    --  A nil pointer returns a length of 0.
    --
    function length(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
       p1 : element_type; --  Parameter
    begin
-      if s = cons_index'First then
+      if s = NIL_CONS then
          error("length", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -64,13 +64,13 @@ package body BBS.lisp.evaluate.str is
    --  Return a specified character from a string.
    --
    function char(s : cons_index) return element_type is
-      t : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
       p1 : element_type;  --  First parameter (string)
       p2 : element_type;  --  Second parameter (integer)
       str : string_index;
       index : Integer;
    begin
-      if s = cons_index'First then
+      if s = NIL_CONS then
          error("char", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -126,14 +126,14 @@ package body BBS.lisp.evaluate.str is
    --  Parse a string as an integer and return the integer value.
    --
    function parse_integer(s : cons_index) return element_type is
-      t : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
       p1 : element_type; --  Parameter
       str : string_index;
       accumulate : int32 := 0;
       neg : Boolean := False;
       ptr : Integer;
    begin
-      if s = cons_index'First then
+      if s = NIL_CONS then
          error("length", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -177,7 +177,7 @@ package body BBS.lisp.evaluate.str is
    --  Return a substring of the original string
    --
    function subseq(s : cons_index) return element_type is
-      t : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
       p1 : element_type;  --  Parameter 1 (string)
       source : string_index;  -- Source string
       p2 : element_type;  --  Parameter 2 (starting position)
@@ -190,7 +190,7 @@ package body BBS.lisp.evaluate.str is
       new_frag : string_index;
       temp : string_index;
    begin
-      if s = cons_index'First then
+      if s = NIL_CONS then
          error("subseq", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -233,7 +233,7 @@ package body BBS.lisp.evaluate.str is
       --
       --  Third parameter (optional)
       --
-      if t.kind /= E_NIL then
+      if t > NIL_CONS then
          p3 := first_value(t);
          if p3.kind = E_ERROR then
             error("subseq", "Error reported evaluating third parameter.");
@@ -396,11 +396,12 @@ package body BBS.lisp.evaluate.str is
    --  Convert a string to upper case
    --
    function string_upcase(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
+      t1 : element_type;
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if s = cons_index'First then
+      if s = NIL_CONS then
          error("string_upcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -425,22 +426,23 @@ package body BBS.lisp.evaluate.str is
       --  Now that the parameter is determined to be of the correct type,
       --  copy it while converting to uppercase.
       --
-      t := copy(p1.v.s, UPPER);
-      if t = NIL_ELEM then
+      t1 := copy(p1.v.s, UPPER);
+      if t1 = NIL_ELEM then
          error("string_upcase", "Error occured copying string");
       end if;
       BBS.lisp.memory.deref(p1);
-      return t;
+      return t1;
    end;
    --
    --  Convert a string to lower case
    --
    function string_downcase(s : cons_index) return element_type is
-      t  : element_type := (kind => E_CONS, ps => s);
+      t  : cons_index := s;
+      t1 : element_type;
       p1 : element_type; --  Parameter
       v : value;
    begin
-      if s = cons_index'First then
+      if s = NIL_CONS then
          error("string_downcase", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -465,12 +467,12 @@ package body BBS.lisp.evaluate.str is
       --  Now that the parameter is determined to be of the correct type,
       --  copy it while converting to lowercase.
       --
-      t := copy(p1.v.s, LOWER);
-      if t = NIL_ELEM then
+      t1 := copy(p1.v.s, LOWER);
+      if t1 = NIL_ELEM then
          error("string_downcase", "Error occured copying string");
       end if;
       BBS.lisp.memory.deref(p1);
-      return t;
+      return t1;
    end;
    --
 end;

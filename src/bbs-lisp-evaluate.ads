@@ -26,6 +26,6 @@ package BBS.lisp.evaluate is
    --  it is passed to the evaluator and the results returned.  The rest of the
    --  expression is also returned
    --
-   function first_value(e : in out element_type) return element_type;
+   function first_value(s : in out cons_index) return element_type;
    --
 end;
