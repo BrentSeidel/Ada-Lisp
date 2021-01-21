@@ -53,7 +53,7 @@
 \frontmatter
 \maketitle
 \begin{center}
-This document is \copyright 2020 Brent Seidel.  All rights reserved.
+This document is \copyright 2021 Brent Seidel.  All rights reserved.
 
 \paragraph{}Note that this is a draft version and not the final version for publication.
 \end{center}
@@ -1122,7 +1122,6 @@ This is used to check if a parameter is of number type or not.  Currently the on
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
-
 \section{or}
 Logical or bitwise \operation{or}.
 \subsection{Inputs}
@@ -1155,15 +1154,15 @@ Since \datatype{packages} are not a supported datatype, this always returns \con
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
-\subsection{parse-integer}
-\subsection{peek8}
-\subsection{peek16}
-\subsection{peek32}
-\subsection{poke8}
-\subsection{poke16}
-\subsection{poke32}
-\subsection{print}
-\subsection{quote}
+\section{parse-integer}
+\section{peek8}
+\section{peek16}
+\section{peek32}
+\section{poke8}
+\section{poke16}
+\section{poke32}
+\section{print}
+\section{quote}
 
 \section{rationalp}
 Is parameter a \datatype{rational number}?
@@ -1241,8 +1240,38 @@ This is compatible with \cl, except that no error is thrown with extra parameter
 \section{string-upcase}
 \section{stringp}
 \section{subseq}
+
 \section{symbolp}
+Is the parameter a symbol?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+The value \constant{T} if the parameter is a symbol, otherwise \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(symbolp 1 2 3)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+This is used to check if a parameter is a symbol or not.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
 \section{terpri}
+Prints a newline.
+\subsection{Inputs}
+None
+\subsection{Output}
+A newline.
+\subsection{Example}
+\begin{lstlisting}
+(terpri)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+Prints a newline to the output stream.
+\subsection{Common Lisp Compatibility}
+\tl() has only one output stream so the optional output stream designator is ignored.
 
 \section{vectorp}
 Is parameter a \datatype{vector}?
@@ -1261,7 +1290,22 @@ Since \datatype{vectors} are not a supported datatype, this always returns \cons
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 %----------------------------------------------------------
 \chapter{Internals}
-As the interpreter is under active development, this section is subject to change without notice.
+\textbf{As the interpreter is under active development, this section is subject to change without notice.}
+
+\section{Operation}
+Processing consists of four phases.
+
+\subsection{Read}
+Text is read from the input stream and passed to the parser.
+
+\subsection{Parse}
+The parse phase examines the text and converts it into the internal representation of a list.  If the list is not complete (parentheses are unbalanced), more text is requested until the list can be completed.  Parsing of sub-lists is done by recursively calling the parser.
+
+\subsection{Evaluate}
+The list from the parse phase is evaluated.  If the first in the list is not a symbol that represents a function, the list is simply returned as is.  Otherwise the function is evaluated and the returned value is passed to the print phase.  Evaluation of sub-lists is done recursively.  Note that, depending on the function, not all sub-lists are evaluated.
+
+\subsection{Print}
+The value returned from the evaluation is printed.  Once this is done, the read phase is reentered and more text requested.
 
 \section{Data Structures}
 
