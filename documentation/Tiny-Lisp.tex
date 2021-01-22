@@ -1092,19 +1092,77 @@ Returns the length of an object.  For \datatype{strings} this is the number of c
 This is mostly compatible with \cl, except that errors are not thrown if the parameter is not a sequence.
 
 \section{let}
+Creates local variables.
 \subsection{Inputs}
+A list of variable names and optional initial values followed by statements to be executed with the local variables.
 \subsection{Output}
+Returns the value of the last statement evaluated.
 \subsection{Example}
 \begin{lstlisting}
+(defun fibi (n)
+  (let (temp (n1 0) (n2 1))
+    (dotimes (iter n)
+      (setq temp (+ n1 n2))
+      (setq n1 n2)
+      (setq n2 temp))
+    n2))
 \end{lstlisting}
+Defines a function to evaluate Fibonacci numbers using iteration.  The variables \keyword{temp}, \keyword{n1}, and \keyword{n2} are local variables with \keyword{n1} being initialized to the value 0 and \keyword{n2} initialized to the value 1.
 \subsection{Description}
+Creates a stack frame containing variables that are local to the statements in the block.  Outside of the block the variables do not exist.
 \subsection{Common Lisp Compatibility}
+Closures are not supported.
 
 \section{list}
+Creates a list
+\subsection{Inputs}
+Any number of parameters.
+\subsection{Output}
+A list.
+\subsection{Example}
+\begin{lstlisting}
+(list 1 2 3)
+\end{lstlisting}
+Returns the list \keyword{(1 2 3)}
+\subsection{Description}
+Creates a list of the passed parameters.
+\subsection{Common Lisp Compatibility}
+Unlike \cl{}, the \keyword{list} operation is optional in \tl{}.
+
 \section{listp}
+Is the parameter a list?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+The value \constant{T} if the parameter is a list, otherwise \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(listp 1 2 3)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+This is used to check if a parameter is a list or not.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
 \section{msg}
 \section{not}
+
 \section{nullp}
+Is the parameter null?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+The value \constant{T} if the parameter is nullt, otherwise \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(nullp 1 2 3)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+This is used to check if a parameter is null or not.  The empty list is considered to be null while an explicit \constant{NIL} is not.
+\subsection{Common Lisp Compatibility}
+The \cl{} operation is called \keyword{null} instead of \keyword{nullp}.  \tl{} may be updated to make them compatible.  Also, in \tl{} only the empty list () is treated as null, while \cl{} also treats \constant{NIL} as null.  This also may be changed in \tl{} to make it more compatible.
 
 \section{numberp}
 Is the parameter a number?
