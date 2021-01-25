@@ -1146,14 +1146,43 @@ This is used to check if a parameter is a list or not.
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
 \section{msg}
+Turns display of debugging messages on or off.
+\subsection{Inputs}
+A single boolean value.  Any additional values are ignored.
+\subsection{Output}
+The value \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(msg T)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+This is intended for use in debugging the interpreter to turn the display of some debugging messages on or off.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl.
+
 \section{not}
+Logical or bitwise \keyword{not}.
+\subsection{Inputs}
+A single value of \datatype{boolean} or \datatype{integer}.
+\subsection{Output}
+A value of \datatype{boolean} or \datatype{integer}.
+\subsection{Example}
+\begin{lstlisting}
+(not T)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+If the parameter is \datatype{boolean}, perform a logical \keyword{not} operation.  If the parameter is \datatype{integer}, perform a bitwise \keyword{not} operation.
+\subsection{Common Lisp Compatibility}
+This operation performs a bitwise \keyword{not} for integers.  This is probably more useful for embedded systems.
 
 \section{nullp}
 Is the parameter null?
 \subsection{Inputs}
 A single value.  Any additional values are ignored.
 \subsection{Output}
-The value \constant{T} if the parameter is nullt, otherwise \constant{NIL}.
+The value \constant{T} if the parameter is null, otherwise \constant{NIL}.
 \subsection{Example}
 \begin{lstlisting}
 (nullp 1 2 3)
