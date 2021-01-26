@@ -1242,9 +1242,55 @@ Since \datatype{packages} are not a supported datatype, this always returns \con
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
 \section{parse-integer}
+
 \section{peek8}
+Reads an 8 bit byte from the specified address in memory.
+\subsection{Inputs}
+An \datatype{integer} representing the address to read from.
+\subsection{Output}
+An 8 bit \datatype{integer} representing the value at that address.
+\subsection{Example}
+\begin{lstlisting}
+(peek 1)
+\end{lstlisting}
+Returns the value at address 1.  The actual value is system dependent.
+\subsection{Description}
+This is used to read memory locations.  It is intended to be used with memory mapped devices to allow drivers to be developed using \tl{}.  This should be used with caution as the results are strongly system dependent.  No protection is provided by \tl{} to prevent attempting to read from protected or non-existent addresses.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl.
+
 \section{peek16}
+Reads a 16 bit word from the specified address in memory.
+\subsection{Inputs}
+An \datatype{integer} representing the address to read from.
+\subsection{Output}
+A 16 bit \datatype{integer} representing the value at that address.
+\subsection{Example}
+\begin{lstlisting}
+(peek 1)
+\end{lstlisting}
+Returns the value at address 1.  The actual value is system dependent.
+\subsection{Description}
+This is used to read memory locations.  It is intended to be used with memory mapped devices to allow drivers to be developed using \tl{}.  This should be used with caution as the results are strongly system dependent.  No protection is provided by \tl{} to prevent attempting to read from protected or non-existent addresses.  Some systems may also throw exceptions for misaligned access to some or all of the addresses.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl.
+
 \section{peek32}
+Reads a 32 bit word from the specified address in memory.
+\subsection{Inputs}
+An \datatype{integer} representing the address to read from.
+\subsection{Output}
+A 32 bit \datatype{integer} representing the value at that address.
+\subsection{Example}
+\begin{lstlisting}
+(peek 1)
+\end{lstlisting}
+Returns the value at address 1.  The actual value is system dependent.
+\subsection{Description}
+This is used to read memory locations.  It is intended to be used with memory mapped devices to allow drivers to be developed using \tl{}.  This should be used with caution as the results are strongly system dependent.  No protection is provided by \tl{} to prevent attempting to read from protected or non-existent addresses.  Some systems may also throw exceptions for misaligned access to some or all of the addresses.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl.
+
 \section{poke8}
 \section{poke16}
 \section{poke32}
