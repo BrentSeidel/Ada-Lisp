@@ -1242,6 +1242,20 @@ Since \datatype{packages} are not a supported datatype, this always returns \con
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 \\
 \section{parse-integer}
+Parses a \datatype{string} containing an integer as text to an \datatype{integer} value.
+\subsection{Inputs}
+A \datatype{string} containing an integer.
+\subsection{Output}
+An \datatype{integer} representing the value in the \datatype{string}.
+\subsection{Example}
+\begin{lstlisting}
+(parse-integer "1024")
+\end{lstlisting}
+Returns the \datatype{integer} 1024.
+\subsection{Description}
+This is used to get an integer value from a string containing the digits of an integer.  To simplify the coding, only the first fragment of the string is examined for digits.  Parameters not of \datatype{string} cause an \keyword{error} to be returned.  Strings starting with non-integer values return 0.  Parsing is terminated when a non digit character is encountered (thus the \datatype{string} ``123abc'' is parsed to the \datatype{integer} 123).
+\subsection{Common Lisp Compatibility}
+The \tl{} version is a subset of the \cl{} version.  None of the \cl{} optional parameters are allowed.  It operates similarly to having \keyword{:junk-allowed} set to \constant{T}. Leading spaces are not allowed.  A leading plus sign ('+`) is not allowed.  Only a single value is returned.
 
 \section{peek8}
 Reads an 8 bit byte from the specified address in memory.
@@ -1292,10 +1306,84 @@ This is used to read memory locations.  It is intended to be used with memory ma
 This operation does not exist in \cl.
 
 \section{poke8}
+Writes an 8 bit byte to the specified address in memory.
+\subsection{Inputs}
+Two \datatype{integer}s representing the address to write to and the value to write, respectively.
+\subsection{Output}
+The \datatype{integer} value written.
+\subsection{Example}
+\begin{lstlisting}
+(poke 1 2)
+\end{lstlisting}
+Returns the value 2.  There may be other effects due to the memory being changed.
+\subsection{Description}
+This is used to write to memory locations.  It is intended to be used with memory mapped devices to allow drivers to be developed using \tl{}.  This should be used with caution as the results are strongly system dependent.  No protection is provided by \tl{} to prevent attempting to write to protected or non-existent addresses.  Some systems may also throw exceptions for misaligned access to some or all of the addresses.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl.
+
 \section{poke16}
+Writes a 16 bit word to the specified address in memory.
+\subsection{Inputs}
+Two \datatype{integer}s representing the address to write to and the value to write, respectively.
+\subsection{Output}
+The \datatype{integer} value written.
+\subsection{Example}
+\begin{lstlisting}
+(poke 4 2)
+\end{lstlisting}
+Returns the value 2.  There may be other effects due to the memory being changed.
+\subsection{Description}
+This is used to write to memory locations.  It is intended to be used with memory mapped devices to allow drivers to be developed using \tl{}.  This should be used with caution as the results are strongly system dependent.  No protection is provided by \tl{} to prevent attempting to write to protected or non-existent addresses.  Some systems may also throw exceptions for misaligned access to some or all of the addresses.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl.
+
 \section{poke32}
+Writes a 32 bit word to the specified address in memory.
+\subsection{Inputs}
+Two \datatype{integer}s representing the address to write to and the value to write, respectively.
+\subsection{Output}
+The \datatype{integer} value written.
+\subsection{Example}
+\begin{lstlisting}
+(poke 4 2)
+\end{lstlisting}
+Returns the value 2.  There may be other effects due to the memory being changed.
+\subsection{Description}
+This is used to write to memory locations.  It is intended to be used with memory mapped devices to allow drivers to be developed using \tl{}.  This should be used with caution as the results are strongly system dependent.  No protection is provided by \tl{} to prevent attempting to write to protected or non-existent addresses.  Some systems may also throw exceptions for misaligned access to some or all of the addresses.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl.
+
 \section{print}
+Prints objects.
+\subsection{Inputs}
+Any number of parameters.
+\subsection{Output}
+\constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(print "Hello world!")
+\end{lstlisting}
+Returns the value \constant{NIL}.  ``Hello world!'' is sent to the output stream.
+\subsection{Description}
+This loops through the provided parameters and prints each one with no newline or space between and no trailing newline.  Note that if a newline is contained in one of the items printed, the internal flag \keyword{first\_char\_flag} is not set.  This may cause \keyword{fresh-line} to output an unneeded newline.
+\subsection{Common Lisp Compatibility}
+The output is not preceded by a newline and followed by a space.  The optional \keyword{output-stream} parameter is not available as there is only one output stream.  Multiple parameters are permitted.  And, there is no implicit binding of parameters to values.
+
 \section{quote}
+Returns a list created from the supplied parameters.
+\subsection{Inputs}
+Any number of parameters.
+\subsection{Output}
+A list generated from the input parameters.
+\subsection{Example}
+\begin{lstlisting}
+(quote 1 2 3 4)
+\end{lstlisting}
+Returns the list (1 2 3 4).
+\subsection{Description}
+Returns a list generated from the passed parameters.  Internally, this returns the index of the cons cell for the first parameter and the rest of the parameter list follows along in the linked list.  The parameters are not evaluated.  In many cases, this may not be needed in \tl{} as lists that do not start with a function parameter are simply returned as-is.
+\subsection{Common Lisp Compatibility}
+Mostly compatible with \cl, except that multiple parameters are permitted.
 
 \section{rationalp}
 Is parameter a \datatype{rational number}?
