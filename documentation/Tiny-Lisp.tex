@@ -1400,8 +1400,22 @@ Returns the value \constant{NIL}.
 Since \datatype{rational numbers} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
-\\
+
 \section{read-line}
+Reads a line of text from the input stream.
+\subsection{Inputs}
+None.
+\subsection{Output}
+A \datatype{string} read from the input stream.
+\subsection{Example}
+\begin{lstlisting}
+(read-line)
+\end{lstlisting}
+Returns the text read from the input.
+\subsection{Description}
+Reads input into a \datatype{string} and returns the \datatype{string}.  The newline that ends the string is not included in the string.
+\subsection{Common Lisp Compatibility}
+None of the \cl{} optional parameters are supported.
 
 \section{realp}
 Is parameter a \datatype{real number}?
@@ -1418,9 +1432,38 @@ Returns the value \constant{NIL}.
 Since \datatype{real numbers} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
-\\
+
 \section{reset}
+Reruns the interpreter initialization.
+\subsection{Inputs}
+None.
+\subsection{Output}
+\constant{NIL}
+\subsection{Example}
+\begin{lstlisting}
+(reset)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+This is intended to reset the interpreter for debugging purposes.  It clears the cons, symbol, and string tables, and re-adds the core symbols for builtin functions.  Not that if \tl{} is embedded with additional operations defined, those are not added.  This operation should be considered deprecated and not used.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl.
+
 \section{setq}
+Assigns a value to a variable.
+\subsection{Inputs}
+Two parameters.  The first is the variable to be set.  If this is not a stack variable, it will be interpreted as a symbol.  The second is the value to assign to the variable.  It is evaluated.
+\subsection{Output}
+\constant{NIL}
+\subsection{Example}
+\begin{lstlisting}
+(setq counter (+ 1 counter))
+\end{lstlisting}
+Returns the value \constant{NIL} and increments the variable \keyword{counter}.
+\subsection{Description}
+This provides a way to assign values to symbols or stack variables.  The previous value of the variable is lost.  Note that symbols representing builtin or special functions cannot be assigned.
+\subsection{Common Lisp Compatibility}
+Only one variable can be set at a time.  It returns \constant{NIL}, not the value set.
 
 \section{simple-bit-vector-p}
 Is parameter a \datatype{simple bit vector}?
