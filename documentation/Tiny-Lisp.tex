@@ -1480,8 +1480,22 @@ Returns the value \constant{NIL}.
 Since \datatype{bit vectors} (simple or otherwise) are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
-\\
+
 \section{simple-string-p}
+Is the parameter a simple string?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+The value \constant{T} if the parameter is a string, otherwise \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(simple-string-p 1 2 3)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+This is used to check if a parameter is a simple string or not.  All strings in \tl{} are considered to be simple strings.
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
 \section{simple-vector-p}
 Is parameter a \datatype{simple vector}?
@@ -1498,11 +1512,42 @@ Returns the value \constant{NIL}.
 Since \datatype{vectors} (simple or otherwise) are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
-\\
+
 \section{sleep}
+Suspend execution for the specified number of milliseconds.
+\subsection{Inputs}
+A single \datatype{integer} value.  Any additional values are ignored.
+\subsection{Output}
+\constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(sleep 100)
+\end{lstlisting}
+Returns the value \constant{NIL} after waiting 100 mS.
+\subsection{Description}
+Suspends execution for the specified number of milliseconds.  Since \tl{} only supports integers, this difference from \cl{} was done in order to allow finer resolutions in delay.
+\subsection{Common Lisp Compatibility}
+The delay value is in milliseconds, not seconds.
+
 \section{string-downcase}
 \section{string-upcase}
+
 \section{stringp}
+Is the parameter a string?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+The value \constant{T} if the parameter is a string, otherwise \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(stringp 1 2 3)
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+This is used to check if a parameter is a string or not..
+\subsection{Common Lisp Compatibility}
+This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
 \section{subseq}
 
 \section{symbolp}
