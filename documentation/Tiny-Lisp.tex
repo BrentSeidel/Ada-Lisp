@@ -1530,7 +1530,36 @@ Suspends execution for the specified number of milliseconds.  Since \tl{} only s
 The delay value is in milliseconds, not seconds.
 
 \section{string-downcase}
+Converts a string to lowercase ASCII.
+\subsection{Inputs}
+A single \datatype{string} value.  Any additional values are ignored.
+\subsection{Output}
+A \datatype{string}.
+\subsection{Example}
+\begin{lstlisting}
+(string-downcase "Hello World!")
+\end{lstlisting}
+Returns the \datatype{string} ``hello world!''.
+\subsection{Description}
+Creates a copy of the input \datatype{string} converting any uppercase characters to lowercase.
+\subsection{Common Lisp Compatibility}
+The optional \keyword{start} and \keyword{end} parameters are not supported.  Only ASCII characters are supported and only the characters `A' through `Z' are converted.
+
 \section{string-upcase}
+Converts a string to uppercase ASCII.
+\subsection{Inputs}
+A single \datatype{string} value.  Any additional values are ignored.
+\subsection{Output}
+A \datatype{string}.
+\subsection{Example}
+\begin{lstlisting}
+(string-upcase "Hello World!")
+\end{lstlisting}
+Returns the \datatype{string} ``HELLO WORLD!''.
+\subsection{Description}
+Creates a copy of the input \datatype{string} converting any lowercase characters to uppercase.
+\subsection{Common Lisp Compatibility}
+The optional \keyword{start} and \keyword{end} parameters are not supported.  Only ASCII characters are supported and only the characters `a' through `z' are converted.
 
 \section{stringp}
 Is the parameter a string?
@@ -1549,6 +1578,20 @@ This is used to check if a parameter is a string or not..
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
 \section{subseq}
+Return a subsequence of the input.
+\subsection{Inputs}
+A single \datatype{string} followed by one or two \datatype{integers} representing the starting and (optional) ending positions.
+\subsection{Output}
+A \datatype{string} containing a sequence copied from the input.
+\subsection{Example}
+\begin{lstlisting}
+(subseq "Hello world!" 3 7)
+\end{lstlisting}
+Returns the \datatype{string} ``lo w''..
+\subsection{Description}
+Copies the selected text from the input string and returns it.
+\subsection{Common Lisp Compatibility}
+In \tl, \keyword{subseq} only works on \datatype{strings}.  At some point, it may be extended to also work on \datatype{lists}.
 
 \section{symbolp}
 Is the parameter a symbol?
