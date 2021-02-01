@@ -1833,9 +1833,63 @@ A function is a list that contains two elements.  The first element is a list of
 
 \subsection{The Stack}
 \label{sec:Stack}
-A stack is defined for storing function parameters and local variables.  The function parameters are used only for user defined functions.  Builtin and Special functions are handled within the Ada code directly from the \emph{cons} cells of the function parameter list.
+A stack is defined for storing function parameters and local variables.  The function parameters are used only for user defined functions.  Builtin and Special functions are handled within the Ada code directly from the \emph{cons} cells of the function parameter list.  Stack entries are defined as follow:
+\begin{lstlisting}
+   type stack_entry_type is (ST_EMPTY, ST_FRAME, ST_VALUE);
+   type stack_entry(kind : stack_entry_type := ST_EMPTY) is
+      record
+         case kind is
+            when ST_EMPTY =>
+               null;
+            when ST_FRAME =>
+               number: Natural;
+               next : stack_index;
+            when ST_VALUE =>
+               st_name : string_index;
+               st_value : value;
+         end case;
+      end record;
+\end{lstlisting}
+Each stack entry can be empty, a stack frame boundary, or a variable.  Stack variables have a name and a value.
 
 \subsection{Global Data}
+The various data arrays are defined as follows.  The ranges are:
+\begin{lstlisting}
+   --
+   --  Sizes for the global data structures.  These can be adjusted as needed.
+   --
+   max_cons : constant Integer := 500;
+   max_symb : constant Integer := 300;
+   max_string : constant Integer := 500;
+   max_stack : constant Integer := 100;
+   --
+   type cons_index is range -1 .. max_cons;
+   type symb_index is range -1 .. max_symb;
+   type string_index is range -1 .. max_string;
+   type stack_index is range 0 .. max_stack;
+\end{lstlisting}
+These may change if the \keyword{bbs.lisp} package gets turned into a generic package.  Should that happen The four constants will be the generic parameters.  This will make adjusting the size of the structures a little easier when embedding.
+
+The actual arrays are:
+\begin{lstlisting}
+   --
+   --  Since this interpreter is designed to be used on embedded computers with
+   --  no operating system and possibly no dynamic memory allocation, The
+   --  statically allocated data structures are defined here.
+   --
+   cons_table : array (cons_index'First + 1 .. cons_index'Last) of cons;
+   symb_table : array (symb_index'First + 1 .. symb_index'Last) of symbol;
+   string_table : array (string_index'First + 1 .. string_index'Last) of fragment;
+\end{lstlisting}
+And in the stack package:
+\begin{lstlisting}
+   --
+   --  The stack array
+   --
+   stack : array (stack_index'First + 1 .. stack_index'Last) of stack_entry :=
+     (others => (kind => ST_EMPTY));
+\end{lstlisting}
+Note that all the arrays have a lower bound of \constant{\ldots'first+1}.  This allows an index value equal to \constant{\ldots'first} to be used to indicate a null entry.
 
 \subsection{Memory Management}
 Memory management is done by reference counting.  When the number of references goes to zero, the item is deallocated.  Items in the cons table and the strings table are reference counted.
@@ -1889,6 +1943,24 @@ end new_line;
 
 It's fairly simple.  Initialize the interpreter and call it.  The only wrinkle is the need to define \function{new\_line}.  The Ada version has an optional parameter of a type defined in \package{Ada.Text\_IO}.  This is a problem when trying to eliminate dependencies on \package{Ada.Text\_IO}.  A more complex example of embedding is found in the \url{https://github.com/BrentSeidel/Ada-Arduino-Due} repository.  This repository contains code that runs on an Arduino Due and includes the definition of several \tl{} operations to access attached hardware.
 
+\subsection{Adding Custom Operations}
+The Ada functions that implement the \tl{} operations are defined using one of the two following prototypes:
+\begin{lstlisting}
+   --
+   --  Type for access to function that implement lisp operations.
+   --
+   type execute_function is access function(s : cons_index) return element_type;
+   --
+   --  Type for access to functions that implement lisp special operations
+   --
+   type special_function is access function(s : cons_index; p : phase) return element_type;
+\end{lstlisting}
+In most cases, an \datatype{execute\_function} is the type to use.  To install the operation, add something like the following line after the main \tl{} initialization function is called.
+\begin{lstlisting}
+      BBS.lisp.add_builtin("due-flash", due_flash'Access);
+\end{lstlisting}
+The first parameter to \keyword{add\_builtin} is a string giving the \tl{} operation name.  The second parameter is an access to the Ada function to call.
+
 
 \section{Opportunities for Optimizing}
 No big effort has gone into optimizing the interpreter.  Should the need arise, there are a few places where things could be optimized.
@@ -1903,6 +1975,8 @@ During parsing, it may be possible to recognize some constant expressions are re
 (+ 1 2 3) -> 6
 \end{lstlisting}
 
+\subsection{The Symbol Table}
+An obvious target for optimization would be to sort the symbol table.  Then a binary search could be done to locate symbols.  The reason that this is not done is that searching for symbols is only done during parsing.  The parser locates the symbol in the table and replaces it by its index.  During execution, the symbol index is used to directly access the symbol without doing a search.  This means that once a symbol is defined, it must never change its location in the table.
 
 \end{document}
 
