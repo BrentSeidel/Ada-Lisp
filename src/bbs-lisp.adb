@@ -43,10 +43,11 @@ package body bbs.lisp is
       add_builtin("car", BBS.lisp.evaluate.list.car'Access);
       add_builtin("cdr", BBS.lisp.evaluate.list.cdr'Access);
       add_builtin("char", BBS.lisp.evaluate.str.char'Access);
+      add_builtin("char-code", BBS.lisp.evaluate.char.char_code'Access);
       add_builtin("char-downcase", BBS.lisp.evaluate.char.char_downcase'Access);
-      add_builtin("char-int", BBS.lisp.evaluate.char.char_int'Access);
       add_builtin("char-upcase", BBS.lisp.evaluate.char.char_upcase'Access);
       add_builtin("characterp", BBS.lisp.evaluate.pred.characterp'Access);
+      add_builtin("code-char", BBS.lisp.evaluate.char.code_char'Access);
       add_builtin("coerce", BBS.lisp.evaluate.symb.coerce'Access);
       add_builtin("compiled-function-p", BBS.lisp.evaluate.pred.compiled_function_p'Access);
       add_builtin("complexp", BBS.lisp.evaluate.pred.return_false'Access);
@@ -62,7 +63,6 @@ package body bbs.lisp is
       add_builtin("fresh-line", BBS.lisp.evaluate.io.fresh_line'Access);
       add_builtin("functionp", BBS.lisp.evaluate.pred.functionp'Access);
       add_builtin("if", BBS.lisp.evaluate.cond.eval_if'Access);
-      add_builtin("int-char", BBS.lisp.evaluate.char.int_char'Access);
       add_builtin("integerp", BBS.lisp.evaluate.pred.integerp'Access);
       add_special("lambda", BBS.lisp.evaluate.func.lambda'Access);
       add_builtin("length", BBS.lisp.evaluate.str.length'Access);
@@ -71,7 +71,7 @@ package body bbs.lisp is
       add_builtin("listp", BBS.lisp.evaluate.pred.listp'Access);
       add_builtin("msg", BBS.lisp.evaluate.misc.msg'Access);
       add_builtin("not", BBS.lisp.evaluate.bool.eval_not'Access);
-      add_builtin("nullp", BBS.lisp.evaluate.pred.nullp'Access);
+      add_builtin("null", BBS.lisp.evaluate.pred.nullp'Access);
       add_builtin("numberp", BBS.lisp.evaluate.pred.numberp'Access);
       add_builtin("or", BBS.lisp.evaluate.bool.eval_or'Access);
       add_builtin("packagep", BBS.lisp.evaluate.pred.return_false'Access);
@@ -87,7 +87,6 @@ package body bbs.lisp is
       add_builtin("rationalp", BBS.lisp.evaluate.pred.return_false'Access);
       add_builtin("read-line", BBS.lisp.evaluate.io.read_line'Access);
       add_builtin("realp", BBS.lisp.evaluate.pred.return_false'Access);
-      add_builtin("reset", BBS.lisp.evaluate.misc.reset'Access);
       add_special("setq", BBS.lisp.evaluate.vars.setq'Access);
       add_builtin("simple-bit-vector-p", BBS.lisp.evaluate.pred.return_false'Access);
       add_builtin("simple-string-p", BBS.lisp.evaluate.pred.simple_string_p'Access);

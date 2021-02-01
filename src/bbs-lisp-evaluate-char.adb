@@ -4,7 +4,7 @@ package body BBS.lisp.evaluate.char is
    --  Given a character, return the integer code for the character.  Typically
    --  the ASCII value.
    --
-   function char_int(s : cons_index) return element_type is
+   function char_code(s : cons_index) return element_type is
       t  : cons_index := s;
       p1 : element_type; --  Parameter
       v : value;
@@ -33,7 +33,7 @@ package body BBS.lisp.evaluate.char is
    --
    --  Given an integer, return the character with that code or an error.
    --
-   function int_char(s : cons_index) return element_type is
+   function code_char(s : cons_index) return element_type is
       t  : cons_index := s;
       p1 : element_type; --  Parameter
       v : value;

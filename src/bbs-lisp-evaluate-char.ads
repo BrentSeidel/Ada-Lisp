@@ -6,11 +6,11 @@ package BBS.lisp.evaluate.char is
    --  Given a character, return the integer code for the character.  Typically
    --  the ASCII value.
    --
-   function char_int(s : cons_index) return element_type;
+   function char_code(s : cons_index) return element_type;
    --
    --  Given an integer, return the character with that code or an error.
    --
-   function int_char(s : cons_index) return element_type;
+   function code_char(s : cons_index) return element_type;
    --
    --  If character is alphabetic, convert to upper case.
    --

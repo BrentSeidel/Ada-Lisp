@@ -2,13 +2,6 @@ with Ada.Real_Time;
 use type Ada.Real_Time.Time;
 package body BBS.lisp.evaluate.misc is
    --
-   function reset(s : cons_index) return element_type is
-      pragma Unreferenced (s);
-   begin
-      init;
-      return NIL_ELEM;
-   end;
-   --
    --  Turn display of messages on or off depending on the boolean value
    --  passed as a parameter.
    --

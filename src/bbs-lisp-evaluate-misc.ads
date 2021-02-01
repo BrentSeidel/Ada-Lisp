@@ -11,12 +11,6 @@ package BBS.lisp.evaluate.misc is
    --
    function dump(s : cons_index) return element_type;
    --
-   --  Calls initialization to restart the interpreter.  Note that this does not
-   --  do any external initialization that may be required in an embedded
-   --  application.
-   --
-   function reset(s : cons_index) return element_type;
-   --
    --  Turn debugging messages on or off.
    --
    function msg(s : cons_index) return element_type;
