@@ -24,7 +24,7 @@ package bbs.lisp is
    type cons_index is range -1 .. max_cons;
    type symb_index is range -1 .. max_symb;
    type string_index is range -1 .. max_string;
-   type stack_index is range 0 .. max_stack;
+   type stack_index is range -1 .. max_stack;
    --
    --  This indicates what type of an object an element_type is pointing to.  It
    --  can be a cons cell, a value, a symbol, a temporary symbol a stack
@@ -115,7 +115,7 @@ package bbs.lisp is
                sym : symb_index;
             when E_STACK =>
                st_name : string_index;
-               st_offset : stack_index;
+               st_offset : Natural;
             when E_VALUE =>
                v : value;
          end case;

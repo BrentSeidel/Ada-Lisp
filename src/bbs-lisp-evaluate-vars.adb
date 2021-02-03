@@ -159,7 +159,7 @@ package body BBS.lisp.evaluate.vars is
                   declare
                      el : element_type;
                      str : string_index;
-                     offset : stack_index := 1;
+                     offset : Natural := 1;
                   begin
                      if cons_table(locals.ps).car.kind = E_CONS then
                         el := cons_table(cons_table(locals.ps).car.ps).car;
@@ -222,7 +222,7 @@ package body BBS.lisp.evaluate.vars is
                declare
                   el : element_type;
                   check : element_type;
-                  offset : stack_index := 1;
+                  offset : Natural := 1;
                   local_val : value := (kind => V_BOOLEAN, b => False);
                begin
                   if cons_table(locals.ps).car.kind = E_CONS then

@@ -28,9 +28,9 @@ package BBS.lisp.stack is
    --
    --  Various pointers for managing the stack and its frames.
    --
-   stack_pointer : stack_index := 0;
-   frame_pointer : stack_index := 0;
-   temp_frame    : stack_index := 0;
+   stack_pointer : stack_index := stack_index'First;
+   frame_pointer : stack_index := stack_index'First;
+   temp_frame    : stack_index := stack_index'First;
    frame_count   : Natural := 0;
    --
    --  Status functions for the stack
@@ -69,16 +69,16 @@ package BBS.lisp.stack is
    --  look backwards through the stack frames for a match to the name.  If
    --  found, the value is returned.  If not found, an empty value is returned.
    --
-   function search_frames(offset : stack_index; name : string_index) return value;
+   function search_frames(offset : Natural; name : string_index) return value;
    --
    --  Search stack for the variable.  The frame offset and name are used to
    --  look backwards through the stack frames for a match to the name.  If
    --  found, the stack index of the variable is returned, if not 0 is returned.
    --
-   function search_frames(offset : stack_index; name : string_index) return stack_index;
+   function search_frames(offset : Natural; name : string_index) return stack_index;
    --
    --  Searches the stack to find a variable and returns the stack index and offset
    --
-   function find_offset(name : string_index; index : out stack_index) return stack_index;
+   function find_offset(name : string_index; index : out stack_index) return Natural;
 end;
 

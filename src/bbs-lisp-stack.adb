@@ -134,14 +134,14 @@ package body BBS.lisp.stack is
    --  look backwards through the stack frames for a match to the name.  If
    --  found, the value is returned.  If not found, a value of none is returned.
    --
-   function search_frames(offset : stack_index; name : string_index) return value is
+   function search_frames(offset : Natural; name : string_index) return value is
       frame : stack_index := frame_pointer;
       test : stack_entry;
       test_name : string_index;
       eq : comparison;
    begin
       while frame > stack_index'First loop
-         test := stack(frame + offset);
+         test := stack(stack_index(Integer(frame) + Integer(offset)));
          if test.kind = ST_VALUE then
             test_name := test.st_name;
          end if;
@@ -178,14 +178,14 @@ package body BBS.lisp.stack is
    --  look backwards through the stack frames for a match to the name.  If
    --  found, the stack index of the variable is returned, if not 0 is returned.
    --
-   function search_frames(offset : stack_index; name : string_index) return stack_index is
+   function search_frames(offset : Natural; name : string_index) return stack_index is
       frame : stack_index := frame_pointer;
       test : stack_entry;
       test_name : string_index;
       eq : comparison;
    begin
       while frame > stack_index'First loop
-         test := stack(frame + offset);
+         test := stack(stack_index(Integer(frame) + Integer(offset)));
          if test.kind = ST_VALUE then
             test_name := test.st_name;
          end if;
@@ -193,7 +193,7 @@ package body BBS.lisp.stack is
             eq := BBS.lisp.strings.compare(name, test_name);
             if eq = CMP_EQ then
                if test.kind = ST_VALUE then
-                  return frame + offset;
+                  return stack_index(Integer(frame) + Integer(offset));
                else
                   error("search_frames", "Found unexpected entry type " & stack_entry_type'Image(test.kind));
                   put("Searching for variable <");
@@ -217,7 +217,7 @@ package body BBS.lisp.stack is
    --
    --  Searches the stack to find a variable and returns the stack index and offset
    --
-   function find_offset(name : string_index; index : out stack_index) return stack_index is
+   function find_offset(name : string_index; index : out stack_index) return Natural is
       sp : stack_index := stack_pointer;
       fp : stack_index := frame_pointer;
       item  : stack_entry;
@@ -238,10 +238,10 @@ package body BBS.lisp.stack is
       end loop;
       if eq = CMP_EQ then
          index := sp;
-         return sp - fp;
+         return Natural(sp - fp);
       else
          index := stack_index'First;
-         return stack_index'First;
+         return Natural'First;
       end if;
    end;
    --

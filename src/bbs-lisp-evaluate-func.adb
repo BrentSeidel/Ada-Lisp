@@ -86,7 +86,7 @@ package body BBS.lisp.evaluate.func is
                   declare
                      el : element_type := cons_table(temp.ps).car;
                      str : string_index;
-                     offset : stack_index := 1;
+                     offset : Natural := 1;
                   begin
                      if (el.kind = E_SYMBOL) then
                         str := symb_table(el.sym).str;
@@ -215,7 +215,7 @@ package body BBS.lisp.evaluate.func is
                   declare
                      el : element_type := cons_table(temp.ps).car;
                      str : string_index;
-                     offset : stack_index := 1;
+                     offset : Natural := 1;
                   begin
                      if (el.kind = E_SYMBOL) then
                         str := symb_table(el.sym).str;

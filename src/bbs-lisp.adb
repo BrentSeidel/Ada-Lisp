@@ -527,7 +527,7 @@ package body bbs.lisp is
       available : Boolean := False;
       temp : symb_index;
       symb : symbol;
-      offset : stack_index;
+      offset : Natural;
       sp : stack_index;
       found : Boolean := False;
       item : BBS.lisp.stack.stack_entry;
@@ -557,7 +557,7 @@ package body bbs.lisp is
       --  Search stack frames.
       --
       offset := BBS.lisp.stack.find_offset(n, sp);
-      if (sp > 0) and (offset > 0) then
+      if (sp > stack_index'First) and (offset > 0) then
          item := BBS.lisp.stack.stack(sp);
          if item.kind = BBS.lisp.stack.ST_VALUE then
             BBS.lisp.memory.ref(item.st_name);
