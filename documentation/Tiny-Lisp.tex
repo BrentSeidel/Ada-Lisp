@@ -1643,7 +1643,49 @@ The list from the parse phase is evaluated.  If the first in the list is not a s
 \subsection{Print}
 The value returned from the evaluation is printed.  Once this is done, the read phase is reentered and more text requested.
 
+\section{Package Organization}
+In order to help modularize and organize the code, it has been divided into several packages.  The root package for \tl{} is \package{BBS.lisp}.  The \package{BBS} package is basically a bucket for my projects to help prevent name collisions with any other packages.
+
+\subsection{\package{BBS.lisp}}
+This package is the root package for \tl{}.  It contains most of the data structures and the public interface for the interpreter.  In addition, a number of common utility function are defined here so that they can be used in all the child packages.
+
+\subsubsection{\package{bbs.lisp.evaluate}}
+This package contains child packages for evaluating the \tl{} operations as well as common functions used by its children.  To keep it a reasonable size, the following child packages have been broken out:
+\begin{itemize}
+  \item \package{BBS.lisp.evaluate.bool} - Contains operations relating to \datatype{boolean} values.
+  \item \package{BBS.lisp.evaluate.char} - Contains operations relating to \datatype{character} values.
+  \item \package{BBS.lisp.evaluate.cond} - Contains \tl{} conditional operations.
+  \item \package{BBS.lisp.evaluate.func} - Contains operations related to defining functions.
+  \item \package{BBS.lisp.evaluate.io} - Contains \tl{} input/output operations.
+  \item \package{BBS.lisp.evaluate.list} - Contains operations relating to \datatype{list} values.
+  \item \package{BBS.lisp.evaluate.loops} - Contains \tl{} loop operations.
+  \item \package{BBS.lisp.evaluate.math} - Contains \tl{} math operations.
+  \item \package{BBS.lisp.evaluate.mem} - Contains \tl{} memory access operations.
+  \item \package{BBS.lisp.evaluate.misc} - Contains operations that don't fit into any other catagory.
+  \item \package{BBS.lisp.evaluate.pred} - Contains predicate (test) operations.
+  \item \package{BBS.lisp.evaluate.str} - Contains operations relating to \datatype{string} values.
+  \item \package{BBS.lisp.evaluate.symb} - Contains operations relating to symbols.
+  \item \package{BBS.lisp.evaluate.vars} - Contains operations relating to variables.
+\end{itemize}
+
+\subsubsection{\package{BBS.lisp.memory}}
+This package contains the memory manager.  This is mainly allocating items and incrementing and decrementing the reference count.
+
+\subsubsection{\package{BBS.lisp.parser}}
+This package contains the parser.
+
+\subsubsection{\package{BBS.lisp.stack}}
+This package contains the stack and functions for accessing the stack.
+
+\subsubsection{\package{BBS.lisp.strings}}
+This package contains some utility functions for strings.
+
+\subsubsection{\package{BBS.lisp.utilities}}
+This package contains some general utility functions.
+
+
 \section{Data Structures}
+Most of the data structures are defined in the \package{BBS.lisp} package, except for the stack, which is defined in \package{BBS.lisp.stack}.
 
 \subsection{Elements}
 The basic data type is the element.  It is defined as follows:
@@ -1949,6 +1991,22 @@ In most cases, an \datatype{execute\_function} is the type to use.  To install t
       BBS.lisp.add_builtin("due-flash", due_flash'Access);
 \end{lstlisting}
 The first parameter to \keyword{add\_builtin} is a string giving the \tl{} operation name.  The second parameter is an access to the Ada function to call.
+
+In the function that you write, the parameter \keyword{s} is an index pointing to the start of the parameter list.  Thus a \tl{} expression like:
+\lstset{language=[Tiny]Lisp}
+\begin{lstlisting}
+(some-function 1 2 3)
+\end{lstlisting}
+is translated into a linked list approximately like:
+\begin{lstlisting}
+symbol.builtin("some-function")->
+  value.integer(1)->
+    value.integer(2)->
+      value.integer(3)->
+        NIL_CONS
+\end{lstlisting}
+The first element is turned into the Ada function call with \keyword(s) pointing to the second element (value.integer(1)).  The Ada function can then traverse the list and extract the \tl{} parameters.
+\lstset{language=Ada}
 
 
 \section{Opportunities for Optimizing}
