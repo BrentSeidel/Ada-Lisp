@@ -43,7 +43,6 @@ package body BBS.lisp.stack is
       if not isFull then
          if v.kind = ST_VALUE then
             BBS.lisp.memory.ref(v.st_name);
---            BBS.lisp.memory.ref(v.st_value);
          end if;
          stack_pointer := stack_pointer + 1;
          stack(stack_pointer) := v;
@@ -62,9 +61,9 @@ package body BBS.lisp.stack is
       while not isEmpty loop
          dummy := pop;
       end loop;
-      stack_pointer := 0;
-      frame_pointer := 0;
-      temp_frame := 0;
+      stack_pointer := stack_index'First;
+      frame_pointer := stack_index'First;
+      temp_frame := stack_index'First;
       frame_count := 0;
    end;
    --
@@ -80,7 +79,7 @@ package body BBS.lisp.stack is
    procedure enter_frame is
    begin
       frame_pointer := temp_frame;
-      temp_frame := 0;
+      temp_frame := stack_index'First;
    end;
    --
    procedure exit_frame is
@@ -141,7 +140,7 @@ package body BBS.lisp.stack is
       test_name : string_index;
       eq : comparison;
    begin
-      while frame > 0 loop
+      while frame > stack_index'First loop
          test := stack(frame + offset);
          if test.kind = ST_VALUE then
             test_name := test.st_name;
@@ -157,7 +156,7 @@ package body BBS.lisp.stack is
                   print(name);
                   Put_Line(">");
                   dump;
-                  frame := 0;
+                  frame := stack_index'First;
                end if;
             end if;
          end if;
@@ -169,7 +168,7 @@ package body BBS.lisp.stack is
             print(name);
             Put_Line(">");
             dump;
-            frame := 0;
+            frame := stack_index'First;
          end if;
       end loop;
       return (kind => V_NONE);
@@ -185,12 +184,10 @@ package body BBS.lisp.stack is
       test_name : string_index;
       eq : comparison;
    begin
-      while frame > 0 loop
+      while frame > stack_index'First loop
          test := stack(frame + offset);
          if test.kind = ST_VALUE then
             test_name := test.st_name;
---         elsif test.kind = ST_LOCAL then
---            test_name := test.l_name;
          end if;
          if test.kind /= ST_EMPTY then
             eq := BBS.lisp.strings.compare(name, test_name);
@@ -203,7 +200,7 @@ package body BBS.lisp.stack is
                   print(name);
                   Put_Line(">");
                   dump;
-                  frame := 0;
+                  frame := stack_index'First;
                end if;
             end if;
          end if;
@@ -212,10 +209,10 @@ package body BBS.lisp.stack is
          else
             error("search_frames", "Did not find frame entry on stack");
             dump;
-            frame := 0;
+            frame := stack_index'First;
          end if;
       end loop;
-      return 0;
+      return stack_index'First;
    end;
    --
    --  Searches the stack to find a variable and returns the stack index and offset
@@ -226,7 +223,7 @@ package body BBS.lisp.stack is
       item  : stack_entry;
       eq : comparison := CMP_NE;
    begin
-      while sp > 0 loop
+      while sp > stack_index'First loop
          item := stack(sp);
          case item.kind is
             when ST_FRAME =>
@@ -243,8 +240,8 @@ package body BBS.lisp.stack is
          index := sp;
          return sp - fp;
       else
-         index := 0;
-         return 0;
+         index := stack_index'First;
+         return stack_index'First;
       end if;
    end;
    --
