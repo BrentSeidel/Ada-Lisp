@@ -215,6 +215,8 @@ package bbs.lisp is
    --
    NIL_ELEM : constant element_type := (Kind => E_NIL);
    NIL_CONS : constant cons_index := cons_index'First;
+   NIL_STR : constant string_index := string_index'First;
+   NIL_SYM : constant symb_index := symb_index'First;
 
 private
    --

@@ -22,7 +22,7 @@ package body bbs.lisp.memory is
    --
    function alloc(s : out cons_index) return Boolean is
    begin
-      for i in NIL_CONS + 1 .. cons_index'Last loop
+      for i in cons_index'First + 1 .. cons_index'Last loop
          if cons_table(i).ref = 0 then
             s := i;
             cons_table(i).ref := 1;
@@ -31,7 +31,7 @@ package body bbs.lisp.memory is
             return True;
          end if;
       end loop;
-      s := 0;
+      s := NIL_CONS;
       return False;
    end;
    --
@@ -45,11 +45,11 @@ package body bbs.lisp.memory is
             s := i;
             string_table(i).ref := 1;
             string_table(i).len := 0;
-            string_table(i).next := -1;
+            string_table(i).next := NIL_STR;
             return True;
          end if;
       end loop;
-      s := 0;
+      s := NIL_STR;
       return False;
    end;
    --
@@ -174,8 +174,8 @@ package body bbs.lisp.memory is
          prev := s;
          next := string_table(s).next;
          string_table(prev).len := 0;
-         string_table(prev).next := -1;
-         while next > string_index'First loop
+         string_table(prev).next := NIL_STR;
+         while next > NIL_STR loop
             if string_table(next).ref > 0 then
                string_table(next).ref := string_table(next).ref - 1;
             else
@@ -186,7 +186,7 @@ package body bbs.lisp.memory is
             prev := next;
             next := string_table(prev).next;
             string_table(prev).len := 0;
-            string_table(prev).next := -1;
+            string_table(prev).next := NIL_STR;
          end loop;
       end if;
    end;

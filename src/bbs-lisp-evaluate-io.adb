@@ -37,7 +37,7 @@ package body BBS.lisp.evaluate.io is
       flag := BBS.lisp.memory.alloc(str);
       if flag then
          string_table(str).len := 0;
-         string_table(str).next := -1;
+         string_table(str).next := NIL_STR;
          first := str;
          while (ptr <= size) loop
             if string_table(str).len < fragment_len then
@@ -50,7 +50,7 @@ package body BBS.lisp.evaluate.io is
                   str := next;
                   string_table(str).len := 1;
                   string_table(str).str(1) := buff(ptr);
-                  string_table(str).next := -1;
+                  string_table(str).next := NIL_STR;
                else
                   bbs.lisp.memory.deref(first);
                   return NIL_ELEM;

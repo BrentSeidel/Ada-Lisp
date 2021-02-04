@@ -46,7 +46,7 @@ package body BBS.lisp.evaluate.symb is
             return(kind => E_ERROR);
          end if;
       end if;
-      if s = cons_index'First then
+      if s = NIL_CONS then
          error("coerce", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -200,7 +200,7 @@ package body BBS.lisp.evaluate.symb is
             return(kind => E_ERROR);
          end if;
       end if;
-      if s = cons_index'First then
+      if s = NIL_CONS then
          error("concatenate", "Internal error.  Should have a list.");
          return (kind => E_ERROR);
       end if;
@@ -241,10 +241,10 @@ package body BBS.lisp.evaluate.symb is
          --  Concatinate strings
          --
          declare
-            str_head : string_index := string_index'First;
-            dest_str : string_index := string_index'First;
-            src_str  : string_index := string_index'First;
-            temp_str : string_index := string_index'First;
+            str_head : string_index := NIL_STR;
+            dest_str : string_index := NIL_STR;
+            src_str  : string_index := NIL_STR;
+            temp_str : string_index := NIL_STR;
             dest_ptr : Integer;
             src_ptr  : integer;
          begin
@@ -289,7 +289,7 @@ package body BBS.lisp.evaluate.symb is
                      src_str := string_table(src_str).next;
                      src_ptr := 1;
                   end if;
-                  exit when src_str = string_index'First;
+                  exit when src_str = NIL_STR;
                   if dest_ptr > fragment_len then
                      if not BBS.lisp.memory.alloc(temp_str) then
                         error("concatinate", "Unable to allocate string fragment");
@@ -311,10 +311,10 @@ package body BBS.lisp.evaluate.symb is
          -- Concatinate lists
          --
          declare
-            cons_head : cons_index := cons_index'First;
-            dest_cons : cons_index := cons_index'First;
-            temp_cons : cons_index := cons_index'First;
-            src_cons : cons_index := cons_index'First;
+            cons_head : cons_index := NIL_CONS;
+            dest_cons : cons_index := NIL_CONS;
+            temp_cons : cons_index := NIL_CONS;
+            src_cons : cons_index := NIL_CONS;
          begin
             if s1 = NIL_CONS then
                error("concatenate", "Cannot compare a single element.");
@@ -340,7 +340,7 @@ package body BBS.lisp.evaluate.symb is
                      BBS.lisp.memory.deref(cons_head);
                      return (kind => E_ERROR);
                   end if;
-                  if cons_head = cons_index'First then
+                  if cons_head = NIL_CONS then
                      cons_head := temp_cons;
                      dest_cons := temp_cons;
                   else

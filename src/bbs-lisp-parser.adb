@@ -166,9 +166,9 @@ package body bbs.lisp.parser is
                  last : in out Integer; s_expr : out cons_index;
                  qfixed : Boolean)
                  return Boolean is
-      head : cons_index := -1;
-      current : cons_index := -1;
-      temp : cons_index := -1;
+      head : cons_index := NIL_CONS;
+      current : cons_index := NIL_CONS;
+      temp : cons_index := NIL_CONS;
       str  : string_index;
       value : int32;
       flag : Boolean;
@@ -529,7 +529,7 @@ package body bbs.lisp.parser is
    begin
       flag := bbs.lisp.memory.alloc(str);
       string_table(str).len := 0;
-      string_table(str).next := -1;
+      string_table(str).next := NIL_STR;
       if flag then
          s := str;
          first := str;
@@ -545,7 +545,7 @@ package body bbs.lisp.parser is
                   str := next;
                   string_table(str).len := 1;
                   string_table(str).str(1) := buff(ptr);
-                  string_table(str).next := -1;
+                  string_table(str).next := NIL_STR;
                else
                   bbs.lisp.memory.deref(first);
                   return False;

@@ -7,7 +7,7 @@ package body bbs.lisp.strings is
       next : string_index := s;
       nxt : string_index;
    begin
-      while next >= (string_index'First + 1) loop
+      while next > NIL_STR loop
          nxt := next;
          for i in 1 .. string_table(nxt).len loop
             string_table(nxt).str(i) := To_Upper(string_table(nxt).str(i));
@@ -25,7 +25,7 @@ package body bbs.lisp.strings is
       next : string_index := s;
       nxt : string_index;
    begin
-      while next >= (string_index'First + 1) loop
+      while next > NIL_STR loop
          nxt := next;
          for i in 1 .. string_table(nxt).len loop
             string_table(nxt).str(i) := To_Lower(string_table(nxt).str(i));
@@ -46,8 +46,7 @@ package body bbs.lisp.strings is
       nxt2 : string_index;
       limit : Integer;
    begin
-      while (next1 >= (string_index'First + 1))
-        and (next2 >= (string_index'First + 1)) loop
+      while (next1 > NIL_STR) and (next2 > NIL_STR) loop
          limit := string_table(next1).len;
          if string_table(next2).len < limit then
             limit := string_table(next2).len;
@@ -76,11 +75,9 @@ package body bbs.lisp.strings is
       elsif string_table(nxt1).len > string_table(nxt2).len then
          return CMP_GT;
       end if;
-      if (next1 >= (string_index'First + 1))
-        and ((next2 < (string_index'First + 1))) then
+      if (next1 > NIL_STR) and (next2 = NIL_STR) then
          return CMP_GT;
-      elsif ((next1 < (string_index'First + 1))
-        and (next2 >= (string_index'First + 1))) then
+      elsif (next1 = NIL_STR) and (next2 > NIL_STR) then
          return CMP_LT;
       end if;
       return CMP_EQ;
@@ -93,7 +90,7 @@ package body bbs.lisp.strings is
       nxt : string_index;
       count : Natural := 0;
    begin
-      while next >= (string_index'First + 1) loop
+      while next > NIL_STR loop
          nxt := next;
          count := count + string_table(nxt).len;
          next := string_table(nxt).next;
@@ -111,8 +108,6 @@ package body bbs.lisp.strings is
       flag : Boolean;
    begin
       flag := bbs.lisp.memory.alloc(prev);
---      string_table(prev).len := 0;
---      string_table(prev).next := -1;
       s := prev;
       first := prev;
       if flag then
@@ -127,7 +122,7 @@ package body bbs.lisp.strings is
                   prev := next;
                   string_table(prev).len := 1;
                   string_table(prev).str(1) := str(ptr);
-                  string_table(prev).next := -1;
+                  string_table(prev).next := NIL_STR;
                else
                   bbs.lisp.memory.deref(first);
                   return False;
@@ -147,7 +142,7 @@ package body bbs.lisp.strings is
       flag : Boolean;
       frag : string_index;
    begin
-      while next >= (string_index'First + 1) loop
+      while next > NIL_STR loop
          nxt := next;
          count := count + string_table(nxt).len;
          next := string_table(nxt).next;
@@ -162,7 +157,7 @@ package body bbs.lisp.strings is
             string_table(frag).str(1) := c;
             string_table(frag).len := 1;
             string_table(nxt).next := frag;
-            string_table(frag).next := -1;
+            string_table(frag).next := NIL_STR;
             return True;
          else
             error("append", "Unable to allocate new string fragment.");

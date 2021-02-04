@@ -355,7 +355,7 @@ package body bbs.lisp is
       next : string_index := s;
       nxt : string_index;
    begin
-      while next >= (string_index'First + 1) loop
+      while next > NIL_STR loop
          nxt := next;
          Put(string_table(nxt).str(1..string_table(nxt).len));
          next := string_table(nxt).next;
@@ -396,7 +396,7 @@ package body bbs.lisp is
    --
    procedure dump_cons is
    begin
-      for i in 0 .. cons_index'Last loop
+      for i in cons_index'First + 1 .. cons_index'Last loop
          if cons_table(i).ref > 0 then
             Put("Cons " & Integer'Image(Integer(i)) & " ref count " &
                   Integer'Image(Integer(cons_table(i).ref)) & " contains: <");
@@ -470,10 +470,11 @@ package body bbs.lisp is
             if symb_table(i).ref = 0 then
                free := i;
                available := True;
-            end if;
-            if bbs.lisp.strings.compare(temp, symb_table(i).str) = CMP_EQ then
-               s := i;
-               return True;
+            else
+               if bbs.lisp.strings.compare(temp, symb_table(i).str) = CMP_EQ then
+                  s := i;
+                  return True;
+               end if;
             end if;
          end loop;
          if available then
@@ -484,7 +485,7 @@ package body bbs.lisp is
       else
          error("get_symb", "Unable to allocate symbol name.");
       end if;
-      s := 0;
+      s := NIL_SYM;
       return False;
    end;
    --
@@ -497,10 +498,11 @@ package body bbs.lisp is
          if symb_table(i).ref = 0 then
             free := i;
             available := True;
-         end if;
-         if bbs.lisp.strings.compare(n, symb_table(i).str) = CMP_EQ then
-            s := i;
-            return True;
+         else
+            if bbs.lisp.strings.compare(n, symb_table(i).str) = CMP_EQ then
+               s := i;
+               return True;
+            end if;
          end if;
       end loop;
       if available then
@@ -509,7 +511,7 @@ package body bbs.lisp is
          symb_table(s) := (ref => 1, kind => SY_EMPTY, str => n);
          return True;
       end if;
-      s := 0;
+      s := NIL_SYM;
       return False;
    end;
    --
@@ -537,15 +539,16 @@ package body bbs.lisp is
       --  Search the symbol table
       --
       for i in symb_index'First + 1 .. symb_index'Last loop
-         if bbs.lisp.strings.compare(n, symb_table(i).str) = CMP_EQ then
-            temp := i;
-            symb := symb_table(temp);
-            found := True;
-            exit;
-         end if;
          if symb_table(i).ref = 0 then
             free := i;
             available := True;
+         else
+            if bbs.lisp.strings.compare(n, symb_table(i).str) = CMP_EQ then
+               temp := i;
+               symb := symb_table(temp);
+               found := True;
+               exit;
+            end if;
          end if;
       end loop;
       if found then
