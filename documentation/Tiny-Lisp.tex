@@ -1687,16 +1687,31 @@ This package contains some general utility functions.
 \section{Data Structures}
 Most of the data structures are defined in the \package{BBS.lisp} package, except for the stack, which is defined in \package{BBS.lisp.stack}.
 
-\subsection{Elements}
-The basic data type is the element.  It is defined as follows:
+The main arrays have size limits and data types defined for accessing them.
 \lstset{language=Ada}
 \begin{lstlisting}
    max_cons : constant Integer := 300;
    max_symb : constant Integer := 200;
    max_string : constant Integer := 500;
-   type cons_index is range 0 .. max_cons;
-   type symb_index is range 0 .. max_symb;
-   type string_index is range 0 .. max_string;
+   max_stack : constant Integer := 100;
+   --
+   type cons_index is range -1 .. max_cons;
+   type symb_index is range -1 .. max_symb;
+   type string_index is range -1 .. max_string;
+   type stack_index is range -1 .. max_stack;
+\end{lstlisting}
+The arrays are defined from \constant{\ldots{}\_index'First + 1} to \constant{\ldots\_index'Last}.  The value \constant{\ldots\_index'First} is used to represent an invalid or null index.  The following constants are defined for this:
+\begin{lstlisting}
+   NIL_CONS : constant cons_index := cons_index'First;
+   NIL_STR : constant string_index := string_index'First;
+   NIL_SYM : constant symb_index := symb_index'First;
+\end{lstlisting}
+
+
+\subsection{Elements}
+The basic data type is the element.  It is defined as follows:
+\lstset{language=Ada}
+\begin{lstlisting}
    type ptr_type is (E_CONS, E_ERROR, E_NIL, E_STACK, E_SYMBOL,
                      E_TEMPSYM, E_VALUE);
    type element_type(kind : ptr_type := E_NIL) is

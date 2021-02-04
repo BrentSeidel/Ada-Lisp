@@ -82,6 +82,7 @@ package body BBS.lisp.evaluate.loops is
          when PH_QUERY =>
             return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
          when PH_PARSE_BEGIN =>
+            BBS.lisp.stack.start_frame;
             if s > NIL_CONS then
                list := cons_table(s).car;   -- This is the dotimes symbol and ignored here
                limits := cons_table(s).cdr;
@@ -94,6 +95,7 @@ package body BBS.lisp.evaluate.loops is
                   rest := cons_table(limits.ps).cdr;
                else
                   error("dotimes", "List not provided for limits.");
+                  BBS.lisp.stack.enter_frame;
                   return (kind => E_ERROR);
                end if;
                if rest.kind = E_CONS then
@@ -109,6 +111,7 @@ package body BBS.lisp.evaluate.loops is
                   end if;
                else
                   error("dotimes", "Loop limit not provided.");
+                  BBS.lisp.stack.enter_frame;
                   return (kind => E_ERROR);
                end if;
                --
@@ -117,9 +120,9 @@ package body BBS.lisp.evaluate.loops is
                --  First convert the loop variable to a local variable, if not already
                --  done.
                --
-               BBS.lisp.stack.start_frame;
                if var.kind = E_CONS then
                   error("dotimes", "The loop variable cannot be a list.");
+                  BBS.lisp.stack.enter_frame;
                   return (kind => E_ERROR);
                end if;
                declare
@@ -136,9 +139,7 @@ package body BBS.lisp.evaluate.loops is
                      str := var.st_name;
                   else
                      error("dotimes", "Can't convert item into a loop variable.");
-                     print(var, False, True);
                      BBS.lisp.stack.enter_frame;
-                     BBS.lisp.stack.exit_frame;
                      return (kind => E_ERROR);
                   end if;
                   var := (kind => E_STACK, st_name => str, st_offset => 1);
@@ -222,11 +223,16 @@ package body BBS.lisp.evaluate.loops is
             --
             --  Build the stack frame
             --
-            BBS.lisp.stack.start_frame;
-            BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
-                                 st_name => var.st_name, st_value =>
-                                   (kind => V_INTEGER, i => 0)));
-            BBS.lisp.stack.enter_frame;
+            if var.kind = E_STACK then
+               BBS.lisp.stack.start_frame;
+               BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
+                                    st_name => var.st_name, st_value =>
+                                      (kind => V_INTEGER, i => 0)));
+               BBS.lisp.stack.enter_frame;
+            else
+               error("dotimes", "Loop counter is not a variable");
+               return (kind => E_ERROR);
+            end if;
             --
             --  Loop with the index variable in the range 0 .. limit.
             --
