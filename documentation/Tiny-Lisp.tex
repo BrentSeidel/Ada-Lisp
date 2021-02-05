@@ -1687,7 +1687,7 @@ This package contains some general utility functions.
 \section{Data Structures}
 Most of the data structures are defined in the \package{BBS.lisp} package, except for the stack, which is defined in \package{BBS.lisp.stack}.
 
-The main arrays have size limits and data types defined for accessing them.
+The main arrays have size limits and data types defined for accessing them.  These may change if the \keyword{bbs.lisp} package gets turned into a generic package.  Should that happen The four constants will be the generic parameters.  This will make adjusting the size of the structures a little easier when embedding.
 \lstset{language=Ada}
 \begin{lstlisting}
    max_cons : constant Integer := 300;
@@ -1894,25 +1894,9 @@ A stack is defined for storing function parameters and local variables.  The fun
 Each stack entry can be empty, a stack frame boundary, or a variable.  Stack variables have a name and a value.
 
 \subsection{Global Data}
-The various data arrays are defined as follows.  The ranges are:
-\begin{lstlisting}
-   --
-   --  Sizes for the global data structures.  These can be adjusted
-   --  as needed.
-   --
-   max_cons : constant Integer := 500;
-   max_symb : constant Integer := 300;
-   max_string : constant Integer := 500;
-   max_stack : constant Integer := 100;
-   --
-   type cons_index is range -1 .. max_cons;
-   type symb_index is range -1 .. max_symb;
-   type string_index is range -1 .. max_string;
-   type stack_index is range 0 .. max_stack;
-\end{lstlisting}
-These may change if the \keyword{bbs.lisp} package gets turned into a generic package.  Should that happen The four constants will be the generic parameters.  This will make adjusting the size of the structures a little easier when embedding.
+The various data arrays are defined as follows.
 
-The actual arrays are:
+The actual arrays are (in \package{bbs.lisp}):
 \begin{lstlisting}
    --
    --  Since this interpreter is designed to be used on embedded computers
@@ -1924,7 +1908,7 @@ The actual arrays are:
    string_table : array (string_index'First + 1 .. string_index'Last)
                   of fragment;
 \end{lstlisting}
-And in the stack package:
+And in the stack package (\package{bbs.lisp.stack}):
 \begin{lstlisting}
    --
    --  The stack array
@@ -1938,9 +1922,61 @@ Note that all the arrays have a lower bound of \constant{\ldots'first+1}.  This 
 Memory management is done by reference counting.  When the number of references goes to zero, the item is deallocated.  Items in the cons table and the strings table are reference counted.
 
 \section{Utility Functions}
+There are a number of functions that are available for use when embedding and extending \tl{}.  These are primarily only in a few packages and they may be moved to improve organization.
+\subsection{\package{BBS.lisp}}
+The functions available here are primarily concerned with the overall operation of the interpreter.  The first procedure to call is:
+\begin{lstlisting}
+   procedure init(p_put_line : t_put_line; p_put : t_put_line;
+                  p_new_line : t_newline; p_get_line : t_get_line);
+\end{lstlisting}
+This routine is used to establish pointers to the I/O functions used and to define the symbols for builtin and special functions.  After this symbols for custom functions can be added.  The following procedure is used for that:
+\begin{lstlisting}
+   procedure add_builtin(n : String; f : execute_function);
+\end{lstlisting}
+To pass control to the \tl{} read-execute-print-loop, the following procedure is used:
+\begin{lstlisting}
+   procedure repl;
+\end{lstlisting}
+If more control is needed, the read-execute-print-loop can be broken out using the following functions and procedure:
+\begin{lstlisting}
+   function read return Element_Type;
+   function eval(e : element_type) return element_type;
+   procedure print(e : element_type; d : Boolean; nl : Boolean);
+   function exit_lisp return Boolean;
+\end{lstlisting}
+These would be used in a loop as follows:
+\begin{lstlisting}
+   procedure repl is
+      e : element_type;
+      r : element_type;
+   begin
+      exit_flag := False;
+      break_flag := false;
+      while True loop
+         BBS.lisp.stack.reset;
+         e := read;
+         if e.kind /= E_ERROR then
+            r := eval(e);
+            if not first_char_flag then
+               new_line;
+            end if;
+            print(r, True, True);
+         end if;
+         exit when exit_lisp;
+      end loop;
+   end;
+\end{lstlisting}
+For writing custom functions, the following functions may be useful:
+\begin{lstlisting}
+   procedure error(f : String; m : String);
+   procedure msg(f : String; m : String);
+   procedure print(e : element_type; d : Boolean; nl : Boolean);
+\end{lstlisting}
+These support printing error and informational messages as well as printing \tl{} elements.  There are other useful functions in some other packages as well.
+\subsection{\package{BBS.lisp.evaluate}}
 
 \section{Embedding}
-This section covers how to embed the list interpreter in another program.  Here is a minimal host program:
+This section covers how too embed the list interpreter in another program.  Here is a minimal host program:
 \begin{lstlisting}
 with Ada.Text_IO;
 with bbs.lisp;

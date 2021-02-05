@@ -197,6 +197,10 @@ package bbs.lisp is
    --
    procedure repl;
    --
+   --  This function checks if the lisp read-eval-print loop should exit
+   --
+   function exit_lisp return Boolean;
+   --
    --  Create a symbol for a builtin function.  This is intended to be called
    --  during initialization to identify the builtin operations.  Once created,
    --  these should never be changed.  No value is returned.
@@ -255,16 +259,17 @@ private
    --
    type comparison is (CMP_EQ, CMP_LT, CMP_GT, CMP_NE);
    --
+   --  Operations for math and comparisons
+   --
+   type mathops is (PLUS, MINUS, MUL, DIV);
+   type compops is (SYM_EQ, SYM_NE, SYM_LT, SYM_GT);
+   --
    --  These procedures print various types of objects.
    --
    procedure print(s : cons_index);
    procedure print(v : value);
    procedure print(s : string_index);
    procedure print(s : symb_index);
-   --
-   --  This function checks if the lisp read-eval-print loop should exit
-   --
-   function exit_lisp return Boolean;
    --
    --  Structures and definitions for handling strings
    --
@@ -319,9 +324,6 @@ private
    --
    --  Finds a symbol and returns it.  Returns false if symbol can't be found.
    --
---   function find_symb(s : out symb_index; n : String) return Boolean;
---   function find_symb(s : out symb_index; n : string_index) return Boolean;
-   --
    function find_variable(n : string_index; create : Boolean) return element_type;
    --
    --  Create a symbol for a special function.  This is intended to be called
@@ -334,11 +336,6 @@ private
    --
    function elem_to_cons(s : out cons_index; e : element_type) return Boolean;
    function append(s1 : cons_index; s2 : cons_index) return Boolean;
-   --
-   --  Operations for math and comparisons
-   --
-   type mathops is (PLUS, MINUS, MUL, DIV);
-   type compops is (SYM_EQ, SYM_NE, SYM_LT, SYM_GT);
    --
    --  Function for dispatching the various functions for evaluation.
    --
