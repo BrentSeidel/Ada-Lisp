@@ -13,7 +13,7 @@ project Lispq is
    end Builder;
 
    package Compiler is
-      for Switches ("ada") use ("-g", "-gnato", "-gnatp", "-fstack-check", "-gnatE", "-gnatf", "-fcallgraph-info=su,da", "-gnat12", "-gnatVa", "-gnatw.X.d.f.g.h.k.l.n.o.s.u.wadhlt");
+      for Switches ("ada") use ("-g", "-gnato", "-gnatp", "-fstack-check", "-gnatf", "-gnat12", "-fcallgraph-info=su,da", "-gnatVa", "-gnatw.X.d.f.g.h.k.l.n.o.s.u.wadhlt");
    end Compiler;
 
    package Binder is

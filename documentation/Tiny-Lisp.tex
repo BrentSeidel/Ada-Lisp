@@ -1974,6 +1974,13 @@ For writing custom functions, the following functions may be useful:
 \end{lstlisting}
 These support printing error and informational messages as well as printing \tl{} elements.  There are other useful functions in some other packages as well.
 \subsection{\package{BBS.lisp.evaluate}}
+This package contains functions useful in the evaluation of \tl{} operations.  The most useful, when adding custom operations, is:
+\begin{lstlisting}
+   function first_value(s : in out cons_index) return element_type;
+\end{lstlisting}
+It extracts the first element from the list pointed to by \keyword{s} and updates \keyword{s} to point to the next element in the list.  If the first element is a variable, the value of the variable is returned.  If the first element is a \tl{} operation, it is evaluated and the result of the evaluation is returned.
+
+\subsection{\package{BBS.lisp.utilities}}
 
 \section{Embedding}
 This section covers how too embed the list interpreter in another program.  Here is a minimal host program:
