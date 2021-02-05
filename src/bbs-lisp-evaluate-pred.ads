@@ -12,6 +12,7 @@ package BBS.lisp.evaluate.pred is
    function characterp(s : cons_index) return element_type;
    function compiled_function_p(s : cons_index) return element_type;
    function consp(s : cons_index) return element_type;
+   function errorp(s : cons_index) return element_type;
    function functionp(s : cons_index) return element_type;
    function integerp(s : cons_index) return element_type;
    function listp(s : cons_index) return element_type;

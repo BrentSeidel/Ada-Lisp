@@ -277,6 +277,8 @@
   (if (compiled-function-p test-pred) (fail "compiled-function-p is true") (pass "compiled-function-p is false"))
   (if (consp (1 2 3)) (pass "consp is true") (fail "consp is false"))
   (if (consp 1) (fail "consp is true") (pass "consp is false"))
+  (if (errorp 1) (fail "errorp is true") (pass "errorp is false"))
+  (if (errorp (+ 1 "a")) (pass "errorp is true") (fail "errorp is false"))
   (if (functionp test-pred) (pass "functionp is true") (fail "functionp is false"))
   (if (functionp 1) (fail "functionp is true") (pass "functionp is false"))
   (if (integerp 3) (pass "integerp is true") (fail "integerp is false"))

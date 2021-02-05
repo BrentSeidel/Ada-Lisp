@@ -872,6 +872,22 @@ The \function{cons} operation creates a \constant{cons} cell and sets the \const
 \subsection{Common Lisp Compatibility}
 There is a subtle difference between \tl{} and \cl.  In \tl, \constant{NIL} is a constant of boolean type, while in \cl, it also represents an empty list.  Thus \operation{(cons 1 NIL)} produce slightly different results, \operation{(1 . NIL)} for \tl{} or \operation{(1)} for \cl.  If you wish to produce the \cl{} results, where the \constant{car} points to a value and the \constant{cdr} is an empty pointer, you can use \operation{(cons 1 ())} or \operation{(cons 1)}.  The former is preferred as it is compatible with \cl.
 
+\section{errorp}
+Is parameter a \datatype{error}?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+A boolean.
+\subsection{Example}
+\begin{lstlisting}
+(error (1 2 3))
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+If the parameter represents an error condition, return \constant{T}, otherwise return \constant{NIL}.  This offers \tl{} programs a rudimentary way to check for errors.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl.  \cl{} provides more comprehensive error handling, signaling, and trapping.
+
 \section{consp}
 Is parameter a \datatype{cons}?
 \subsection{Inputs}

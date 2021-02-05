@@ -72,6 +72,22 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
+   function errorp(s : cons_index) return element_type is
+      t  : cons_index := s;
+      p : element_type;
+   begin
+      if s = NIL_CONS then
+         error("errorp", "Internal error, not passed a list.");
+         return (kind => E_ERROR);
+      end if;
+      p := first_value(t);
+      if p.kind = E_ERROR then
+         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+      else
+         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+      end if;
+   end;
+   --
    function functionp(s : cons_index) return element_type is
       t  : cons_index := s;
       p : element_type;

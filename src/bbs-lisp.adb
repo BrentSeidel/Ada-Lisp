@@ -54,6 +54,7 @@ package body bbs.lisp is
       add_builtin("concatenate", BBS.lisp.evaluate.symb.concatenate'Access);
       add_builtin("cons", BBS.lisp.evaluate.list.cons'Access);
       add_builtin("consp", BBS.lisp.evaluate.pred.consp'Access);
+      add_builtin("errorp", BBS.lisp.evaluate.pred.errorp'Access);
       add_special("defun", BBS.lisp.evaluate.func.defun'Access);
       add_builtin("dowhile", BBS.lisp.evaluate.loops.dowhile'Access);
       add_special("dotimes", BBS.lisp.evaluate.loops.dotimes'Access);
