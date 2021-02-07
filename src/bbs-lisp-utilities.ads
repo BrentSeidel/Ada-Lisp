@@ -6,15 +6,14 @@ package bbs.lisp.utilities is
    --
    --  The following routine supports parameters and local variables.
    --  It scans through the passed s expression (recursively, if necessary) and
-   --  when it finds a symbol or tempsym, it looks through the list of passed
-   --  in parameters or local variables.  If the name matches, it replaces the
-   --  symbol or tempsym with a pointer to the parameter or local variable and
-   --  updates the ref count.  The return value is the number of replacements
-   --  made.
+   --  when it finds a symbol, it looks at the passed in parameter or local
+   --  variable.  If the name matches, it replaces the symbol with a pointer to
+   --  the parameter or local variable and updates the ref count.  The return
+   --  value is the number of replacements made.
    --
-   function replace_syms(s : cons_index; lib : cons_index) return Natural;
-   --
-   --  Perform the replacement for a single symbol/variable
+   --  Perform the replacement for a single symbol/variable.  Searches the list
+   --  s and any symbols or tempsyms whose name matches that of var are replaced
+   --  by var.  This means that stack variables will shadow symbols.
    --
    function replace_sym(s : cons_index; var : element_type) return Natural;
    --
