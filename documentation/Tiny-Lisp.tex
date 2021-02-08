@@ -26,7 +26,7 @@
 %
 %  Define Tiny Lisp based on Common Lisp
 %
-\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{atomp, bit-vector-p, car, cdr, char-downcase, char-int, char-upcase, compiled-function-p, dowhile, dump, exit, fresh-line, if, int-char, lambda, msg, nullp, parse-integer, peek8, peek16, peek32, poke8, poke16, poke32, quote, read-line, reset, setq, simple-bit-vector-p, simple-string-p, simple-vector-p, string-downcase, string-upcase}}
+\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{atomp, bit-vector-p, car, cdr, char-downcase, char-code, char-upcase, compiled-function-p, dowhile, dump, exit, fresh-line, if, code-char, lambda, msg, nullp, parse-integer, peek8, peek16, peek32, poke8, poke16, poke32, quote, read-line, reset, setq, simple-bit-vector-p, simple-string-p, simple-vector-p, string-downcase, string-upcase}}
 %
 % Macro definitions
 %
@@ -196,12 +196,12 @@ The \function{and} and \function{or} operations operate on either booleans or in
 The normal comparison operations work on characters.  There are also some operations defined to operate on characters.
 \begin{lstlisting}
 (char-downcase #\A)
-(char-int #\B)
+(char-code #\B)
 (char-upcase #\c)
-(int-char 65)
+(code-char 65)
 \end{lstlisting}
 
-The \function{char-int} and \function{int-char} operations convert between characters and their integer codes.  Given an integer in the range 0-255, \function{int-char} returns the corresponding character value.  Given a character value, the function \function{char-int} returns the corresponding integer (usually the ASCII code.
+The \function{char-code} and \function{code-char} operations convert between characters and their integer codes.  Given an integer in the range 0-255, \function{code-char} returns the corresponding character value.  Given a character value, the function \function{char-code} returns the corresponding integer (usually the ASCII code.
 
 The \function{char-downcase} and \function{char-upcase} operations convert characters between upper and lower case.  Non-alphabetic characters are not changed.
 
@@ -238,12 +238,9 @@ Some additional operations are provided for debugging purposes.  These control t
 (dump)
 (msg T)
 (msg NIL)
-(reset)
 \end{lstlisting}
 
 The \function{dump} operation prints the contents of the cons, symbol, and string tables.  The \function{msg} operation turn the display of debugging information on and off.  These are helpful when trying to debug the interpreter and should not be necessary during normal operation.
-
-The \function{reset} operation is intended to reset the interpreter to an initial state.  Currently, it just calls the \function{init()} function.  It needs to go through the symbol table and remove everything that's not a \function{builtin} and clear out the cons table.  Do not use until this is fixed.
 
 \subsection{Functions}
 \begin{lstlisting}
@@ -335,11 +332,12 @@ A wide variety of predicates are provided.  These mostly match the ones in \cl{}
 (characterp #\A)
 (compiled-function-p print)
 (consp (1 2 3))
+(errorp (+ 1 "A"))
 (functionp functionp)
 (integerp 3)
 (listp (2 4 6))
 (numberp 4)
-(nullp ())
+(null ())
 (simple-string-p "Hello")
 (stringp "Hello")
 (symbolp car)
@@ -407,6 +405,9 @@ The \function{setq} form sets a value for a symbol or stack variable.  If a symb
 
 The \function{let} form creates local variables on the stack and an environment for other statements that use them.  Variables can have an optional initial value.  If no initial value is provided, the variable is set to \constant{NIL}.  The value returned from the \function{let} form is the value of the last statement executed.
 
+\subsection{Error Handling}
+In cases where the interpreter detects an error, the current operation returns an element of type \constant{E\_ERROR}.  Currently, the only thing that can be done with this is to check if it is present using \keyword{errorp}.  It is expected that this will eventually be expanded to include error codes that can help identify what sort of error occurred.
+
 \subsection{Other}
 There are a few operations that do things that can't be easily categorized.
 
@@ -447,6 +448,9 @@ The Boolean values \constant{NIL} and \constant{T} correspond to \constant{True}
 
 \subsection{List}
 The list is the basic complex data type.  A list element has two slots (historically called \constant{car} and \constant{cdr}).  Typically the \constant{car} slot contains a data value and the \constant{cdr} slot contains a pointer to the next list element.  The end of a list is indicated by a \constant{NIL} value in the \constant{cdr} slot.
+
+\subsection{Error}
+There is currently only one possible \datatype{error} value.  This is used to signal that some sort of error has occurred.  It is expected that this will eventually be expanded to include a code to help identify what sort of error occurred.
 
 %----------------------------------------------------------
 \chapter{Operation Reference}
@@ -872,22 +876,6 @@ The \function{cons} operation creates a \constant{cons} cell and sets the \const
 \subsection{Common Lisp Compatibility}
 There is a subtle difference between \tl{} and \cl.  In \tl, \constant{NIL} is a constant of boolean type, while in \cl, it also represents an empty list.  Thus \operation{(cons 1 NIL)} produce slightly different results, \operation{(1 . NIL)} for \tl{} or \operation{(1)} for \cl.  If you wish to produce the \cl{} results, where the \constant{car} points to a value and the \constant{cdr} is an empty pointer, you can use \operation{(cons 1 ())} or \operation{(cons 1)}.  The former is preferred as it is compatible with \cl.
 
-\section{errorp}
-Is parameter a \datatype{error}?
-\subsection{Inputs}
-A single value.  Any additional values are ignored.
-\subsection{Output}
-A boolean.
-\subsection{Example}
-\begin{lstlisting}
-(error (1 2 3))
-\end{lstlisting}
-Returns the value \constant{NIL}.
-\subsection{Description}
-If the parameter represents an error condition, return \constant{T}, otherwise return \constant{NIL}.  This offers \tl{} programs a rudimentary way to check for errors.
-\subsection{Common Lisp Compatibility}
-This operation does not exist in \cl.  \cl{} provides more comprehensive error handling, signaling, and trapping.
-
 \section{consp}
 Is parameter a \datatype{cons}?
 \subsection{Inputs}
@@ -976,6 +964,22 @@ Returns the constant \constant{NIL}.
 This is intended for debugging purposes.  It prints the contents of the cons, symbol, and string tables.
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.
+
+\section{errorp}
+Is parameter a \datatype{error}?
+\subsection{Inputs}
+A single value.  Any additional values are ignored.
+\subsection{Output}
+A boolean.
+\subsection{Example}
+\begin{lstlisting}
+(error (1 2 3))
+\end{lstlisting}
+Returns the value \constant{NIL}.
+\subsection{Description}
+If the parameter represents an error condition, return \constant{T}, otherwise return \constant{NIL}.  This offers \tl{} programs a rudimentary way to check for errors.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl.  \cl{} provides more comprehensive error handling, signaling, and trapping.
 
 \section{exit}
 Exits the \tl{} interpreter.
