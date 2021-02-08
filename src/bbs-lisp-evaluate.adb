@@ -81,8 +81,11 @@ package body BBS.lisp.evaluate is
       if e.kind = E_CONS then
          return e.ps;
       else
-         return e.v.l;
+         if e.kind = E_VALUE and then e.v.kind = V_LIST then
+            return e.v.l;
+         end if;
       end if;
+      return NIL_CONS;
    end;
    --
    function execute_block(e : element_type) return element_type is

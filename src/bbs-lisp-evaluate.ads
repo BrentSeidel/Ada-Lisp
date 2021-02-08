@@ -4,11 +4,16 @@
 --
 package BBS.lisp.evaluate is
    --
-   function isTrue(e : element_type) return Boolean;
-   function isList(e : element_type) return Boolean;
-   function isFunction(e : element_type) return Boolean;
+   function isTrue(e : element_type) return Boolean
+     with Global => (Input => cons_table);
+   function isList(e : element_type) return Boolean
+     with Global => Null;
+   function isFunction(e : element_type) return Boolean
+     with Global => (Input => cons_table);
    function getList(e : element_type) return cons_index
-     with pre => isList(e);
+     with post => (if not isList(e) then getList'Result = NIL_CONS else
+                       getList'Result in cons_index'Range),
+       global => Null;
    --
    --  Execute the statements in a block and return the value of the last
    --  statement executed.

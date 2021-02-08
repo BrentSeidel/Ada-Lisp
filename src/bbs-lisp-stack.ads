@@ -35,13 +35,18 @@ package BBS.lisp.stack is
    --
    --  Status functions for the stack
    --
-   function isFull return Boolean;
-   function isEmpty return Boolean;
+   function isFull return Boolean
+     with Global => (Input => stack_pointer);
+   function isEmpty return Boolean
+     with Global => (Input => stack_pointer);
    --
    --  Adding and removing items from the stack
    --
-   function pop return stack_entry;
-   procedure push(v : stack_entry);
+   function pop return stack_entry
+     with Global => (Input => (stack, stack_pointer));
+   --  Should be (In_Out => (stack, stack_pointer));
+   procedure push(v : stack_entry)
+     with Global => (In_Out => (stack, stack_pointer));
    --
    --  Operations for stack frames.  The usage is as follows:
    --  1) Call start_frame before pushing items onto the stack that should be
@@ -51,34 +56,47 @@ package BBS.lisp.stack is
    --  3) Call exit_frame to clean up the stack frame.  There is no need to pop
    --     the items off the stack that belong to the stack frame.
    --
-   procedure start_frame;
-   procedure enter_frame;
-   procedure exit_frame;
+   procedure start_frame
+     with Global => (Input => frame_pointer,
+                     In_Out => (stack, stack_pointer, frame_count),
+                     Output => temp_frame);
+   procedure enter_frame
+     with Global => (In_Out => temp_frame, Output => frame_pointer);
+   procedure exit_frame
+     with Global => (In_out => (stack, stack_pointer, frame_pointer),
+                     Output => frame_count);
    --
    --  Procedure for clearing stack.  This is done at the command line level.
    --  There should be nothing on the stack at this point.  Some error conditions
    --  may cause a return to the command line without clearing the stack.
    --
-   procedure reset;
+   procedure reset
+     with Global => (Output => (stack, stack_pointer, frame_pointer, temp_frame, frame_count)),
+     Post => ((stack_pointer = stack_index'First) and (frame_pointer = stack_index'First) and
+              (temp_frame = stack_index'First) and (frame_count = 0));
    --
    --  Dump the stack for debugging purposes
    --
-   procedure dump;
+   procedure dump
+     with Global => (Input => (stack, stack_pointer, frame_pointer));
    --
    --  Search stack for the variable.  The frame offset and name are used to
    --  look backwards through the stack frames for a match to the name.  If
    --  found, the value is returned.  If not found, an empty value is returned.
    --
-   function search_frames(offset : Natural; name : string_index) return value;
+   function search_frames(offset : Natural; name : string_index) return value
+     with Global => (Input => (stack, frame_pointer));
    --
    --  Search stack for the variable.  The frame offset and name are used to
    --  look backwards through the stack frames for a match to the name.  If
    --  found, the stack index of the variable is returned, if not 0 is returned.
    --
-   function search_frames(offset : Natural; name : string_index) return stack_index;
+   function search_frames(offset : Natural; name : string_index) return stack_index
+     with Global => (Input => (stack, frame_pointer));
    --
    --  Searches the stack to find a variable and returns the stack index and offset
    --
-   function find_offset(name : string_index; index : out stack_index) return Natural;
+   function find_offset(name : string_index; index : out stack_index) return Natural
+     with Global => (Input => (stack, stack_pointer, frame_pointer));
 end;
 

@@ -2,7 +2,8 @@ package bbs.lisp.utilities is
    --
    --  Various utility functions
    --
-   function count(s : cons_index) return Integer;
+   function count(s : cons_index) return Integer
+     with Global => (Input => cons_table);
    --
    --  The following routine supports parameters and local variables.
    --  It scans through the passed s expression (recursively, if necessary) and
@@ -15,13 +16,19 @@ package bbs.lisp.utilities is
    --  s and any symbols or tempsyms whose name matches that of var are replaced
    --  by var.  This means that stack variables will shadow symbols.
    --
-   function replace_sym(s : cons_index; var : element_type) return Natural;
+   function replace_sym(s : cons_index; var : element_type) return Natural
+     with Global => (Input => (cons_table, symb_table));
+   -- Really should be (Input => symb_table, In_Out => cons_table).
    --
    --  Function to determine if a character is a digit or not in different number
    --  systems.
    --
-   function isDigit(c : Character) return Boolean;
-   function isAlpha(c : Character) return Boolean;
-   function isHex(c : Character) return Boolean;
-   function hexDigit(c : Character) return uint32;
+   function isDigit(c : Character) return Boolean
+     with Global => Null;
+   function isAlpha(c : Character) return Boolean
+     with Global => Null;
+   function isHex(c : Character) return Boolean
+     with Global => Null;
+   function hexDigit(c : Character) return uint32
+     with Global => Null;
 end;

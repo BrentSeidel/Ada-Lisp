@@ -178,6 +178,20 @@ package bbs.lisp is
    cons_table : array (cons_index'First + 1 .. cons_index'Last) of cons;
    symb_table : array (symb_index'First + 1 .. symb_index'Last) of symbol;
    --
+   --  Structures and definitions for handling strings
+   --
+   fragment_len : constant Integer := 16;
+   type fragment is
+      record
+         ref : Natural;
+         next : string_index;
+         len : Integer range 0..fragment_len;
+         str : String (1..fragment_len);
+      end record;
+   --
+   --
+   string_table : array (string_index'First + 1 .. string_index'Last) of fragment;
+   --
    --  Do initialization and define text I/O routines
    --
    procedure init(p_put_line : t_put_line; p_put : t_put_line;
@@ -270,20 +284,6 @@ private
    procedure print(v : value);
    procedure print(s : string_index);
    procedure print(s : symb_index);
-   --
-   --  Structures and definitions for handling strings
-   --
-   fragment_len : constant Integer := 16;
-   type fragment is
-      record
-         ref : Natural;
-         next : string_index;
-         len : Integer range 0..fragment_len;
-         str : String (1..fragment_len);
-      end record;
-   --
-   --
-   string_table : array (string_index'First + 1 .. string_index'Last) of fragment;
    --
    --  For debugging, dump the various tables
    --
