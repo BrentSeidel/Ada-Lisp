@@ -1,5 +1,4 @@
 with BBS.lisp.memory;
-with BBS.lisp.stack;
 package body BBS.lisp.evaluate is
    --
    --  Take an element_type and checks if it can be interpreted as true or false.

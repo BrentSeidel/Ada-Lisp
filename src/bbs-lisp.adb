@@ -19,7 +19,13 @@ with BBS.lisp.stack;
 use type BBS.lisp.stack.stack_entry_type;
 with BBS.lisp.strings;
 --
-package body bbs.lisp is
+package body bbs.lisp
+with Refined_State => (pvt_exit_flag => exit_flag,
+                       pvt_break_flag => break_flag,
+                       pvt_string_table => string_table,
+                       pvt_msg_flag => msg_flag,
+                       pvt_exit_loop => exit_loop,
+                       pvt_first_char_flag => first_char_flag) is
    --
    --  Initialize the data structures used in the lisp interpreter.  It resets'
    --  the tables and adds the builtin operations to the symbol table.

@@ -10,7 +10,9 @@
 --  different, these will have to be customized for each target.
 --
 with Ada.Unchecked_Conversion;
-package bbs.lisp is
+package bbs.lisp
+with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
+                        pvt_msg_flag, pvt_exit_loop, pvt_first_char_flag) is
    --
    --  Define the basic types used.
    --
@@ -178,20 +180,6 @@ package bbs.lisp is
    cons_table : array (cons_index'First + 1 .. cons_index'Last) of cons;
    symb_table : array (symb_index'First + 1 .. symb_index'Last) of symbol;
    --
-   --  Structures and definitions for handling strings
-   --
-   fragment_len : constant Integer := 16;
-   type fragment is
-      record
-         ref : Natural;
-         next : string_index;
-         len : Integer range 0..fragment_len;
-         str : String (1..fragment_len);
-      end record;
-   --
-   --
-   string_table : array (string_index'First + 1 .. string_index'Last) of fragment;
-   --
    --  Do initialization and define text I/O routines
    --
    procedure init(p_put_line : t_put_line; p_put : t_put_line;
@@ -242,23 +230,43 @@ private
    --
    --  Flag for exiting the REPL
    --
-   exit_flag : Boolean := False;
+   exit_flag : Boolean := False
+     with Part_Of => pvt_exit_flag;
    --
    --  Flag to exit current command
    --
-   break_flag : Boolean := False;
+   break_flag : Boolean := False
+     with Part_Of => pvt_break_flag;
    --
    --  Flag to enable or disable display of messages
    --
-   msg_flag : Boolean := False;
+   msg_flag : Boolean := False
+     with Part_Of => pvt_msg_flag;
    --
    --  Set to non-zero to break out of that many nested loops
    --
-   exit_loop : Natural;
+   exit_loop : Natural
+     with Part_Of => pvt_exit_loop;
    --
    --  Will printing start on a new line
    --
-   first_char_flag : Boolean := True;
+   first_char_flag : Boolean := True
+     with Part_Of => pvt_first_char_flag;
+   --
+   --  Structures and definitions for handling strings
+   --
+   fragment_len : constant Integer := 16;
+   type fragment is
+      record
+         ref : Natural;
+         next : string_index;
+         len : Integer range 0..fragment_len;
+         str : String (1..fragment_len);
+      end record;
+   --
+   --
+   string_table : array (string_index'First + 1 .. string_index'Last) of fragment
+     with Part_Of => pvt_string_table;
    --
    --  Initialize the data structures used in the lisp interpreter.
    --
