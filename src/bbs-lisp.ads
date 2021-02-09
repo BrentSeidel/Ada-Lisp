@@ -201,21 +201,29 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --
    --  This function checks if the lisp read-eval-print loop should exit
    --
-   function exit_lisp return Boolean;
+   function exit_lisp return Boolean
+     with Global => (Input => pvt_exit_flag);
    --
    --  Create a symbol for a builtin function.  This is intended to be called
    --  during initialization to identify the builtin operations.  Once created,
    --  these should never be changed.  No value is returned.
    --
-   procedure add_builtin(n : String; f : execute_function);
+   procedure add_builtin(n : String; f : execute_function)
+     with Global => (In_Out => (symb_table, pvt_string_table));
    --
    --  Procedures for printing error and non-error messages.  Pass in string
    --  representing the function name and the message.  This is intended to
    --  make error messages more consistent.
    --
-   procedure error(f : String; m : String);
-   procedure msg(f : String; m : String);
-   procedure print(e : element_type; d : Boolean; nl : Boolean);
+   procedure error(f : String; m : String)
+     with Global => Null;
+   --  The output stream is written to.
+   procedure msg(f : String; m : String)
+     with Global => (Input => pvt_msg_flag);
+   --  The output stream is written to.
+   procedure print(e : element_type; d : Boolean; nl : Boolean)
+     with Global => (Input => (cons_table, symb_table, pvt_string_table));
+   --  The output stream is written to.
    --
    --  Some useful constants
    --
@@ -288,20 +296,31 @@ private
    --
    --  These procedures print various types of objects.
    --
-   procedure print(s : cons_index);
-   procedure print(v : value);
-   procedure print(s : string_index);
-   procedure print(s : symb_index);
+   procedure print(s : cons_index)
+     with Global => (Input => (cons_table, symb_table, pvt_string_table));
+   procedure print(v : value)
+     with Global => (Input => (cons_table, symb_table, pvt_string_table));
+   procedure print(s : string_index)
+     with Global => (Input => pvt_string_table);
+   procedure print(s : symb_index)
+     with Global => (Input => (cons_table, symb_table, pvt_string_table));
    --
    --  For debugging, dump the various tables
    --
-   procedure dump_cons;
-   procedure dump_symbols;
-   procedure dump_strings;
-   procedure dump(e : element_type);
-   procedure dump(s : cons_index);
-   procedure dump(s : symb_index);
-   procedure dump(v : value);
+   procedure dump_cons
+     with Global => (Input => (cons_table, symb_table, pvt_string_table));
+   procedure dump_symbols
+     with Global => (Input => (cons_table, symb_table, pvt_string_table));
+   procedure dump_strings
+     with Global => (Input => pvt_string_table);
+   procedure dump(e : element_type)
+     with Global => (Input => (cons_table, symb_table, pvt_string_table));
+   procedure dump(s : cons_index)
+     with Global => (Input => (cons_table, symb_table, pvt_string_table));
+   procedure dump(s : symb_index)
+     with Global => (Input => (cons_table, symb_table, pvt_string_table));
+   procedure dump(v : value)
+     with Global => (Input => (cons_table, symb_table, pvt_string_table));
    --
    --  Local functions and procedures
    --
@@ -317,18 +336,26 @@ private
    --  Replacements for Text_IO to make porting to embedded systems easier.
    --  These call the user specified routines in the above pointers.
    --
-   procedure put_line(s : String);
-   procedure put(s : String);
-   procedure new_line;
-   procedure Get_Line(Item : out String; Last : out Natural);
+   procedure put_line(s : String)
+     with Global => (Output => pvt_first_char_flag);
+   procedure put(s : String)
+     with Global => (Output => pvt_first_char_flag);
+   procedure new_line
+     with Global => (Output => pvt_first_char_flag);
+   procedure Get_Line(Item : out String; Last : out Natural)
+     with Global => (Output => pvt_first_char_flag);
    --
    --  Functions for symbols.
    --
    --  If a symbol exists, return it, otherwise create a new symbol.  Returns
    --  false if symbol doesn't exist and can't be created.
    --
-   function get_symb(s : out symb_index; n : String) return Boolean;
-   function get_symb(s : out symb_index; n : string_index) return Boolean;
+   function get_symb(s : out symb_index; n : String) return Boolean
+     with Global => (Input => symb_table);
+   --  It really is (In_Out => symb_table)
+   function get_symb(s : out symb_index; n : string_index) return Boolean
+     with Global => (Input => (symb_table, pvt_string_table));
+   --  It really is (In_Out => (symb_table, pvt_string_table))
    --
    --  Finds a symbol and returns it.  Returns false if symbol can't be found.
    --
@@ -338,7 +365,8 @@ private
    --  during initialization to identify the special operations.  Once created,
    --  these should never be changed.  No value is returned.
    --
-   procedure add_special(n : String; f : special_function);
+   procedure add_special(n : String; f : special_function)
+     with Global => (In_Out => (symb_table, pvt_string_table));
    --
    --  Utility functions for manipulating lists
    --

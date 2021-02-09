@@ -3,7 +3,13 @@
 --  can is intended for use on embedded systems where hardware devices can be
 --  accessed at fixed addresses.  Here be dragons.  This can be dangerous.
 --
-package BBS.lisp.evaluate.mem is
+package BBS.lisp.evaluate.mem
+  with SPARK_Mode => Off
+is
+   --
+   --  Since this package explicitly access arbitrary memory locations for read
+   --  and write, there is no way that this can be proved, so we just turn SPARK
+   --  mode off.
    --
    --  Read memory locations returning 8, 16, or 32 bit elements from the
    --  location.  Some systems may throw exceptions for unaligned access.
