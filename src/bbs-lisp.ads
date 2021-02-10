@@ -12,7 +12,8 @@
 with Ada.Unchecked_Conversion;
 package bbs.lisp
 with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
-                        pvt_msg_flag, pvt_exit_loop, pvt_first_char_flag) is
+                        pvt_msg_flag, pvt_exit_loop, pvt_first_char_flag,
+                        output_stream, input_stream) is
    --
    --  Define the basic types used.
    --
@@ -183,13 +184,16 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --  Do initialization and define text I/O routines
    --
    procedure init(p_put_line : t_put_line; p_put : t_put_line;
-                  p_new_line : t_newline; p_get_line : t_get_line);
+                  p_new_line : t_newline; p_get_line : t_get_line)
+     with Global => (Output => (cons_table, symb_table, pvt_string_table,
+                               output_stream, input_stream, pvt_first_char_flag));
    --
    --  The read procedure/function reads the complete text of an s-expression
    --  from some input device.  The string is then parsed into a binary form
    --  that can be evaluated.
    --
-   function read return Element_Type;
+   function read return Element_Type
+     with Global => (Input => (input_stream, cons_table, symb_table, pvt_string_table));
    --
    --  This procedure evaluates a binary s-expression and returns the resuls.
    --
@@ -216,14 +220,13 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --  make error messages more consistent.
    --
    procedure error(f : String; m : String)
-     with Global => Null;
-   --  The output stream is written to.
+     with Global => (Output => output_stream);
    procedure msg(f : String; m : String)
-     with Global => (Input => pvt_msg_flag);
-   --  The output stream is written to.
+     with Global => (Input => pvt_msg_flag,
+                     output => output_stream);
    procedure print(e : element_type; d : Boolean; nl : Boolean)
-     with Global => (Input => (cons_table, symb_table, pvt_string_table));
-   --  The output stream is written to.
+     with Global => (Input => (cons_table, symb_table, pvt_string_table),
+                     output => output_stream);
    --
    --  Some useful constants
    --
@@ -278,7 +281,8 @@ private
    --
    --  Initialize the data structures used in the lisp interpreter.
    --
-   procedure init;
+   procedure init
+   with Global => (Output => (cons_table, symb_table, pvt_string_table));
    --
    --  Define some enumerations
    --
@@ -328,22 +332,30 @@ private
    --  Function pointers for I/O.  Using these pointers may allow the interpeter
    --  to be run on systems without access to Ada.Text_IO.
    --
-   io_put_line : t_put_line;
-   io_put      : t_put_line;
-   io_new_line : t_newline;
-   io_get_line : t_get_line;
+   io_put_line : t_put_line
+     with Part_Of => output_stream;
+   io_put      : t_put_line
+     with Part_Of => output_stream;
+   io_new_line : t_newline
+     with Part_Of => output_stream;
+   io_get_line : t_get_line
+     with Part_Of => input_stream;
    --
    --  Replacements for Text_IO to make porting to embedded systems easier.
    --  These call the user specified routines in the above pointers.
    --
    procedure put_line(s : String)
-     with Global => (Output => pvt_first_char_flag);
+     with Global => (input => output_stream,
+                     Output => pvt_first_char_flag);
    procedure put(s : String)
-     with Global => (Output => pvt_first_char_flag);
+     with Global => (Output => pvt_first_char_flag,
+                     Input => output_stream);
    procedure new_line
-     with Global => (Output => pvt_first_char_flag);
+     with Global => (Output => pvt_first_char_flag,
+                     Input => output_stream);
    procedure Get_Line(Item : out String; Last : out Natural)
-     with Global => (Output => pvt_first_char_flag);
+     with Global => (Output => pvt_first_char_flag,
+                     Input => input_stream);
    --
    --  Functions for symbols.
    --
@@ -370,8 +382,12 @@ private
    --
    --  Utility functions for manipulating lists
    --
-   function elem_to_cons(s : out cons_index; e : element_type) return Boolean;
-   function append(s1 : cons_index; s2 : cons_index) return Boolean;
+   function elem_to_cons(s : out cons_index; e : element_type) return Boolean
+     with Global => (Input => cons_table);
+   -- Should be (In_Out => cons_table)
+   function append(s1 : cons_index; s2 : cons_index) return Boolean
+     with Global => (Input => cons_table);
+   -- Should be (In_Out => cons_table)
    --
    --  Function for dispatching the various functions for evaluation.
    --

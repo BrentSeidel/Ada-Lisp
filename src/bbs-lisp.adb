@@ -25,7 +25,9 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                        pvt_string_table => string_table,
                        pvt_msg_flag => msg_flag,
                        pvt_exit_loop => exit_loop,
-                       pvt_first_char_flag => first_char_flag) is
+                       pvt_first_char_flag => first_char_flag,
+                       output_stream => (io_put_line, io_put, io_new_line),
+                       input_stream => io_get_line) is
    --
    --  Initialize the data structures used in the lisp interpreter.  It resets'
    --  the tables and adds the builtin operations to the symbol table.
