@@ -64,23 +64,4 @@ package body BBS.lisp.evaluate.math is
       return (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum));
    end;
    --
-   function add(s : cons_index) return element_type is
-   begin
-      return eval_math(s, PLUS);
-   end;
-   --
-   function sub(s : cons_index) return element_type is
-   begin
-      return eval_math(s, MINUS);
-   end;
-   --
-   function mul(s : cons_index) return element_type is
-   begin
-      return eval_math(s, MUL);
-   end;
-   --
-   function div(s : cons_index) return element_type is
-   begin
-      return eval_math(s, DIV);
-   end;
 end;

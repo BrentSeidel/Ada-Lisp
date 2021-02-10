@@ -128,26 +128,6 @@ package body BBS.lisp.evaluate.cond is
       end if;
    end;
    --
-   function eq(s : cons_index) return element_type is
-   begin
-      return eval_comp(s, SYM_EQ);
-   end;
-   --
-   function ne(s : cons_index) return element_type is
-   begin
-      return eval_comp(s, SYM_NE);
-   end;
-   --
-   function lt(s : cons_index) return element_type is
-   begin
-      return eval_comp(s, SYM_LT);
-   end;
-   --
-   function gt(s : cons_index) return element_type is
-   begin
-      return eval_comp(s, SYM_GT);
-   end;
-   --
    function eval_if(s : cons_index) return element_type is
       t  : element_type;
       s1 : cons_index := s;

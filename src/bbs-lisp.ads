@@ -234,6 +234,20 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    NIL_CONS : constant cons_index := cons_index'First;
    NIL_STR : constant string_index := string_index'First;
    NIL_SYM : constant symb_index := symb_index'First;
+   --
+   --  Define some enumerations
+   --
+   --
+   --  Type to indicate the result of comparisons.  The CMP_NE options is
+   --  available for comparisons that cannot be ordered, otherwise CMP_LT or
+   --  CMP_GT should be used.
+   --
+   type comparison is (CMP_EQ, CMP_LT, CMP_GT, CMP_NE);
+   --
+   --  Operations for math and comparisons
+   --
+   type mathops is (PLUS, MINUS, MUL, DIV);
+   type compops is (SYM_EQ, SYM_NE, SYM_LT, SYM_GT);
 
 private
    --
@@ -283,20 +297,6 @@ private
    --
    procedure init
    with Global => (Output => (cons_table, symb_table, pvt_string_table));
-   --
-   --  Define some enumerations
-   --
-   --
-   --  Type to indicate the result of comparisons.  The CMP_NE options is
-   --  available for comparisons that cannot be ordered, otherwise CMP_LT or
-   --  CMP_GT should be used.
-   --
-   type comparison is (CMP_EQ, CMP_LT, CMP_GT, CMP_NE);
-   --
-   --  Operations for math and comparisons
-   --
-   type mathops is (PLUS, MINUS, MUL, DIV);
-   type compops is (SYM_EQ, SYM_NE, SYM_LT, SYM_GT);
    --
    --  These procedures print various types of objects.
    --
