@@ -5,7 +5,7 @@ package body bbs.lisp.memory is
    procedure reset_tables is
    begin
       for i in NIL_CONS + 1 .. cons_index'Last loop
-         cons_table(i).ref := 0;
+         cons_table(i).ref := FREE_CONS;
          cons_table(i).car := (Kind => E_NIL);
          cons_table(i).cdr := (Kind => E_NIL);
       end loop;
@@ -13,7 +13,7 @@ package body bbs.lisp.memory is
          symb_table(i).ref := 0;
       end loop;
       for i in string_index'First + 1 .. string_index'Last loop
-         string_table(i).ref := 0;
+         string_table(i).ref := FREE_STR;
       end loop;
    end;
    --
@@ -23,9 +23,9 @@ package body bbs.lisp.memory is
    function alloc(s : out cons_index) return Boolean is
    begin
       for i in cons_index'First + 1 .. cons_index'Last loop
-         if cons_table(i).ref = 0 then
+         if cons_table(i).ref = FREE_CONS then
             s := i;
-            cons_table(i).ref := 1;
+            cons_table(i).ref := FREE_CONS + 1;
             cons_table(i).car := (Kind => E_NIL);
             cons_table(i).cdr := (Kind => E_NIL);
             return True;
@@ -41,9 +41,9 @@ package body bbs.lisp.memory is
    function alloc(s : out string_index) return Boolean is
    begin
       for i in string_index'First + 1 .. string_index'Last loop
-         if string_table(i).ref = 0 then
+         if string_table(i).ref = FREE_STR then
             s := i;
-            string_table(i).ref := 1;
+            string_table(i).ref := FREE_STR + 1;
             string_table(i).len := 0;
             string_table(i).next := NIL_STR;
             return True;
@@ -57,7 +57,7 @@ package body bbs.lisp.memory is
    --
    procedure ref(s : cons_index) is
    begin
-      if cons_table(s).ref = 0 then
+      if cons_table(s).ref = FREE_CONS then
          error("ref cons", "Attempting to ref an unallocated cons.");
       end if;
       cons_table(s).ref :=  cons_table(s).ref + 1;
@@ -67,7 +67,7 @@ package body bbs.lisp.memory is
    --
    procedure ref(s : string_index) is
    begin
-      if string_table(s).ref = 0 then
+      if string_table(s).ref = FREE_STR then
          error("ref string", "Attempting to ref an unallocated string.");
       end if;
     string_table(s).ref := string_table(s).ref + 1;
@@ -110,7 +110,7 @@ package body bbs.lisp.memory is
       if s > NIL_CONS then
          msg("deref cons", "Dereffing cons at " & cons_index'Image(s) &
             " Ref count was " & Integer'Image(Integer(cons_table(s).ref)));
-         if cons_table(s).ref > 0 then
+         if cons_table(s).ref > FREE_CONS then
             cons_table(s).ref := cons_table(s).ref - 1;
          else
             error("deref cons", "Attempt to deref an unreffed cons at index "
@@ -120,7 +120,7 @@ package body bbs.lisp.memory is
          --  If the reference count goes to zero, deref the things that the cons
          --  points to.
          --
-         if cons_table(s).ref = 0 then
+         if cons_table(s).ref = FREE_CONS then
             deref(cons_table(s).car);
             deref(cons_table(s).cdr);
             cons_table(s).car := NIL_ELEM;
@@ -161,7 +161,7 @@ package body bbs.lisp.memory is
       next : string_index;
       prev : string_index;
    begin
-      if string_table(s).ref > 0 then
+      if string_table(s).ref > FREE_STR then
          string_table(s).ref := string_table(s).ref - 1;
       else
          error("deref string", "Attempt to deref an unreffed string at index "
@@ -170,19 +170,19 @@ package body bbs.lisp.memory is
       --
       --  If the reference count goes to zero, deref the next fragment.
       --
-      if string_table(s).ref = 0 then
+      if string_table(s).ref = FREE_STR then
          prev := s;
          next := string_table(s).next;
          string_table(prev).len := 0;
          string_table(prev).next := NIL_STR;
          while next > NIL_STR loop
-            if string_table(next).ref > 0 then
+            if string_table(next).ref > FREE_STR then
                string_table(next).ref := string_table(next).ref - 1;
             else
                error("deref string", "Attempt to deref an unreffed string at index "
                      & string_index'Image(s));
             end if;
-            exit when string_table(next).ref > 0;
+            exit when string_table(next).ref > FREE_STR;
             prev := next;
             next := string_table(prev).next;
             string_table(prev).len := 0;

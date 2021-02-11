@@ -316,7 +316,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          when V_CHARACTER =>
             Put("'" & v.c & "'");
          when V_STRING =>
-            put(" STR: Ref: " & Natural'Image(string_table(v.s).ref) & " Value: ");
+            put(" STR: Ref: " & str_ref_count'Image(string_table(v.s).ref) & " Value: ");
             print(v.s);
          when V_BOOLEAN =>
             if v.b then
@@ -325,7 +325,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                put(" NIL");
             end if;
          when V_LIST =>
-            put(" LIST: Ref: " & Natural'Image(cons_table(v.l).ref) & " Value: ");
+            put(" LIST: Ref: " & cons_ref_count'Image(cons_table(v.l).ref) & " Value: ");
             print(v.l);
          when others =>
             Put("<Unknown value kind " & value_type'Image(v.kind) & ">");
@@ -451,7 +451,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          if string_table(i).ref > 0 then
             Put("String " & Integer'Image(Integer(i)) & " contains: <"
                                  & string_table(i).str & ">, ");
-            Put("Reference count: " & Integer'Image(string_table(i).ref));
+            Put("Reference count: " & str_ref_count'Image(string_table(i).ref));
             Put(", Length: " & Integer'Image(Integer(string_table(i).len)));
             Put_Line(", Next: " & string_index'Image(string_table(i).next));
          end if;

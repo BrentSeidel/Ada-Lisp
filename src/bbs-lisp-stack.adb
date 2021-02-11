@@ -6,22 +6,10 @@ with BBS.lisp.strings;
 with BBS.lisp.memory;
 package body BBS.lisp.stack is
    --
-   --  Status functions for the stack
-   --
-   function isFull return Boolean is
-   begin
-      return (stack_pointer = stack_index'Last);
-   end;
-   --
-   function isEmpty return Boolean is
-   begin
-      return (stack_pointer = stack_index'First);
-   end;
-   --
    --
    --  Adding and removing items from the stack
    --
-   function pop return stack_entry is
+   procedure pop(v : out stack_entry) is
       t : stack_entry := (kind => ST_EMPTY);
    begin
       if not isEmpty then
@@ -35,7 +23,7 @@ package body BBS.lisp.stack is
       else
          error("pop", "Stack underflow");
       end if;
-      return t;
+      v := t;
    end;
    --
    procedure push(v : stack_entry) is
@@ -56,14 +44,18 @@ package body BBS.lisp.stack is
    --  may cause a return to the command line without clearing the stack.
    --
    procedure reset is
-      dummy : stack_entry;  --  This is never used.
+      temp : stack_entry;
    begin
       while not isEmpty loop
-         dummy := pop;
+         pop(temp);
+         if temp.kind = ST_VALUE then
+            BBS.lisp.memory.deref(temp.st_name);
+            BBS.lisp.memory.deref(temp.st_value);
+         end if;
       end loop;
-      stack_pointer := stack_index'First;
-      frame_pointer := stack_index'First;
-      temp_frame := stack_index'First;
+      stack_pointer := EMPTY_STACK;
+      frame_pointer := EMPTY_STACK;
+      temp_frame := EMPTY_STACK;
       frame_count := 0;
    end;
    --
@@ -79,7 +71,7 @@ package body BBS.lisp.stack is
    procedure enter_frame is
    begin
       frame_pointer := temp_frame;
-      temp_frame := stack_index'First;
+      temp_frame := EMPTY_STACK;
    end;
    --
    procedure exit_frame is
@@ -140,7 +132,7 @@ package body BBS.lisp.stack is
       test_name : string_index;
       eq : comparison;
    begin
-      while frame > stack_index'First loop
+      while frame > EMPTY_STACK loop
          test := stack(stack_index(Integer(frame) + Integer(offset)));
          if test.kind = ST_VALUE then
             test_name := test.st_name;
@@ -156,7 +148,7 @@ package body BBS.lisp.stack is
                   print(name);
                   Put_Line(">");
                   dump;
-                  frame := stack_index'First;
+                  frame := EMPTY_STACK;
                end if;
             end if;
          end if;
@@ -168,7 +160,7 @@ package body BBS.lisp.stack is
             print(name);
             Put_Line(">");
             dump;
-            frame := stack_index'First;
+            frame := EMPTY_STACK;
          end if;
       end loop;
       return (kind => V_NONE);
@@ -184,7 +176,7 @@ package body BBS.lisp.stack is
       test_name : string_index;
       eq : comparison;
    begin
-      while frame > stack_index'First loop
+      while frame > EMPTY_STACK loop
          test := stack(stack_index(Integer(frame) + Integer(offset)));
          if test.kind = ST_VALUE then
             test_name := test.st_name;
@@ -200,7 +192,7 @@ package body BBS.lisp.stack is
                   print(name);
                   Put_Line(">");
                   dump;
-                  frame := stack_index'First;
+                  frame := EMPTY_STACK;
                end if;
             end if;
          end if;
@@ -209,7 +201,7 @@ package body BBS.lisp.stack is
          else
             error("search_frames", "Did not find frame entry on stack");
             dump;
-            frame := stack_index'First;
+            frame := EMPTY_STACK;
          end if;
       end loop;
       return stack_index'First;
@@ -223,7 +215,7 @@ package body BBS.lisp.stack is
       item  : stack_entry;
       eq : comparison := CMP_NE;
    begin
-      while sp > stack_index'First loop
+      while sp > EMPTY_STACK loop
          item := stack(sp);
          case item.kind is
             when ST_FRAME =>
@@ -240,7 +232,7 @@ package body BBS.lisp.stack is
          index := sp;
          return Natural(sp - fp);
       else
-         index := stack_index'First;
+         index := EMPTY_STACK;
          return Natural'First;
       end if;
    end;

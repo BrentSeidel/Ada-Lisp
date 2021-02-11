@@ -27,7 +27,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    type cons_index is range -1 .. max_cons;
    type symb_index is range -1 .. max_symb;
    type string_index is range -1 .. max_string;
-   type stack_index is range -1 .. max_stack;
+   type stack_index is range 0 .. max_stack;
    --
    --  This indicates what type of an object an element_type is pointing to.  It
    --  can be a cons cell, a value, a symbol, a temporary symbol a stack
@@ -73,7 +73,13 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
       new Ada.Unchecked_Conversion(source => uint32, target => int32);
    function int32_to_uint32 is
       new Ada.Unchecked_Conversion(source => int32, target => uint32);
-
+   --
+   --  Types for reference counts
+   --
+   type cons_ref_count is new Natural;
+   type str_ref_count  is new Natural;
+   FREE_CONS : constant cons_ref_count := cons_ref_count'First;
+   FREE_STR  : constant str_ref_count := str_ref_count'First;
    --
    --  Define the contents of records.
    --
@@ -129,7 +135,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --
    type cons is
       record
-         ref : Natural;
+         ref : cons_ref_count;
          car : element_type;
          cdr : element_type;
       end record;
@@ -283,7 +289,7 @@ private
    fragment_len : constant Integer := 16;
    type fragment is
       record
-         ref : Natural;
+         ref : str_ref_count;
          next : string_index;
          len : Integer range 0..fragment_len;
          str : String (1..fragment_len);

@@ -23,7 +23,7 @@ package BBS.lisp.stack is
    --
    --  The stack array
    --
-   stack : array (stack_index'First + 1 .. stack_index'Last) of stack_entry :=
+   stack : array (stack_index'First .. stack_index'Last) of stack_entry :=
      (others => (kind => ST_EMPTY));
    --
    --  Various pointers for managing the stack and its frames.
@@ -33,20 +33,30 @@ package BBS.lisp.stack is
    temp_frame    : stack_index := stack_index'First;
    frame_count   : Natural := 0;
    --
+   EMPTY_STACK : constant stack_index := stack_index'First;
+   FULL_STACK  : constant stack_index := stack_index'Last;
+   --
    --  Status functions for the stack
    --
-   function isFull return Boolean
-     with Global => (Input => stack_pointer);
-   function isEmpty return Boolean
-     with Global => (Input => stack_pointer);
+   function isFull return Boolean is (stack_pointer = FULL_STACK)
+     with Global => (Input => stack_pointer),
+     Inline;
+   function isEmpty return Boolean is (stack_pointer = EMPTY_STACK)
+     with Global => (Input => stack_pointer),
+     Inline;
    --
    --  Adding and removing items from the stack
    --
-   function pop return stack_entry
-     with Global => (Input => (stack, stack_pointer));
-   --  Should be (In_Out => (stack, stack_pointer));
+   procedure pop(v : out stack_entry)
+     with Global => (In_Out => (stack, stack_pointer)),
+     pre => not isEmpty,
+     post => not isFull and v = stack(stack_pointer'Old) and
+     stack_pointer = stack_pointer'Old - 1;
    procedure push(v : stack_entry)
-     with Global => (In_Out => (stack, stack_pointer));
+     with Global => (In_Out => (stack, stack_pointer)),
+     pre => not isFull,
+     post => not isEmpty and stack_pointer = stack_pointer'Old + 1 and
+     stack(stack_pointer) = v;
    --
    --  Operations for stack frames.  The usage is as follows:
    --  1) Call start_frame before pushing items onto the stack that should be
@@ -72,8 +82,8 @@ package BBS.lisp.stack is
    --
    procedure reset
      with Global => (Output => (stack, stack_pointer, frame_pointer, temp_frame, frame_count)),
-     Post => ((stack_pointer = stack_index'First) and (frame_pointer = stack_index'First) and
-              (temp_frame = stack_index'First) and (frame_count = 0));
+     Post => ((stack_pointer = EMPTY_STACK) and (frame_pointer = EMPTY_STACK) and
+              (temp_frame = EMPTY_STACK) and (frame_count = 0));
    --
    --  Dump the stack for debugging purposes
    --
