@@ -13,7 +13,8 @@ package body BBS.lisp.evaluate.func is
    --      translated to point to the parameter atom in the parameter list.  It
    --      also could concievable be a single atom or even NIL.
    --
-   function defun(s : cons_index; p : phase) return element_type is
+--   function defun(s : cons_index; p : phase) return element_type is
+   procedure defun(e : out element_type; s : cons_index; p : phase) is
       params : element_type;
       name : element_type;
       temp : element_type;
@@ -27,7 +28,8 @@ package body BBS.lisp.evaluate.func is
       --
       case p is
          when PH_QUERY =>
-            return (kind => E_VALUE, v => (kind => V_INTEGER, i => 2));
+            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 2));
+            return;
             --
             --  First identify the name, parameter list, and body.  Then perform
             --  initial checks to verify that they are the appropriate kind of object.
@@ -48,7 +50,8 @@ package body BBS.lisp.evaluate.func is
                   if (symb_table(symb).kind = SY_BUILTIN) or
                     (symb_table(symb).kind = SY_SPECIAL) then
                      error("defun", "Can't assign a value to a builtin or special symbol");
-                     return (kind => E_ERROR);
+                     e := (kind => E_ERROR);
+                     return;
                   end if;
                elsif p3.kind = E_TEMPSYM then
                   flag := get_symb(symb, p3.tempsym);
@@ -57,12 +60,14 @@ package body BBS.lisp.evaluate.func is
                      cons_table(p2.ps).car := (kind => E_SYMBOL, sym => symb);
                   else
                      error("defun", "Unable to add symbol ");
-                     return (kind => E_ERROR);
+                     e := (kind => E_ERROR);
+                     return;
                   end if;
                else
                   error("defun", "First parameter is not a symbol or temporary symbol.");
                   Put_Line("Parameter type is " & ptr_type'Image(p3.kind));
-                  return (kind => E_ERROR);
+                  e := (kind => E_ERROR);
+                  return;
                end if;
                --
                --  Next process the parameter list.  Note that currently, defun
@@ -74,14 +79,16 @@ package body BBS.lisp.evaluate.func is
                   params := cons_table(temp.ps).car;
                else
                   error("defun", "Improper parameters.");
-                  return (kind => E_ERROR);
+                  e := (kind => E_ERROR);
+                  return;
                end if;
                temp := params;
                BBS.lisp.stack.start_frame;
                while temp.kind = E_CONS loop
                   if cons_table(temp.ps).car.kind = E_CONS then
                      error("defun", "A parameter cannot be a list.");
-                     return (kind => E_ERROR);
+                     e := (kind => E_ERROR);
+                     return;
                   end if;
                   declare
                      el : element_type := cons_table(temp.ps).car;
@@ -116,7 +123,8 @@ package body BBS.lisp.evaluate.func is
                BBS.lisp.stack.enter_frame;
             else
                error("defun", "Something went horribly wrong and defun did not get a list");
-               return (kind => E_ERROR);
+               e := (kind => E_ERROR);
+               return;
             end if;
          when PH_PARSE_END =>
             BBS.lisp.stack.exit_frame;
@@ -126,7 +134,8 @@ package body BBS.lisp.evaluate.func is
          when PH_EXECUTE =>
             if s = NIL_CONS then
                error("defun", "No parameters given to defun.");
-               return (kind => E_ERROR);
+               e := (kind => E_ERROR);
+               return;
             end if;
             name := cons_table(s).car;
             temp := cons_table(s).cdr;
@@ -134,16 +143,19 @@ package body BBS.lisp.evaluate.func is
                params := cons_table(temp.ps).car;
             else
                error("defun", "Improper parameters.");
-               return (kind => E_ERROR);
+               e := (kind => E_ERROR);
+               return;
             end if;
             if (name.kind /= E_SYMBOL)
               and (name.kind /= E_TEMPSYM) then
                error("defun", "Function name must be a symbol or tempsym.");
-               return (kind => E_ERROR);
+               e := (kind => E_ERROR);
+               return;
             end if;
             if (params.kind /= E_CONS) and (params.kind /= E_NIL) then
                error("defun", "Parameter list must be a list or NIL.");
-               return (kind => E_ERROR);
+               e := (kind => E_ERROR);
+               return;
             end if;
             --
             --  To get to this point, all checks have passed, so attach the
@@ -163,7 +175,7 @@ package body BBS.lisp.evaluate.func is
             symb_table(symb) := (ref => 1, str => symb_table(symb).str,
                                  kind => SY_LAMBDA, ps => temp.ps);
       end case;
-      return NIL_ELEM;
+      e := NIL_ELEM;
    end;
    --
    --  Defines a function.  The command is (lambda (parameters) body).
@@ -176,7 +188,8 @@ package body BBS.lisp.evaluate.func is
    --      also could concievable be a single atom or even NIL.
    --    The returned value is an variable element of type V_LAMBDA.
    --
-   function lambda(s : cons_index; p : phase) return element_type is
+--   function lambda(s : cons_index; p : phase) return element_type is
+   procedure lambda(e : out element_type; s : cons_index; p : phase) is
       params : element_type;
       temp : element_type;
    begin
@@ -185,7 +198,8 @@ package body BBS.lisp.evaluate.func is
       --
       case p is
          when PH_QUERY =>
-            return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
+            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
+            return;
             --
             --  First identify the name, parameter list, and body.  Then perform
             --  initial checks to verify that they are the appropriate kind of object.
@@ -203,14 +217,16 @@ package body BBS.lisp.evaluate.func is
                   params := cons_table(params.ps).car;
                else
                   error("lambda", "Improper parameters.");
-                  return (kind => E_ERROR);
+                  e := (kind => E_ERROR);
+                  return;
                end if;
                temp := params;
                BBS.lisp.stack.start_frame;
                while temp.kind = E_CONS loop
                   if cons_table(temp.ps).car.kind = E_CONS then
                      error("lambda", "A parameter cannot be a list.");
-                     return (kind => E_ERROR);
+                     e := (kind => E_ERROR);
+                     return;
                   end if;
                   declare
                      el : element_type := cons_table(temp.ps).car;
@@ -244,7 +260,8 @@ package body BBS.lisp.evaluate.func is
                BBS.lisp.stack.enter_frame;
             else
                error("lambda", "Something went horribly wrong and lambda did not get a list");
-               return (kind => E_ERROR);
+               e := (kind => E_ERROR);
+               return;
             end if;
          when PH_PARSE_END =>
             BBS.lisp.stack.exit_frame;
@@ -254,20 +271,24 @@ package body BBS.lisp.evaluate.func is
          when PH_EXECUTE =>
             if s = NIL_CONS then
                error("lambda", "No parameters given to lambda.");
-               return (kind => E_ERROR);
+               e := (kind => E_ERROR);
+               return;
             end if;
             if (params.kind /= E_CONS) and (params.kind /= E_NIL) then
                error("lambda", "Parameter list must be a list or NIL.");
-               return (kind => E_ERROR);
+               e := (kind => E_ERROR);
+               return;
             end if;
             --
             --  To get to this point, all checks have passed, so return the
             --  parameter list and body.
             --
             BBS.lisp.memory.ref(s);
-            return (kind => E_VALUE, v => (kind => V_LAMBDA, lam => s));
+            e := (kind => E_VALUE, v => (kind => V_LAMBDA, lam => s));
+            return;
       end case;
-      return NIL_ELEM;
+      e := NIL_ELEM;
+      return;
    end;
    --
    --  Functions for evaluating lisp functions.

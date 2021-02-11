@@ -9,5 +9,6 @@ package BBS.lisp.evaluate.loops is
    --
    --  Evaluate statements a specified number of times.
    --
-   function dotimes(s : cons_index; p : phase) return element_type;
+--   function dotimes(s : cons_index; p : phase) return element_type;
+   procedure dotimes(e : out element_type; s : cons_index; p : phase);
 end;

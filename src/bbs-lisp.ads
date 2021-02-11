@@ -152,7 +152,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --
    --  Type for access to functions that implement lisp special operations
    --
-   type special_function is access function(s : cons_index; p : phase) return element_type;
+   type special_function is access procedure(e : out element_type; s : cons_index; p : phase);
    --
    --  A symbol give a perminant name to a piece of data.  These can be global
    --  variables, user defined functions, or builtin functions.  The builtin

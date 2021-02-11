@@ -7,11 +7,8 @@ package body BBS.lisp.evaluate.vars is
    --  perminant symbol in the symbol table.  The assigned value is the result
    --  of evaluating the second parameter.
    --
-   --  To improve memory management, need to make a copy of the assigned value
-   --  to use as a return value.  Currently, the REPL deallocates the returned
-   --  value after printing it.
-   --
-   function setq(s : cons_index; p : phase) return element_type is
+--   function setq(s : cons_index; p : phase) return element_type is
+   procedure setq(e : out element_type; s : cons_index; p : phase) is
       symb : symb_index;
       p1 : element_type;
       p2 : element_type;
@@ -34,7 +31,8 @@ package body BBS.lisp.evaluate.vars is
    begin
       case p is
          when PH_QUERY =>
-            return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
+            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
+            return;
          when PH_PARSE_BEGIN =>
               msg("setq", "Called during parse begin phase.");
             if s > cons_index'First then
@@ -46,7 +44,8 @@ package body BBS.lisp.evaluate.vars is
                   if (symb_table(symb).kind = SY_BUILTIN) or
                     (symb_table(symb).kind = SY_SPECIAL) then
                      error("setq", "Can't assign a value to a builtin or special symbol");
-                     return (kind => E_ERROR);
+                     e := (kind => E_ERROR);
+                     return;
                   end if;
                elsif p3.kind = E_TEMPSYM then
                   str := p3.tempsym;
@@ -58,11 +57,13 @@ package body BBS.lisp.evaluate.vars is
                else
                   error("setq", "First parameter is not a symbol or temporary symbol.");
                   Put_Line("Parameter type is " & ptr_type'Image(p3.kind));
-                  return (kind => E_ERROR);
+                  e := (kind => E_ERROR);
+                  return;
                end if;
             else
                error("setq", "Something went horribly wrong and setq did not get a list");
-               return (kind => E_ERROR);
+               e := (kind => E_ERROR);
+               return;
             end if;
          when PH_PARSE_END =>
             null;
@@ -77,13 +78,15 @@ package body BBS.lisp.evaluate.vars is
                else
                   error("setq", "First parameter is not a symbol.");
                   Put_Line("Kind is " & ptr_type'Image(p1.kind));
-                  return (kind => E_ERROR);
+                  e := (kind => E_ERROR);
+                  return;
                end if;
                if not stacked then
                   if (symb_table(symb).kind = SY_BUILTIN) or
                     (symb_table(symb).kind = SY_SPECIAL) then
                      error("setq", "Can't assign a value to a builtin or special symbol");
-                     return (kind => E_ERROR);
+                     e := (kind => E_ERROR);
+                     return;
                   end if;
                end if;
                --
@@ -118,25 +121,29 @@ package body BBS.lisp.evaluate.vars is
                   symb_table(symb) := (ref => 1, Kind => SY_VARIABLE,
                                        pv => p2, str => symb_table(symb).str);
                end if;
-               return p2;
+               e := p2;
+               return;
             else
                error("setq", "Not enough arguments.");
-               return (kind => E_ERROR);
+               e := (kind => E_ERROR);
+               return;
             end if;
       end case;
-      return NIL_ELEM;
+      e := NIL_ELEM;
    end;
    --
    --  Define local variables and optionally assign values to them.
    --
-   function local(s : cons_index; p : phase) return element_type is
+--   function local(s : cons_index; p : phase) return element_type is
+   procedure local(e : out element_type; s : cons_index; p : phase) is
       locals : element_type;
       list : element_type;
       t : element_type := NIL_ELEM;
    begin
       case p is
          when PH_QUERY =>
-            return (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
+            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
+            return;
          when PH_PARSE_BEGIN =>
             if s > NIL_CONS then
                --
@@ -147,7 +154,8 @@ package body BBS.lisp.evaluate.vars is
                   locals := cons_table(locals.ps).car;
                else
                   error("let", "Improper parameters.");
-                  return (kind => E_ERROR);
+                  e := (kind => E_ERROR);
+                  return;
                end if;
                BBS.lisp.stack.start_frame;
                while locals.kind = E_CONS loop
@@ -181,7 +189,8 @@ package body BBS.lisp.evaluate.vars is
                         Put_Line("Item is of kind " & ptr_type'Image(el.kind));
                         BBS.lisp.stack.enter_frame;
                         BBS.lisp.stack.exit_frame;
-                        return (kind => E_ERROR);
+                        e := (kind => E_ERROR);
+                        return;
                      end if;
                      el := (kind => E_STACK, st_name => str,
                             st_offset => offset);
@@ -200,7 +209,8 @@ package body BBS.lisp.evaluate.vars is
                BBS.lisp.stack.enter_frame;
             else
                error("let", "Something went horribly wrong and local did not get a list");
-               return (kind => E_ERROR);
+               e := (kind => E_ERROR);
+               return;
             end if;
          when PH_PARSE_END =>
             BBS.lisp.stack.exit_frame;
@@ -261,7 +271,8 @@ package body BBS.lisp.evaluate.vars is
                      Put_Line("Item is of kind " & ptr_type'Image(el.kind));
                      BBS.lisp.stack.enter_frame;
                      BBS.lisp.stack.exit_frame;
-                     return (kind => E_ERROR);
+                     e := (kind => E_ERROR);
+                     return;
                   end if;
                   offset := offset + 1;
                end;
@@ -276,9 +287,10 @@ package body BBS.lisp.evaluate.vars is
                error("let", "Error occured evaluting statement");
             end if;
             BBS.lisp.stack.exit_frame;
-            return t;
+            e := t;
+            return;
       end case;
-      return NIL_ELEM;
+      e := NIL_ELEM;
    end;
    --
 end;
