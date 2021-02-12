@@ -66,7 +66,6 @@ package body BBS.lisp.evaluate.loops is
    --  executed the specified number of times.
    --  (dotimes (local count [result]) <body>).
    --
---   function dotimes(s : cons_index; p : phase) return element_type is
    procedure dotimes(e : out element_type; s : cons_index; p : phase) is
       limits : element_type; --  Condition to evaluate
       list : element_type; --  List of operations to execute

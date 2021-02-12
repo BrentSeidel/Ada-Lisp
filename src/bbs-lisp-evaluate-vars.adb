@@ -2,12 +2,11 @@ with BBS.lisp.memory;
 with BBS.lisp.stack;
 package body BBS.lisp.evaluate.vars is
    --
-   --  This sets a symbol to a value.  The first parameter must evaluate to a
-   --  symbol or temp symbol.  If it is a temp symbol, it is converted to a
-   --  perminant symbol in the symbol table.  The assigned value is the result
-   --  of evaluating the second parameter.
+   --  This sets a symbol or stack variable to a value.  The first parameter
+   --  must evaluate to a symbol, stack variable, or temp symbol.  If it is a
+   --  temp symbol, it is converted to a perminant symbol in the symbol table.
+   --  The assigned value is the result of evaluating the second parameter.
    --
---   function setq(s : cons_index; p : phase) return element_type is
    procedure setq(e : out element_type; s : cons_index; p : phase) is
       symb : symb_index;
       p1 : element_type;
@@ -134,7 +133,6 @@ package body BBS.lisp.evaluate.vars is
    --
    --  Define local variables and optionally assign values to them.
    --
---   function local(s : cons_index; p : phase) return element_type is
    procedure local(e : out element_type; s : cons_index; p : phase) is
       locals : element_type;
       list : element_type;

@@ -709,10 +709,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                   New_Line;
                end if;
                if rest.kind = E_CONS then
---                  e := sym.s.all(rest.ps, PH_EXECUTE);
                   sym.s.all(e, rest.ps, PH_EXECUTE);
                else
---                  e := sym.s.all(NIL_CONS, PH_EXECUTE);
                   sym.s.all(e, NIL_CONS, PH_EXECUTE);
                end if;
             when SY_LAMBDA =>

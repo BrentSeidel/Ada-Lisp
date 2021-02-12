@@ -13,7 +13,6 @@ package body BBS.lisp.evaluate.func is
    --      translated to point to the parameter atom in the parameter list.  It
    --      also could concievable be a single atom or even NIL.
    --
---   function defun(s : cons_index; p : phase) return element_type is
    procedure defun(e : out element_type; s : cons_index; p : phase) is
       params : element_type;
       name : element_type;
@@ -188,7 +187,6 @@ package body BBS.lisp.evaluate.func is
    --      also could concievable be a single atom or even NIL.
    --    The returned value is an variable element of type V_LAMBDA.
    --
---   function lambda(s : cons_index; p : phase) return element_type is
    procedure lambda(e : out element_type; s : cons_index; p : phase) is
       params : element_type;
       temp : element_type;

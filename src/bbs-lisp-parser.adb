@@ -197,7 +197,6 @@ package body bbs.lisp.parser is
             list_end := true;
             if special_flag then
                if begin_called then
---                  e := special_symb.s.all(head, PH_PARSE_END);
                   special_symb.s.all(e, head, PH_PARSE_END);
                else
                   error("list", "Internal error, parse end attempted to be called before parse begin");
@@ -380,7 +379,6 @@ package body bbs.lisp.parser is
                if (symb_table(e.sym).kind = SY_SPECIAL) and (item = 0) then
                   special_flag := True;
                   special_symb := symb_table(e.sym);
---                  e := special_symb.s.all(head, PH_QUERY);
                   special_symb.s.all(e, head, PH_QUERY);
                   if e.kind = E_VALUE then
                      if e.v.kind = V_INTEGER then
@@ -424,7 +422,6 @@ package body bbs.lisp.parser is
          --  a stack.
          --
          if special_flag and then (item = item_count) then
---                  e := special_symb.s.all(head, PH_PARSE_BEGIN);
             special_symb.s.all(e, head, PH_PARSE_BEGIN);
             begin_called := True;
          end if;
