@@ -13,12 +13,13 @@ package body BBS.lisp.evaluate.mem is
    --  Read memory locations returning 8, 16, or 32 bit elements from the
    --  location.  Some systems may throw exceptions for unaligned access.
    --
-   function peek8(s : cons_index) return element_type is
+--   function peek8(s : cons_index) return element_type is
+   procedure peek8(e : out element_type; s : cons_index) is
       rest : cons_index := s;
       param : element_type;
       addr1 : intermediate;
       addr : p_uint8;
-      el : element_type;
+--      el : element_type;
       value : uint8;
       ok : Boolean := True;
    begin
@@ -48,19 +49,20 @@ package body BBS.lisp.evaluate.mem is
       --
       if ok then
          value := addr.all;
-         el := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
+         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
       else
-         el := (kind => E_ERROR);
+         e := (kind => E_ERROR);
       end if;
-      return el;
+--      return el;
    end;
    --
-   function peek16(s : cons_index) return element_type is
+--   function peek16(s : cons_index) return element_type is
+   procedure peek16(e : out element_type; s : cons_index) is
       rest : cons_index := s;
       param : element_type;
       addr1 : intermediate;
       addr : p_uint16;
-      el : element_type;
+--      el : element_type;
       value : uint16;
       ok : Boolean := True;
    begin
@@ -83,7 +85,6 @@ package body BBS.lisp.evaluate.mem is
          ok := False;
          error("peek16", "Address must be an element.");
          print(param, False, True);
-         el := (kind => E_ERROR);
       end if;
       --
       --  If the parameter is an integer and in range, then read the memory
@@ -91,19 +92,20 @@ package body BBS.lisp.evaluate.mem is
       --
       if ok then
          value := addr.all;
-         el := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
+         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
       else
-         el := (kind => E_ERROR);
+         e := (kind => E_ERROR);
       end if;
-      return el;
+--      return el;
    end;
    --
-   function peek32(s : cons_index) return element_type is
+--   function peek32(s : cons_index) return element_type is
+   procedure peek32(e : out element_type; s : cons_index) is
       rest : cons_index := s;
       param : element_type;
       addr1 : intermediate;
       addr : p_uint32;
-      el : element_type;
+--      el : element_type;
       value : uint32;
       ok : Boolean := True;
    begin
@@ -126,7 +128,6 @@ package body BBS.lisp.evaluate.mem is
          ok := False;
          error("peek32", "Address must be an element.");
          print(param, False, True);
-         el := (kind => E_ERROR);
       end if;
       --
       --  If the parameter is an integer and in range, then read the memory
@@ -134,22 +135,23 @@ package body BBS.lisp.evaluate.mem is
       --
       if ok then
          value := addr.all;
-         el := (kind => E_VALUE, v => (kind => V_INTEGER, i => uint32_to_int32(value)));
+         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => uint32_to_int32(value)));
       else
-         el := (kind => E_ERROR);
+         e := (kind => E_ERROR);
       end if;
-      return el;
+--      return el;
    end;
    --
    --  Write 8, 16, or 32 bit elements to memory locations.  Some systems may
    --  throw exceptions for unaligned access.
    --
-   function poke8(s : cons_index) return element_type is
+--   function poke8(s : cons_index) return element_type is
+   procedure poke8(e : out element_type; s : cons_index) is
       rest : cons_index := s;
       param : element_type;
       addr1 : intermediate;
       addr : p_uint8;
-      el : element_type;
+--      el : element_type;
       value : uint8;
       ok : Boolean := True;
    begin
@@ -198,19 +200,20 @@ package body BBS.lisp.evaluate.mem is
       --
       if ok then
          addr.all := value;
-         el := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
+         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
       else
-         el := (kind => E_ERROR);
+         e := (kind => E_ERROR);
       end if;
-      return el;
+--      return el;
    end;
    --
-   function poke16(s : cons_index) return element_type is
+--   function poke16(s : cons_index) return element_type is
+   procedure poke16(e : out element_type; s : cons_index) is
       rest : cons_index := s;
       param : element_type;
       addr1 : intermediate;
       addr : p_uint16;
-      el : element_type;
+--      el : element_type;
       value : uint16;
       ok : Boolean := True;
    begin
@@ -259,19 +262,20 @@ package body BBS.lisp.evaluate.mem is
       --
       if ok then
          addr.all := value;
-         el := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
+         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
       else
-         el := (kind => E_ERROR);
+         e := (kind => E_ERROR);
       end if;
-      return el;
+--      return el;
    end;
    --
-   function poke32(s : cons_index) return element_type is
+--   function poke32(s : cons_index) return element_type is
+   procedure poke32(e : out element_type; s : cons_index) is
       rest : cons_index := s;
       param : element_type;
       addr1 : intermediate;
       addr : p_uint32;
-      el : element_type;
+--      el : element_type;
       value : uint32;
       ok : Boolean := True;
    begin
@@ -320,11 +324,11 @@ package body BBS.lisp.evaluate.mem is
       --
       if ok then
          addr.all := value;
-         el := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
+         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
       else
-         el := (kind => E_ERROR);
+         e := (kind => E_ERROR);
       end if;
-      return el;
+--      return el;
    end;
    --
 

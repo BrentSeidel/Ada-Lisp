@@ -7,7 +7,8 @@ package body BBS.lisp.evaluate.loops is
    --  condition evaluates to true, the rest of the items in the list are
    --  evaluated.  This is repeated until the condition evaluates to false.
    --
-   function dowhile(s : cons_index) return element_type is
+--   function dowhile(s : cons_index) return element_type is
+   procedure dowhile(e : out element_type; s : cons_index) is
       cond : element_type; --  Condition to evaluate
       list : element_type; --  List of operations to execute
       t : element_type := NIL_ELEM;
@@ -26,7 +27,8 @@ package body BBS.lisp.evaluate.loops is
          end if;
          if temp.kind = E_ERROR then
             error("dowhile", "Error occured during evaluation of condition");
-            return temp;
+            e := temp;
+            return;
          end if;
          while isTrue(temp) loop
             BBS.lisp.memory.deref(t);
@@ -37,7 +39,8 @@ package body BBS.lisp.evaluate.loops is
             t := execute_block(list);
             if t.kind = E_ERROR then
                error("dowhile", "Error occured during evaluation of body");
-               return t;
+               e := t;
+               return;
             end if;
             if isList(cond) then
                temp := eval_dispatch(getList(cond));
@@ -46,15 +49,17 @@ package body BBS.lisp.evaluate.loops is
             end if;
             if temp.kind = E_ERROR then
                error("dowhile", "Error occured during evaluation of condition");
-               return temp;
+               e := temp;
+               return;
             end if;
          end loop;
          BBS.lisp.memory.deref(temp);
       else
          error("dowhile", "Must provide a condition and expressions.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
-      return t;
+      e := t;
    end;
    --
    --  Evaluates a dotimes command.  The first item contains up to three elements,

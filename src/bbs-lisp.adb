@@ -698,9 +698,11 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                   New_Line;
                end if;
                if rest.kind = E_CONS then
-                  e := sym.f.all(rest.ps);
+--                  e := sym.f.all(rest.ps);
+                  sym.f.all(e, rest.ps);
                else
-                  e := sym.f.all(NIL_CONS);
+--                  e := sym.f.all(NIL_CONS);
+                  sym.f.all(e, NIL_CONS);
                end if;
             when SY_SPECIAL =>
                if msg_flag then

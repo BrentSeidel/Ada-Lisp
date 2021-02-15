@@ -8,217 +8,242 @@ package body BBS.lisp.evaluate.pred is
    --
    --  These return true of false depending on the type of data passed.
    --
-   function atomp(s : cons_index) return element_type is
+--   function atomp(s : cons_index) return element_type is
+   procedure atomp(e : out element_type; s : cons_index) is
       p : element_type;
    begin
       if s = cons_index'First then
          error("symbolp", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := cons_table(s).car;
       if not isList(p) then
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
       end if;
    end;
    --
-   function characterp(s : cons_index) return element_type is
-      t  : cons_index := s;
+--   function characterp(s : cons_index) return element_type is
+   procedure characterp(e : out element_type; s : cons_index) is
+      t : cons_index := s;
       p : element_type;
    begin
       if s = NIL_CONS then
          error("characterp", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := first_value(t);
       if (p.kind = E_VALUE) and then (p.v.kind = V_CHARACTER) then
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
       end if;
    end;
    --
-   function compiled_function_p(s : cons_index) return element_type is
+--   function compiled_function_p(s : cons_index) return element_type is
+   procedure compiled_function_p(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p : element_type;
    begin
       if s = NIL_CONS then
          error("compiled_function_p", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := first_value(t);
       if p.kind = E_SYMBOL then
          if (symb_table(p.sym).kind = SY_BUILTIN) or
            (symb_table(p.sym).kind = SY_SPECIAL) then
-            return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+            e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+            return;
          end if;
       end if;
-      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+      e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
    end;
    --
-   function consp(s : cons_index) return element_type is
+--   function consp(s : cons_index) return element_type is
+   procedure consp(e : out element_type; s : cons_index) is
       p : element_type;
    begin
       if s = NIL_CONS then
          error("symbolp", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := cons_table(s).car;
       if isList(p) then
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
       end if;
    end;
    --
-   function errorp(s : cons_index) return element_type is
-      t  : cons_index := s;
+   procedure errorp(e : out element_type; s : cons_index) is
+      t : cons_index := s;
       p : element_type;
    begin
       if s = NIL_CONS then
          error("errorp", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := first_value(t);
       if p.kind = E_ERROR then
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
       end if;
    end;
    --
-   function functionp(s : cons_index) return element_type is
-      t  : cons_index := s;
+--   function functionp(s : cons_index) return element_type is
+   procedure functionp(e : out element_type; s : cons_index)is
+      t : cons_index := s;
       p : element_type;
    begin
       if s = NIL_CONS then
          error("functionp", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := first_value(t);
       if p.kind = E_SYMBOL then
          if (symb_table(p.sym).kind = SY_BUILTIN) or
            (symb_table(p.sym).kind = SY_SPECIAL) or
            (symb_table(p.sym).kind = SY_LAMBDA) then
-            return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+            e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+            return;
          end if;
       end if;
       if p.kind = E_VALUE then
          if p.v.kind = V_LAMBDA then
-            return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+            e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+            return;
          end if;
       end if;
-      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+      e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
    end;
    --
-   function integerp(s : cons_index) return element_type is
-      t  : cons_index := s;
+   procedure integerp(e : out element_type; s : cons_index) is
+      t : cons_index := s;
       p : element_type;
    begin
       if s = NIL_CONS then
          error("integerp", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := first_value(t);
       if (p.kind = E_VALUE) and then (p.v.kind = V_INTEGER) then
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
       end if;
    end;
    --
-   function listp(s : cons_index) return element_type is
+--   function listp(s : cons_index) return element_type is
+   procedure listp(e : out element_type; s : cons_index) is
       p : element_type;
    begin
       if s = NIL_CONS then
          error("listp", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := cons_table(s).car;
       if isList(p) or (p = NIL_ELEM) then
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
       end if;
    end;
    --
-   function nullp(s : cons_index) return element_type is
-      t  : cons_index := s;
+--   function nullp(s : cons_index) return element_type is
+   procedure nullp(e : out element_type; s : cons_index) is
+      t : cons_index := s;
       p : element_type;
    begin
       if s = NIL_CONS then
          error("nullp", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := first_value(t);
       if p = NIL_ELEM then
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
       end if;
    end;
    --
-   function numberp(s : cons_index) return element_type is
-      t  : cons_index := s;
+   procedure numberp(e : out element_type; s : cons_index) is
+      t : cons_index := s;
       p : element_type;
    begin
       if s = NIL_CONS then
          error("numberp", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := first_value(t);
       if (p.kind = E_VALUE) and then (p.v.kind = V_INTEGER) then
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
       end if;
    end;
    --
-   function simple_string_p(s : cons_index) return element_type is
-      t  : cons_index := s;
+--   function simple_string_p(s : cons_index) return element_type is
+   procedure simple_string_p(e : out element_type; s : cons_index) is
+      t : cons_index := s;
       p : element_type;
    begin
       if s = NIL_CONS then
          error("simple_string_p", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := first_value(t);
       if (p.kind = E_VALUE) and then (p.v.kind = V_STRING) then
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
       end if;
    end;
    --
-   function stringp(s : cons_index) return element_type is
+--   function stringp(s : cons_index) return element_type is
+   procedure stringp(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p : element_type;
    begin
       if s = NIL_CONS then
          error("stringp", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := first_value(t);
       if (p.kind = E_VALUE) and then (p.v.kind = V_STRING) then
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
       end if;
    end;
    --
-   function symbolp(s : cons_index) return element_type is
+   procedure symbolp(e : out element_type; s : cons_index) is
       p : element_type;
    begin
       if s = NIL_CONS then
          error("symbolp", "Internal error, not passed a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p := cons_table(s).car;
       if p.kind = E_SYMBOL then
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
       end if;
    end;
    --
@@ -226,70 +251,22 @@ package body BBS.lisp.evaluate.pred is
    --  actually no reason to have all of these functions coded.  They can just
    --  use one function that returns NIL (False).
    --
-   function return_false(s : cons_index) return element_type is
+--   function return_false(s : cons_index) return element_type is
+   procedure return_false(e : out element_type; s : cons_index) is
       pragma Unreferenced (s);
    begin
-      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+      e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
    end;
    --
---   function rationalp(e : element_type) return element_type is
---      pragma Unreferenced (e);
---   begin
---      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
---   end;
-   --
---   function floatp(e : element_type) return element_type is
---      pragma Unreferenced (e);
---   begin
---      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
---   end;
-   --
---   function realp(e : element_type) return element_type is
---      pragma Unreferenced (e);
---   begin
---      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
---   end;
-   --
---   function complexp(e : element_type) return element_type is
---      pragma Unreferenced (e);
---   begin
---      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
---   end;
-   --
---   function bit_vector_p(e : element_type) return element_type is
---      pragma Unreferenced (e);
---   begin
---      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
---   end;
-   --
---   function vectorp(e : element_type) return element_type is
---      pragma Unreferenced (e);
---   begin
---      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
---   end;
-   --
---   function simple_vector_p(e : element_type) return element_type is
---      pragma Unreferenced (e);
---   begin
---      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
---   end;
-   --
---   function simple_bit_vector_p(e : element_type) return element_type is
---      pragma Unreferenced (e);
---   begin
---      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
---   end;
-   --
---   function arrayp(e : element_type) return element_type is
---      pragma Unreferenced (e);
---   begin
---      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
---   end;
-   --
---   function packagep(e : element_type) return element_type is
---      pragma Unreferenced (e);
---   begin
---      return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
---   end;
+--   procedure arrayp(e : out element_type; s : cons_index);
+--   procedure bit_vector_p(e : out element_type; s : cons_index);
+--   procedure complexp(e : out element_type; s : cons_index);
+--   procedure floatp(e : out element_type; s : cons_index);
+--   procedure rationalp(e : out element_type; s : cons_index);
+--   procedure realp(e : out element_type; s : cons_index);
+--   procedure packagep(e : out element_type; s : cons_index);
+--   procedure simple_vector_p(e : out element_type; s : cons_index);
+--   procedure simple_bit_vector_p(e : out element_type; s : cons_index);
+--   procedure vectorp(e : out element_type; s : cons_index);
    --
 end;

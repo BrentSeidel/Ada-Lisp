@@ -1,19 +1,22 @@
 with BBS.lisp.memory;
 package body BBS.lisp.evaluate.bool is
    --
-   function eval_not(s : cons_index) return element_type is
+--   function eval_not(s : cons_index) return element_type is
+   procedure eval_not(e : out element_type; s : cons_index) is
       p1 : element_type; --  Parameter
       s1 : cons_index := s;
       v : value;
    begin
       if s = NIL_CONS then
          error("eval_not", "Internal error.  Should have a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p1 := first_value(s1);
       if p1.kind = E_ERROR then
          error("eval_not", "Error reported evaluating parameter.");
-         return p1;
+         e := p1;
+         return;
       end if;
       if p1.kind = E_VALUE then
          v := p1.v;
@@ -21,17 +24,21 @@ package body BBS.lisp.evaluate.bool is
          error("eval_not", "Parameter does not evaluate to a value");
       end if;
       if v.kind = V_BOOLEAN then
-         return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => not v.b));
+         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => not v.b));
+         return;
       elsif v.kind = V_INTEGER then
-         return (kind => E_VALUE, v => (kind => V_INTEGER, i =>
-                                          uint32_to_int32(not int32_to_uint32(v.i))));
+         e := (kind => E_VALUE, v => (kind => V_INTEGER, i =>
+                                        uint32_to_int32(not int32_to_uint32(v.i))));
+         return;
       else
          error("eval_not", "Cannot perform NOT of parameter of type " & value_type'Image(v.kind));
-         return (kind => E_ERROR);
+         e :=  (kind => E_ERROR);
+         return;
       end if;
    end;
    --
-   function eval_and(s : cons_index) return element_type is
+--   function eval_and(s : cons_index) return element_type is
+   procedure eval_and(e : out element_type; s : cons_index) is
       accum_i : int32 := -1;
       accum_b : Boolean := True;
       int_op : Boolean;
@@ -69,7 +76,8 @@ package body BBS.lisp.evaluate.bool is
          temp := first_value(ptr);
          if accumulate(temp) = E_ERROR then
             error("eval_and", "Error processing parameter.");
-            return (kind => E_ERROR);
+            e := (kind => E_ERROR);
+            return;
          end if;
          if ptr > NIL_CONS then
             if (int_op and (accum_i /= 0)) or ((not int_op) and accum_b) then
@@ -77,7 +85,8 @@ package body BBS.lisp.evaluate.bool is
                   temp := first_value(ptr);
                   if accumulate(temp) = E_ERROR then
                      error("eval_and", "Error processing parameter.");
-                     return (kind => E_ERROR);
+                     e := (kind => E_ERROR);
+                     return;
                   end if;
                   --
                   --  Check for short circuiting operations
@@ -93,16 +102,18 @@ package body BBS.lisp.evaluate.bool is
          end if;
       else
          error("eval_and", "Internal error.  Should have a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       if int_op then
-         return (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum_i));
+         e := (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum_i));
       else
-         return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => accum_b));
+         e := (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => accum_b));
       end if;
    end;
    --
-   function eval_or(s : cons_index) return element_type is
+--   function eval_or(s : cons_index) return element_type is
+   procedure eval_or(e : out element_type; s : cons_index) is
       accum_i : int32 := 0;
       accum_b : Boolean := False;
       int_op : Boolean;
@@ -140,7 +151,8 @@ package body BBS.lisp.evaluate.bool is
          temp := first_value(ptr);
          if accumulate(temp) = E_ERROR then
             error("eval_ok", "Error processing parameter.");
-            return (kind => E_ERROR);
+            e := (kind => E_ERROR);
+            return;
          end if;
          if ptr > NIL_CONS then
             if (int_op and (accum_i /= -1)) or ((not int_op) and (not accum_b)) then
@@ -148,7 +160,8 @@ package body BBS.lisp.evaluate.bool is
                   temp := first_value(ptr);
                   if accumulate(temp) = E_ERROR then
                      error("eval_ok", "Error processing parameter.");
-                     return (kind => E_ERROR);
+                     e := (kind => E_ERROR);
+                     return;
                   end if;
                   --
                   --  Check for short circuiting operations
@@ -164,12 +177,13 @@ package body BBS.lisp.evaluate.bool is
          end if;
       else
          error("eval_or", "Internal error.  Should have a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       if int_op then
-         return (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum_i));
+         e := (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum_i));
       else
-         return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => accum_b));
+         e := (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => accum_b));
       end if;
    end;
    --

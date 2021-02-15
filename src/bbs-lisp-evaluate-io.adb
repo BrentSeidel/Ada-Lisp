@@ -3,7 +3,8 @@ package body BBS.lisp.evaluate.io is
    --
    --  Print stuff
    --
-   function print(s : cons_index) return element_type is
+--   function print(s : cons_index) return element_type is
+   procedure print(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       car : element_type;
    begin
@@ -11,19 +12,19 @@ package body BBS.lisp.evaluate.io is
          car := first_value(t);
          print(car, True, False);
       end loop;
-      return NIL_ELEM;
+      e := NIL_ELEM;
    end;
    --
-   function fresh_line(s : cons_index) return element_type is
+   procedure fresh_line(e : out element_type; s : cons_index) is
       pragma Unreferenced (s);
    begin
       if not first_char_flag then
          New_Line;
       end if;
-      return NIL_ELEM;
+      e := NIL_ELEM;
    end;
    --
-   function read_line(s : cons_index) return element_type is
+   procedure read_line(e : out element_type; s : cons_index) is
       pragma Unreferenced (s);
       buff : String(1 .. 256);
       size : Natural;
@@ -53,21 +54,22 @@ package body BBS.lisp.evaluate.io is
                   string_table(str).next := NIL_STR;
                else
                   bbs.lisp.memory.deref(first);
-                  return NIL_ELEM;
+                  e := NIL_ELEM;
+                  return;
                end if;
             end if;
             ptr := ptr + 1;
          end loop;
       end if;
-      ptr := ptr + 1;
-      return (kind => E_VALUE, v => (kind => V_STRING, s => first));
+--      ptr := ptr + 1;
+      e := (kind => E_VALUE, v => (kind => V_STRING, s => first));
    end;
    --
-   function terpri(s : cons_index) return element_type is
+   procedure terpri(e : out element_type; s : cons_index) is
       pragma Unreferenced (s);
    begin
       New_Line;
-      return NIL_ELEM;
+      e := NIL_ELEM;
    end;
    --
 end;

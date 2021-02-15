@@ -64,4 +64,32 @@ package body BBS.lisp.evaluate.math is
       return (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum));
    end;
    --
+   --
+   --  Perform addition
+   --
+   procedure add(e : out element_type; s : cons_index) is
+   begin
+      e := eval_math(s, PLUS);
+   end;
+   --
+   --  Perform subtraction
+   --
+   procedure sub(e : out element_type; s : cons_index) is
+   begin
+      e := eval_math(s, MINUS);
+   end;
+   --
+   --  Perform multiplication
+   --
+   procedure mul(e : out element_type; s : cons_index) is
+   begin
+      e := eval_math(s, MUL);
+   end;
+   --
+   --  Perform division
+   --
+   procedure div(e : out element_type; s : cons_index) is
+   begin
+      e := eval_math(s, DIV);
+   end;
 end;

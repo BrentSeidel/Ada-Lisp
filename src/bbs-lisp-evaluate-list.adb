@@ -4,40 +4,45 @@ package body BBS.lisp.evaluate.list is
    --
    --  Create a list out of two elements.
    --
-   function cons(s : cons_index) return element_type is
+--   function cons(s : cons_index) return element_type is
+   procedure cons(e : out element_type; s : cons_index) is
       s1 : cons_index := s;
       p1 : element_type;  --  First parameter
       p2 : element_type;  --  Second parameter
    begin
       if s = NIL_CONS then
          error("cons(e", "Internal error.  Should have a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p1 := first_value(s1);
       if p1.kind = E_ERROR then
          error("cons", "Error reported evaluating first parameter.");
-         return p1;
+         e := p1;
+         return;
       end if;
       p2 := first_value(s1);
       if p2.kind = E_ERROR then
          error("cons", "Error reported evaluating second parameter.");
-         return p2;
+         e := p2;
+         return;
       end if;
       if BBS.lisp.memory.alloc(s1) then
          cons_table(s1).car := p1;
          cons_table(s1).cdr := p2;
          BBS.lisp.memory.ref(p1);
          BBS.lisp.memory.ref(p2);
-         return (kind => E_VALUE, v => (kind => V_LIST, l => s));
+         e := (kind => E_VALUE, v => (kind => V_LIST, l => s));
       else
          error("cons", "Unable to allocate cons cell");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
       end if;
    end;
    --
    --  Return the first entry in a list (it may be another list).
    --
-   function car(s : cons_index) return element_type is
+--   function car(s : cons_index) return element_type is
+   procedure car(e : out element_type; s : cons_index) is
       rest : cons_index := s;
       first : element_type;
       temp : element_type;
@@ -48,14 +53,16 @@ package body BBS.lisp.evaluate.list is
          s1 := getList(first);
          temp := cons_table(s1).car;
          BBS.lisp.memory.ref(temp);
-         return temp;
+         e := temp;
+      else
+         e := first;
       end if;
-      return first;
    end;
    --
    --  Return the rest of a list
    --
-   function cdr(s : cons_index) return element_type is
+--   function cdr(s : cons_index) return element_type is
+   procedure cdr(e : out element_type; s : cons_index) is
       rest : cons_index := s;
       first : element_type;
       temp : element_type;
@@ -66,24 +73,27 @@ package body BBS.lisp.evaluate.list is
          s1 := getList(first);
          temp := cons_table(s1).cdr;
          BBS.lisp.memory.ref(temp);
-         return temp;
+         e := temp;
+      else
+         e := NIL_ELEM;
       end if;
-      return NIL_ELEM;
    end;
    --
    --  Create a list verbatum from the parameter list
    --
-   function quote(s : cons_index) return element_type is
-      e : constant element_type := (kind => E_CONS, ps => s);
+--   function quote(s : cons_index) return element_type is
+   procedure quote(e : out element_type; s : cons_index) is
+      t : constant element_type := (kind => E_CONS, ps => s);
    begin
-      bbs.lisp.memory.ref(e);
-      return e;
+      bbs.lisp.memory.ref(t);
+      e := t;
    end;
    --
    --  Create a list by evaluating the parameters, similar to quote, but quote
    --  does not evaluate the parameters.
    --
-   function list(s : cons_index) return element_type is
+--   function list(s : cons_index) return element_type is
+   procedure list(e : out element_type; s : cons_index) is
       first : element_type;
       rest : cons_index := s;
       head : cons_index;
@@ -95,7 +105,8 @@ package body BBS.lisp.evaluate.list is
             first := first_value(rest);
             if first.kind = E_ERROR then
                error("list", "Parameter returned an error");
-               return first;
+               e := first;
+               return;
             end if;
             BBS.lisp.memory.ref(first);
             cons_table(s1).car := first;
@@ -103,10 +114,12 @@ package body BBS.lisp.evaluate.list is
             tail := s1;
          else
             error("list", "Unable to allocate cons cell.");
-            return (kind => E_ERROR);
+            e := (kind => E_ERROR);
+            return;
          end if;
       else
-         return NIL_ELEM;
+         e := NIL_ELEM;
+         return;
       end if;
       while rest > NIL_CONS loop
          if BBS.lisp.memory.alloc(s1) then
@@ -114,7 +127,8 @@ package body BBS.lisp.evaluate.list is
             if first.kind = E_ERROR then
                BBS.lisp.memory.deref(head);
                error("list", "Parameter returned an error");
-               return first;
+               e := first;
+               return;
             end if;
             cons_table(tail).cdr := (kind => E_VALUE, v => (kind => V_LIST, l => s1));
             tail := s1;
@@ -123,18 +137,20 @@ package body BBS.lisp.evaluate.list is
          else
             BBS.lisp.memory.deref(head);
             error("list", "Unable to allocate cons cell");
-            return (kind => E_ERROR);
+            e := (kind => E_ERROR);
+            return;
          end if;
       end loop;
-      return (kind => E_VALUE, v => (kind => V_LIST, l => head));
+      e := (kind => E_VALUE, v => (kind => V_LIST, l => head));
    end;
    --
    --  Append one list to another.
    --
-   function append(s : cons_index) return element_type is
+--   function append(s : cons_index) return element_type is
+   procedure append(e : out element_type; s : cons_index) is
       pragma Unreferenced (s);
    begin
-      return (kind => E_ERROR);
+      e := (kind => E_ERROR);
    end;
 
    --

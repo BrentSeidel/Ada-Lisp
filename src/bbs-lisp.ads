@@ -148,7 +148,8 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --
    --  Type for access to function that implement lisp operations.
    --
-   type execute_function is access function(s : cons_index) return element_type;
+--   type execute_function is access function(s : cons_index) return element_type;
+   type execute_function is access procedure(e : out element_type; s : cons_index);
    --
    --  Type for access to functions that implement lisp special operations
    --

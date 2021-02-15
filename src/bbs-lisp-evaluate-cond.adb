@@ -128,7 +128,37 @@ package body BBS.lisp.evaluate.cond is
       end if;
    end;
    --
-   function eval_if(s : cons_index) return element_type is
+   --  Compare two items for equality.
+   --
+   procedure eq(e : out element_type; s : cons_index) is
+   begin
+      e := eval_comp(s, SYM_EQ);
+   end;
+   --
+   --  Compare two items for not equality.
+   --
+   procedure ne(e : out element_type; s : cons_index) is
+   begin
+      e := eval_comp(s, SYM_NE);
+   end;
+   --
+   --  Is first item less than the second item?
+   --
+   procedure lt(e : out element_type; s : cons_index) is
+   begin
+      e := eval_comp(s, SYM_LT);
+   end;
+   --
+   --  Is the first item greater than the second item?
+   --
+   procedure gt(e : out element_type; s : cons_index) is
+   begin
+      e := eval_comp(s, SYM_GT);
+   end;
+   --
+   --  Perform an IF operation.
+   --
+   procedure eval_if(e : out element_type; s : cons_index) is
       t  : element_type;
       s1 : cons_index := s;
       p1 : element_type; --  Condition
@@ -137,12 +167,14 @@ package body BBS.lisp.evaluate.cond is
    begin
       if s = cons_index'First then
          error("eval_if", "Internal error.  Should have a list.");
-         return (kind => E_ERROR);
+         e := (kind => E_ERROR);
+         return;
       end if;
       p1 := first_value(s1);
       if p1.kind = E_ERROR then
          error("eval_if", "Condition reported an error.");
-         return p1;
+         e := p1;
+         return;
       end if;
       if s1 > NIL_CONS then
          p2 := cons_table(s1).car;
@@ -182,6 +214,6 @@ package body BBS.lisp.evaluate.cond is
          end if;
       end if;
       BBS.lisp.memory.deref(p1);
-      return t;
+      e := t;
    end;
 end;

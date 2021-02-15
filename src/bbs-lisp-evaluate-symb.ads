@@ -6,11 +6,13 @@ package BBS.lisp.evaluate.symb is
    --    boolean -> integer (NIL -> 0, T -> 1)
    --    integer -> boolean (0 -> NIL, /= 0 -> T)
    --
-   function coerce(s : cons_index) return element_type;
+--   function coerce(s : cons_index) return element_type;
+   procedure coerce(e : out element_type; s : cons_index);
    --
    --  Concatenate two strings or lists.
    --
-   function concatenate(s : cons_index) return element_type;
+--   function concatenate(s : cons_index) return element_type;
+   procedure concatenate(e : out element_type; s : cons_index);
 
 private
    --
