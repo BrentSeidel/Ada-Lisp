@@ -3,7 +3,6 @@ package body BBS.lisp.evaluate.io is
    --
    --  Print stuff
    --
---   function print(s : cons_index) return element_type is
    procedure print(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       car : element_type;
@@ -61,7 +60,6 @@ package body BBS.lisp.evaluate.io is
             ptr := ptr + 1;
          end loop;
       end if;
---      ptr := ptr + 1;
       e := (kind => E_VALUE, v => (kind => V_STRING, s => first));
    end;
    --

@@ -1,7 +1,6 @@
 with BBS.lisp.memory;
 package body BBS.lisp.evaluate.bool is
    --
---   function eval_not(s : cons_index) return element_type is
    procedure eval_not(e : out element_type; s : cons_index) is
       p1 : element_type; --  Parameter
       s1 : cons_index := s;
@@ -25,27 +24,23 @@ package body BBS.lisp.evaluate.bool is
       end if;
       if v.kind = V_BOOLEAN then
          e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => not v.b));
-         return;
       elsif v.kind = V_INTEGER then
          e := (kind => E_VALUE, v => (kind => V_INTEGER, i =>
                                         uint32_to_int32(not int32_to_uint32(v.i))));
-         return;
       else
          error("eval_not", "Cannot perform NOT of parameter of type " & value_type'Image(v.kind));
          e :=  (kind => E_ERROR);
-         return;
       end if;
    end;
    --
---   function eval_and(s : cons_index) return element_type is
    procedure eval_and(e : out element_type; s : cons_index) is
       accum_i : int32 := -1;
       accum_b : Boolean := True;
-      int_op : Boolean;
+      int_op : Boolean := False;
       ptr : cons_index;
       temp : element_type;
 
-      function accumulate(t : element_type) return ptr_type is
+      function accumulate(t : element_type; first : Boolean) return ptr_type is
          v : value;
       begin
          if t.kind = E_VALUE then
@@ -55,11 +50,11 @@ package body BBS.lisp.evaluate.bool is
             BBS.lisp.memory.deref(temp);
             return E_ERROR;
          end if;
-         if v.kind = V_INTEGER then
+         if (v.kind = V_INTEGER and first) or (v.kind = V_INTEGER and int_op) then
             accum_i := uint32_to_int32(int32_to_uint32(accum_i) and
                                                         int32_to_uint32(v.i));
             int_op := True;
-         elsif v.kind = V_BOOLEAN then
+         elsif (v.kind = V_BOOLEAN and first) or (v.kind = V_BOOLEAN and not int_op) then
             accum_b := accum_b and v.b;
             int_op := False;
          else
@@ -74,7 +69,7 @@ package body BBS.lisp.evaluate.bool is
       if s > NIL_CONS then
          ptr := s;
          temp := first_value(ptr);
-         if accumulate(temp) = E_ERROR then
+         if accumulate(temp, True) = E_ERROR then
             error("eval_and", "Error processing parameter.");
             e := (kind => E_ERROR);
             return;
@@ -83,7 +78,7 @@ package body BBS.lisp.evaluate.bool is
             if (int_op and (accum_i /= 0)) or ((not int_op) and accum_b) then
                loop
                   temp := first_value(ptr);
-                  if accumulate(temp) = E_ERROR then
+                  if accumulate(temp, False) = E_ERROR then
                      error("eval_and", "Error processing parameter.");
                      e := (kind => E_ERROR);
                      return;
@@ -112,15 +107,14 @@ package body BBS.lisp.evaluate.bool is
       end if;
    end;
    --
---   function eval_or(s : cons_index) return element_type is
    procedure eval_or(e : out element_type; s : cons_index) is
       accum_i : int32 := 0;
       accum_b : Boolean := False;
-      int_op : Boolean;
+      int_op : Boolean := False;
       ptr : cons_index;
       temp : element_type;
 
-      function accumulate(t : element_type) return ptr_type is
+      function accumulate(t : element_type; first : Boolean) return ptr_type is
          v : value;
       begin
          if t.kind = E_VALUE then
@@ -130,11 +124,11 @@ package body BBS.lisp.evaluate.bool is
             BBS.lisp.memory.deref(temp);
             return E_ERROR;
          end if;
-         if v.kind = V_INTEGER then
+         if (v.kind = V_INTEGER and first) or (v.kind = V_INTEGER and int_op) then
             accum_i := uint32_to_int32(int32_to_uint32(accum_i) or
                                                         int32_to_uint32(v.i));
             int_op := True;
-         elsif v.kind = V_BOOLEAN then
+         elsif (v.kind = V_BOOLEAN and first) or (v.kind = V_BOOLEAN and not int_op) then
             accum_b := accum_b or v.b;
             int_op := False;
          else
@@ -149,8 +143,8 @@ package body BBS.lisp.evaluate.bool is
       if s > NIL_CONS then
          ptr := s;
          temp := first_value(ptr);
-         if accumulate(temp) = E_ERROR then
-            error("eval_ok", "Error processing parameter.");
+         if accumulate(temp, True) = E_ERROR then
+            error("eval_or", "Error processing parameter.");
             e := (kind => E_ERROR);
             return;
          end if;
@@ -158,8 +152,8 @@ package body BBS.lisp.evaluate.bool is
             if (int_op and (accum_i /= -1)) or ((not int_op) and (not accum_b)) then
                loop
                   temp := first_value(ptr);
-                  if accumulate(temp) = E_ERROR then
-                     error("eval_ok", "Error processing parameter.");
+                  if accumulate(temp, False) = E_ERROR then
+                     error("eval_or", "Error processing parameter.");
                      e := (kind => E_ERROR);
                      return;
                   end if;

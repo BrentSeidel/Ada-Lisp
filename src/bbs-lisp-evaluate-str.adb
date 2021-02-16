@@ -6,7 +6,6 @@ package body BBS.lisp.evaluate.str is
    --  Return the length of a string or list.  Atoms will get a value of 1.
    --  A nil pointer returns a length of 0.
    --
---   function length(s : cons_index) return element_type is
    procedure length(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p1 : element_type; --  Parameter
@@ -65,7 +64,6 @@ package body BBS.lisp.evaluate.str is
    --
    --  Return a specified character from a string.
    --
---   function char(s : cons_index) return element_type is
    procedure char(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p1 : element_type;  --  First parameter (string)
@@ -136,7 +134,6 @@ package body BBS.lisp.evaluate.str is
    --
    --  Parse a string as an integer and return the integer value.
    --
---   function parse_integer(s : cons_index) return element_type is
    procedure parse_integer(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p1 : element_type; --  Parameter
@@ -191,7 +188,6 @@ package body BBS.lisp.evaluate.str is
    --
    --  Return a substring of the original string
    --
---   function subseq(s : cons_index) return element_type is
    procedure subseq(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p1 : element_type;  --  Parameter 1 (string)
@@ -428,7 +424,6 @@ package body BBS.lisp.evaluate.str is
    --
    --  Convert a string to upper case
    --
---   function string_upcase(s : cons_index) return element_type is
    procedure string_upcase(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       t1 : element_type;
@@ -474,7 +469,6 @@ package body BBS.lisp.evaluate.str is
    --
    --  Convert a string to lower case
    --
---   function string_downcase(s : cons_index) return element_type is
    procedure string_downcase(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       t1 : element_type;

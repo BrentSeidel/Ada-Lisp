@@ -33,19 +33,20 @@
 ;
 ;  Test if and booleans
 ;
+(print "===> Testing booleans")
+(terpri)
 (defun test-bool ()
   (if t (pass "T literal works")
         (fail "T literal does not work"))
   (if nil (fail "NIL literal does not work")
           (pass "NIL literal works")))
-;
-(print "===> Testing booleans")
-(terpri)
 (test-bool)
 (setq test-bool 0)
 ;
 ;  Test integer comparisons
 ;
+(print "===> Testing integer comparisons")
+(terpri)
 (defun test-int-cmp ()
   (if (= 0 0) (pass "0 = 0") (fail "0 = 0"))
   (if (< 0 0) (fail "0 < 0") (pass "0 < 0"))
@@ -63,14 +64,13 @@
   (if (< -2 -1) (pass "-2 < -1") (fail "-2 < -1"))
   (if (> -2 -1) (fail "-2 > -1") (pass "-2 > -1"))
   (if (/= -2 -1) (pass "-2 /= -1") (fail "-2 /= -1")))
-;
-(print "===> Testing integer comparisons")
-(terpri)
 (test-int-cmp)
 (setq test-int-cmp 0)
 ;
 ;  Test string comparisons
 ;
+(print "===> Testing string comparisons")
+(terpri)
 (defun test-str-cmp ()
   (if (= "A" "A") (pass "A = A") (fail "A = A"))
   (if (< "A" "A") (fail "A < A") (pass "A < A"))
@@ -84,14 +84,13 @@
   (if (< "A" "AA") (pass "A < AA") (fail "A < AA"))
   (if (> "A" "AA") (fail "A > AA") (pass "A > AA"))
   (if (/= "A" "AA") (pass "A /= AA") (fail "A /= AA")))
-;
-(print "===> Testing string comparisons")
-(terpri)
 (test-str-cmp)
 (setq test-str-cmp 0)
 ;
 ;  Test basic math functions
 ;
+(print "===> Testing basic math operations")
+(terpri)
 (defun test-basic-math ()
   (verify-equal 6 (+ 1 2 3) "Add positive")
   (verify-equal 0 (+ 1 2 -3) "Add mixed")
@@ -108,13 +107,13 @@
   (verify-equal 8 (/ -24 -3) "Div negative")
   (verify-equal 4 (/ 24 5) "Div inexact"))
 ;
-(print "===> Testing basic math operations")
-(terpri)
 (test-basic-math)
 (setq test-basic-math 0)
 ;
 ;  Test global variables with setq
 ;
+(print "===> Testing globals")
+(terpri)
 (defun test-global ()
   (setq **GLOB** 1)
   (verify-equal 1 **GLOB** "Set global variable")
@@ -122,14 +121,13 @@
   (verify-equal 2 **GLOB** "Increment global")
   (setq **GLOB** "Hello")
   (verify-equal "Hello" **GLOB** "Set global to string"))
-;
-(print "===> Testing globals")
-(terpri)
 (test-global)
 (setq test-global 0)
 ;
 ;  Test local variables with setq
 ;
+(print "===> Testing let")
+(terpri)
 (defun test-let ()
   (let ((a (+ 1 2)) (b 4) (c 0))
     (verify-equal 3 a "A is 3")
@@ -146,14 +144,13 @@
       (setq a 20)
       (verify-equal 20 a "A is 20"))
     (verify-equal 4 a "A is 4")))
-;
-(print "===> Testing let")
-(terpri)
 (test-let)
 (setq test-let 0)
 ;
 ;  Test dowhile operation
 ;
+(print "===> Testing dowhile")
+(terpri)
 (defun test-dowhile ()
   (let ((count 0) (accum 0))
     (dowhile (< count 10)
@@ -163,14 +160,13 @@
       (terpri))
     (verify-equal 10 count "Count is 10")
     (verify-equal 55 accum "Accumulator is 55")))
-;
-(print "===> Testing dowhile")
-(terpri)
 (test-dowhile)
 (setq test-dowhile 0)
 ;
 ;  Test dotimes operation
 ;
+(print "===> Testing dotimes")
+(terpri)
 (defun test-dotimes ()
   (let ((accum 0) result)
     (setq result (dotimes (n 10 20)
@@ -179,14 +175,13 @@
       (setq accum (+ accum n))))
     (verify-equal 20 result "Result returned")
     (verify-equal 45 accum "Accumulator is 45")))
-;
-(print "===> Testing dotimes")
-(terpri)
 (test-dotimes)
 (setq test-dotimes 0)
 ;
 ;  Test logical operations
 ;
+(print "===> Testing logic operations")
+(terpri)
 (defun test-logic ()
   (verify-equal NIL (not T) "T -> NIL")
   (verify-equal T (not NIL) "NIL -> T")
@@ -205,14 +200,13 @@
   (verify-equal 7 (or 1 2 4) "Produces 7")
   (verify-equal #xF0F0 (or #xF000 #xF0) "Produces #xF0F0")
   (verify-equal T (not (and T NIL)) "T nand NIL -> T"))
-;
-(print "===> Testing logic operations")
-(terpri)
 (test-logic)
 (setq test-logic 0)
 ;
 ;  Test character data type and operations
 ;
+(print "===> Testing characters")
+(terpri)
 (defun test-char ()
   (if (= #\A #\A) (pass "A = A") (fail "A /= A"))
   (if (= #\A #\B) (fail "A = B") (pass "A /= B"))
@@ -226,14 +220,13 @@
   (verify-equal (code-char 66) #\B "Character code 66 is B")
   (verify-equal (char-downcase #\A) #\a "Lower case A is a")
   (verify-equal (char-upcase #\a) #\A "Upper case a is A"))
-;
-(print "===> Testing characters")
-(terpri)
 (test-char)
 (setq test-char 0)
 ;
 ;  Test string operations
 ;
+(print "===> Testing strings")
+(terpri)
 (defun test-str ()
   (verify-equal 5 (length "Hello") "Length of hello")
   (verify-equal 26 (length "abcdefghijklmnopqrstuvwxyz") "Length of alphabet")
@@ -249,14 +242,13 @@
   (verify-equal "hello" (string-downcase "HELLO") "Lower case text")
   (verify-equal "-bye" (subseq "Good-bye" 4) "Subsequence with default end")
   (verify-equal "d-b" (subseq "Good-bye" 3 6) "Subsequence with specified end"))
-;
-(print "===> Testing strings")
-(terpri)
 (test-str)
 (setq test-str 0)
 ;
 ;  Test predicates
 ;
+(print "===> Testing predicates")
+(terpri)
 (defun test-pred ()
   (if (arrayp (1 3 4)) (fail "arrayp") (pass "arrayp"))
   (if (bit-vector-p (1 2 3)) (fail "bit-vector-p") (pass "bit-vector-p"))
@@ -295,14 +287,13 @@
   (if (stringp #\C) (fail "simple-string-p is true") (pass "simple-string-p is false"))
   (if (symbolp car) (pass "symbolp is true") (fail "symbolp is false"))
   (if (symbolp #\@) (fail "symbolp is true") (pass "symbolp is true")))
-;
-(print "===> Testing predicates")
-(terpri)
 (test-pred)
 (setq test-pred 0)
 ;
 ;  Test coerce and quoted symbols
 ;
+(print "===> Testing coercion")
+(terpri)
 (defun test-coerce ()
   (verify-equal 1 (coerce t 'integer) "Boolean to integer")
   (verify-equal 0 (coerce nil 'integer) "Boolean to integer")
@@ -312,22 +303,68 @@
   (verify-equal "@" (coerce #\@ 'string) "Character to string")
   (verify-equal T (coerce 1 'boolean) "Integer to boolean")
   (verify-equal NIL (coerce 0 'boolean) "Integer to boolean"))
-;
-(print "===> Testing coercion")
-(terpri)
 (test-coerce)
 (setq test-coerce 0)
 ;
 ;  Test concatenation of strings.  Lists can't be compared so
 ;  they aren't tested.
 ;
-(defun test-concatenate ()
-  (verify-equal "Hello world!" (concatenate 'string "Hello" " " "world" "!") "String concatenation"))
-;
 (print "==> Testing concatenation")
 (terpri)
+(defun test-concatenate ()
+  (verify-equal "Hello world!" (concatenate 'string "Hello" " " "world" "!") "String concatenation"))
 (test-concatenate)
 (setq test-concatenate 0)
+;
+;  Test error conditions.  There are lots so they will be broken down into smaller
+;  groups.
+;
+(print "==> Testing comparison error conditions")
+(terpri)
+(defun test-cmp-err ()
+  (verify-equal T (errorp (=)) "No parameters to equal")
+  (verify-equal T (errorp (= 1)) "One parameters to equal")
+  (verify-equal T (errorp (= 1 "A")) "Mismatched parameters to equal")
+  (verify-equal T (errorp (/=)) "No parameters to not-equal")
+  (verify-equal T (errorp (/= 1)) "One parameters to not-equal")
+  (verify-equal T (errorp (/= 1 "A")) "Mismatched parameters to not-equal")
+  (verify-equal T (errorp (<)) "No parameters to less-than")
+  (verify-equal T (errorp (< 1)) "One parameters to less-than")
+  (verify-equal T (errorp (< 1 "A")) "Mismatched parameters to less-than")
+  (verify-equal T (errorp (>)) "No parameters to greater-than")
+  (verify-equal T (errorp (> 1)) "One parameters to greater-than")
+  (verify-equal T (errorp (> 1 "A")) "Mismatched parameters to greater-than"))
+(test-cmp-err)
+(setq test-cmp-err 0)
+;
+(print "==> Testing math error conditions")
+(terpri)
+(defun test-math-err ()
+  (verify-equal T (errorp (+)) "No parameters to addition")
+  (verify-equal T (errorp (+ 1 "A")) "Mismatched parameters to addition")
+  (verify-equal T (errorp (-)) "No parameters to subtraction")
+  (verify-equal T (errorp (- 1 "A")) "Mismatched parameters to subtraction")
+  (verify-equal T (errorp (/)) "No parameters to division")
+  (verify-equal T (errorp (/ 1 "A")) "Mismatched parameters to division")
+  (verify-equal T (errorp (*)) "No parameters to multiplication")
+  (verify-equal T (errorp (* 1 "A")) "Mismatched parameters to multiplication"))
+(test-math-err)
+(setq test-math-err 0)
+;
+(print "==> Testing logical operation error conditions")
+(terpri)
+(defun test-log-err ()
+  (verify-equal T (errorp (NOT)) "No parameter to NOT")
+  (verify-equal T (errorp (NOT "A")) "Invalid parameter type to NOT")
+  (verify-equal T (errorp (AND)) "No parameter to AND")
+  (verify-equal T (errorp (AND "A")) "Invalid parameter type to AND")
+  (verify-equal T (errorp (AND T 1)) "Mixed parameter types to AND")
+  (verify-equal T (errorp (OR)) "No parameter to OR")
+  (verify-equal T (errorp (OR "A")) "Invalid parameter type to OR")
+  (verify-equal T (errorp (OR NIL 1)) "Mixed parameter types to OR")
+)
+(test-log-err)
+(setq test-log-err 0)
 ;
 ;(dump)
 (exit)

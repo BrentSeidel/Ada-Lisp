@@ -5,7 +5,6 @@ package body BBS.lisp.evaluate.misc is
    --  Turn display of messages on or off depending on the boolean value
    --  passed as a parameter.
    --
---   function msg(s : cons_index) return element_type is
    procedure msg(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p1 : element_type; --  Parameter

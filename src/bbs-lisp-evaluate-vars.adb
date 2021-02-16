@@ -121,12 +121,11 @@ package body BBS.lisp.evaluate.vars is
                                        pv => p2, str => symb_table(symb).str);
                end if;
                e := p2;
-               return;
             else
                error("setq", "Not enough arguments.");
                e := (kind => E_ERROR);
-               return;
             end if;
+            return;
       end case;
       e := NIL_ELEM;
    end;

@@ -4,7 +4,6 @@ package body BBS.lisp.evaluate.list is
    --
    --  Create a list out of two elements.
    --
---   function cons(s : cons_index) return element_type is
    procedure cons(e : out element_type; s : cons_index) is
       s1 : cons_index := s;
       p1 : element_type;  --  First parameter
@@ -41,7 +40,6 @@ package body BBS.lisp.evaluate.list is
    --
    --  Return the first entry in a list (it may be another list).
    --
---   function car(s : cons_index) return element_type is
    procedure car(e : out element_type; s : cons_index) is
       rest : cons_index := s;
       first : element_type;
@@ -61,7 +59,6 @@ package body BBS.lisp.evaluate.list is
    --
    --  Return the rest of a list
    --
---   function cdr(s : cons_index) return element_type is
    procedure cdr(e : out element_type; s : cons_index) is
       rest : cons_index := s;
       first : element_type;
@@ -81,7 +78,6 @@ package body BBS.lisp.evaluate.list is
    --
    --  Create a list verbatum from the parameter list
    --
---   function quote(s : cons_index) return element_type is
    procedure quote(e : out element_type; s : cons_index) is
       t : constant element_type := (kind => E_CONS, ps => s);
    begin
@@ -92,7 +88,6 @@ package body BBS.lisp.evaluate.list is
    --  Create a list by evaluating the parameters, similar to quote, but quote
    --  does not evaluate the parameters.
    --
---   function list(s : cons_index) return element_type is
    procedure list(e : out element_type; s : cons_index) is
       first : element_type;
       rest : cons_index := s;
@@ -146,7 +141,6 @@ package body BBS.lisp.evaluate.list is
    --
    --  Append one list to another.
    --
---   function append(s : cons_index) return element_type is
    procedure append(e : out element_type; s : cons_index) is
       pragma Unreferenced (s);
    begin

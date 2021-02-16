@@ -32,7 +32,6 @@ package body BBS.lisp.evaluate.symb is
    --
    --  (coerce <object> <result type>)
    --
---   function coerce(s : cons_index) return element_type is
    procedure coerce(e : out element_type; s : cons_index) is
       s1 : cons_index := s;
       t1 : element_type;
@@ -199,7 +198,6 @@ package body BBS.lisp.evaluate.symb is
       e := (kind => E_ERROR);
    end;
    --
---   function concatenate(s : cons_index) return element_type is
    procedure concatenate(e : out element_type; s : cons_index) is
       s1 : cons_index := s;
       t1 : element_type := NIL_ELEM;

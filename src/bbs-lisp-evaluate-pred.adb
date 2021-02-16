@@ -8,7 +8,6 @@ package body BBS.lisp.evaluate.pred is
    --
    --  These return true of false depending on the type of data passed.
    --
---   function atomp(s : cons_index) return element_type is
    procedure atomp(e : out element_type; s : cons_index) is
       p : element_type;
    begin
@@ -25,7 +24,6 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
---   function characterp(s : cons_index) return element_type is
    procedure characterp(e : out element_type; s : cons_index) is
       t : cons_index := s;
       p : element_type;
@@ -43,7 +41,6 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
---   function compiled_function_p(s : cons_index) return element_type is
    procedure compiled_function_p(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p : element_type;
@@ -64,7 +61,6 @@ package body BBS.lisp.evaluate.pred is
       e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
    end;
    --
---   function consp(s : cons_index) return element_type is
    procedure consp(e : out element_type; s : cons_index) is
       p : element_type;
    begin
@@ -98,7 +94,6 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
---   function functionp(s : cons_index) return element_type is
    procedure functionp(e : out element_type; s : cons_index)is
       t : cons_index := s;
       p : element_type;
@@ -143,7 +138,6 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
---   function listp(s : cons_index) return element_type is
    procedure listp(e : out element_type; s : cons_index) is
       p : element_type;
    begin
@@ -160,7 +154,6 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
---   function nullp(s : cons_index) return element_type is
    procedure nullp(e : out element_type; s : cons_index) is
       t : cons_index := s;
       p : element_type;
@@ -195,7 +188,6 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
---   function simple_string_p(s : cons_index) return element_type is
    procedure simple_string_p(e : out element_type; s : cons_index) is
       t : cons_index := s;
       p : element_type;
@@ -213,7 +205,6 @@ package body BBS.lisp.evaluate.pred is
       end if;
    end;
    --
---   function stringp(s : cons_index) return element_type is
    procedure stringp(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p : element_type;
@@ -251,7 +242,6 @@ package body BBS.lisp.evaluate.pred is
    --  actually no reason to have all of these functions coded.  They can just
    --  use one function that returns NIL (False).
    --
---   function return_false(s : cons_index) return element_type is
    procedure return_false(e : out element_type; s : cons_index) is
       pragma Unreferenced (s);
    begin

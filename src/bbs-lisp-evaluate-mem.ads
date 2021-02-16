@@ -14,9 +14,6 @@ is
    --  Read memory locations returning 8, 16, or 32 bit elements from the
    --  location.  Some systems may throw exceptions for unaligned access.
    --
---   function peek8(s : cons_index) return element_type;
---   function peek16(s : cons_index) return element_type;
---   function peek32(s : cons_index) return element_type;
    procedure peek8(e : out element_type; s : cons_index);
    procedure peek16(e : out element_type; s : cons_index);
    procedure peek32(e : out element_type; s : cons_index);
@@ -24,9 +21,6 @@ is
    --  Write 8, 16, or 32 bit elements to memory locations.  Some systems may
    --  throw exceptions for unaligned access.
    --
---   function poke8(s : cons_index) return element_type;
---   function poke16(s : cons_index) return element_type;
---   function poke32(s : cons_index) return element_type;
    procedure poke8(e : out element_type; s : cons_index);
    procedure poke16(e : out element_type; s : cons_index);
    procedure poke32(e : out element_type; s : cons_index);

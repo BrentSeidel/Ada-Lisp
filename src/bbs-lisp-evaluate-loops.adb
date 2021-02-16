@@ -7,7 +7,6 @@ package body BBS.lisp.evaluate.loops is
    --  condition evaluates to true, the rest of the items in the list are
    --  evaluated.  This is repeated until the condition evaluates to false.
    --
---   function dowhile(s : cons_index) return element_type is
    procedure dowhile(e : out element_type; s : cons_index) is
       cond : element_type; --  Condition to evaluate
       list : element_type; --  List of operations to execute
@@ -86,7 +85,6 @@ package body BBS.lisp.evaluate.loops is
       case p is
          when PH_QUERY =>
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
-            return;
          when PH_PARSE_BEGIN =>
             BBS.lisp.stack.start_frame;
             if s > NIL_CONS then
@@ -165,11 +163,9 @@ package body BBS.lisp.evaluate.loops is
                cons_table(limits.ps).car := var;
             end if;
             e := NIL_ELEM;
-            return;
          when PH_PARSE_END =>
             BBS.lisp.stack.exit_frame;
             e := NIL_ELEM;
-            return;
          when PH_EXECUTE =>
             --
             --  EXECUTE Phase
@@ -288,7 +284,6 @@ package body BBS.lisp.evaluate.loops is
                end if;
             end if;
             e := t;
-            return;
       end case;
    end;
 

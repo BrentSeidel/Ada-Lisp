@@ -2064,7 +2064,7 @@ The Ada functions that implement the \tl{} operations are defined using one of t
    type special_function is access procedure(e : out element_type;
              s : cons_index; p : phase);
 \end{lstlisting}
-In most cases, an \datatype{execute\_function} is the type to use.  To install the operation, add something like the following line after the main \tl{} initialization function is called.
+In most cases, an \datatype{execute\_function} is the type to use and \datatype{special\_function} is defined in the \keyword{private} section to discourage use.  To install the operation, add something like the following line after the main \tl{} initialization function is called.
 \begin{lstlisting}
       BBS.lisp.add_builtin("due-flash", due_flash'Access);
 \end{lstlisting}

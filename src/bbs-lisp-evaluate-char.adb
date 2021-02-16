@@ -4,7 +4,6 @@ package body BBS.lisp.evaluate.char is
    --  Given a character, return the integer code for the character.  Typically
    --  the ASCII value.
    --
---   function char_code(s : cons_index) return element_type is
    procedure char_code(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p1 : element_type; --  Parameter
@@ -38,7 +37,6 @@ package body BBS.lisp.evaluate.char is
    --
    --  Given an integer, return the character with that code or an error.
    --
---   function code_char(s : cons_index) return element_type is
    procedure code_char(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p1 : element_type; --  Parameter
@@ -78,7 +76,6 @@ package body BBS.lisp.evaluate.char is
    --
    --  If character is alphabetic, convert to upper case.
    --
---   function char_upcase(s : cons_index) return element_type is
    procedure char_upcase(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p1 : element_type; --  Parameter
@@ -113,7 +110,6 @@ package body BBS.lisp.evaluate.char is
    --
    --  If character is alphabetic, convert to lower case.
    --
---   function char_downcase(s : cons_index) return element_type is
    procedure char_downcase(e : out element_type; s : cons_index) is
       t  : cons_index := s;
       p1 : element_type; --  Parameter
