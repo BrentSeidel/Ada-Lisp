@@ -12,5 +12,13 @@ library project Bbs_Lisp is
       for Switches ("ada") use ("-gnatf", "-gnat12", "-g", "-O", "-gnatVa", "-gnatw.Xa");
    end Compiler;
 
+   package Prove is
+      for Switches use ("--codepeer=on", "-j4");
+   end Prove;
+
+   package Builder is
+      for Switches ("ada") use ("-j4");
+   end Builder;
+
 end Bbs_Lisp;
 

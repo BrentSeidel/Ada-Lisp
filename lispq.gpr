@@ -9,7 +9,7 @@ project Lispq is
    for Exec_Dir use ".";
 
    package Builder is
-      for Switches ("ada") use ("-g", "-s");
+      for Switches ("ada") use ("-g", "-s", "-j4");
    end Builder;
 
    package Compiler is
@@ -23,6 +23,10 @@ project Lispq is
    package Linker is
       for Switches ("ada") use ("-g");
    end Linker;
+
+   package Prove is
+      for Switches use ("--level=0", "--codepeer=on", "-j4");
+   end Prove;
 
 end Lispq;
 
