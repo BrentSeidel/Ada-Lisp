@@ -119,7 +119,6 @@ package body BBS.lisp.evaluate.func is
                   end;
                   temp := cons_table(temp.ps).cdr;
                end loop;
-               BBS.lisp.stack.enter_frame;
             else
                error("defun", "Something went horribly wrong and defun did not get a list");
                e := (kind => E_ERROR);
@@ -255,7 +254,6 @@ package body BBS.lisp.evaluate.func is
                   end;
                   temp := cons_table(temp.ps).cdr;
                end loop;
-               BBS.lisp.stack.enter_frame;
             else
                error("lambda", "Something went horribly wrong and lambda did not get a list");
                e := (kind => E_ERROR);
@@ -297,9 +295,7 @@ package body BBS.lisp.evaluate.func is
    --  the parameters that can be passed to the function.  The second is the
    --  function body.
    --
-   --  TODO: Change e to cons_index.
-   --
-   function eval_function(s : cons_index; e : element_type) return element_type is
+   function eval_function(s : cons_index; e : cons_index) return element_type is
       params : element_type ;
       func_body : element_type;
       param_value : value := (kind => V_NONE);
@@ -312,9 +308,7 @@ package body BBS.lisp.evaluate.func is
    begin
       params := cons_table(s).car;
       func_body := cons_table(s).cdr;
-      if e.kind = E_CONS then
-         supplied := bbs.lisp.utilities.count(e.ps);
-      end if;
+      supplied := bbs.lisp.utilities.count(e);
       if params.kind = E_CONS then
          requested := bbs.lisp.utilities.count(params.ps);
       elsif params.kind = E_NIL then
@@ -330,11 +324,7 @@ package body BBS.lisp.evaluate.func is
       --
       --  Assign parameters to values.
       --
-      if isList(e) then
-         rest := getList(e);
-      else
-         rest := NIL_CONS;
-      end if;
+      rest := e;
       name := params;  --  List of parameter names
       BBS.lisp.stack.start_frame;
       while rest > NIL_CONS loop
@@ -361,7 +351,6 @@ package body BBS.lisp.evaluate.func is
       --
       --  Evaluate the function
       --
-      BBS.lisp.stack.enter_frame;
       ret_val := execute_block(func_body);
       BBS.lisp.stack.exit_frame;
       return ret_val;

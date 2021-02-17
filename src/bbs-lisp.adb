@@ -719,7 +719,11 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                   print(sym.ps);
                   new_line;
                end if;
-               e := bbs.lisp.evaluate.func.eval_function(sym.ps, rest);
+               if rest.kind = E_CONS then
+                  e := bbs.lisp.evaluate.func.eval_function(sym.ps, rest.ps);
+               else
+                  e := bbs.lisp.evaluate.func.eval_function(sym.ps, NIL_CONS);
+               end if;
             when SY_VARIABLE =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating variable ");
@@ -732,7 +736,11 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                      print(sym.ps);
                      new_line;
                   end if;
-                  e := bbs.lisp.evaluate.func.eval_function(sym.pv.v.lam, rest);
+                  if rest.kind = E_CONS then
+                     e := bbs.lisp.evaluate.func.eval_function(sym.pv.v.lam, rest.ps);
+                  else
+                     e := bbs.lisp.evaluate.func.eval_function(sym.pv.v.lam, NIL_CONS);
+                  end if;
                else
                   BBS.lisp.memory.ref(sym.pv);
                   e := sym.pv;
@@ -752,7 +760,11 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                print(first.v.lam);
                new_line;
             end if;
-            e := bbs.lisp.evaluate.func.eval_function(first.v.lam, rest);
+            if rest.kind = E_CONS then
+               e := bbs.lisp.evaluate.func.eval_function(first.v.lam, rest.ps);
+            else
+               e := bbs.lisp.evaluate.func.eval_function(first.v.lam, NIL_CONS);
+            end if;
          else
             BBS.lisp.memory.ref(s);
             e := (kind => E_CONS, ps => s);
@@ -765,7 +777,11 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                print(val);
                new_line;
             end if;
-            e := bbs.lisp.evaluate.func.eval_function(val.lam, rest);
+            if rest.kind = E_CONS then
+               e := bbs.lisp.evaluate.func.eval_function(val.lam, rest.ps);
+            else
+               e := bbs.lisp.evaluate.func.eval_function(val.lam, NIL_CONS);
+            end if;
          else
             BBS.lisp.memory.ref(s);
             e := (kind => E_CONS, ps => s);

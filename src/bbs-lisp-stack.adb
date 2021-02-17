@@ -17,6 +17,8 @@ package body BBS.lisp.stack is
          if t.kind = ST_VALUE then
             BBS.lisp.memory.deref(t.st_name);
             BBS.lisp.memory.deref(t.st_value);
+         else
+            put_line("stack.pop: Popped stack frame");
          end if;
          stack(stack_pointer) := (kind => ST_EMPTY);
          stack_pointer := stack_pointer - 1;
@@ -31,6 +33,7 @@ package body BBS.lisp.stack is
       if not isFull then
          if v.kind = ST_VALUE then
             BBS.lisp.memory.ref(v.st_name);
+            BBS.lisp.memory.ref(v.st_value);
          end if;
          stack_pointer := stack_pointer + 1;
          stack(stack_pointer) := v;
@@ -55,30 +58,29 @@ package body BBS.lisp.stack is
       end loop;
       stack_pointer := EMPTY_STACK;
       frame_pointer := EMPTY_STACK;
-      temp_frame := EMPTY_STACK;
       frame_count := 0;
    end;
    --
    --  Operations for stack frames
    --
+   --  Start a stack frame
+   --
    procedure start_frame is
    begin
       frame_count := frame_count + 1;
       push((kind => ST_FRAME, number => frame_count, next => frame_pointer));
-      temp_frame := stack_pointer;
+      frame_pointer := stack_pointer;
    end;
    --
-   procedure enter_frame is
-   begin
-      frame_pointer := temp_frame;
-      temp_frame := EMPTY_STACK;
-   end;
+   --  Exit a stack frame
    --
    procedure exit_frame is
       frame : constant stack_entry := stack(frame_pointer);
    begin
       if frame.kind /= ST_FRAME then
          error("exit_frame", "Not a stack frame.");
+         put_line("exit_frame: Frame pointer is: " & stack_index'Image(frame_pointer));
+         put_line("exit_frame: Stack entry type is: " & stack_entry_type'Image(frame.kind));
          return;
       end if;
       for temp in frame_pointer .. stack_pointer loop
@@ -93,13 +95,18 @@ package body BBS.lisp.stack is
       frame_count := frame.number - 1;
    end;
    --
+   function get_fp return stack_index is
+   begin
+      return frame_pointer;
+   end;
+   --
    procedure dump is
       e : stack_entry;
    begin
       put_line("Stack dump start");
       Put_Line("SP: " & stack_index'Image(stack_pointer) & ", FP: " &
                  stack_index'Image(frame_pointer));
-      for i in stack_index'First + 1 .. stack_index'Last loop
+      for i in stack_index'First .. stack_index'Last loop
          e := stack(i);
          case e.kind is
             when ST_EMPTY =>

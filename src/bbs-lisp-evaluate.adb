@@ -88,13 +88,12 @@ package body BBS.lisp.evaluate is
    end;
    --
    function execute_block(e : element_type) return element_type is
-      statement : element_type;
+      statement : element_type := e;
       ret_val : element_type;
    begin
       --
       --  Evaluate the function
       --
-      statement := e;
       ret_val := NIL_ELEM;
       while isList(statement) loop
          BBS.lisp.memory.deref(ret_val);

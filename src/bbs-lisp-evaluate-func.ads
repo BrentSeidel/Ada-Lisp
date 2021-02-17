@@ -30,5 +30,5 @@ package BBS.lisp.evaluate.func is
    --
    --  Functions for evaluating lisp functions
    --
-   function eval_function(s : cons_index; e : element_type) return element_type;
+   function eval_function(s : cons_index; e : cons_index) return element_type;
 end;

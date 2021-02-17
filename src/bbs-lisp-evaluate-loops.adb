@@ -99,7 +99,6 @@ package body BBS.lisp.evaluate.loops is
                   rest := cons_table(limits.ps).cdr;
                else
                   error("dotimes", "List not provided for limits.");
-                  BBS.lisp.stack.enter_frame;
                   e := (kind => E_ERROR);
                   return;
                end if;
@@ -116,7 +115,6 @@ package body BBS.lisp.evaluate.loops is
                   end if;
                else
                   error("dotimes", "Loop limit not provided.");
-                  BBS.lisp.stack.enter_frame;
                   e := (kind => E_ERROR);
                   return;
                end if;
@@ -128,7 +126,6 @@ package body BBS.lisp.evaluate.loops is
                --
                if var.kind = E_CONS then
                   error("dotimes", "The loop variable cannot be a list.");
-                  BBS.lisp.stack.enter_frame;
                   e := (kind => E_ERROR);
                   return;
                end if;
@@ -146,7 +143,6 @@ package body BBS.lisp.evaluate.loops is
                      str := var.st_name;
                   else
                      error("dotimes", "Can't convert item into a loop variable.");
-                     BBS.lisp.stack.enter_frame;
                      e := (kind => E_ERROR);
                      return;
                   end if;
@@ -155,7 +151,6 @@ package body BBS.lisp.evaluate.loops is
                                        st_name => str,
                                        st_value => (kind => V_NONE)));
                end;
-               BBS.lisp.stack.enter_frame;
                --
                --  Var has been converted to a local variable.  Now put it back into
                --  the list.
@@ -241,7 +236,6 @@ package body BBS.lisp.evaluate.loops is
                BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
                                     st_name => var.st_name, st_value =>
                                       (kind => V_INTEGER, i => 0)));
-               BBS.lisp.stack.enter_frame;
             else
                error("dotimes", "Loop counter is not a variable");
                e := (kind => E_ERROR);
@@ -254,7 +248,7 @@ package body BBS.lisp.evaluate.loops is
                --
                --  Set the value of the local variable on the stack
                --
-               BBS.lisp.stack.stack(BBS.lisp.stack.frame_pointer + 1) :=
+               BBS.lisp.stack.stack(BBS.lisp.stack.get_fp + 1) :=
                  (kind => BBS.lisp.stack.ST_VALUE,
                   st_name => var.st_name, st_value =>
                     (kind => V_INTEGER, i => int32(index)));

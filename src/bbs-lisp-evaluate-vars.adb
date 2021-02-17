@@ -184,7 +184,7 @@ package body BBS.lisp.evaluate.vars is
                         error("let", "Can't convert item into a local variable.");
                         print(el, False, True);
                         Put_Line("Item is of kind " & ptr_type'Image(el.kind));
-                        BBS.lisp.stack.enter_frame;
+--                        BBS.lisp.stack.enter_frame;
                         BBS.lisp.stack.exit_frame;
                         e := (kind => E_ERROR);
                         return;
@@ -203,7 +203,6 @@ package body BBS.lisp.evaluate.vars is
                   end;
                   locals := cons_table(locals.ps).cdr;
                end loop;
-               BBS.lisp.stack.enter_frame;
             else
                error("let", "Something went horribly wrong and local did not get a list");
                e := (kind => E_ERROR);
@@ -266,7 +265,6 @@ package body BBS.lisp.evaluate.vars is
                      error("let", "Local variable is not a local.");
                      print(el, False, True);
                      Put_Line("Item is of kind " & ptr_type'Image(el.kind));
-                     BBS.lisp.stack.enter_frame;
                      BBS.lisp.stack.exit_frame;
                      e := (kind => E_ERROR);
                      return;
@@ -275,7 +273,6 @@ package body BBS.lisp.evaluate.vars is
                end;
                locals := cons_table(locals.ps).cdr;
             end loop;
-            BBS.lisp.stack.enter_frame;
             --
             --  Now evaluate the statements in this context.
             --

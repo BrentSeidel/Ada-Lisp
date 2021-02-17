@@ -30,7 +30,6 @@ package BBS.lisp.stack is
    --
    stack_pointer : stack_index := stack_index'First;
    frame_pointer : stack_index := stack_index'First;
-   temp_frame    : stack_index := stack_index'First;
    frame_count   : Natural := 0;
    --
    EMPTY_STACK : constant stack_index := stack_index'First;
@@ -67,11 +66,7 @@ package BBS.lisp.stack is
    --     the items off the stack that belong to the stack frame.
    --
    procedure start_frame
-     with Global => (Input => frame_pointer,
-                     In_Out => (stack, stack_pointer, frame_count),
-                     Output => temp_frame);
-   procedure enter_frame
-     with Global => (In_Out => temp_frame, Output => frame_pointer);
+     with Global => (In_Out => (stack, stack_pointer, frame_count, frame_pointer));
    procedure exit_frame
      with Global => (In_out => (stack, stack_pointer, frame_pointer),
                      Output => frame_count);
@@ -81,9 +76,9 @@ package BBS.lisp.stack is
    --  may cause a return to the command line without clearing the stack.
    --
    procedure reset
-     with Global => (Output => (stack, stack_pointer, frame_pointer, temp_frame, frame_count)),
+     with Global => (Output => (stack, stack_pointer, frame_pointer, frame_count)),
      Post => ((stack_pointer = EMPTY_STACK) and (frame_pointer = EMPTY_STACK) and
-              (temp_frame = EMPTY_STACK) and (frame_count = 0));
+                  (frame_count = 0));
    --
    --  Dump the stack for debugging purposes
    --
@@ -108,5 +103,12 @@ package BBS.lisp.stack is
    --
    function find_offset(name : string_index; index : out stack_index) return Natural
      with Global => (Input => (stack, stack_pointer, frame_pointer));
+   --
+   -- Returns the frame pointer so that it can be private.
+   --
+   function get_fp return stack_index;
+   --
+private
+
 end;
 

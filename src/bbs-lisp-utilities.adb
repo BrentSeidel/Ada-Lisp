@@ -8,6 +8,9 @@ package body bbs.lisp.utilities is
       t : element_type := (kind => E_CONS, ps => s);
       c : Integer := 0;
    begin
+      if s = NIL_CONS then
+         return 0;
+      end if;
       while t.kind = E_CONS loop
          c := c + 1;
          t := cons_table(t.ps).cdr;
