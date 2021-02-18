@@ -23,8 +23,8 @@ package BBS.lisp.evaluate is
      with Global => (input => (cons_table, symb_table, pvt_string_table,
                                pvt_exit_flag, pvt_break_flag, pvt_msg_flag,
                                pvt_exit_loop, pvt_first_char_flag,
-                               BBS.lisp.stack.stack,
-                               BBS.lisp.stack.stack_pointer));
+                               BBS.lisp.stack.pvt_stack,
+                               BBS.lisp.stack.pvt_sp));
 --                               BBS.lisp.stack.frame_pointer));
    --  should be (In_Out => (cons_table, symb_table, pvt_string_table,
    --                        pvt_exit_flag, pvt_break_flag, pvt_msg_flag,
@@ -39,8 +39,8 @@ package BBS.lisp.evaluate is
    --
    function indirect_elem(e : element_type) return element_type
      with Global => (input => (pvt_string_table, symb_table,
-                               BBS.lisp.stack.stack,
-                               BBS.lisp.stack.stack_pointer));
+                               BBS.lisp.stack.pvt_stack,
+                               BBS.lisp.stack.pvt_sp));
 --                               BBS.lisp.stack.frame_pointer));
    --
    --  This procedure extracts the first value from an element.  This value may

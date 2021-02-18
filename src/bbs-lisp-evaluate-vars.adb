@@ -108,11 +108,11 @@ package body BBS.lisp.evaluate.vars is
                if stacked then
                   if p1.kind = E_STACK then
                      index := BBS.lisp.stack.search_frames(p1.st_offset, p1.st_name);
-                     BBS.lisp.memory.deref(BBS.lisp.stack.stack(index).st_value);
+                     BBS.lisp.memory.deref(BBS.lisp.stack.get_entry(index).st_value);
                      if p2.kind = E_VALUE then
-                        BBS.lisp.stack.stack(index).st_value := p2.v;
+                        BBS.lisp.stack.set_value(index, p2.v);
                      elsif p2.kind = E_CONS then
-                        BBS.lisp.stack.stack(index).st_value := (kind => V_LIST, l => p2.ps);
+                        BBS.lisp.stack.set_value(index, (kind => V_LIST, l => p2.ps));
                      end if;
                   end if;
                else

@@ -4,8 +4,19 @@
 --
 with BBS.lisp.strings;
 with BBS.lisp.memory;
-package body BBS.lisp.stack is
+package body BBS.lisp.stack
+with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
+                       pvt_fp => frame_pointer, pvt_fc => frame_count) is
    --
+   function isFull return Boolean is
+   begin
+      return (stack_pointer = FULL_STACK);
+   end;
+   --
+   function isEmpty return Boolean is
+   begin
+      return (stack_pointer = EMPTY_STACK);
+   end;
    --
    --  Adding and removing items from the stack
    --
@@ -95,9 +106,44 @@ package body BBS.lisp.stack is
       frame_count := frame.number - 1;
    end;
    --
+   --  Returns the frame pointer
+   --
    function get_fp return stack_index is
    begin
       return frame_pointer;
+   end;
+   --
+   --  Sets an entry on the stack
+   --
+   procedure set_entry(e : stack_index; v : stack_entry) is
+   begin
+      if e <= stack_pointer then
+         stack(e) := v;
+      else
+         error("set_entry", "Stack index out of range");
+      end if;
+   end;
+   --
+   --  Sets the value of an entry on the stack
+   --
+   procedure set_value(e : stack_index; v : value) is
+   begin
+      if e <= stack_pointer then
+         if stack(e).kind = ST_VALUE then
+            stack(e).st_value := v;
+         else
+            error("set_value", "Entry is not a value type");
+         end if;
+      else
+         error("set_value", "Stack index out of range");
+      end if;
+   end;
+   --
+   --  Gets an entry from the stack
+   --
+   function get_entry(e : stack_index) return stack_entry is
+   begin
+      return stack(e);
    end;
    --
    procedure dump is

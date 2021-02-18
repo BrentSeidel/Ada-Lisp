@@ -570,13 +570,13 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       --
       offset := BBS.lisp.stack.find_offset(n, sp);
       if (sp > stack_index'First) and (offset > 0) then
-         item := BBS.lisp.stack.stack(sp);
+         item := BBS.lisp.stack.get_entry(sp);
          if item.kind = BBS.lisp.stack.ST_VALUE then
             BBS.lisp.memory.ref(item.st_name);
             return (kind => E_STACK, st_name => item.st_name, st_offset => offset);
          else
             error("find_variable", "Item on stack is of type " &
-                    BBS.lisp.stack.stack_entry_type'Image(BBS.lisp.stack.stack(sp).kind));
+                    BBS.lisp.stack.stack_entry_type'Image(BBS.lisp.stack.get_entry(sp).kind));
          end if;
       end if;
       --

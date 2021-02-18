@@ -248,10 +248,14 @@ package body BBS.lisp.evaluate.loops is
                --
                --  Set the value of the local variable on the stack
                --
-               BBS.lisp.stack.stack(BBS.lisp.stack.get_fp + 1) :=
-                 (kind => BBS.lisp.stack.ST_VALUE,
-                  st_name => var.st_name, st_value =>
-                    (kind => V_INTEGER, i => int32(index)));
+--               BBS.lisp.stack.stack(BBS.lisp.stack.get_fp + 1) :=
+--                 (kind => BBS.lisp.stack.ST_VALUE,
+--                  st_name => var.st_name, st_value =>
+--                    (kind => V_INTEGER, i => int32(index)));
+               BBS.lisp.stack.set_entry(BBS.lisp.stack.get_fp + 1,
+                                        (kind => BBS.lisp.stack.ST_VALUE,
+                                         st_name => var.st_name, st_value =>
+                                           (kind => V_INTEGER, i => int32(index))));
                --
                --  Evaluate all of the items in the list.
                --
