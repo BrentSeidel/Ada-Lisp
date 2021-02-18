@@ -318,17 +318,14 @@
 ;
 ;  Test lambda
 ;
-(defun verify-equal (expected actual text)
-  (if (= actual expected) (print "PASS: Actual ")
-              (print "***FAIL: Actual "))
-  (print  actual ", Expected " expected " " text)
-  (terpri))
 (print "==> Testing Lambda")
 (terpri)
 (defun test-lambda (a b c d)
   (verify-equal a (b c d) "Testing lambda"))
-;(test-lambda 3 (lambda (a1 a2) (print "In Lambda " (+ a1 a2)) (terpri) (+ a1 a2)) 1 2)
 (test-lambda 3 (lambda (a1 a2) (+ a1 a2)) 1 2)
+(test-lambda 6 (lambda (a1 a2) (* a1 a2)) 2 3)
+(test-lambda T (lambda (a1 a2) (< a1 a2)) #\A #\B)
+(test-lambda T (lambda (a1 a2)(= a1 (* a2 (/ a1 a2)))) 6 2)
 
 (defun check-eq (a b) (if (= a b) (print "Equal") (print "Not-equal")) (terpri))
 ;
