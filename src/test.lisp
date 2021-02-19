@@ -12,22 +12,38 @@
 ;-----------------------------------------
 ;  Support functions.  Load these first.
 ;
+(setq *PASS-COUNT* 0)
+(setq *FAIL-COUNT* 0)
+;
 ; Prints a pass message
 (defun pass (n)
+  (setq *PASS-COUNT* (+ *PASS-COUNT* 1))
   (print "PASS: " n)
   (terpri))
 ; Prints a fail message
 (defun fail (n)
+  (setq *FAIL-COUNT* (+ *FAIL-COUNT* 1))
   (print "***FAIL: " n)
   (terpri))
 ;
 ;  If two values are equal, print pass message, otherwise print fail message
 ;
 (defun verify-equal (expected actual text)
+  (if (= actual expected) (setq *PASS-COUNT* (+ *PASS-COUNT* 1))
+              (setq *FAIL-COUNT* (+ *FAIL-COUNT* 1)))
   (if (= actual expected) (print "PASS: Actual ")
               (print "***FAIL: Actual "))
   (print  actual ", Expected " expected " " text)
   (terpri))
+;
+;  Print summary results
+;
+(defun summary ()
+  (print "Test cases passed: " *PASS-COUNT*)
+  (terpri)
+  (print "Test cases failed: " *FAIL-COUNT*)
+  (terpri)
+  (print "Total test cases:  " (+ *PASS-COUNT* *FAIL-COUNT*)))
 ;  --------------------------------------------
 ;  Test cases.  Load and run the desired test.
 ;
@@ -411,6 +427,67 @@
 (test-log-err)
 (setq test-log-err 0)
 ;
+(print "===> Testing predicate error conditions")
+(terpri)
+(defun test-pred-err ()
+;
+;  Test cases commented out because as these types are not supported in
+;  Tiny-Lisp, the predicates for them always return false even with no
+;  parameters.
+;
+;  (verify-equal T (errorp (arrayp)) "No parameter to arrayp")
+;  (verify-equal T (errorp (bit-vector-p)) "No parameter to bit-vector-p")
+;  (verify-equal T (errorp (complexp)) "No parameter to complexp")
+;  (verify-equal T (errorp (floatp)) "No parameter to floatp")
+;  (verify-equal T (errorp (vectorp)) "No parameter to vectorp")
+;  (verify-equal T (errorp (rationalp)) "No parameter to rationalp")
+;  (verify-equal T (errorp (realp)) "No parameter to realp")
+;  (verify-equal T (errorp (simple-vector-p)) "No parameter to simple-vector-p")
+;  (verify-equal T (errorp (simple-bit-vector-p)) "No parameter to simple-bit-vector-p")
+;  (verify-equal T (errorp (packagep)) "No parameter to packagep")
+;  (verify-equal T (errorp (vectorp)) "No parameter to vectorp")
+  (verify-equal T (errorp (atomp)) "No parameter to atomp")
+  (verify-equal T (errorp (characterp)) "No parameter to characterp")
+  (verify-equal T (errorp (compiled-function-p)) "No parameter to compiled-function-p")
+  (verify-equal T (errorp (consp)) "No parameter to consp")
+  (verify-equal T (errorp (errorp)) "No parameter to errorp")
+  (verify-equal T (errorp (functionp)) "No parameter to functionp")
+  (verify-equal T (errorp (integerp)) "No parameter to integerp")
+  (verify-equal T (errorp (listp)) "No parameter to listp")
+  (verify-equal T (errorp (numberp)) "No parameter to numberp")
+  (verify-equal T (errorp (null)) "No parameter to null")
+  (verify-equal T (errorp (simple-string-p)) "No parameter to simple-string-p")
+  (verify-equal T (errorp (stringp)) "No parameter to stringp")
+  (verify-equal T (errorp (symbolp)) "No parameter to symbolp"))
+(test-pred-err)
+(setq test-pred-err 0)
+;
+(print "===> Testing coercion errors")
+(terpri)
+(defun test-coerce-err ()
+  (verify-equal T (errorp (coerce)) "No paramaters")
+  (verify-equal T (errorp (coerce nil)) "One parameter")
+  (verify-equal T (errorp (coerce t 'print)) "Wrong coercion")
+  (verify-equal T (errorp (coerce nil 'character)) "Invalid coercion"))
+(test-coerce-err)
+(setq test-coerce-err 0)
+;
+(print "==> Testing concatenation errors")
+(terpri)
+(defun test-concatenate-err ()
+  (verify-equal T (errorp (concatenate)) "No parameters")
+  (verify-equal T (errorp (concatenate 'string)) "One parameter")
+  (verify-equal T (errorp (concatenate 'print "Hello " "World")) "Invalid type")
+  (verify-equal T (errorp (concatenate 'list (1 2 3) "world")) "Wrong type")
+  (verify-equal NIL (errorp (concatenate 'list (1 2 3) (4 5 6))) "Concatenate lists")
+  (verify-equal T (errorp (concatenate 'string (1 2 3) "world")) "Wrong type")
+  (verify-equal T (errorp (concatenate 'string "Hello " 1)) "Wrong type"))
+(test-concatenate-err)
+(setq test-concatenate-err 0)
+;
 ;(dump)
+(print "===> Testing complete")
+(terpri)
+(summary)
 (exit)
 

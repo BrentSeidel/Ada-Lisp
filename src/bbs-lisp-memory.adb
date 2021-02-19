@@ -1,18 +1,42 @@
 package body bbs.lisp.memory is
    --
+   --  Ghost functions used in some proofs.
+   --
+   function count_free_cons return Natural is
+      count : Natural := 0;
+   begin
+      for i in cons_table'Range loop
+         if cons_table(i).ref = 0 then
+            count := count + 1;
+         end if;
+      end loop;
+      return count;
+   end;
+   --
+   function count_free_str return Natural is
+      count : Natural := 0;
+   begin
+      for i in string_table'Range loop
+         if string_table(i).ref = 0 then
+            count := count + 1;
+         end if;
+      end loop;
+      return count;
+   end;
+   --
    --  Reset the tables
    --
    procedure reset_tables is
    begin
-      for i in NIL_CONS + 1 .. cons_index'Last loop
+      for i in cons_table'Range loop
          cons_table(i).ref := FREE_CONS;
          cons_table(i).car := (Kind => E_NIL);
          cons_table(i).cdr := (Kind => E_NIL);
       end loop;
-      for i in symb_index'First + 1 .. symb_index'Last loop
+      for i in symb_table'Range loop
          symb_table(i).ref := 0;
       end loop;
-      for i in string_index'First + 1 .. string_index'Last loop
+      for i in string_table'Range loop
          string_table(i).ref := FREE_STR;
       end loop;
    end;
@@ -22,7 +46,7 @@ package body bbs.lisp.memory is
    --
    function alloc(s : out cons_index) return Boolean is
    begin
-      for i in cons_index'First + 1 .. cons_index'Last loop
+      for i in cons_table'Range loop
          if cons_table(i).ref = FREE_CONS then
             s := i;
             cons_table(i).ref := FREE_CONS + 1;
@@ -40,7 +64,7 @@ package body bbs.lisp.memory is
    --
    function alloc(s : out string_index) return Boolean is
    begin
-      for i in string_index'First + 1 .. string_index'Last loop
+      for i in string_table'Range loop
          if string_table(i).ref = FREE_STR then
             s := i;
             string_table(i).ref := FREE_STR + 1;

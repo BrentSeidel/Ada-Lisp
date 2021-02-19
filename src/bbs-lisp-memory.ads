@@ -1,3 +1,8 @@
+--
+--  This package manages allocations in the cons and string arrays.  These can
+--  be dynamically allocated and deallocated.  Reference counting is used to
+--  determine if a particular entry is free or not.
+--
 package bbs.lisp.memory is
    --
    --  Utility functions for allocating and freeing items.  Memory management
@@ -7,6 +12,13 @@ package bbs.lisp.memory is
    --
    --  Symbols are allocated in another fashion and aren't deallocated, though
    --  this may change in the future.
+   --
+   --  Ghost functions used in some proofs.
+   --
+   function count_free_cons return Natural
+     with Ghost;
+   function count_free_str return Natural
+     with Ghost;
    --
    --  Reset some of the memory tables back to their starting state.
    --
@@ -20,10 +32,14 @@ package bbs.lisp.memory is
    --  and the output value should be ignored.
    --
    function alloc(s : out cons_index) return Boolean
-     with Global => (Input => cons_table);
+     with Global => (Input => cons_table),
+     post => (if count_free_cons = 0 then alloc'Result = False
+                else alloc'Result = True);
    -- should really be (In_Out => const_table);
    function alloc(s : out string_index) return Boolean
-     with Global => (Input => pvt_string_table);
+     with Global => (Input => pvt_string_table),
+     post => (if count_free_str = 0 then alloc'Result = False
+                else alloc'Result = True);
    -- should really be (In_Out => pvt_string_table);
    --
    --  Increment the reference count of various items.  This is typically done

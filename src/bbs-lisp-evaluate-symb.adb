@@ -272,7 +272,7 @@ package body BBS.lisp.evaluate.symb is
             dest_str := str_head;
             dest_ptr := 1;
             if s1 = NIL_CONS then
-               error("concatenate", "Cannot compare a single element.");
+               error("concatenate", "Cannot concatenate a single element.");
                e := (kind => E_ERROR);
                return;
             end if;
@@ -289,7 +289,7 @@ package body BBS.lisp.evaluate.symb is
                if t2.kind = E_VALUE then
                   v2 := t2.v;
                else
-                  error("concatenate", "Second parameter does not evaluate to a value");
+                  error("concatenate", "Parameter does not evaluate to a value");
                   BBS.lisp.memory.deref(t2);
                   e := (kind => E_ERROR);
                   return;
@@ -356,7 +356,7 @@ package body BBS.lisp.evaluate.symb is
                if isList(t2) then
                   src_cons := getList(t2);
                else
-                  error("concatenate", "Second parameter does not evaluate to a list");
+                  error("concatenate", "Parameter does not evaluate to a list");
                   BBS.lisp.memory.deref(t2);
                   e := (kind => E_ERROR);
                   return;
