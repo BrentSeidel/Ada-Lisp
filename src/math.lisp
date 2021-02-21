@@ -80,6 +80,29 @@
               (setq min mid)))
            (+ 0 min))))))
 ;
+;  Test if a number is prime.  This depends on the functions rem and one of the
+;  sqrt functionds defined above.
+;
+(defun primep (n)
+  (let ((prime T) (count 3) (limit (+ 1 (sqrt n))))
+    (if (= 0 (rem n 2))
+      (setq prime NIL))
+    (dowhile (and prime (< count limit))
+      (if (= 0 (rem n count))
+        (setq prime NIL))
+      (setq count (+ 2 count)))
+    prime))
+;
+;  List prime numbers from 1 through n
+;
+(defun primes (n)
+  (let ((value 0) (is-prime NIL) (limit (+ 1 (/ n 2))))
+  (dotimes (x limit)
+    (setq value (+ 1 (* 2 x)))
+    (setq is-prime (primep value))
+    (if is-prime (print value " is prime"))
+    (if is-prime (terpri)))))
+;
 ;  Logical operations
 ;
 (defun xor (a b) (or (and a (not b)) (and (not a) b)))
