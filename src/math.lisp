@@ -81,7 +81,7 @@
            (+ 0 min))))))
 ;
 ;  Test if a number is prime.  This depends on the functions rem and one of the
-;  sqrt functionds defined above.
+;  sqrt functions defined above.
 ;
 (defun primep (n)
   (let ((prime T) (count 3) (limit (+ 1 (sqrt n))))
@@ -100,8 +100,7 @@
   (dotimes (x limit)
     (setq value (+ 1 (* 2 x)))
     (setq is-prime (primep value))
-    (if is-prime (print value " is prime"))
-    (if is-prime (terpri)))))
+    (if is-prime (progn (print value " is prime") (terpri))))))
 ;
 ;  Logical operations
 ;

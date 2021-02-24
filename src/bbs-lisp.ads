@@ -12,7 +12,7 @@
 with Ada.Unchecked_Conversion;
 package bbs.lisp
 with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
-                        pvt_msg_flag, pvt_exit_loop, pvt_first_char_flag,
+                        pvt_msg_flag, pvt_first_char_flag,
                         output_stream, input_stream) is
    --
    --  Define the basic types used.
@@ -273,11 +273,6 @@ private
    --
    msg_flag : Boolean := False
      with Part_Of => pvt_msg_flag;
-   --
-   --  Set to non-zero to break out of that many nested loops
-   --
-   exit_loop : Natural
-     with Part_Of => pvt_exit_loop;
    --
    --  Will printing start on a new line
    --

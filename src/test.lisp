@@ -194,6 +194,26 @@
 (test-dotimes)
 (setq test-dotimes 0)
 ;
+;  Test progn and return
+;
+(print "===> Testing block related operations")
+(terpri)
+(defun test-block ()
+  (let ((accum 0) (count 0) result)
+    (setq result (dowhile (< count 10)
+      (print "Count is " count)
+      (terpri)
+      (if (= count 5)
+        (progn
+          (verify-equal 5 count "Loop at 5")
+          (return 50)
+          (verify-equal 1 2 "Return operation failed")))
+       (setq count (+ 1 count))))
+    (verify-equal 50 result "Checking result from return")
+    (verify-equal 5 count "Loop exited at count = 5")))
+(test-block)
+(setq test-block 0)
+;
 ;  Test logical operations
 ;
 (print "===> Testing logic operations")

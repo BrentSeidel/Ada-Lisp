@@ -51,6 +51,10 @@ package body BBS.lisp.evaluate.loops is
                e := temp;
                return;
             end if;
+            if get_exit_block > 0 then
+               decrement_exit_block;
+               exit;
+            end if;
          end loop;
          BBS.lisp.memory.deref(temp);
       else
@@ -248,10 +252,6 @@ package body BBS.lisp.evaluate.loops is
                --
                --  Set the value of the local variable on the stack
                --
---               BBS.lisp.stack.stack(BBS.lisp.stack.get_fp + 1) :=
---                 (kind => BBS.lisp.stack.ST_VALUE,
---                  st_name => var.st_name, st_value =>
---                    (kind => V_INTEGER, i => int32(index)));
                BBS.lisp.stack.set_entry(BBS.lisp.stack.get_fp + 1,
                                         (kind => BBS.lisp.stack.ST_VALUE,
                                          st_name => var.st_name, st_value =>
@@ -266,6 +266,10 @@ package body BBS.lisp.evaluate.loops is
                   BBS.lisp.stack.exit_frame;
                   e := t;
                   return;
+               end if;
+               if get_exit_block > 0 then
+                  decrement_exit_block;
+                  exit;
                end if;
             end loop;
             BBS.lisp.memory.deref(t);
@@ -283,6 +287,22 @@ package body BBS.lisp.evaluate.loops is
             end if;
             e := t;
       end case;
+   end;
+   --
+   --  Create a block containing multiple statements
+   --
+   procedure progn(e : out element_type; s : cons_index) is
+   begin
+      e := execute_block((kind => E_CONS, ps => s));
+   end;
+   --
+   --  Breaks out of a loop (or other exclosing block) and returns a value
+   --
+   procedure return_from(e : out element_type; s : cons_index) is
+      t : cons_index := s;
+   begin
+      e := first_value(t);
+      BBS.lisp.evaluate.set_exit_block(1);
    end;
 
 end;

@@ -33,7 +33,7 @@ package body BBS.lisp.evaluate.vars is
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
             return;
          when PH_PARSE_BEGIN =>
-              msg("setq", "Called during parse begin phase.");
+            msg("setq", "Called during parse begin phase.");
             if s > cons_index'First then
                p1 := cons_table(s).car;  --  Should be symbol for setq
                p2 := cons_table(s).cdr;

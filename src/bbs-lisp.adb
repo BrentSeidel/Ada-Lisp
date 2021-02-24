@@ -24,7 +24,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                        pvt_break_flag => break_flag,
                        pvt_string_table => string_table,
                        pvt_msg_flag => msg_flag,
-                       pvt_exit_loop => exit_loop,
                        pvt_first_char_flag => first_char_flag,
                        output_stream => (io_put_line, io_put, io_new_line),
                        input_stream => io_get_line) is
@@ -92,10 +91,12 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       add_builtin("poke16", BBS.lisp.evaluate.mem.poke16'Access);
       add_builtin("poke32", BBS.lisp.evaluate.mem.poke32'Access);
       add_builtin("print", BBS.lisp.evaluate.io.print'Access);
+      add_builtin("progn", BBS.lisp.evaluate.loops.progn'Access);
       add_builtin("quote", BBS.lisp.evaluate.list.quote'Access);
       add_builtin("rationalp", BBS.lisp.evaluate.pred.return_false'Access);
       add_builtin("read-line", BBS.lisp.evaluate.io.read_line'Access);
       add_builtin("realp", BBS.lisp.evaluate.pred.return_false'Access);
+      add_builtin("return", BBS.lisp.evaluate.loops.return_from'Access);
       add_special("setq", BBS.lisp.evaluate.vars.setq'Access);
       add_builtin("simple-bit-vector-p", BBS.lisp.evaluate.pred.return_false'Access);
       add_builtin("simple-string-p", BBS.lisp.evaluate.pred.simple_string_p'Access);
@@ -386,6 +387,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       break_flag := false;
       while True loop
          BBS.lisp.stack.reset;
+         BBS.lisp.evaluate.set_exit_block(0);
          e := read;
          if e.kind /= E_ERROR then
             r := eval(e);
@@ -793,7 +795,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             new_line;
          end if;
          e := (kind => E_CONS, ps => s);
-      else -- Not a symbol, just return the value.
+      else  --  Not a symbol, just return the value.
          if msg_flag then
             Put("eval_dispatch: Evaluating non-symbol ");
             print(first, False, True);

@@ -1,5 +1,6 @@
 with BBS.lisp.memory;
-package body BBS.lisp.evaluate is
+package body BBS.lisp.evaluate
+with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    --  Take an element_type and checks if it can be interpreted as true or false.
    --
@@ -89,7 +90,8 @@ package body BBS.lisp.evaluate is
    --
    function execute_block(e : element_type) return element_type is
       statement : element_type := e;
-      ret_val : element_type;
+      ret_val   : element_type;
+      list      : cons_index;
    begin
       --
       --  Evaluate the function
@@ -97,18 +99,45 @@ package body BBS.lisp.evaluate is
       ret_val := NIL_ELEM;
       while isList(statement) loop
          BBS.lisp.memory.deref(ret_val);
-         if isList(cons_table(statement.ps).car) then
-            ret_val := eval_dispatch(getList(cons_table(statement.ps).car));
-            if ret_val.kind = E_ERROR then
-               error("block execution", "Operation returned an error");
-               exit;
-            end if;
+         list := getList(statement);
+         if isList(cons_table(list).car) then
+            ret_val := eval_dispatch(getList(cons_table(list).car));
          else
-            ret_val := indirect_elem(cons_table(statement.ps).car);
+            ret_val := indirect_elem(cons_table(list).car);
          end if;
-         statement := cons_table(statement.ps).cdr;
+         if ret_val.kind = E_ERROR then
+            error("block execution", "Operation returned an error");
+            exit;
+         end if;
+         if exit_block > 0 then
+            exit;
+         end if;
+         statement := cons_table(list).cdr;
       end loop;
       return ret_val;
+   end;
+   --
+   --  Set the exit_loop flag
+   --
+   procedure set_exit_block(n : Natural) is
+   begin
+      exit_block := n;
+   end;
+   --
+   --  Decrement the exit_block flag
+   --
+   procedure decrement_exit_block is
+   begin
+      if exit_block > 0 then
+         exit_block := exit_block - 1;
+      end if;
+   end;
+   --
+   --  Returns the exit_block flag
+   --
+   function get_exit_block return Natural is
+   begin
+      return exit_block;
    end;
    --
    --  The following function examines an atom.  If the atom is some sort of

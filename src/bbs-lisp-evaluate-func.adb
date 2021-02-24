@@ -104,7 +104,6 @@ package body BBS.lisp.evaluate.func is
                      elsif (el.kind = E_TEMPSYM) then
                         msg("defun", "Converting tempsym to parameter");
                         str := el.tempsym;
-                        BBS.lisp.memory.ref(str);
                         el := (kind => E_STACK, st_name => str,
                                st_offset => offset);
                         BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE, st_name =>
@@ -342,6 +341,8 @@ package body BBS.lisp.evaluate.func is
             BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
                                  st_name => cons_table(name.ps).car.st_name,
                                  st_value => param_value));
+            BBS.lisp.memory.deref(param_value);
+--            BBS.lisp.memory.deref(param_value);
          else
             error("function evaluation", "Something horrible happened, a parameter is not a parameter");
             return (kind => E_ERROR);
@@ -351,8 +352,12 @@ package body BBS.lisp.evaluate.func is
       --
       --  Evaluate the function
       --
+--      put_line("eval_function: Stack frame built, preparing to evaluate function");
+--      dump_strings;
       ret_val := execute_block(func_body);
       BBS.lisp.stack.exit_frame;
+--      put_line("eval_function: Stack frame removed, after evaluating function");
+--      dump_strings;
       return ret_val;
    end;
 end;

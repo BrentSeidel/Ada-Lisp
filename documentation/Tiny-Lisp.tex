@@ -1389,6 +1389,24 @@ This loops through the provided parameters and prints each one with no newline o
 \subsection{Common Lisp Compatibility}
 The output is not preceded by a newline and followed by a space.  The optional \keyword{output-stream} parameter is not available as there is only one output stream.  Multiple parameters are permitted.  And, there is no implicit binding of parameters to values.
 
+\section{progn}
+Collects operations into a block.
+\subsection{Inputs}
+List of statements to be evaluated.
+\subsection{Output}
+The result of the last statement evaluated.
+\subsection{Example}
+\begin{lstlisting}
+(progn (print "Hello world!")
+       (terpri)
+       (+ 1 3))
+\end{lstlisting}
+Prints the string ``Hello world!'' and returns the value 4.
+\subsection{Description}
+This is used when multiple operations are needed in a place where only a single operation is permitted.  An example is the \keyword{if} operation.
+\subsection{Common Lisp Compatibility}
+This is basically compatible with \cl.
+
 \section{quote}
 Returns a list created from the supplied parameters.
 \subsection{Inputs}
@@ -1452,6 +1470,25 @@ Returns the value \constant{NIL}.
 Since \datatype{real numbers} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
+
+\section{return}
+Exits a block and returns a value
+\subsection{Inputs}
+An optional value to be returned.  If none is specified, \constant{NIL} is assumed.
+\subsection{Output}
+The specified value.
+\subsection{Example}
+\begin{lstlisting}
+(progn (print "Hello world!")
+       (terpri)
+       (return 5)
+       (+ 1 3))
+\end{lstlisting}
+Prints the string ``Hello world!'' and returns the value 5.  The \operation{(+ 1 3)} operation is not evaluated.
+\subsection{Description}
+This is used to provide an early exit from a block.  A common use would be to exit a loop if a certain condition is met.  Internally, a block is defined as any operation that calls the \function{execute\_block} function.  It may be possible in the future to do an equivalent of the \keyword{return-from} operation to exit multiple nested blocks, but \tl{} doesn't support named blocks so any implementation would likely not be compatible with \cl.
+\subsection{Common Lisp Compatibility}
+This is basically compatible with \cl.
 
 \section{setq}
 Assigns a value to a variable.
