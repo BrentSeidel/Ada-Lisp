@@ -58,7 +58,7 @@
   (verify-false (= NIL T) "NIL and T literals are not equal")
   (verify-true (= T (= 1 1)) "T literal is equal to a true condition")
   (verify-false (= T (= 1 2)) "T literal is not equal to a false condition")
-  (verify-true (= NIL (= 1 2)) "NILT literal is equal to a false condition")
+  (verify-true (= NIL (= 1 2)) "NIL literal is equal to a false condition")
   (verify-false (= NIL (= 1 1)) "T literal is not equal to a true condition"))
 (test-bool)
 (setq test-bool 0)
