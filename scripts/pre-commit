@@ -14,7 +14,7 @@ fi
 #  Next run the tests and see if there are any failures
 #
 echo "Running tests"
-if ./lisp < src/test.lisp | grep FAIL
+if ./lisp < src/test.lisp | grep '^...FAIL'
 then
   echo "Test failures detected"
   exit 1

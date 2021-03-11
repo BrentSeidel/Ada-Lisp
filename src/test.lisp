@@ -413,8 +413,50 @@
 (test-lambda 6 (lambda (a1 a2) (* a1 a2)) 2 3)
 (test-lambda T (lambda (a1 a2) (< a1 a2)) #\A #\B)
 (test-lambda T (lambda (a1 a2)(= a1 (* a2 (/ a1 a2)))) 6 2)
-
-(defun check-eq (a b) (if (= a b) (print "Equal") (print "Not-equal")) (terpri))
+(setq test-lambda 0)
+;
+;  Test miscellaneous items.  These have out of band effects, so the
+;  checks mainly that they properly recognize valid and invalid parameters.
+;
+(print "===> Testing miscellaneous operations")
+(terpri)
+(defun test-misc ()
+  (verify-equal (msg T) NIL "Message on returns NIL")
+  (verify-equal (msg NIL) NIL "Message off returns NIL")
+  (verify-true (errorp (msg)) "No parameter to message")
+  (verify-true (errorp (msg "Hello")) "String parameter to message")
+  (verify-equal (sleep 1) NIL "Sleep returns NIL")
+  (verify-true (errorp (sleep)) "No parameter to sleep")
+  (verify-true (errorp (sleep "Wake")) "String parameter to sleep"))
+(test-misc)
+(setq test-misc 0)
+;
+;  Test memory operations.  These read and write arbitrary memory, which
+;  can have unpleasant side effects.  Only the error cases are tested.
+;
+(print "===> Testing memory operation errors")
+(terpri)
+(defun test-mem-err ()
+  (verify-true (errorp (peek8)) "No parameter to peek8")
+  (verify-true (errorp (peek16)) "No parameter to peek16")
+  (verify-true (errorp (peek32)) "No parameter to peek32")
+  (verify-true (errorp (peek8 "Hello")) "String parameter to peek8")
+  (verify-true (errorp (peek16 "Hello")) "String parameter to peek16")
+  (verify-true (errorp (peek32 "Hello")) "String parameter to peek32")
+  (verify-true (errorp (poke8)) "No parameter to poke8")
+  (verify-true (errorp (poke16)) "No parameter to poke16")
+  (verify-true (errorp (poke32)) "No parameter to poke32")
+  (verify-true (errorp (poke8 1)) "One parameter to poke8")
+  (verify-true (errorp (poke16 1)) "One parameter to poke16")
+  (verify-true (errorp (poke32 1)) "One parameter to poke32")
+  (verify-true (errorp (poke8 "Hello" 1)) "String parameter to poke8")
+  (verify-true (errorp (poke16 "Hello" 1)) "String parameter to poke16")
+  (verify-true (errorp (poke32 "Hello" 1)) "String parameter to poke32")
+  (verify-true (errorp (poke8 1 "Hello")) "String parameter to poke8")
+  (verify-true (errorp (poke16 1 "Hello")) "String parameter to poke16")
+  (verify-true (errorp (poke32 1 "Hello")) "String parameter to poke32"))
+(test-mem-err)
+(setq test-mem-err 0)
 ;
 ;  Test error conditions.  There are lots so they will be broken down into smaller
 ;  groups.
