@@ -5,6 +5,7 @@
 *.gcov
 *.gcda
 *.gcno
+summary-cov.txt
 
 # Ada Library Information
 *.ali

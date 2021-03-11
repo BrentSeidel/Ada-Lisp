@@ -1,0 +1,6 @@
+#
+#  Script to do code coverage
+#
+gnatmake -P lispq.gpr -f -cargs -fprofile-arcs -ftest-coverage -largs -fprofile-arcs
+./lisp < src/test.lisp
+gcov obj/*.gcda > summary-cov.txt
