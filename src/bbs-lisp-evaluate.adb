@@ -38,6 +38,21 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       return False;
    end;
    --
+   --  If e is list type, return the index of the head of the list, otherwise
+   --  return NIL_CONS.
+   --
+   function getList(e : element_type) return cons_index is
+   begin
+      if e.kind = E_CONS then
+         return e.ps;
+      else
+         if e.kind = E_VALUE and then e.v.kind = V_LIST then
+            return e.v.l;
+         end if;
+      end if;
+      return NIL_CONS;
+   end;
+   --
    --  This checks to see if the element represents a function call.  The element
    --  is a symbol of type either BUILTIN or LAMBDA.
    --
@@ -74,19 +89,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       return False;
    end;
    --
-   --  Note that this only works if e is a list type.
-   --
-   function getList(e : element_type) return cons_index is
-   begin
-      if e.kind = E_CONS then
-         return e.ps;
-      else
-         if e.kind = E_VALUE and then e.v.kind = V_LIST then
-            return e.v.l;
-         end if;
-      end if;
-      return NIL_CONS;
-   end;
+   --  Evaluate a list of statements.
    --
    function execute_block(e : element_type) return element_type is
       statement : element_type := e;

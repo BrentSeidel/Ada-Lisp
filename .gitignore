@@ -1,6 +1,11 @@
 # Object file
 *.o
 
+# Code coverage
+*.gcov
+*.gcda
+*.gcno
+
 # Ada Library Information
 *.ali
 *.stderr

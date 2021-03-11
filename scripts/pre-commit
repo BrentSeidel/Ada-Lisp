@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+#  First try to build the lisp software.
+#
+echo "Building software"
+if gprbuild lispq.gpr
+then
+  echo "Build succeeded"
+else
+  echo "Error occured during build - Aborting"
+  exit 1
+fi
+#
+#  Next run the tests and see if there are any failures
+#
+echo "Running tests"
+if ./lisp < src/test.lisp | grep FAIL
+then
+  echo "Test failures detected"
+  exit 1
+fi
+echo "No test failures detected"
+exit 0
+
