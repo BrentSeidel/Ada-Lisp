@@ -99,6 +99,8 @@
   (verify-false (= "A" "B") "not A = B")
   (verify-true (< "A" "B") "A < B")
   (verify-false (> "A" "B") "not A > B")
+  (verify-false (< "C" "B") "C < B")
+  (verify-true (> "C" "B") "not C > B")
   (verify-true (/= "A" "B") "A /= B")
   (verify-false (= "A" "AA") "not A = AA")
   (verify-true (< "A" "AA") "A < AA")
@@ -106,6 +108,40 @@
   (verify-true (/= "A" "AA") "A /= AA"))
 (test-str-cmp)
 (setq test-str-cmp 0)
+;
+;  Test boolean comparisons
+;
+(print "===> Testing boolean comparisons")
+(terpri)
+(defun test-bool-cmp ()
+  (verify-true (= T T) "True is true")
+  (verify-false (/= T T) "not T /= T")
+  (verify-false (< T T) "not T < T")
+  (verify-false (> T T) "not T > T")
+  (verify-true (= NIL NIL) "False is false")
+  (verify-false (/= NIL NIL) "not NIL /= NIL")
+  (verify-false (< NIL NIL) "not NIL < NIL")
+  (verify-false (> NIL NIL) "not NIL > NIL")
+  (verify-true (> T NIL) "T > NIL")
+  (verify-true (< NIL T) "NIL < T")
+  (verify-false (= NIL T) "not NIL = T")
+  (verify-true (/= T NIL) "T /= NIL")
+  (verify-false (> NIL T) "not NIL > T")
+  (verify-false (< T NIL) "not T < NIL"))
+(test-bool-cmp)
+(setq test-bool-cmp 0)
+;
+;  Test symbol comparisons
+;
+(print "===> Testing symbol comparisons")
+(terpri)
+(defun test-sym-comp ()
+  (verify-true (= 'print 'print) "Print is equal to itself")
+  (verify-false (/= 'print 'print) "not print /= print")
+  (verify-false (= 'print 'terpri) "not print = terpri")
+  (verify-true (/= 'terpri 'print) "terpri is not print"))
+(test-sym-comp)
+(setq test-sym-comp 0)
 ;
 ;  Test basic math functions
 ;
@@ -243,7 +279,8 @@
 (test-logic)
 (setq test-logic 0)
 ;
-;  Test character data type and operations
+;  Test character data type and operations.  Some of these tests assume
+;  ASCII encoding.
 ;
 (print "===> Testing characters")
 (terpri)
@@ -259,7 +296,15 @@
   (verify-equal (char-code #\A) 65 "A has character code 65")
   (verify-equal (code-char 66) #\B "Character code 66 is B")
   (verify-equal (char-downcase #\A) #\a "Lower case A is a")
-  (verify-equal (char-upcase #\a) #\A "Upper case a is A"))
+  (verify-equal (char-upcase #\a) #\A "Upper case a is A")
+  (verify-equal (char-code #\space) 32 "#\space represents a space")
+  (verify-equal (char-code #\newline) 10 "#\newline represents a line feed")
+  (verify-equal (char-code #\tab) 9 "#\tab represents a tab")
+  (verify-equal (char-code #\page) 12 "#\page represents a form feed")
+  (verify-equal (char-code #\rubout) 127 "#\rubout represents a delete")
+  (verify-equal (char-code #\linefeed) 10 "#\linefeed represents a line feed")
+  (verify-equal (char-code #\return) 13 "#\return represents a carriage return")
+  (verify-equal (char-code #\backspace) 8 "#\backspace represents a backspace"))
 (test-char)
 (setq test-char 0)
 ;
@@ -388,7 +433,9 @@
   (verify-true (errorp (< 1 "A")) "Mismatched parameters to less-than")
   (verify-true (errorp (>)) "No parameters to greater-than")
   (verify-true (errorp (> 1)) "One parameters to greater-than")
-  (verify-true (errorp (> 1 "A")) "Mismatched parameters to greater-than"))
+  (verify-true (errorp (> 1 "A")) "Mismatched parameters to greater-than")
+  (verify-true (errorp (> 'print 'terpri)) "Symbols are not ordered")
+  (verify-true (errorp (< 'print 'terpri)) "Symbols are not ordered"))
 (test-cmp-err)
 (setq test-cmp-err 0)
 ;
@@ -510,6 +557,14 @@
   (verify-true (errorp (concatenate 'string "Hello " 1)) "Wrong type"))
 (test-concatenate-err)
 (setq test-concatenate-err 0)
+;
+(print "===> Testing condition errors")
+(terpri)
+(defun test-cond-err ()
+  (verify-true (errorp (if)) "No parameters to if")
+)
+(test-cond-err)
+(setq test-cond-err 0)
 ;
 ;(dump)
 (print "===> Testing complete")
