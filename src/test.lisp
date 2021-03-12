@@ -1,8 +1,9 @@
 ;
-;  Test functions for the Tiny Lisp Interpreter.  Currently, the cons table
-;  probably aren't large enough to load all this code at once.  To run a test
-;  set, first start the Lisp interpreter, then load the support functions.
-;  Finally load and run the desired test.
+;  Test functions for the Tiny Lisp Interpreter.  This file has been
+;  designed so that it can be sourced to the lisp interpreter via a
+;  command like:
+;
+;  ./lisp < test.lisp
 ;
 ;  These tests more or less proceed in increasing complexity where later tests
 ;  depend on items from earlier tests working correctly.  There are some things
@@ -443,7 +444,8 @@
 (setq test-lambda 0)
 ;
 ;  Test miscellaneous items.  These have out of band effects, so the
-;  checks mainly that they properly recognize valid and invalid parameters.
+;  checks mainly test that they properly recognize valid and invalid
+;  parameters.
 ;
 (print "===> Testing miscellaneous operations")
 (terpri)
@@ -457,6 +459,26 @@
   (verify-true (errorp (sleep "Wake")) "String parameter to sleep"))
 (test-misc)
 (setq test-misc 0)
+;
+;  Test I/O operations.  These have out of band effects, so the
+;  checks mainly test that proper values are returned and that errors
+;  don't occur for valid inputs.
+;
+(print "===> Testing I/O operations")
+(terpri)
+(defun test-io ()
+  (verify-equal NIL (print 1) "Print returns NIL")
+  (verify-equal NIL (print #\1) "Print returns NIL")
+  (verify-equal NIL (print "1") "Print returns NIL")
+  (verify-equal NIL (print 'print) "Print returns NIL")
+  (verify-equal NIL (print (1 2 3)) "Print returns NIL")
+  (verify-equal NIL (terpri) "Terpri returns NIL")
+  (verify-equal NIL (fresh-line) "Fresh-line returns NIL")
+  (verify-equal NIL (progn (print "Hello") (fresh-line)) "Fresh-line returns NIL")
+  (verify-equal "Test" (read-line) "Text read from read-line"))
+(test-io)
+Test
+(setq test-io 0)
 ;
 ;  Test memory operations.  These read and write arbitrary memory, which
 ;  can have unpleasant side effects.  Only the error cases are tested.
@@ -513,12 +535,20 @@
 (defun test-math-err ()
   (verify-true (errorp (+)) "No parameters to addition")
   (verify-true (errorp (+ 1 "A")) "Mismatched parameters to addition")
+  (verify-true (errorp (+ 1 (msg))) "Error parameter to addition")
+  (verify-true (errorp (+ 1 (1 2 3))) "Error parameter to addition")
   (verify-true (errorp (-)) "No parameters to subtraction")
   (verify-true (errorp (- 1 "A")) "Mismatched parameters to subtraction")
+  (verify-true (errorp (- 1 (msg))) "Error parameter to subtraction")
+  (verify-true (errorp (- 1 (1 2 3))) "Error parameter to subtraction")
   (verify-true (errorp (/)) "No parameters to division")
   (verify-true (errorp (/ 1 "A")) "Mismatched parameters to division")
+  (verify-true (errorp (/ 1 (msg))) "Error parameter to division")
+  (verify-true (errorp (/ 1 (1 2 3))) "Error parameter to division")
   (verify-true (errorp (*)) "No parameters to multiplication")
-  (verify-true (errorp (* 1 "A")) "Mismatched parameters to multiplication"))
+  (verify-true (errorp (* "A" 1)) "Mismatched parameters to multiplication")
+  (verify-true (errorp (* (msg) 1)) "Error parameter to multiplication")
+  (verify-true (errorp (* (1 2 3) 1)) "Error parameter to multiplication"))
 (test-math-err)
 (setq test-math-err 0)
 ;
@@ -527,12 +557,18 @@
 (defun test-log-err ()
   (verify-true (errorp (not)) "No parameter to NOT")
   (verify-true (errorp (not "A")) "Invalid parameter type to NOT")
+  (verify-true (errorp (not (msg))) "Error parameter type to NOT")
+  (verify-true (errorp (not (1 2 3))) "List parameter type to NOT")
   (verify-true (errorp (and)) "No parameter to AND")
   (verify-true (errorp (and "A")) "Invalid parameter type to AND")
   (verify-true (errorp (and T 1)) "Mixed parameter types to AND")
+  (verify-true (errorp (and T (msg))) "Error parameter type to AND")
+  (verify-true (errorp (and T (1 2 3))) "List parameter type to AND")
   (verify-true (errorp (or)) "No parameter to OR")
   (verify-true (errorp (or "A")) "Invalid parameter type to OR")
-  (verify-true (errorp (or 1 NIL)) "Mixed parameter types to OR"))
+  (verify-true (errorp (or 1 NIL)) "Mixed parameter types to OR")
+  (verify-true (errorp (or NIL (msg))) "Error parameter type to OR")
+  (verify-true (errorp (or 0 (1 2 3))) "List parameter type to OR"))
 (test-log-err)
 (setq test-log-err 0)
 ;

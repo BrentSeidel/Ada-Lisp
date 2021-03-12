@@ -21,6 +21,8 @@ package body BBS.lisp.evaluate.bool is
          v := p1.v;
       else
          error("eval_not", "Parameter does not evaluate to a value");
+         e := (kind => E_ERROR);
+         return;
       end if;
       if v.kind = V_BOOLEAN then
          e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => not v.b));
