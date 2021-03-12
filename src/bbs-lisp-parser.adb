@@ -304,20 +304,17 @@ package body bbs.lisp.parser is
                flag := parse_char(ptr, buff, last, char);
                if flag then
                   e := (kind => E_VALUE, v => (kind => V_CHARACTER, c => char));
-                  if cons_table(head).car.kind = E_NIL then
-                     cons_table(head).car := e;
-                  else
-                     flag := append_to_list(head, e);
-                     if not flag then
-                        error("list", "Failed appending character to list");
-                        return flag;
-                     end if;
-                  end if;
                else
-                  error("list", "Unable to parse character literal");
-                  BBS.lisp.memory.deref(current);
-                  BBS.lisp.memory.deref(head);
-                  return False;
+                  e := (kind => E_ERROR);
+               end if;
+               if cons_table(head).car.kind = E_NIL then
+                  cons_table(head).car := e;
+               else
+                  flag := append_to_list(head, e);
+                  if not flag then
+                     error("list", "Failed appending character to list");
+                     return flag;
+                  end if;
                end if;
             else
                error("list", "Unrecognized special form");
@@ -334,7 +331,7 @@ package body bbs.lisp.parser is
             if flag then
                e := (kind => E_VALUE, v => (kind => V_STRING, s => str));
                if cons_table(head).car.kind = E_NIL then
-                  cons_table(head).car := (kind => E_VALUE, v => (kind => V_STRING, s => str));
+                  cons_table(head).car := e;
                else
                   flag := append_to_list(head, e);
                   if not flag then
@@ -428,7 +425,7 @@ package body bbs.lisp.parser is
          item := item + 1;
       end loop;
       s_expr := head;
-      return flag;
+      return True;
    end;
    --
    --  Parse a symbol.  The boolean values "T" and "NIL" are also detected here.
