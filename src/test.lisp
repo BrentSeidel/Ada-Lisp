@@ -427,7 +427,10 @@
 (print "==> Testing concatenation")
 (terpri)
 (defun test-concatenate ()
-  (verify-equal "Hello world!" (concatenate 'string "Hello" " " "world" "!") "String concatenation"))
+  (verify-equal "Hello world!" (concatenate 'string "Hello" " " "world" "!") "String concatenation")
+  (verify-false (errorp (concatenate 'list (1 2 3) (4 5 6))) "Concatenate lists")
+  (verify-equal 6 (length (concatenate 'list (1 2 3) (4 5 6))) "Concatenate lists")
+  )
 (test-concatenate)
 (setq test-concatenate 0)
 ;
@@ -475,9 +478,10 @@
   (verify-equal NIL (terpri) "Terpri returns NIL")
   (verify-equal NIL (fresh-line) "Fresh-line returns NIL")
   (verify-equal NIL (progn (print "Hello") (fresh-line)) "Fresh-line returns NIL")
-  (verify-equal "Test" (read-line) "Text read from read-line"))
+  (verify-equal "Testing a longer line that should be split across fragments."
+    (read-line) "Text read from read-line"))
 (test-io)
-Test
+Testing a longer line that should be split across fragments.
 (setq test-io 0)
 ;
 ;  Test memory operations.  These read and write arbitrary memory, which
@@ -526,7 +530,16 @@ Test
   (verify-true (errorp (> 1)) "One parameters to greater-than")
   (verify-true (errorp (> 1 "A")) "Mismatched parameters to greater-than")
   (verify-true (errorp (> 'print 'terpri)) "Symbols are not ordered")
-  (verify-true (errorp (< 'print 'terpri)) "Symbols are not ordered"))
+  (verify-true (errorp (< 'print 'terpri)) "Symbols are not ordered")
+  (verify-true (errorp (= (msg) 1)) "Error in first parameter")
+  (verify-true (errorp (/= 1 (msg))) "Error in second parameter")
+  (verify-true (errorp (< (1 2 3) 1)) "List in first parameter")
+  (verify-true (errorp (> 1 (1 2 3))) "List in second parameter")
+  (verify-true (errorp (if (msg) 1 2)) "Error in if condition")
+  (verify-true (errorp (if T (msg) 2)) "Error in if true branch")
+  (verify-true (errorp (if NIL 1 (msg))) "Error in if false branch")
+  (verify-true (errorp (if)) "No parameters to if")
+)
 (test-cmp-err)
 (setq test-cmp-err 0)
 ;
@@ -666,19 +679,27 @@ Test
   (verify-true (errorp (concatenate 'string)) "One parameter")
   (verify-true (errorp (concatenate 'print "Hello " "World")) "Invalid type")
   (verify-true (errorp (concatenate 'list (1 2 3) "world")) "Wrong type")
-  (verify-false (errorp (concatenate 'list (1 2 3) (4 5 6))) "Concatenate lists")
   (verify-true (errorp (concatenate 'string (1 2 3) "world")) "Wrong type")
   (verify-true (errorp (concatenate 'string "Hello " 1)) "Wrong type"))
 (test-concatenate-err)
 (setq test-concatenate-err 0)
 ;
-(print "===> Testing condition errors")
+;  Testing function errors is a bit difficult because defining functions
+;  within functions is not supported.
+;
+(print "===> Testing function errors")
 (terpri)
-(defun test-cond-err ()
-  (verify-true (errorp (if)) "No parameters to if")
-)
-(test-cond-err)
-(setq test-cond-err 0)
+(defun test1 (a) (print (+ a 1)))
+(verify-true (errorp (test1)) "Function called with wrong number of parameters")
+(verify-true (errorp (defun)) "No parameters to defun")
+(verify-true (errorp (defun print)) "Redefine a builtin")
+(verify-true (errorp (defun 3)) "Function name must be a symbol")
+(verify-true (errorp (defun test1)) "Only function name provided")
+(verify-true (errorp (defun test1 1 (print (+ 1 1)))) "Not a parameter")
+;(verify-true (errorp (defun test1 ((1)) (print (+ 1 1)))) "Not a parameter")
+(verify-true (errorp (lambda)) "Lambda with no parameters")
+;(verify-true (errorp (lambda 1)) "Lambda with value parameter")
+;(verify-true (errorp (lambda (1))) "lambda with value parameter")
 ;
 ;(dump)
 (print "===> Testing complete")

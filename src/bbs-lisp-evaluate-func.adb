@@ -218,17 +218,18 @@ package body BBS.lisp.evaluate.func is
                end if;
                temp := params;
                BBS.lisp.stack.start_frame;
-               while temp.kind = E_CONS loop
-                  if cons_table(temp.ps).car.kind = E_CONS then
-                     error("lambda", "A parameter cannot be a list.");
-                     e := (kind => E_ERROR);
-                     return;
-                  end if;
-                  declare
-                     el : element_type := cons_table(temp.ps).car;
-                     str : string_index;
-                     offset : Natural := 1;
-                  begin
+               declare
+                  el : element_type;
+                  str : string_index;
+                  offset : Natural := 1;
+               begin
+                  while temp.kind = E_CONS loop
+                     if cons_table(temp.ps).car.kind = E_CONS then
+                        error("lambda", "A parameter cannot be a list.");
+                        e := (kind => E_ERROR);
+                        return;
+                     end if;
+                     el :=  cons_table(temp.ps).car;
                      if (el.kind = E_SYMBOL) then
                         str := symb_table(el.sym).str;
                         msg("lambda", "Converting symbol to parameter");
@@ -247,12 +248,14 @@ package body BBS.lisp.evaluate.func is
                         error("lambda", "Can't convert item into a parameter.");
                         print(el, False, True);
                         Put_Line("Item is of kind " & ptr_type'Image(el.kind));
+                        e := (kind => E_ERROR);
+                        return;
                      end if;
                      offset := offset + 1;
                      cons_table(temp.ps).car := el;
-                  end;
-                  temp := cons_table(temp.ps).cdr;
-               end loop;
+                     temp := cons_table(temp.ps).cdr;
+                  end loop;
+               end;
             else
                error("lambda", "Something went horribly wrong and lambda did not get a list");
                e := (kind => E_ERROR);
@@ -342,7 +345,6 @@ package body BBS.lisp.evaluate.func is
                                  st_name => cons_table(name.ps).car.st_name,
                                  st_value => param_value));
             BBS.lisp.memory.deref(param_value);
---            BBS.lisp.memory.deref(param_value);
          else
             error("function evaluation", "Something horrible happened, a parameter is not a parameter");
             return (kind => E_ERROR);
@@ -352,12 +354,8 @@ package body BBS.lisp.evaluate.func is
       --
       --  Evaluate the function
       --
---      put_line("eval_function: Stack frame built, preparing to evaluate function");
---      dump_strings;
       ret_val := execute_block(func_body);
       BBS.lisp.stack.exit_frame;
---      put_line("eval_function: Stack frame removed, after evaluating function");
---      dump_strings;
       return ret_val;
    end;
 end;
