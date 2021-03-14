@@ -93,13 +93,9 @@ package body bbs.lisp.parser is
       --
       elsif BBS.lisp.utilities.isDigit(buff(ptr)) or
         ((buff(ptr) = '-') and BBS.lisp.utilities.isDigit(buff(ptr + 1))) then
-         flag := int(ptr, buff, last, value);
-         if flag then
-            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
-         else
-            error("parse", "Error parsing number");
-            e := (kind => E_ERROR);
-         end if;
+         int(ptr, buff, last, value);
+         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+         flag := true;
          qtemp := False;
       --
       -- String
@@ -120,13 +116,9 @@ package body bbs.lisp.parser is
       elsif buff(ptr) = '#' then
          ptr := ptr + 1;
          if (buff(ptr) = 'x') or (buff(ptr) = 'X') then
-            flag := hex(ptr, buff, last, value);
-            if flag then
-               e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
-            else
-               error("parse", "Error parsing hexidecimal integer");
-               e := (kind => E_ERROR);
-            end if;
+            hex(ptr, buff, last, value);
+            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+            flag := true;
          elsif buff(ptr) = '\' then
             --
             --  Character literal
@@ -251,23 +243,17 @@ package body bbs.lisp.parser is
          --
          elsif BBS.lisp.utilities.isDigit(buff(ptr)) or
            ((buff(ptr) = '-') and BBS.lisp.utilities.isDigit(buff(ptr + 1))) then
-            flag := int(ptr, buff, last, value);
-            if flag then
-               e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
-               if cons_table(head).car.kind = E_NIL then
-                  cons_table(head).car := e;
-               else
-                  flag := append_to_list(head, e);
-                  if not flag then
-                     error("list", "Failed appending decimal integer to list");
-                     return flag;
-                  end if;
-               end if;
+            int(ptr, buff, last, value);
+            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+            flag := true;
+            if cons_table(head).car.kind = E_NIL then
+               cons_table(head).car := e;
             else
-               error ("list", "Error parsing integer");
-               BBS.lisp.memory.deref(current);
-               BBS.lisp.memory.deref(head);
-               return False;
+               flag := append_to_list(head, e);
+               if not flag then
+                  error("list", "Failed appending decimal integer to list");
+                  return flag;
+               end if;
             end if;
             qtemp := False;
          --
@@ -279,23 +265,17 @@ package body bbs.lisp.parser is
                --
                --  Hexidecimal number
                --
-               flag := hex(ptr, buff, last, value);
-               if flag then
-                  e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
-                  if cons_table(head).car.kind = E_NIL then
-                     cons_table(head).car := e;
-                  else
-                  flag := append_to_list(head, e);
-                     if not flag then
-                        error("list", "Failed appending hexidecimal integer to list");
-                        return flag;
-                     end if;
-                  end if;
+               hex(ptr, buff, last, value);
+               e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+               flag := true;
+               if cons_table(head).car.kind = E_NIL then
+                  cons_table(head).car := e;
                else
-                  error("list", "Error parsing hexidecimal number");
-                  BBS.lisp.memory.deref(current);
-                  BBS.lisp.memory.deref(head);
-                  return False;
+                  flag := append_to_list(head, e);
+                  if not flag then
+                     error("list", "Failed appending hexidecimal integer to list");
+                     return flag;
+                  end if;
                end if;
             elsif buff(ptr) = '\' then
                --
@@ -478,8 +458,7 @@ package body bbs.lisp.parser is
    --
    --  Parse an integer.
    --
-   function int(ptr : in out integer; buff : String; last : Integer; value : out int32)
-                return Boolean is
+   procedure int(ptr : in out integer; buff : String; last : Integer; value : out int32) is
       accumulate : int32 := 0;
       neg : Boolean := False;
    begin
@@ -496,13 +475,11 @@ package body bbs.lisp.parser is
       else
          value := accumulate;
       end if;
-      return True;
    end;
    --
    --  Parse an integer in hexidecimal notation.
    --
-   function hex(ptr : in out integer; buff : String; last : Integer; value : out int32)
-                return Boolean is
+   procedure hex(ptr : in out integer; buff : String; last : Integer; value : out int32) is
       accumulate : uint32 := 0;
    begin
       ptr := ptr + 1;
@@ -511,7 +488,6 @@ package body bbs.lisp.parser is
          ptr := ptr + 1;
       end loop;
       value := uint32_to_int32(accumulate);
-      return True;
    end;
    --
    --  Parse strings.  Note that currently strings cannot be broken across lines.

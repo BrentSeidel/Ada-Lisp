@@ -38,15 +38,13 @@ private
    --
    --  Subfunction for parsing integers
    --
-   function int(ptr : in out Integer; buff : String; last : Integer; value : out int32)
-                return Boolean
+   procedure int(ptr : in out Integer; buff : String; last : Integer; value : out int32)
      with Global => Null;
    --
    --  Hexidecimal numbers are read in as 32 bit unsigned integers and conerted
    --  to signed 32 bit integers using an unchecked conversion.
    --
-   function hex(ptr : in out Integer; buff : String; last : Integer; value : out int32)
-                return Boolean
+   procedure hex(ptr : in out Integer; buff : String; last : Integer; value : out int32)
      with Global => Null;
    --
    --  Parse strings
