@@ -57,13 +57,7 @@ package body BBS.lisp.evaluate.symb is
       --  the first version of this function, the parameters were swapped.  This
       --  was not consistent with Common Lisp and has been changed.
       --
-      if s1 > NIL_CONS then
-         t2 := first_value(s1);
-      else
-         error("coerce", "Cannot compare a single element.");
-         e := (kind => E_ERROR);
-         return;
-      end if;
+      t2 := first_value(s1);
       if t2.kind = E_ERROR then
          error("coerce", "Error reported evaluating second parameter.");
          e := t2;
@@ -342,7 +336,7 @@ package body BBS.lisp.evaluate.symb is
             src_cons : cons_index := NIL_CONS;
          begin
             if s1 = NIL_CONS then
-               error("concatenate", "Cannot compare a single element.");
+               error("concatenate", "Cannot concatenate a single element.");
                e := (kind => E_ERROR);
                return;
             end if;
@@ -390,7 +384,6 @@ package body BBS.lisp.evaluate.symb is
             return;
          end;
       end if;
-      e := (kind => E_ERROR);
    end;
    --
 end;
