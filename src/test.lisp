@@ -388,6 +388,7 @@
   (verify-true (functionp test-pred) "functionp is true for user defined functions")
   (verify-true (functionp functionp) "functionp is true for builtin functions")
   (verify-true (functionp setq) "functionp is true for special functions")
+  (verify-true (functionp (lambda (a b) (+ a b))) "functionp is true for lambda functions")
   (verify-false (functionp 1) "functionp is false for non-functions")
   (verify-true (integerp 3) "integerp is true for integers")
   (verify-false (integerp #\A) "integerp is false for non-integers")
@@ -511,6 +512,23 @@ Testing a longer line that should be split across fragments.
   (verify-true (errorp (poke32 1 "Hello")) "String parameter to poke32"))
 (test-mem-err)
 (setq test-mem-err 0)
+;
+;  Test list operations.  Since list comparisons aren't currently suppored,
+;  these aren't quite as nice as they might be.
+;
+(print "===> Testing list operations")
+(terpri)
+(defun test-list ()
+  (verify-equal 3 (length (1 2 3)) "Length of a raw list")
+  (verify-equal 4 (length (quote "a" "B" 3 4)) "Length of a quoted list")
+  (verify-equal 5 (car (5 1 2 3 4)) "CAR of a list")
+  (verify-equal 4 (length (cdr (5 6 7 8 9))) "Length of CDR")
+  (verify-equal 2 (length (cons (2 3 4) 1)) "CONS of elements")
+  (verify-equal 1 (car (cons 1 (2 3 4))) "CAR of a CONS")
+  (verify-equal 2 (car (cdr (1 2 3 4))) "CAR of a CDR of a list")
+)
+(test-list)
+(setq test-list 0)
 ;
 ;  Test error conditions.  There are lots so they will be broken down into smaller
 ;  groups.
