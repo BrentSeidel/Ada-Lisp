@@ -24,5 +24,5 @@ package BBS.lisp.evaluate.list is
    --
    --  Append one list to another (currently unimplemented).
    --
-   procedure append(e : out element_type; s : cons_index);
+--   procedure append(e : out element_type; s : cons_index);
 end;

@@ -10,7 +10,7 @@ package body BBS.lisp.evaluate.list is
       p2 : element_type;  --  Second parameter
    begin
       if s = NIL_CONS then
-         error("cons(e", "Internal error.  Should have a list.");
+         error("cons", "Internal error.  Should have a list.");
          e := (kind => E_ERROR);
          return;
       end if;
@@ -31,7 +31,7 @@ package body BBS.lisp.evaluate.list is
          cons_table(s1).cdr := p2;
          BBS.lisp.memory.ref(p1);
          BBS.lisp.memory.ref(p2);
-         e := (kind => E_VALUE, v => (kind => V_LIST, l => s));
+         e := (kind => E_VALUE, v => (kind => V_LIST, l => s1));
       else
          error("cons", "Unable to allocate cons cell");
          e := (kind => E_ERROR);
@@ -139,13 +139,12 @@ package body BBS.lisp.evaluate.list is
       e := (kind => E_VALUE, v => (kind => V_LIST, l => head));
    end;
    --
-   --  Append one list to another.
+   --  Append one list to another.  Not yet implemented.
    --
-   procedure append(e : out element_type; s : cons_index) is
-      pragma Unreferenced (s);
-   begin
-      e := (kind => E_ERROR);
-   end;
-
+--   procedure append(e : out element_type; s : cons_index) is
+--      pragma Unreferenced (s);
+--   begin
+--      e := (kind => E_ERROR);
+--   end;
    --
 end;
