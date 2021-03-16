@@ -12,6 +12,7 @@ package body BBS.lisp.evaluate.loops is
       list : element_type; --  List of operations to execute
       t : element_type := NIL_ELEM;
       temp : element_type;
+      error_occured : Boolean := False;
    begin
       if s > cons_index'First then
          cond := cons_table(s).car;
@@ -29,7 +30,7 @@ package body BBS.lisp.evaluate.loops is
             e := temp;
             return;
          end if;
-         while isTrue(temp) loop
+         while isTrue(temp) and not error_occured loop
             BBS.lisp.memory.deref(t);
             BBS.lisp.memory.deref(temp);
             --
@@ -39,22 +40,24 @@ package body BBS.lisp.evaluate.loops is
             if t.kind = E_ERROR then
                error("dowhile", "Error occured during evaluation of body");
                e := t;
-               return;
-            end if;
-            if isList(cond) then
-               temp := eval_dispatch(getList(cond));
+               error_occured := True;
             else
-               temp := indirect_elem(cond);
-            end if;
-            if temp.kind = E_ERROR then
-               error("dowhile", "Error occured during evaluation of condition");
-               e := temp;
-               return;
+               if isList(cond) then
+                  temp := eval_dispatch(getList(cond));
+               else
+                  temp := indirect_elem(cond);
+               end if;
+               if temp.kind = E_ERROR then
+                  error("dowhile", "Error occured during evaluation of condition");
+                  e := temp;
+                  error_occured := True;
+               end if;
             end if;
             if get_exit_block > 0 then
                decrement_exit_block;
                exit;
             end if;
+            exit when error_occured;
          end loop;
          BBS.lisp.memory.deref(temp);
       else
@@ -62,7 +65,9 @@ package body BBS.lisp.evaluate.loops is
          e := (kind => E_ERROR);
          return;
       end if;
-      e := t;
+      if not error_occured then
+         e := t;
+      end if;
    end;
    --
    --  Evaluates a dotimes command.  The first item contains up to three elements,
@@ -97,25 +102,37 @@ package body BBS.lisp.evaluate.loops is
                --
                --  Extract local variable, limit, and optional result
                --
-               limits := cons_table(limits.ps).car;
-               if limits.kind = E_CONS then
-                  var := cons_table(limits.ps).car;
-                  rest := cons_table(limits.ps).cdr;
+               if not isList(limits) then
+                  error("dotimes", "No parameters provided");
+                  e := (kind => E_ERROR);
+                  return;
+               end if;
+               limits := cons_table(getList(limits)).car;
+               if isList(limits) then
+                  var := cons_table(getList(limits)).car;
+                  rest := cons_table(getList(limits)).cdr;
                else
                   error("dotimes", "List not provided for limits.");
                   e := (kind => E_ERROR);
                   return;
                end if;
-               if rest.kind = E_CONS then
-                  limit := cons_table(rest.ps).car;
-                  if limit.kind = E_CONS then
-                     limit := eval_dispatch(limit.ps);
+               if isList(var) then
+                  error("dotimes", "The loop variable cannot be a list.");
+                  BBS.lisp.memory.deref(var);
+                  cons_table(getList(limits)).car := (Kind => E_ERROR);
+                  e := (kind => E_ERROR);
+                  return;
+               end if;
+               if isList(rest) then
+                  limit := cons_table(getList(rest)).car;
+                  if isList(limit) then
+                     limit := eval_dispatch(getList(limit));
                   else
                      limit := indirect_elem(limit);
                   end if;
                   result := cons_table(rest.ps).cdr;
-                  if result.kind = E_CONS then
-                     result := cons_table(result.ps).car;
+                  if isList(result) then
+                     result := cons_table(getList(result)).car;
                   end if;
                else
                   error("dotimes", "Loop limit not provided.");
@@ -128,11 +145,6 @@ package body BBS.lisp.evaluate.loops is
                --  First convert the loop variable to a local variable, if not already
                --  done.
                --
-               if var.kind = E_CONS then
-                  error("dotimes", "The loop variable cannot be a list.");
-                  e := (kind => E_ERROR);
-                  return;
-               end if;
                declare
                   str : string_index;
                begin

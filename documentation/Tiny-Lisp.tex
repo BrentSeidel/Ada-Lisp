@@ -908,6 +908,26 @@ This creates a user defined function.
 \subsection{Common Lisp Compatibility}
 This is more or less a subset of \cl, except that there are probably many corner cases where things don't quite match..
 
+\section{dotimes}
+Repeats a series of statements a specific number of times.
+\subsection{Inputs}
+Two or more values.  The first value is a list containing a local variable and the numb, the remaining values are the statements to be executed the specified number of times.
+\subsection{Output}
+A constant \constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(setq sum 0)
+(dotimes (x 10)
+  (print "The sum is " sum)
+  (terpri)
+  (setq sum (+ sum x)))
+\end{lstlisting}
+Returns the constant \constant{NIL}.
+\subsection{Description}
+On each pass through the loop, the local variable is set to the next value in the range 0 to the loop limit.  The supplied statements are evaluated.  It is not recommended to change the value of the local variable in the body of the loop.
+\subsection{Common Lisp Compatibility}
+The result-form, declarations, and tags are not supported.
+
 \section{dowhile}
 Repeats a series of statements while a condition is \constant{T}.
 \subsection{Inputs}
@@ -928,26 +948,6 @@ Returns the value of the last statement in the loop, \keyword{min}
 The condition is evaluated on each pass through the loop.  If the condition evaluates to \constant{T}, the rest of the statements are executed.  If the condition evaluates to \constant{NIL}, the loop is exited.  Thus, if the first time the condition is evaluated it returns \constant{NIL}, the statements in the loop are never executed.
 \subsection{Common Lisp Compatibility}
 This doesn't appear to exist in \cl.  It is similar to the \cl{} \keyword{do} loop, except that the condition comes first.
-
-\section{dotimes}
-Repeats a series of statements a specific number of times.
-\subsection{Inputs}
-Two or more values.  The first value is a list containing a local variable and the numb, the remaining values are the statements to be executed the specified number of times.
-\subsection{Output}
-A constant \constant{NIL}.
-\subsection{Example}
-\begin{lstlisting}
-(setq sum 0)
-(dotimes (x 10)
-  (print "The sum is " sum)
-  (terpri)
-  (setq sum (+ sum x)))
-\end{lstlisting}
-Returns the constant \constant{NIL}.
-\subsection{Description}
-On each pass through the loop, the local variable is set to the next value in the range 0 to the loop limit.  The supplied statements are evaluated.  It is not recommended to change the value of the local variable in the body of the loop.
-\subsection{Common Lisp Compatibility}
-The result-form, declarations, and tags are not supported.
 
 \section{dump}
 Prints out some internal tables.
