@@ -109,7 +109,7 @@ package body BBS.lisp.evaluate.str is
       end if;
       str := p1.v.s;
       index := Integer(p2.v.i) + 1;
-      if index < 0 then
+      if index < 1 then
          error("char", "Index out of range");
          e := (kind => E_ERROR);
          return;
@@ -282,7 +282,7 @@ package body BBS.lisp.evaluate.str is
       else
          stop := -1;
       end if;
-      if start < 0 then
+      if start < 1 then
          error("subseq", "Starting character must not be less than 0.");
          BBS.lisp.memory.deref(p1);
          e := (kind => E_ERROR);
