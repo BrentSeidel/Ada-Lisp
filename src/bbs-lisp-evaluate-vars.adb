@@ -142,20 +142,26 @@ package body BBS.lisp.evaluate.vars is
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
             return;
          when PH_PARSE_BEGIN =>
+            BBS.lisp.stack.start_frame;
             if s > NIL_CONS then
                --
                --  First process the list of local variables
                --
-               locals := cons_table(s).cdr;  --  Should be local variable list.
-               if locals.kind = E_CONS then
-                  locals := cons_table(locals.ps).car;
+               list := cons_table(s).cdr;  --  Should be local variable list.
+               if isList(list) then
+                  locals := cons_table(getList(list)).car;
                else
                   error("let", "Improper parameters.");
                   e := (kind => E_ERROR);
                   return;
                end if;
-               BBS.lisp.stack.start_frame;
-               while locals.kind = E_CONS loop
+               if not isList(locals) then
+                  error("let", "Parameter list must be a list");
+                  BBS.lisp.memory.deref(locals);
+                  cons_table(getList(list)).car := (Kind => E_ERROR);
+                  return;
+               end if;
+               while isList(locals) loop
                   --
                   --  If the local variable is a cons, then the first element
                   --  is the variable name and the second element is the value.
@@ -184,7 +190,6 @@ package body BBS.lisp.evaluate.vars is
                         error("let", "Can't convert item into a local variable.");
                         print(el, False, True);
                         Put_Line("Item is of kind " & ptr_type'Image(el.kind));
---                        BBS.lisp.stack.enter_frame;
                         BBS.lisp.stack.exit_frame;
                         e := (kind => E_ERROR);
                         return;
@@ -211,6 +216,11 @@ package body BBS.lisp.evaluate.vars is
          when PH_PARSE_END =>
             BBS.lisp.stack.exit_frame;
          when PH_EXECUTE =>
+            if s = NIL_CONS then
+               error("let", "No parameters given.");
+               e := (kind => E_ERROR);
+               return;
+            end if;
             --
             --  First process the list of local variables
             --
@@ -219,38 +229,49 @@ package body BBS.lisp.evaluate.vars is
             --
             --  Next process the parameter list.
             --
+            if not isList(locals) then
+               error("let", "No list of local variables");
+               e := (Kind => E_ERROR);
+               return;
+            end if;
             BBS.lisp.stack.start_frame;
-            while locals.kind = E_CONS loop
+            while isList(locals) loop
                --
                --  If the local variable is a cons, then the first element
                --  is the variable name and the second element is the value.
                --
                declare
                   el : element_type;
+                  temp_list : cons_index;
                   check : element_type;
                   offset : Natural := 1;
                   local_val : value := (kind => V_BOOLEAN, b => False);
                begin
-                  if cons_table(locals.ps).car.kind = E_CONS then
-                     el := cons_table(cons_table(locals.ps).car.ps).car;
+                  if isList(cons_table(getList(locals)).car) then
+                     temp_list := getList(cons_table(getList(locals)).car);
+                     el := cons_table(temp_list).car;
                      --
                      -- Check if there is a value
                      --
-                     check := cons_table(cons_table(locals.ps).car.ps).cdr;
-                     if check.kind = E_CONS then
-                        check := cons_table(check.ps).car;
+                     check := cons_table(temp_list).cdr;
+                     if isList(check) then
+                        check := cons_table(getList(check)).car;
                      end if;
-                     if check.kind = E_CONS then
-                        check := eval_dispatch(check.ps);
+                     if isList(check) then
+                        check := eval_dispatch(getList(check));
                      else
                         check := indirect_elem(check);
                      end if;
                      case check.kind is
                         when E_CONS =>
                            local_val := (kind => V_LIST, l => check.ps);
-                           null;
                         when E_VALUE =>
                            local_val := check.v;
+                        when E_ERROR =>
+                           error("let", "Error detected during parameter processing");
+                           e := (Kind => E_ERROR);
+                           BBS.lisp.stack.exit_frame;
+                           return;
                         when others =>  -- Might need to update to check for errors.
                            null;
                      end case;
@@ -262,9 +283,10 @@ package body BBS.lisp.evaluate.vars is
                                           st_name => el.st_name,
                                           st_value => local_val));
                   else
-                     error("let", "Local variable is not a local.");
-                     print(el, False, True);
-                     Put_Line("Item is of kind " & ptr_type'Image(el.kind));
+                     error("let", "Local variable is not a local");
+                     put("Item is: ");
+                     print(el, False, False);
+                     Put_Line(", Item is of kind " & ptr_type'Image(el.kind));
                      BBS.lisp.stack.exit_frame;
                      e := (kind => E_ERROR);
                      return;
