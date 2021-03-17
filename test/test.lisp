@@ -799,7 +799,7 @@ Testing a longer line that should be split across fragments.
   (verify-true (errorp (dotimes ('print 1 2) (print "Hi"))) "Loop variable is a builtin")
   (verify-true (errorp (dotimes (1) 1)) "No limit variable")
   (verify-true (errorp (dotimes (a #\error) 1)) "Error in limits")
-  (verify-true (errorp (dotimes (a -1) 1))) "Limit is negative")
+  (verify-true (errorp (dotimes (a -1) 1)) "Limit is negative")
   (verify-true (errorp (dotimes (a #\A) 1)) "Limit is not integer")
   (verify-true (errorp (dotimes (a 5) (+ 1 #\error))) "Error in loop body")
 )

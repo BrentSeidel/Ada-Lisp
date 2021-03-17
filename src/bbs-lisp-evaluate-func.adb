@@ -350,8 +350,8 @@ package body BBS.lisp.evaluate.func is
       params := cons_table(s).car;
       func_body := cons_table(s).cdr;
       supplied := bbs.lisp.utilities.count(e);
-      if params.kind = E_CONS then
-         requested := bbs.lisp.utilities.count(params.ps);
+      if isList(params) then
+         requested := bbs.lisp.utilities.count(getList(params));
       elsif params.kind = E_NIL then
          requested := 0;
       elsif params.kind /= E_CONS then
@@ -373,8 +373,8 @@ package body BBS.lisp.evaluate.func is
             temp_value := first_value(rest);
             if temp_value.kind = E_VALUE then
                param_value := temp_value.v;
-            elsif temp_value.kind = E_CONS then
-               param_value := (kind => V_LIST, l => temp_value.ps);
+            elsif isList(temp_value) then
+               param_value := (kind => V_LIST, l => getList(temp_value));
             elsif temp_value.kind = E_NIL then
                param_value := (kind => V_BOOLEAN, b => False);
             else
@@ -393,6 +393,8 @@ package body BBS.lisp.evaluate.func is
       --
       --  Evaluate the function
       --
+--      put_line("eval_function starting, stack dump is:");
+--      BBS.lisp.stack.dump;
       ret_val := execute_block(func_body);
       BBS.lisp.stack.exit_frame;
       return ret_val;

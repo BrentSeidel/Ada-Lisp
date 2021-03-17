@@ -189,8 +189,6 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
          test := stack(stack_index(Integer(frame) + Integer(offset)));
          if test.kind = ST_VALUE then
             test_name := test.st_name;
-         end if;
-         if test.kind /= ST_EMPTY then
             eq := BBS.lisp.strings.compare(name, test_name);
             if eq = CMP_EQ then
                if test.kind = ST_VALUE then

@@ -168,11 +168,11 @@ package body bbs.lisp.parser is
       list_end : Boolean := False;
       item : Natural := 0;
       special_flag : Boolean := False;
-      special_symb : symbol;
+      special_symb : symbol := (ref => 1, str => NIL_STR, Kind => SY_EMPTY);
       begin_called : Boolean := False;
       item_count : Natural := 0;
       char : Character;
-      qtemp : Boolean := False;
+      qtemp : Boolean := False;  --  Flag for quoting items
    begin
       flag := bbs.lisp.memory.alloc(head);
       if not flag then
@@ -187,11 +187,15 @@ package body bbs.lisp.parser is
          --
          if buff(ptr) = ')' then
             list_end := true;
+            item := 0;
             if special_flag then
                if begin_called then
                   special_symb.s.all(e, head, PH_PARSE_END);
                else
                   error("list", "Internal error, parse end attempted to be called before parse begin");
+                  put("Probably missing parameters to operation ");
+                  print(special_symb.str);
+                  new_line;
                end if;
             end if;
             qtemp := False;
