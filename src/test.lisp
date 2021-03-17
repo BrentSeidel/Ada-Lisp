@@ -358,8 +358,10 @@
   (verify-equal 42 (parse-integer "42") "The meaning of life")
   (verify-equal -100 (parse-integer "-100") "Negative number")
   (verify-equal 0 (parse-integer "hello") "Not a number")
-  (verify-equal "HELLO" (string-upcase "hello") "Upper case text")
-  (verify-equal "hello" (string-downcase "HELLO") "Lower case text")
+  (verify-equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123"
+    (string-upcase "abcdefghijklmnopqrstuvwxyz0123") "Upper case text")
+  (verify-equal "abcdefghijklmnopqrstuvwxyz0123"
+    (string-downcase "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123") "Lower case text")
   (verify-equal "-bye" (subseq "Good-bye" 4) "Subsequence with default end")
   (verify-equal "d-b" (subseq "Good-bye" 3 6) "Subsequence with specified end")
   (verify-equal "fairly long string t"
@@ -775,17 +777,18 @@ Testing a longer line that should be split across fragments.
 ;
 (print "===> Testing DOWHILE errors")
 (terpri)
+(defun check-err (b) (if (< b 3) b #\error))
 (defun test-dowhile-err ()
   (verify-true (errorp (dowhile)) "No parameters to dowhile")
   (verify-true (errorp (dowhile #\error (print "Hello"))) "Error in condition")
   (let ((a 0))
-    (verify-true (errorp (dowhile (< a 3) (setq a (+ a 1)) (+ 1 #\error))) "Error in block")
-    (defun check-err (b) (if (< b 3) b #\error))
-    (verify-true (errorp (dowhile (check-err a) (setq a (+ a 1)))) "Error later in condition")
-    (setq check-err 0))
+    (verify-true (errorp (dowhile (< a 3) (setq a (+ a 1)) (+ 1 #\error))) "Error in block"))
+  (let ((a 0))
+    (verify-true (errorp (dowhile (check-err a) (setq a (+ a 1)))) "Error later in condition"))
 )
 (test-dowhile-err)
 (setq test-dowhile-err 0)
+(setq check-err 0)
 ;
 (print "===> Testing DOTIMES errors")
 (terpri)

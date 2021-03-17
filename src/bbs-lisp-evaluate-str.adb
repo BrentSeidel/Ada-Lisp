@@ -415,7 +415,14 @@ package body BBS.lisp.evaluate.str is
          new_frag := temp;
          string_table(new_frag).len := string_table(source).len;
          for index in 1 .. fragment_len loop
-            string_table(new_frag).str(index) := BBS.lisp.strings.To_Upper(string_table(source).str(index));
+            case t is
+            when NONE =>
+               string_table(new_frag).str(index) := string_table(source).str(index);
+            when UPPER =>
+               string_table(new_frag).str(index) := BBS.lisp.strings.To_Upper(string_table(source).str(index));
+            when LOWER =>
+               string_table(new_frag).str(index) := BBS.lisp.strings.To_Lower(string_table(source).str(index));
+            end case;
          end loop;
          source := string_table(source).next;
       end loop;
