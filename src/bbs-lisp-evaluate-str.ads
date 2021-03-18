@@ -29,10 +29,10 @@ package BBS.lisp.evaluate.str is
    procedure string_downcase(e : out element_type; s : cons_index);
 private
    --
-   --  Helper functions for length
+   --  Helper functions for length (note that length of a string is in
+   --  BBS.lisp.strings).
    --
    function length(s : cons_index) return int32;
-   function length(s : string_index) return int32;
    --
    --  Copy string with transformations
    --

@@ -16,24 +16,6 @@ package body bbs.lisp.strings is
       end loop;
    end;
    --
-   --  Procedure to print a string
-   --
-   --
-   --  Converts a string to lower-case in place.
-   --
-   procedure lowercase(s : string_index) is
-      next : string_index := s;
-      nxt : string_index;
-   begin
-      while next > NIL_STR loop
-         nxt := next;
-         for i in 1 .. string_table(nxt).len loop
-            string_table(nxt).str(i) := To_Lower(string_table(nxt).str(i));
-         end loop;
-         next := string_table(nxt).next;
-      end loop;
-   end;
-   --
    --  Compare two strings.  This loops through the two strings and compares
    --  character by character.  As soon as a character is not equal, it returns
    --  CMP_LT or CMP_GT.  If one string is longer than the the other, but
@@ -85,7 +67,7 @@ package body bbs.lisp.strings is
    --
    --  Returns the length of a string in characters
    --
-   function length(s : string_index) return Natural is
+   function length(s : string_index) return int32 is
       next : string_index := s;
       nxt : string_index;
       count : Natural := 0;
@@ -95,7 +77,7 @@ package body bbs.lisp.strings is
          count := count + string_table(nxt).len;
          next := string_table(nxt).next;
       end loop;
-      return count;
+      return int32(count);
    end;
    --
    --  Converts a fixed length Ada string to a Lisp string.  Returns false if

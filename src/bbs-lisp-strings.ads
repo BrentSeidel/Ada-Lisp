@@ -5,13 +5,10 @@
 private package bbs.lisp.strings is
    --
    --  Converts a string to upper-case in place.
+   --  In place lowercase is never used.  If it's ever needed, this routine
+   --  can provide a template for it.
    --
    procedure uppercase(s : string_index)
-     with Global => (In_Out => pvt_string_table);
-   --
-   --  Converts a string to lower-case in place.
-   --
-   procedure lowercase(s : string_index)
      with Global => (In_Out => pvt_string_table);
    --
    --  Compare two strings
@@ -23,7 +20,7 @@ private package bbs.lisp.strings is
    --
    --  Returns the length of a string in characters
    --
-   function length(s : string_index) return Natural
+   function length(s : string_index) return int32
      with Global => (Input => pvt_string_table);
    --
    --  Converts a fixed length Ada string to a Lisp string.  Returns false if

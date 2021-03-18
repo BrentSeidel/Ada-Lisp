@@ -146,34 +146,34 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
       return stack(e);
    end;
    --
-   procedure dump is
-      e : stack_entry;
-   begin
-      put_line("Stack dump start");
-      Put_Line("SP: " & stack_index'Image(stack_pointer) & ", FP: " &
-                 stack_index'Image(frame_pointer));
-      for i in stack_index'First .. stack_index'Last loop
-         e := stack(i);
-         case e.kind is
-            when ST_EMPTY =>
-               null;
-            when ST_FRAME =>
-               put(stack_index'Image(i) & " " & stack_entry_type'Image(e.kind));
-               put(", Number => " & Natural'Image(e.number));
-               put_line(", Next => " & stack_index'Image(e.next));
-            when ST_VALUE =>
-               put(stack_index'Image(i) & " " & stack_entry_type'Image(e.kind));
-               put(", Name => ");
-               print(e.st_name);
-               put(", Value => ");
-               print(e.st_value);
-               new_line;
---            when others =>
---               put_line(stack_index'Image(i) & " Unknown stack entry kind.");
-         end case;
-      end loop;
-      put_line("Stack dump end");
-   end;
+--   procedure dump is
+--      e : stack_entry;
+--   begin
+--      put_line("Stack dump start");
+--      Put_Line("SP: " & stack_index'Image(stack_pointer) & ", FP: " &
+--                 stack_index'Image(frame_pointer));
+--      for i in stack_index'First .. stack_index'Last loop
+--         e := stack(i);
+--         case e.kind is
+--            when ST_EMPTY =>
+--               null;
+--            when ST_FRAME =>
+--               put(stack_index'Image(i) & " " & stack_entry_type'Image(e.kind));
+--               put(", Number => " & Natural'Image(e.number));
+--               put_line(", Next => " & stack_index'Image(e.next));
+--            when ST_VALUE =>
+--               put(stack_index'Image(i) & " " & stack_entry_type'Image(e.kind));
+--               put(", Name => ");
+--               print(e.st_name);
+--               put(", Value => ");
+--               print(e.st_value);
+--               new_line;
+----            when others =>  -- Unused for now.  May be used if other kinds are added.
+----               put_line(stack_index'Image(i) & " Unknown stack entry kind.");
+--         end case;
+--      end loop;
+--      put_line("Stack dump end");
+--   end;
    --
    --  Search stack for the variable.  The frame offset and name are used to
    --  look backwards through the stack frames for a match to the name.  If
@@ -198,7 +198,7 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
                   put("Searching for variable <");
                   print(name);
                   Put_Line(">");
-                  dump;
+--                  dump;
                   frame := EMPTY_STACK;
                end if;
             end if;
@@ -210,7 +210,7 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
             put("Searching for variable <");
             print(name);
             Put_Line(">");
-            dump;
+--            dump;
             frame := EMPTY_STACK;
          end if;
       end loop;
@@ -242,7 +242,7 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
                   put("Searching for variable <");
                   print(name);
                   Put_Line(">");
-                  dump;
+--                  dump;
                   frame := EMPTY_STACK;
                end if;
             end if;
@@ -251,7 +251,7 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
             frame := stack(frame).next;
          else
             error("search_frames", "Did not find frame entry on stack");
-            dump;
+--            dump;
             frame := EMPTY_STACK;
          end if;
       end loop;

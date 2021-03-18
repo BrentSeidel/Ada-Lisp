@@ -22,7 +22,7 @@ package body BBS.lisp.evaluate.str is
       elsif p1.kind = E_VALUE then
          if p1.v.kind = V_STRING then
             e := (kind => E_VALUE, v => (kind => V_INTEGER,
-                                          i => length(p1.v.s)));
+                                          i => BBS.lisp.strings.length(p1.v.s)));
          elsif p1.v.kind = V_NONE then
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 0));
          else
@@ -51,16 +51,6 @@ package body BBS.lisp.evaluate.str is
       return c;
    end;
    --
-   function length(s : string_index) return int32 is
-      t : string_index := s;
-      c : int32 := 0;
-   begin
-      while t > string_index'First loop
-         c := c + int32(string_table(t).len);
-         t := string_table(t).next;
-      end loop;
-      return c;
-   end;
    --
    --  Return a specified character from a string.
    --

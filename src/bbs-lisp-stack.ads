@@ -66,10 +66,11 @@ with Abstract_State => (pvt_stack, pvt_sp, pvt_fp, pvt_fc) is
      with Global => (Output => (pvt_stack, pvt_sp, pvt_fp, pvt_fc)),
      Post => (isEmpty);
    --
-   --  Dump the stack for debugging purposes
+   --  Dump the stack for debugging purposes.  Since the stack is private, this
+   --  needs to be defined here instead of in BBS.lisp.debug.  Uncomment to use.
    --
-   procedure dump
-     with Global => (Input => (pvt_stack, pvt_sp, pvt_fp));
+--   procedure dump
+--     with Global => (Input => (pvt_stack, pvt_sp, pvt_fp));
    --
    --  Search stack for the variable.  The frame offset and name are used to
    --  look backwards through the stack frames for a match to the name.  If
