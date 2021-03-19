@@ -316,7 +316,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       exit_flag := False;
       break_flag := false;
       while True loop
-         BBS.lisp.stack.reset;
+--         BBS.lisp.stack.reset;
          BBS.lisp.evaluate.set_exit_block(0);
          e := read;
          if e.kind /= E_ERROR then

@@ -190,7 +190,6 @@ package body BBS.lisp.evaluate.vars is
                         error("let", "Can't convert item into a local variable.");
                         print(el, False, True);
                         Put_Line("Item is of kind " & ptr_type'Image(el.kind));
-                        BBS.lisp.stack.exit_frame;
                         e := (kind => E_ERROR);
                         return;
                      end if;

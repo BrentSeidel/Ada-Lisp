@@ -36,10 +36,10 @@ with Abstract_State => (pvt_stack, pvt_sp, pvt_fp, pvt_fc) is
    --
    --  Adding and removing items from the stack
    --
-   procedure pop(v : out stack_entry)
-     with Global => (In_Out => (pvt_stack, pvt_sp)),
-     pre => not isEmpty,
-     post => not isFull;
+--   procedure pop(v : out stack_entry)
+--     with Global => (In_Out => (pvt_stack, pvt_sp)),
+--     pre => not isEmpty,
+--     post => not isFull;
    procedure push(v : stack_entry)
      with Global => (In_Out => (pvt_stack, pvt_sp)),
      pre => not isFull,
@@ -62,9 +62,9 @@ with Abstract_State => (pvt_stack, pvt_sp, pvt_fp, pvt_fc) is
    --  There should be nothing on the stack at this point.  Some error conditions
    --  may cause a return to the command line without clearing the stack.
    --
-   procedure reset
-     with Global => (Output => (pvt_stack, pvt_sp, pvt_fp, pvt_fc)),
-     Post => (isEmpty);
+--   procedure reset
+--     with Global => (Output => (pvt_stack, pvt_sp, pvt_fp, pvt_fc)),
+--     Post => (isEmpty);
    --
    --  Dump the stack for debugging purposes.  Since the stack is private, this
    --  needs to be defined here instead of in BBS.lisp.debug.  Uncomment to use.

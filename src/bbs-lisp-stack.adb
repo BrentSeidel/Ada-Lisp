@@ -20,24 +20,24 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
    --
    --  Adding and removing items from the stack
    --
-   procedure pop(v : out stack_entry) is
-      t : stack_entry := (kind => ST_EMPTY);
-   begin
-      if not isEmpty then
-         t := stack(stack_pointer);
-         if t.kind = ST_VALUE then
-            BBS.lisp.memory.deref(t.st_name);
-            BBS.lisp.memory.deref(t.st_value);
-         else
-            put_line("stack.pop: Popped stack frame");
-         end if;
-         stack(stack_pointer) := (kind => ST_EMPTY);
-         stack_pointer := stack_pointer - 1;
-      else
-         error("pop", "Stack underflow");
-      end if;
-      v := t;
-   end;
+--   procedure pop(v : out stack_entry) is
+--      t : stack_entry := (kind => ST_EMPTY);
+--   begin
+--      if not isEmpty then
+--         t := stack(stack_pointer);
+--         if t.kind = ST_VALUE then
+--            BBS.lisp.memory.deref(t.st_name);
+--            BBS.lisp.memory.deref(t.st_value);
+--         else
+--            put_line("stack.pop: Popped stack frame");
+--         end if;
+--         stack(stack_pointer) := (kind => ST_EMPTY);
+--         stack_pointer := stack_pointer - 1;
+--      else
+--         error("pop", "Stack underflow");
+--      end if;
+--      v := t;
+--   end;
    --
    procedure push(v : stack_entry) is
    begin
@@ -57,20 +57,20 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
    --  There should be nothing on the stack at this point.  Some error conditions
    --  may cause a return to the command line without clearing the stack.
    --
-   procedure reset is
-      temp : stack_entry;
-   begin
-      while not isEmpty loop
-         pop(temp);
-         if temp.kind = ST_VALUE then
-            BBS.lisp.memory.deref(temp.st_name);
-            BBS.lisp.memory.deref(temp.st_value);
-         end if;
-      end loop;
-      stack_pointer := EMPTY_STACK;
-      frame_pointer := EMPTY_STACK;
-      frame_count := 0;
-   end;
+--   procedure reset is
+--      temp : stack_entry;
+--   begin
+--      while not isEmpty loop
+--         pop(temp);
+--         if temp.kind = ST_VALUE then
+--            BBS.lisp.memory.deref(temp.st_name);
+--            BBS.lisp.memory.deref(temp.st_value);
+--         end if;
+--      end loop;
+--      stack_pointer := EMPTY_STACK;
+--      frame_pointer := EMPTY_STACK;
+--      frame_count := 0;
+--   end;
    --
    --  Operations for stack frames
    --
