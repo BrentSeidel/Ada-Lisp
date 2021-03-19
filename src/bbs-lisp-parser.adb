@@ -202,7 +202,7 @@ package body bbs.lisp.parser is
                   flag := append_to_list(head, e);
                   if not flag then
                      error("list", "Failed appending hexidecimal integer to list");
-                     return flag;
+                     return False;
                   end if;
                end if;
             elsif buff(ptr) = '\' then
@@ -221,14 +221,21 @@ package body bbs.lisp.parser is
                   flag := append_to_list(head, e);
                   if not flag then
                      error("list", "Failed appending character to list");
-                     return flag;
+                     return False;
                   end if;
                end if;
             else
                error("list", "Unrecognized special form");
-               BBS.lisp.memory.deref(current);
-               BBS.lisp.memory.deref(head);
-               return False;
+               e := (Kind => E_ERROR);
+               if cons_table(head).car.kind = E_NIL then
+                  cons_table(head).car := e;
+               else
+                  flag := append_to_list(head, e);
+                  if not flag then
+                     error("list", "Failed appending error to list");
+                     return False;
+                  end if;
+               end if;
             end if;
             qtemp := False;
          --

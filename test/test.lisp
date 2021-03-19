@@ -352,7 +352,8 @@
   (verify-equal (char-code #\linefeed) 10 "#\linefeed represents a line feed")
   (verify-equal (char-code #\return) 13 "#\return represents a carriage return")
   (verify-equal (char-code #\backspace) 8 "#\backspace represents a backspace")
-  (verify-true (errorp #\bad) "#\bad is an error"))
+  (verify-true (errorp #\bad) "#\bad is an error")
+  (verify-true (errorp #!) "Invalid special sequence"))
 (test-char)
 (setq test-char 0)
 ;

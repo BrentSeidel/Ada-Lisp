@@ -160,7 +160,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       dummy : Boolean;
       el : element_type;
    begin
-      Put("LISP> ");
+      Put(prompt1);
       Get_Line(buff, size);
       dummy := BBS.lisp.parser.parse(buff, size, el);
       return el;
