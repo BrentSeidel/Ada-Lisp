@@ -18,11 +18,17 @@ private
      with Global => (Input => cons_table);
    -- should be (In_Out => cons_table)
    --
-   --  Subfunction for parsing lists
+   --  Subfunction for parsing lists.  If the buffer ends before the end of the
+   --  list is reached, more input is read and the parsing continues.
+   --    ptr    - Position in buffer to examine
+   --    buff   - Character buffer
+   --    last   - Last valid character in buffer
+   --    s_expr - Parsed s expression
+   --    qfixed - The list is quoted
    --
    function list(ptr : in out Integer; buff : in out String;
                  last : in out Integer; s_expr : out cons_index;
-                 qfixed : Boolean)
+                 qfixed : Boolean; base : Boolean)
                  return Boolean
      with Global => (Input => (cons_table, symb_table, pvt_string_table));
    -- should be (In_Out => (cons_table, symb_table, pvt_string_table)

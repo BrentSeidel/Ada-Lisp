@@ -227,6 +227,10 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       list : cons_index;
    begin
       Put("(");
+      if s = NIL_CONS then
+         put(")");
+         return;
+      end if;
       temp := (kind => E_CONS, ps => s);
       while temp.kind /= E_NIL loop
          if BBS.lisp.evaluate.isList(temp)  then

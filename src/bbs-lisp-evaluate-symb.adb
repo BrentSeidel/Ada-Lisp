@@ -235,7 +235,7 @@ package body BBS.lisp.evaluate.symb is
          return;
       end if;
       if (v1.qsym /= sym_str) and (v1.qsym /= sym_list) then
-         error("concatenate", "Can only concatinate strings and lists");
+         error("concatenate", "Can only concatenate strings and lists");
          put("Unrecognized type: ");
          print(v1);
          new_line;
@@ -258,7 +258,7 @@ package body BBS.lisp.evaluate.symb is
             src_ptr  : integer;
          begin
             if not BBS.lisp.memory.alloc(str_head) then
-               error("concatinate", "Unable to allocate string fragment.");
+               error("concatenate", "Unable to allocate string fragment.");
                BBS.lisp.memory.deref(t2);
                e := (kind => E_ERROR);
                return;
@@ -289,7 +289,7 @@ package body BBS.lisp.evaluate.symb is
                   return;
                end if;
                if v2.kind /= V_STRING then
-                  error("concatinate", "Unable to concatinate " & value_type'Image(v2.kind) &
+                  error("concatenate", "Unable to concatenate " & value_type'Image(v2.kind) &
                           " to a string.");
                   BBS.lisp.memory.deref(v2);
                   e := (kind => E_ERROR);
@@ -309,7 +309,7 @@ package body BBS.lisp.evaluate.symb is
                   exit when src_str = NIL_STR;
                   if dest_ptr > fragment_len then
                      if not BBS.lisp.memory.alloc(temp_str) then
-                        error("concatinate", "Unable to allocate string fragment");
+                        error("concatenate", "Unable to allocate string fragment");
                         BBS.lisp.memory.deref(str_head);
                         BBS.lisp.memory.deref(t2);
                         e := (kind => E_ERROR);
@@ -357,7 +357,7 @@ package body BBS.lisp.evaluate.symb is
                end if;
                loop
                   if not BBS.lisp.memory.alloc(temp_cons) then
-                     error("concatinate", "Unable to allocate cons.");
+                     error("concatenate", "Unable to allocate cons.");
                      BBS.lisp.memory.deref(t2);
                      BBS.lisp.memory.deref(cons_head);
                      e := (kind => E_ERROR);

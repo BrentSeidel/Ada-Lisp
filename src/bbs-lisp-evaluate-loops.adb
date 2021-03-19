@@ -26,7 +26,7 @@ package body BBS.lisp.evaluate.loops is
             temp := indirect_elem(cond);
          end if;
          if temp.kind = E_ERROR then
-            error("dowhile", "Error occured during evaluation of condition");
+            error("dowhile", "Error occurred during evaluation of condition");
             e := temp;
             return;
          end if;
@@ -38,7 +38,7 @@ package body BBS.lisp.evaluate.loops is
             --
             t := execute_block(list);
             if t.kind = E_ERROR then
-               error("dowhile", "Error occured during evaluation of body");
+               error("dowhile", "Error occurred during evaluation of body");
                e := t;
                error_occured := True;
             else
@@ -48,7 +48,7 @@ package body BBS.lisp.evaluate.loops is
                   temp := indirect_elem(cond);
                end if;
                if temp.kind = E_ERROR then
-                  error("dowhile", "Error occured during evaluation of condition");
+                  error("dowhile", "Error occurred during evaluation of condition");
                   e := temp;
                   error_occured := True;
                end if;
@@ -274,7 +274,7 @@ package body BBS.lisp.evaluate.loops is
                BBS.lisp.memory.deref(t);
                t := execute_block(list);
                if t.kind = E_ERROR then
-                  error("dotimes", "Error occured in body");
+                  error("dotimes", "Error occurred in body");
                   BBS.lisp.stack.exit_frame;
                   e := t;
                   return;
@@ -294,7 +294,7 @@ package body BBS.lisp.evaluate.loops is
             else
                t := indirect_elem(result);
                if t.kind = E_ERROR then
-                  error("dotimes", "Error occured in body");
+                  error("dotimes", "Error occurred in body");
                end if;
             end if;
             e := t;

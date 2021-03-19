@@ -254,6 +254,11 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --
    type mathops is (PLUS, MINUS, MUL, DIV);
    type compops is (SYM_EQ, SYM_NE, SYM_LT, SYM_GT);
+   --
+   --  Prompts
+   --
+   prompt1 : constant String := "LISP> ";  --  Primary lisp prompt
+   prompt2 : constant String := "More> ";  --  Prompt for more text
 
 private
    --

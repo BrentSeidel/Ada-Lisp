@@ -2,6 +2,7 @@ with BBS.lisp;
 with BBS.lisp.strings;
 with BBS.lisp.memory;
 with BBS.lisp.utilities;
+with BBS.lisp.evaluate;
 package body bbs.lisp.parser is
    --
    --  Utilities to assist in parsing
@@ -48,115 +49,38 @@ package body bbs.lisp.parser is
    function parse(buff : in out String; last : in out Integer; e : out element_type) return Boolean is
       ptr  : Integer;
       head : cons_index;
-      str  : string_index;
       flag : Boolean := False;
-      value : int32;
-      char : Character;
-      qtemp : Boolean := False;
+      qtemp : constant Boolean := False;
    begin
       e := NIL_ELEM;
       ptr := buff'First;
-      skip_whitespace(ptr, buff, last);
-      --
-      --  A quoted element.
-      --
-      if buff(ptr) = ''' then
-         qtemp := True;
-         ptr := ptr + 1;
-      end if;
-      --
-      --  Start of a list
-      --
-      if buff(ptr) = '(' then
-         flag := list(ptr, buff, last, head, qtemp);
-         if flag then
-            if (cons_table(head).car.kind = E_NIL) and (cons_table(head).cdr.kind = E_NIL) then
-               e := NIL_ELEM;
-               BBS.lisp.memory.deref(head);
-            else
-               e := (kind => E_CONS, ps => head);
-            end if;
-         else
-            error("parse", "Error in parsing list.");
+      flag := list(ptr, buff, last, head, qtemp, True);
+      if flag then
+         if head = NIL_CONS or else ((cons_table(head).car.kind = E_NIL) and (cons_table(head).cdr.kind = E_NIL)) then
+            e := NIL_ELEM;
             BBS.lisp.memory.deref(head);
-            e := (kind => E_ERROR);
-         end if;
-         qtemp := False;
-      --
-      --  Comment
-      --
-      elsif buff(ptr) = ';' then
-         e := (Kind => E_NIL);
-         qtemp := False;
-      --
-      --  Integer
-      --
-      elsif BBS.lisp.utilities.isDigit(buff(ptr)) or
-        ((buff(ptr) = '-') and BBS.lisp.utilities.isDigit(buff(ptr + 1))) then
-         int(ptr, buff, last, value);
-         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
-         flag := true;
-         qtemp := False;
-      --
-      -- String
-      --
-      elsif buff(ptr) = '"' then
-         flag := parse_str(ptr, buff, last, str);
-         if flag then
-            e := (Kind => E_VALUE, v =>(kind => V_STRING, s => str));
          else
-            error("parse", "Error parsing string");
-            BBS.lisp.memory.deref(str);
-            e := (kind => E_ERROR);
+            e := (kind => E_CONS, ps => head);
          end if;
-         qtemp := False;
-      --
-      -- Special
-      --
-      elsif buff(ptr) = '#' then
-         ptr := ptr + 1;
-         if (buff(ptr) = 'x') or (buff(ptr) = 'X') then
-            hex(ptr, buff, last, value);
-            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
-            flag := true;
-         elsif buff(ptr) = '\' then
-            --
-            --  Character literal
-            --
-            flag := parse_char(ptr, buff, last, char);
-            if flag then
-               e := (kind => E_VALUE, v => (kind => V_CHARACTER, c => char));
-            else
-               e := (kind => E_ERROR);
-               error("list", "Unable to parse character literal");
-            end if;
-         else
-            error("parse", "Unrecognized special form");
-            e := (kind => E_ERROR);
-         end if;
-         qtemp := False;
-      --
-      --  Anything that doesn't match something else is treated as a symbol
-      --
       else
-         e := symb(ptr, buff, last, qtemp);
-         if e.kind /= E_ERROR then
-            flag := true;
-         else
-            error("parse", "Error parsing symbol");
-            flag := False;
-         end if;
-         qtemp := False;
+         error("parse", "Error in parsing list.");
+         BBS.lisp.memory.deref(head);
+         e := (kind => E_ERROR);
       end if;
       return flag;
    end;
    --
    --  Subfunction for parsing lists.  If the buffer ends before the end of the
    --  list is reached, more input is read and the parsing continues.
+   --    ptr    - Position in buffer to examine
+   --    buff   - Character buffer
+   --    last   - Last valid character in buffer
+   --    s_expr - Parsed s expression
+   --    qfixed - The list is quoted
    --
    function list(ptr : in out integer; buff : in out String;
                  last : in out Integer; s_expr : out cons_index;
-                 qfixed : Boolean)
+                 qfixed : Boolean; base : Boolean)
                  return Boolean is
       head : cons_index := NIL_CONS;
       current : cons_index := NIL_CONS;
@@ -179,7 +103,6 @@ package body bbs.lisp.parser is
          error("list", "Unable to allocate cons for head");
          return False;
       end if;
-      ptr := ptr + 1;
       while (not list_end) loop
          skip_whitespace(ptr, buff, last);
          --
@@ -203,7 +126,8 @@ package body bbs.lisp.parser is
          -- Check for starting a new sub-list
          --
          elsif buff(ptr) = '(' then
-            flag := list(ptr, buff, last, current, qfixed or qtemp);
+            ptr := ptr + 1;
+            flag := list(ptr, buff, last, current, qfixed or qtemp, False);
             ptr := ptr + 1;
             if flag then
                if (cons_table(current).car.kind = E_NIL) and (cons_table(current).cdr.kind = E_NIL) then
@@ -391,8 +315,11 @@ package body bbs.lisp.parser is
          --  If there is no text left to parse and it's not the end of a list,
          --  read some more text and point to the start of it.
          --
+         if ptr > last and base then
+            list_end := True;
+         end if;
          if (ptr > last) and (not list_end) then
-            Put("More> ");
+            Put(prompt2);
             Get_Line(buff, last);
             ptr := 1;
          end if;
@@ -408,7 +335,14 @@ package body bbs.lisp.parser is
          end if;
          item := item + 1;
       end loop;
-      s_expr := head;
+      if base and head > NIL_CONS then
+         s_expr := BBS.lisp.evaluate.getList(cons_table(head).car);
+         cons_table(head).car := NIL_ELEM;
+         cons_table(head).cdr := NIL_ELEM;
+         bbs.lisp.memory.deref(head);
+      else
+         s_expr := head;
+      end if;
       return True;
    end;
    --
