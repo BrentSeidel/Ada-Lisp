@@ -40,7 +40,7 @@ with Abstract_State => (pvt_stack, pvt_sp, pvt_fp, pvt_fc) is
 --     with Global => (In_Out => (pvt_stack, pvt_sp)),
 --     pre => not isEmpty,
 --     post => not isFull;
-   procedure push(v : stack_entry)
+   procedure push(v : stack_entry; err : out Boolean)
      with Global => (In_Out => (pvt_stack, pvt_sp)),
      pre => not isFull,
      post => not isEmpty;
@@ -53,7 +53,7 @@ with Abstract_State => (pvt_stack, pvt_sp, pvt_fp, pvt_fc) is
    --  3) Call exit_frame to clean up the stack frame.  There is no need to pop
    --     the items off the stack that belong to the stack frame.
    --
-   procedure start_frame
+   procedure start_frame(err : out Boolean)
      with Global => (In_Out => (pvt_stack, pvt_sp, pvt_fc, pvt_fp));
    procedure exit_frame
      with Global => (In_out => (pvt_stack, pvt_sp, pvt_fp, pvt_fc));
@@ -99,12 +99,12 @@ with Abstract_State => (pvt_stack, pvt_sp, pvt_fp, pvt_fc) is
    --
    --  Sets an entry on the stack
    --
-   procedure set_entry(e : stack_index; v : stack_entry)
+   procedure set_entry(e : stack_index; v : stack_entry; err : out Boolean)
      with Global => (Output => pvt_stack);
    --
    --  Sets the value of an entry on the stack
    --
-   procedure set_value(e : stack_index; v : value)
+   procedure set_value(e : stack_index; v : value; err : out Boolean)
      with Global => (Output => pvt_stack);
    --
    --  Gets an entry from the stack

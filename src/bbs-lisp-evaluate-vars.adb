@@ -16,6 +16,7 @@ package body BBS.lisp.evaluate.vars is
       str : string_index;
       stacked : Boolean := False;
       index : stack_index;
+      err : Boolean := False;
 
       procedure deref_previous(s : symb_index) is
       begin
@@ -110,9 +111,14 @@ package body BBS.lisp.evaluate.vars is
                      index := BBS.lisp.stack.search_frames(p1.st_offset, p1.st_name);
                      BBS.lisp.memory.deref(BBS.lisp.stack.get_entry(index).st_value);
                      if p2.kind = E_VALUE then
-                        BBS.lisp.stack.set_value(index, p2.v);
+                        BBS.lisp.stack.set_value(index, p2.v, err);
                      elsif p2.kind = E_CONS then
-                        BBS.lisp.stack.set_value(index, (kind => V_LIST, l => p2.ps));
+                        BBS.lisp.stack.set_value(index, (kind => V_LIST, l => p2.ps), err);
+                     end if;
+                     if err then
+                        error("setq", "Error occured setting stack variable");
+                        e := (Kind => E_ERROR);
+                        return;
                      end if;
                   end if;
                else
@@ -136,13 +142,14 @@ package body BBS.lisp.evaluate.vars is
       locals : element_type;
       list : element_type;
       t : element_type := NIL_ELEM;
+      err : Boolean;
    begin
       case p is
          when PH_QUERY =>
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
             return;
          when PH_PARSE_BEGIN =>
-            BBS.lisp.stack.start_frame;
+            BBS.lisp.stack.start_frame(err);
             if s > NIL_CONS then
                --
                --  First process the list of local variables
@@ -197,7 +204,8 @@ package body BBS.lisp.evaluate.vars is
                             st_offset => offset);
                      BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
                                           st_name => str,
-                                          st_value => (kind => V_NONE)));
+                                          st_value => (kind => V_NONE)),
+                                        err);
                      offset := offset + 1;
                      if cons_table(locals.ps).car.kind = E_CONS then
                         cons_table(cons_table(locals.ps).car.ps).car := el;
@@ -233,7 +241,7 @@ package body BBS.lisp.evaluate.vars is
                e := (Kind => E_ERROR);
                return;
             end if;
-            BBS.lisp.stack.start_frame;
+            BBS.lisp.stack.start_frame(err);
             while isList(locals) loop
                --
                --  If the local variable is a cons, then the first element
@@ -280,7 +288,8 @@ package body BBS.lisp.evaluate.vars is
                   if (el.kind = E_STACK) then
                      BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
                                           st_name => el.st_name,
-                                          st_value => local_val));
+                                          st_value => local_val),
+                                        err);
                   else
                      error("let", "Local variable is not a local");
                      put("Item is: ");

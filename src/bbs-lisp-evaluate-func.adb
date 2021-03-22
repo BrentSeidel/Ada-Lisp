@@ -83,7 +83,7 @@ package body BBS.lisp.evaluate.func is
                   return;
                end if;
                temp := params;
-               BBS.lisp.stack.start_frame;
+               BBS.lisp.stack.start_frame(error_occured);
                while temp.Kind = E_CONS loop
                   if isList(cons_table(temp.ps).car) then
                      error("defun", "A parameter cannot be a list.");
@@ -107,16 +107,18 @@ package body BBS.lisp.evaluate.func is
                            str := symb_table(el.sym).str;
                            el := (Kind => E_STACK, st_name => str,
                                st_offset => offset);
-                           BBS.lisp.stack.push((Kind => BBS.lisp.stack.ST_VALUE, st_name =>
-                                               str, st_value => (kind => V_NONE)));
+                           BBS.lisp.stack.push((Kind => BBS.lisp.stack.ST_VALUE,
+                                                st_name => str, st_value => (kind => V_NONE)),
+                                               error_occured);
                         end if;
                      elsif (el.kind = E_TEMPSYM) then
                         msg("defun", "Converting tempsym to parameter.");
                         str := el.tempsym;
                         el := (Kind => E_STACK, st_name => str,
                                st_offset => offset);
-                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE, st_name =>
-                                               str, st_value => (kind => V_NONE)));
+                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
+                                             st_name => str, st_value => (kind => V_NONE)),
+                                           error_occured);
                      else
                         error("defun", "Can't convert item into a parameter.");
                         print(el, False, True);
@@ -234,7 +236,7 @@ package body BBS.lisp.evaluate.func is
                   return;
                end if;
                temp := params;
-               BBS.lisp.stack.start_frame;
+               BBS.lisp.stack.start_frame(error_occured);
                declare
                   el : element_type;
                   str : string_index;
@@ -259,16 +261,18 @@ package body BBS.lisp.evaluate.func is
                            msg("lambda", "Converting symbol to parameter");
                            el := (kind => E_STACK, st_name => str,
                                st_offset => offset);
-                           BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE, st_name =>
-                                               str, st_value => (kind => V_NONE)));
+                           BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
+                                                st_name => str, st_value => (kind => V_NONE)),
+                                              error_occured);
                         end if;
                      elsif (el.kind = E_TEMPSYM) then
                         msg("lambda", "Converting tempsym to parameter");
                         str := el.tempsym;
                         el := (kind => E_STACK, st_name => str,
                                st_offset => offset);
-                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE, st_name =>
-                                               str, st_value => (kind => V_NONE)));
+                        BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
+                                             st_name => str, st_value => (kind => V_NONE)),
+                                           error_occured);
                      else
                         error("lambda", "Can't convert item into a parameter.");
                         print(el, False, True);
@@ -346,6 +350,7 @@ package body BBS.lisp.evaluate.func is
       ret_val : element_type;
       supplied : Integer := 0;
       requested : Integer := 0;
+      err : Boolean := False;
    begin
       params := cons_table(s).car;
       func_body := cons_table(s).cdr;
@@ -367,7 +372,11 @@ package body BBS.lisp.evaluate.func is
       --
       rest := e;
       name := params;  --  List of parameter names
-      BBS.lisp.stack.start_frame;
+      BBS.lisp.stack.start_frame(err);
+      if err then
+         error("function evaluation", "Error building stack frame");
+         return (Kind => E_ERROR);
+      end if;
       while rest > NIL_CONS loop
          if cons_table(name.ps).car.kind = E_STACK then
             temp_value := first_value(rest);
@@ -382,10 +391,16 @@ package body BBS.lisp.evaluate.func is
             end if;
             BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
                                  st_name => cons_table(name.ps).car.st_name,
-                                 st_value => param_value));
+                                 st_value => param_value), err);
+            if err then
+               error("function evaluation", "Error adding parameters to stack frame");
+               BBS.lisp.stack.exit_frame;
+               return (Kind => E_ERROR);
+            end if;
             BBS.lisp.memory.deref(param_value);
          else
             error("function evaluation", "Something horrible happened, a parameter is not a parameter");
+            BBS.lisp.stack.exit_frame;
             return (kind => E_ERROR);
          end if;
          name  := cons_table(name.ps).cdr;

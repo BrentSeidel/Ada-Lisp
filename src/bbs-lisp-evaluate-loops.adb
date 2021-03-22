@@ -90,12 +90,13 @@ package body BBS.lisp.evaluate.loops is
       s1 : cons_index;
       dummy : Natural;
       t : element_type := NIL_ELEM;
+      err : Boolean;
    begin
       case p is
          when PH_QUERY =>
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
          when PH_PARSE_BEGIN =>
-            BBS.lisp.stack.start_frame;
+            BBS.lisp.stack.start_frame(err);
             if s > NIL_CONS then
                list := cons_table(s).car;   -- This is the dotimes symbol and ignored here
                limits := cons_table(s).cdr;
@@ -165,7 +166,7 @@ package body BBS.lisp.evaluate.loops is
                   var := (kind => E_STACK, st_name => str, st_offset => 1);
                   BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
                                        st_name => str,
-                                       st_value => (kind => V_NONE)));
+                                       st_value => (kind => V_NONE)), err);
                end;
                --
                --  Var has been converted to a local variable.  Now put it back into
@@ -248,10 +249,10 @@ package body BBS.lisp.evaluate.loops is
             --  Build the stack frame
             --
             if var.kind = E_STACK then
-               BBS.lisp.stack.start_frame;
+               BBS.lisp.stack.start_frame(err);
                BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
                                     st_name => var.st_name, st_value =>
-                                      (kind => V_INTEGER, i => 0)));
+                                      (kind => V_INTEGER, i => 0)), err);
             else
                error("dotimes", "Loop counter is not a variable");
                e := (kind => E_ERROR);
@@ -267,7 +268,8 @@ package body BBS.lisp.evaluate.loops is
                BBS.lisp.stack.set_entry(BBS.lisp.stack.get_fp + 1,
                                         (kind => BBS.lisp.stack.ST_VALUE,
                                          st_name => var.st_name, st_value =>
-                                           (kind => V_INTEGER, i => int32(index))));
+                                           (kind => V_INTEGER, i => int32(index))),
+                                       err);
                --
                --  Evaluate all of the items in the list.
                --

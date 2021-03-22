@@ -39,7 +39,7 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
 --      v := t;
 --   end;
    --
-   procedure push(v : stack_entry) is
+   procedure push(v : stack_entry; err : out Boolean) is
    begin
       if not isFull then
          if v.kind = ST_VALUE then
@@ -48,8 +48,10 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
          end if;
          stack_pointer := stack_pointer + 1;
          stack(stack_pointer) := v;
+         err := False;
       else
          error("push", "Stack overflow");
+         err := True;
       end if;
    end;
    --
@@ -76,11 +78,15 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
    --
    --  Start a stack frame
    --
-   procedure start_frame is
+   procedure start_frame(err : out Boolean) is
    begin
       frame_count := frame_count + 1;
-      push((kind => ST_FRAME, number => frame_count, next => frame_pointer));
-      frame_pointer := stack_pointer;
+      push((kind => ST_FRAME, number => frame_count, next => frame_pointer), err);
+      if not err then
+         frame_pointer := stack_pointer;
+      else
+         frame_count := frame_count - 1;
+      end if;
    end;
    --
    --  Exit a stack frame
@@ -115,27 +121,32 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
    --
    --  Sets an entry on the stack
    --
-   procedure set_entry(e : stack_index; v : stack_entry) is
+   procedure set_entry(e : stack_index; v : stack_entry; err : out Boolean) is
    begin
       if e <= stack_pointer then
          stack(e) := v;
+         err := False;
       else
          error("set_entry", "Stack index out of range");
+         err := True;
       end if;
    end;
    --
    --  Sets the value of an entry on the stack
    --
-   procedure set_value(e : stack_index; v : value) is
+   procedure set_value(e : stack_index; v : value; err : out Boolean) is
    begin
       if e <= stack_pointer then
          if stack(e).kind = ST_VALUE then
             stack(e).st_value := v;
+            err := False;
          else
             error("set_value", "Entry is not a value type");
+            err := True;
          end if;
       else
          error("set_value", "Stack index out of range");
+         err := True;
       end if;
    end;
    --
@@ -186,6 +197,10 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
       eq : comparison;
    begin
       while frame > EMPTY_STACK loop
+         if Integer(frame) + Integer(offset) > Integer(FULL_STACK) then
+            error("search frames", "Stack pointer value out of range");
+            return (Kind => V_NONE);
+         end if;
          test := stack(stack_index(Integer(frame) + Integer(offset)));
          if test.kind = ST_VALUE then
             test_name := test.st_name;
@@ -228,6 +243,10 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
       eq : comparison;
    begin
       while frame > EMPTY_STACK loop
+         if Integer(frame) + Integer(offset) > Integer(FULL_STACK) then
+            error("search frames", "Stack pointer value out of range");
+            return EMPTY_STACK;
+         end if;
          test := stack(stack_index(Integer(frame) + Integer(offset)));
          if test.kind = ST_VALUE then
             test_name := test.st_name;
@@ -255,7 +274,7 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
             frame := EMPTY_STACK;
          end if;
       end loop;
-      return stack_index'First;
+      return EMPTY_STACK;
    end;
    --
    --  Searches the stack to find a variable and returns the stack index and offset

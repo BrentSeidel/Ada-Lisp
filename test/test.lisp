@@ -875,6 +875,10 @@ Testing a longer line that should be split across fragments.
 (test-var-errors)
 (setq test-var-errors 0)
 ;
+(print "===> Testing stack overflow")
+(terpri)
+(defun test-stack-ovr (a) (print "A is " a) (terpri) (test-stack-ovr (+ 1 a)))
+(verify-true (errorp (test-stack-ovr 1)) "Stack overflow error")
 ;(dump)
 (print "===> Testing complete")
 (terpri)
