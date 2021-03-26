@@ -140,6 +140,7 @@ package body BBS.lisp.evaluate.vars is
    --
    procedure local(e : out element_type; s : cons_index; p : phase) is
       locals : element_type;
+      base : element_type;
       list : element_type;
       t : element_type := NIL_ELEM;
       err : Boolean;
@@ -150,6 +151,10 @@ package body BBS.lisp.evaluate.vars is
             return;
          when PH_PARSE_BEGIN =>
             BBS.lisp.stack.start_frame(err);
+            if err then
+               error("let", "Error creating stack frame during parsing");
+               e := (Kind => E_ERROR);
+            end if;
             if s > NIL_CONS then
                --
                --  First process the list of local variables
@@ -168,6 +173,7 @@ package body BBS.lisp.evaluate.vars is
                   cons_table(getList(list)).car := (Kind => E_ERROR);
                   return;
                end if;
+               base := locals;
                while isList(locals) loop
                   --
                   --  If the local variable is a cons, then the first element
@@ -206,6 +212,14 @@ package body BBS.lisp.evaluate.vars is
                                           st_name => str,
                                           st_value => (kind => V_NONE)),
                                         err);
+                     if err then
+                        error("let", "Error building stack frame during parsing");
+                        put_line("Local variable list removed");
+                        BBS.lisp.memory.deref(base);
+                        e := (Kind => E_ERROR);
+                        cons_table(getList(list)).car := (Kind => E_ERROR);
+                        return;
+                     end if;
                      offset := offset + 1;
                      if cons_table(locals.ps).car.kind = E_CONS then
                         cons_table(cons_table(locals.ps).car.ps).car := el;
@@ -290,6 +304,12 @@ package body BBS.lisp.evaluate.vars is
                                           st_name => el.st_name,
                                           st_value => local_val),
                                         err);
+                     if err then
+                        error("let", "Error building stack frame during execution");
+                     BBS.lisp.stack.exit_frame;
+                     e := (kind => E_ERROR);
+                     return;
+                     end if;
                   else
                      error("let", "Local variable is not a local");
                      put("Item is: ");

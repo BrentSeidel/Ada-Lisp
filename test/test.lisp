@@ -174,9 +174,9 @@
 (test-basic-math)
 (setq test-basic-math 0)
 ;
-;  Test global variables with setq
+;  Test symbols/global variables with setq
 ;
-(print "===> Testing globals")
+(print "===> Testing symbols/globals")
 (terpri)
 (defun test-global ()
   (setq **GLOB** 1)
@@ -526,11 +526,24 @@
 (print "===> Testing I/O operations")
 (terpri)
 (defun test-io ()
-  (verify-equal NIL (print 1) "Print returns NIL")
-  (verify-equal NIL (print #\1) "Print returns NIL")
-  (verify-equal NIL (print "1") "Print returns NIL")
-  (verify-equal NIL (print 'print) "Print returns NIL")
-  (verify-equal NIL (print (1 2 3)) "Print returns NIL")
+  (verify-equal NIL (print 1) "Print integer returns NIL")
+  (verify-equal NIL (print #\1) "Print character returns NIL")
+  (verify-equal NIL (print "1") "Print string returns NIL")
+  (verify-equal NIL (print 'print) "Print quoted symbol returns NIL")
+  (verify-equal NIL (print print) "Print builting symbol returns NIL")
+  (verify-equal NIL (print (1 2 3)) "Print list returns NIL")
+  (verify-equal NIL (print ()) "Print empty list returns NIL")
+  (let (a)
+    (verify-equal NIL (print a) "Print empty local variable returns NIL")
+    (setq a (1 2 3))
+    (verify-equal NIL (print a) "Print list local variable returns NIL")
+    (setq a 'print)
+    (verify-equal NIL (print a) "Print quoted symbol local variable returns NIL")
+    (setq a print)
+    (verify-equal NIL (print a) "Print symbol local variable returns NIL")
+    (setq a (lambda (c) (+ 1 c)))
+    (verify-equal NIL (print a) "Print lambda local variable returns NIL")
+    (verify-equal NIL (print b) "Print unknown variable returns NIL"))
   (verify-equal NIL (terpri) "Terpri returns NIL")
   (verify-equal NIL (fresh-line) "Fresh-line returns NIL")
   (verify-equal NIL (progn (print "Hello") (fresh-line)) "Fresh-line returns NIL")
@@ -879,6 +892,26 @@ Testing a longer line that should be split across fragments.
 (terpri)
 (defun test-stack-ovr (a) (print "A is " a) (terpri) (test-stack-ovr (+ 1 a)))
 (verify-true (errorp (test-stack-ovr 1)) "Stack overflow error")
+(verify-true (errorp (let (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14
+  A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32
+  A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 A46 A47 A48 A49 A50
+  A51 A52 A53 A54 A55 A56 A57 A58 A59 A60 A61 A62 A63 A64 A65 A66 A67 A68
+  A69 A70 A71 A72 A73 A74 A75 A76 A77 A78 A79 A80 A81 A82 A83 A84 A85 A86
+  A87 A88 A89 A90 A91 A92 A93 A94 A95 A96 A97 A98 A99 A100)
+  (print "So many local variables") (terpri))) "Too many local variables")
+(defun test-lambda (a b)
+  (verify-equal a (b 1 2 3 4 5 6 7 8 9
+  10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33
+  34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57
+  58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81
+  82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100) "Testing lambda"))
+(verify-true (errorp (test-lambda T (lambda (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14
+  A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32
+  A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 A46 A47 A48 A49 A50
+  A51 A52 A53 A54 A55 A56 A57 A58 A59 A60 A61 A62 A63 A64 A65 A66 A67 A68
+  A69 A70 A71 A72 A73 A74 A75 A76 A77 A78 A79 A80 A81 A82 A83 A84 A85 A86
+  A87 A88 A89 A90 A91 A92 A93 A94 A95 A96 A97 A98 A99 A100)
+  (print "So many local variables") (terpri)))) "Lambda variables")
 ;(dump)
 (print "===> Testing complete")
 (terpri)

@@ -359,7 +359,7 @@ package body BBS.lisp.evaluate.func is
          requested := bbs.lisp.utilities.count(getList(params));
       elsif params.kind = E_NIL then
          requested := 0;
-      elsif params.kind /= E_CONS then
+      else
          requested := 1;
       end if;
       if supplied /= requested then
