@@ -347,9 +347,8 @@ package body BBS.lisp.evaluate.symb is
                   e := t2;
                   return;
                end if;
-               if isList(t2) then
-                  src_cons := getList(t2);
-               else
+               src_cons := getList(t2);
+               if src_cons = NIL_CONS then
                   error("concatenate", "Parameter does not evaluate to a list");
                   BBS.lisp.memory.deref(t2);
                   e := (kind => E_ERROR);
@@ -372,9 +371,8 @@ package body BBS.lisp.evaluate.symb is
                   end if;
                   cons_table(dest_cons).car := cons_table(src_cons).car;
                   BBS.lisp.memory.ref(cons_table(dest_cons).car);
-                  if isList(cons_table(src_cons).cdr) then
-                     src_cons := getList(cons_table(src_cons).cdr);
-                  else
+                  src_cons := getList(cons_table(src_cons).cdr);
+                  if src_cons = NIL_CONS then
                      exit;
                   end if;
                end loop;

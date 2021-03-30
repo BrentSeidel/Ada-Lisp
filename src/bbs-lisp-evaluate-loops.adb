@@ -109,14 +109,13 @@ package body BBS.lisp.evaluate.loops is
                   return;
                end if;
                limits := cons_table(getList(limits)).car;
-               if isList(limits) then
-                  var := cons_table(getList(limits)).car;
-                  rest := cons_table(getList(limits)).cdr;
-               else
+               if not isList(limits) then
                   error("dotimes", "List not provided for limits.");
                   e := (kind => E_ERROR);
                   return;
                end if;
+               var := cons_table(getList(limits)).car;
+               rest := cons_table(getList(limits)).cdr;
                if isList(var) then
                   error("dotimes", "The loop variable cannot be a list.");
                   BBS.lisp.memory.deref(var);

@@ -69,7 +69,7 @@ with Abstract_State =>  pvt_exit_block is
      Inline;
    --
 private
-      --
+   --
    --  Set to non-zero to break out of that many nested loops
    --
    exit_block : Natural := 0

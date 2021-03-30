@@ -62,13 +62,12 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       list : cons_index;
       val : value;
    begin
-      if isList(e) then
-         list := getList(e);
+      list := getList(e);
+      if list > NIL_CONS then
          temp := cons_table(list).car;
       else
          temp := e;
       end if;
-
       if temp.kind = E_SYMBOL then
          sym_kind := symb_table(temp.sym).kind;
          if (sym_kind = SY_BUILTIN) or
@@ -177,11 +176,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
          return NIL_ELEM;
       else
          first := cons_table(s).car;
-         if isList(cons_table(s).cdr) then
-            s := getList(cons_table(s).cdr);
-         else
-            s := NIL_CONS;
-         end if;
+         s := getList(cons_table(s).cdr);
          if first.kind = E_NIL then
             null;
          elsif isList(first) then

@@ -35,7 +35,7 @@ package body BBS.lisp.evaluate.func is
             --  initial checks to verify that they are the appropriate kind of object.
             --
          when PH_PARSE_BEGIN =>
-            if s > cons_index'First then
+            if s > NIL_CONS then
                --
                --  First process the symbol for the function.
                --
@@ -408,8 +408,6 @@ package body BBS.lisp.evaluate.func is
       --
       --  Evaluate the function
       --
---      put_line("eval_function starting, stack dump is:");
---      BBS.lisp.stack.dump;
       ret_val := execute_block(func_body);
       BBS.lisp.stack.exit_frame;
       return ret_val;
