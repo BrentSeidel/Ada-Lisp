@@ -328,7 +328,7 @@ package body BBS.lisp.evaluate.vars is
             --
             t := execute_block(list);
             if t.kind = E_ERROR then
-               error("let", "Error occured evaluting statement");
+               error("let", "Error occured evaluating statement");
             end if;
             BBS.lisp.stack.exit_frame;
             e := t;
