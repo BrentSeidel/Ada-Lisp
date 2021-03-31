@@ -15,6 +15,13 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
                         pvt_msg_flag, pvt_first_char_flag,
                         output_stream, input_stream) is
    --
+   --  Identification
+   --
+   name : constant string            := "Tiny Lisp";
+   version_string : constant string  := "V00.02 - 2021-Mar-31";
+   version_number : constant Integer := 2;
+   version_date : constant Integer   := 20210331;  -- yyyymmdd
+   --
    --  Define the basic types used.
    --
    --  Sizes for the global data structures.  These can be adjusted as needed.
