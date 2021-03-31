@@ -60,7 +60,7 @@ package body bbs.lisp.parser is
             e := NIL_ELEM;
             BBS.lisp.memory.deref(head);
          else
-            e := (kind => E_CONS, ps => head);
+            e := BBS.lisp.evaluate.makeList(head);
          end if;
       else
          error("parse", "Error in parsing list.");
@@ -139,11 +139,11 @@ package body bbs.lisp.parser is
                   end if;
                else
                   if cons_table(head).car.kind = E_NIL then
-                     cons_table(head).car := (kind => E_CONS, ps => current);
+                     cons_table(head).car := BBS.lisp.evaluate.makeList(current);
                   else
                      flag := BBS.lisp.memory.alloc(temp);
                      if flag then
-                        cons_table(temp).car := (Kind => E_CONS, ps => current);
+                        cons_table(temp).car := BBS.lisp.evaluate.makeList(current);
                         flag := append(head, temp);
                         if not flag then
                            error("list", "Unable to append to list");

@@ -53,6 +53,13 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       return NIL_CONS;
    end;
    --
+   --  Takes a cons index and returns a list element type.
+   --
+   function makeList(s : cons_index) return element_type is
+   begin
+      return (Kind => E_CONS, ps => s);
+   end;
+   --
    --  This checks to see if the element represents a function call.  The element
    --  is a symbol of type either BUILTIN or LAMBDA.
    --

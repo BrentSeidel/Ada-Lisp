@@ -6,6 +6,8 @@ with BBS.lisp.stack;
 package BBS.lisp.evaluate
 with Abstract_State =>  pvt_exit_block is
    --
+   --  Various utility functions
+   --
    function isTrue(e : element_type) return Boolean
      with Global => (Input => cons_table);
    function isList(e : element_type) return Boolean
@@ -16,6 +18,8 @@ with Abstract_State =>  pvt_exit_block is
      with post => (if not isList(e) then getList'Result = NIL_CONS else
                        getList'Result in cons_index'Range),
        global => Null;
+   function makeList(s : cons_index) return element_type
+     with Global => Null;
    --
    --  Execute the statements in a block and return the value of the last
    --  statement executed.

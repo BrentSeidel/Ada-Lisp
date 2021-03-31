@@ -1,21 +1,24 @@
 with BBS.lisp.memory;
 with BBS.lisp.strings;
+with BBS.lisp.evaluate;
 package body bbs.lisp.utilities is
    --
    --  Various utility functions
    --
    function count(s : cons_index) return Integer is
-      t : element_type := (kind => E_CONS, ps => s);
+      t : cons_index := s;
+      last : cons_index;
       c : Integer := 0;
    begin
       if s = NIL_CONS then
          return 0;
       end if;
-      while t.kind = E_CONS loop
+      while t > NIL_CONS loop
          c := c + 1;
-         t := cons_table(t.ps).cdr;
+         last := t;
+         t := BBS.lisp.evaluate.getList(cons_table(t).cdr);
       end loop;
-      if t.kind /= E_NIL then
+      if cons_table(last).cdr.kind /= E_NIL then
          c := c + 1;
       end if;
       return c;
@@ -68,23 +71,23 @@ package body bbs.lisp.utilities is
       --
    begin
       loop
-         if cons_table(temp).car.kind /= E_CONS then
+         if BBS.lisp.evaluate.isList(cons_table(temp).car) then
+            count := count + replace_sym(BBS.lisp.evaluate.getList(cons_table(temp).car), var);
+         else
             if process_element(cons_table(temp).car, var, new_elem) then
                BBS.lisp.memory.deref(cons_table(temp).car);
                cons_table(temp).car := new_elem;
                BBS.lisp.memory.ref(cons_table(temp).car);
                count := count + 1;
             end if;
-         elsif cons_table(temp).car.kind = E_CONS then
-            count := count + replace_sym(cons_table(temp).car.ps, var);
          end if;
-         exit when cons_table(temp).cdr.kind /= E_CONS;
-         temp := cons_table(temp).cdr.ps;
+         exit when not BBS.lisp.evaluate.isList(cons_table(temp).cdr);
+         temp := BBS.lisp.evaluate.getList(cons_table(temp).cdr);
       end loop;
          --
          --  Process the last element, it it exists in a CDR
          --
-      if cons_table(temp).cdr.kind /= E_CONS then
+      if not BBS.lisp.evaluate.isList(cons_table(temp).cdr) then
          if process_element(cons_table(temp).cdr, var, new_elem) then
             BBS.lisp.memory.deref(cons_table(temp).cdr);
             cons_table(temp).cdr := new_elem;

@@ -112,8 +112,8 @@ package body BBS.lisp.evaluate.vars is
                      BBS.lisp.memory.deref(BBS.lisp.stack.get_entry(index).st_value);
                      if p2.kind = E_VALUE then
                         BBS.lisp.stack.set_value(index, p2.v, err);
-                     elsif p2.kind = E_CONS then
-                        BBS.lisp.stack.set_value(index, (kind => V_LIST, l => p2.ps), err);
+                     elsif isList(p2) then
+                        BBS.lisp.stack.set_value(index, (kind => V_LIST, l => getList(p2)), err);
                      end if;
                      if err then
                         error("setq", "Error occured setting stack variable");
@@ -139,8 +139,8 @@ package body BBS.lisp.evaluate.vars is
    --  Define local variables and optionally assign values to them.
    --
    procedure local(e : out element_type; s : cons_index; p : phase) is
-      locals : element_type;
-      base : element_type;
+      locals : cons_index;
+      base : cons_index;
       list : element_type;
       t : element_type := NIL_ELEM;
       err : Boolean;
@@ -161,20 +161,20 @@ package body BBS.lisp.evaluate.vars is
                --
                list := cons_table(s).cdr;  --  Should be local variable list.
                if isList(list) then
-                  locals := cons_table(getList(list)).car;
+                  locals := getList(cons_table(getList(list)).car);
                else
                   error("let", "Improper parameters.");
                   e := (kind => E_ERROR);
                   return;
                end if;
-               if not isList(locals) then
+               if locals = NIL_CONS then
                   error("let", "Parameter list must be a list");
-                  BBS.lisp.memory.deref(locals);
+                  BBS.lisp.memory.deref(cons_table(getList(list)).car);
                   cons_table(getList(list)).car := (Kind => E_ERROR);
                   return;
                end if;
                base := locals;
-               while isList(locals) loop
+               while locals /= NIL_CONS loop
                   --
                   --  If the local variable is a cons, then the first element
                   --  is the variable name and the second element is the value.
@@ -185,10 +185,10 @@ package body BBS.lisp.evaluate.vars is
                      str : string_index;
                      offset : Natural := 1;
                   begin
-                     if cons_table(locals.ps).car.kind = E_CONS then
-                        el := cons_table(cons_table(locals.ps).car.ps).car;
+                     if isList(cons_table(locals).car) then
+                        el := cons_table(getList(cons_table(locals).car)).car;
                      else
-                        el := cons_table(locals.ps).car;
+                        el := cons_table(locals).car;
                      end if;
                      if el.kind = E_SYMBOL then
                         str := symb_table(el.sym).str;
@@ -221,13 +221,13 @@ package body BBS.lisp.evaluate.vars is
                         return;
                      end if;
                      offset := offset + 1;
-                     if cons_table(locals.ps).car.kind = E_CONS then
-                        cons_table(cons_table(locals.ps).car.ps).car := el;
+                     if isList(cons_table(locals).car) then
+                        cons_table(getList(cons_table(locals).car)).car := el;
                      else
-                        cons_table(locals.ps).car := el;
+                        cons_table(locals).car := el;
                      end if;
                   end;
-                  locals := cons_table(locals.ps).cdr;
+                  locals := getList(cons_table(locals).cdr);
                end loop;
             else
                error("let", "Something went horribly wrong and local did not get a list");
@@ -245,18 +245,18 @@ package body BBS.lisp.evaluate.vars is
             --
             --  First process the list of local variables
             --
-            locals := cons_table(s).car;  --  Should be parameter list.
+            locals := getList(cons_table(s).car);  --  Should be parameter list.
             list := cons_table(s).cdr;
             --
             --  Next process the parameter list.
             --
-            if not isList(locals) then
+            if locals = NIL_CONS then
                error("let", "No list of local variables");
                e := (Kind => E_ERROR);
                return;
             end if;
             BBS.lisp.stack.start_frame(err);
-            while isList(locals) loop
+            while locals > NIL_CONS loop
                --
                --  If the local variable is a cons, then the first element
                --  is the variable name and the second element is the value.
@@ -268,8 +268,8 @@ package body BBS.lisp.evaluate.vars is
                   offset : Natural := 1;
                   local_val : value := (kind => V_BOOLEAN, b => False);
                begin
-                  if isList(cons_table(getList(locals)).car) then
-                     temp_list := getList(cons_table(getList(locals)).car);
+                  if isList(cons_table(locals).car) then
+                     temp_list := getList(cons_table(locals).car);
                      el := cons_table(temp_list).car;
                      --
                      -- Check if there is a value
@@ -283,21 +283,18 @@ package body BBS.lisp.evaluate.vars is
                      else
                         check := indirect_elem(check);
                      end if;
-                     case check.kind is
-                        when E_CONS =>
-                           local_val := (kind => V_LIST, l => check.ps);
-                        when E_VALUE =>
-                           local_val := check.v;
-                        when E_ERROR =>
-                           error("let", "Error detected during parameter processing");
-                           e := (Kind => E_ERROR);
-                           BBS.lisp.stack.exit_frame;
-                           return;
-                        when others =>  -- Might need to update to check for errors.
-                           null;
-                     end case;
+                     if isList(check) then
+                        local_val := (kind => V_LIST, l => getList(check));
+                     elsif check.kind = E_VALUE then
+                        local_val := check.v;
+                     elsif check.kind = E_ERROR then
+                        error("let", "Error detected during parameter processing");
+                        e := (Kind => E_ERROR);
+                        BBS.lisp.stack.exit_frame;
+                        return;
+                     end if;
                   else
-                     el := cons_table(locals.ps).car;
+                     el := cons_table(locals).car;
                   end if;
                   if (el.kind = E_STACK) then
                      BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
@@ -321,7 +318,7 @@ package body BBS.lisp.evaluate.vars is
                   end if;
                   offset := offset + 1;
                end;
-               locals := cons_table(locals.ps).cdr;
+               locals := getList(cons_table(locals).cdr);
             end loop;
             --
             --  Now evaluate the statements in this context.

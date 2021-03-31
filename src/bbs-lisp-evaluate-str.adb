@@ -38,14 +38,16 @@ package body BBS.lisp.evaluate.str is
    --  Helper functions for length
    --
    function length(s : cons_index) return int32 is
-      t : element_type := (kind => E_CONS, ps => s);
+      t : cons_index := s;
+      last : cons_index;
       c : int32 := 0;
    begin
-      while isList(t) loop
+      while t > NIL_CONS loop
          c := c + 1;
-         t := cons_table(getList(t)).cdr;
+         last := t;
+         t := getList(cons_table(t).cdr);
       end loop;
-      if t.kind /= E_NIL then
+      if cons_table(last).cdr.kind /= E_NIL then
          c := c + 1;
       end if;
       return c;

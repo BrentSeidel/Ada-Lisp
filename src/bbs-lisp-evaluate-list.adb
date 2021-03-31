@@ -79,10 +79,9 @@ package body BBS.lisp.evaluate.list is
    --  Create a list verbatum from the parameter list
    --
    procedure quote(e : out element_type; s : cons_index) is
-      t : constant element_type := (kind => E_CONS, ps => s);
    begin
-      bbs.lisp.memory.ref(t);
-      e := t;
+      bbs.lisp.memory.ref(s);
+      e := makeList(s);
    end;
    --
    --  Create a list by evaluating the parameters, similar to quote, but quote
