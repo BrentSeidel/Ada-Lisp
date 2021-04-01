@@ -7,6 +7,7 @@ with new_line;
 procedure Lisp is
 begin
    Ada.Text_IO.Put_Line("Tiny lisp interpreter written in Ada.");
+   Ada.Text_IO.Put_Line(BBS.lisp.name & " " & BBs.lisp.version_string);
    bbs.lisp.init(Ada.Text_IO.Put_Line'Access, Ada.Text_IO.Put'Access,
                 new_line.New_Line'Access, Ada.Text_IO.Get_Line'Access);
    bbs.lisp.repl;

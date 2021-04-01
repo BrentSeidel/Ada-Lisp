@@ -18,9 +18,9 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --  Identification
    --
    name : constant string            := "Tiny Lisp";
-   version_string : constant string  := "V00.02 - 2021-Mar-31";
+   version_string : constant string  := "V00.02+ - 2021-Apr-01";
    version_number : constant Integer := 2;
-   version_date : constant Integer   := 20210331;  -- yyyymmdd
+   version_date : constant Integer   := 2021041;  -- yyyymmdd
    --
    --  Define the basic types used.
    --

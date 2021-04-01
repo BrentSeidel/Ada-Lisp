@@ -94,7 +94,7 @@ package body BBS.lisp.evaluate.list is
       tail : cons_index;
       s1 : cons_index;
    begin
-      if s > cons_index'First then
+      if s > NIL_CONS then
          if BBS.lisp.memory.alloc(s1) then
             first := first_value(rest);
             if first.kind = E_ERROR then
@@ -107,7 +107,7 @@ package body BBS.lisp.evaluate.list is
             head := s1;
             tail := s1;
          else
-            error("list", "Unable to allocate cons cell.");
+            error("list", "Unable to allocate initial cons cell.");
             e := (kind => E_ERROR);
             return;
          end if;

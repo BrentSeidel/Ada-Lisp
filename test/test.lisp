@@ -918,6 +918,27 @@ Testing a longer line that should be split across fragments.
   A69 A70 A71 A72 A73 A74 A75 A76 A77 A78 A79 A80 A81 A82 A83 A84 A85 A86
   A87 A88 A89 A90 A91 A92 A93 A94 A95 A96 A97 A98 A99 A100)
   (print "So many parameters") (terpri)))) "Lambda variables")
+;
+;  Testing other resource exhaustion errors
+;
+(print "===> Testing Resource exhaustion")
+(terpri)
+(defun test-str-error ()
+  (let ((s "1234567890123456"))
+    (dowhile T
+      (setq s (concatenate 'string s "1234567890123456")))))
+(verify-true (errorp (test-str-error)) "String exhaustion with full fragments")
+(defun test-str-error ()
+  (let ((s "123456789012345"))
+    (dowhile T
+      (setq s (concatenate 'string s "123456789012345")))))
+(verify-true (errorp (test-str-error)) "String exhaustion with partial fragments")
+(defun test-cons-error ()
+  (let ((s (0 1)))
+    (dowhile T
+      (setq s (concatenate 'list s (list 0 1 3))))))
+(verify-true (errorp (test-cons-error)) "Cons table exhaustion in concatenate")
+(setq test-cons-error 0)
 ;(dump)
 (print "===> Testing complete")
 (terpri)
