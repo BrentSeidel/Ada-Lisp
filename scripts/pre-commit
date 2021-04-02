@@ -3,6 +3,7 @@
 #  First try to build the lisp software.
 #
 echo "Building software"
+scripts/make_info
 if gprbuild lispq.gpr
 then
   echo "Build succeeded"

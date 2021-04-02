@@ -2,6 +2,21 @@
 #
 #  Script to do code coverage
 #
+#
+#  Remove old files from the obj directory and existing coverage files
+#
+rm obj/*
+rm *.gcov
+#
+#  Build the application for code coverage
+#
+scripts/make_info
 gnatmake -P lispq.gpr -f -cargs -fprofile-arcs -ftest-coverage -largs -fprofile-arcs
+#
+#  Run the application with the test input
+#
 ./lisp < test/$1.lisp
+#
+#  Process the code coverage results
+#
 gcov obj/*.gcda > summary-cov.txt

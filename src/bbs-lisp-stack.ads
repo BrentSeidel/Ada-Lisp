@@ -28,11 +28,9 @@ with Abstract_State => (pvt_stack, pvt_sp, pvt_fp, pvt_fc) is
    --  Status functions for the stack
    --
    function isFull return Boolean
-     with Global => (Input => pvt_sp),
-     Inline;
-   function isEmpty return Boolean
-     with Global => (Input => pvt_sp),
-     Inline;
+     with Global => (Input => pvt_sp);
+--   function isEmpty return Boolean
+--     with Global => (Input => pvt_sp);
    --
    --  Adding and removing items from the stack
    --
@@ -42,8 +40,8 @@ with Abstract_State => (pvt_stack, pvt_sp, pvt_fp, pvt_fc) is
 --     post => not isFull;
    procedure push(v : stack_entry; err : out Boolean)
      with Global => (In_Out => (pvt_stack, pvt_sp)),
-     pre => not isFull,
-     post => not isEmpty;
+     pre => not isFull;
+--     post => not isEmpty;
    --
    --  Operations for stack frames.  The usage is as follows:
    --  1) Call start_frame before pushing items onto the stack that should be

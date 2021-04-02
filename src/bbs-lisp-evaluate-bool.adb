@@ -27,8 +27,7 @@ package body BBS.lisp.evaluate.bool is
       if v.kind = V_BOOLEAN then
          e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => not v.b));
       elsif v.kind = V_INTEGER then
-         e := (kind => E_VALUE, v => (kind => V_INTEGER, i =>
-                                        uint32_to_int32(not int32_to_uint32(v.i))));
+         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => uint32_to_int32(not int32_to_uint32(v.i))));
       else
          error("eval_not", "Cannot perform NOT of parameter of type " & value_type'Image(v.kind));
          e :=  (kind => E_ERROR);

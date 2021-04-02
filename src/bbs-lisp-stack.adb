@@ -13,10 +13,10 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
       return (stack_pointer = FULL_STACK);
    end;
    --
-   function isEmpty return Boolean is
-   begin
-      return (stack_pointer = EMPTY_STACK);
-   end;
+--   function isEmpty return Boolean is
+--   begin
+--      return (stack_pointer = EMPTY_STACK);
+--   end;
    --
    --  Adding and removing items from the stack
    --

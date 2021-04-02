@@ -939,6 +939,13 @@ Testing a longer line that should be split across fragments.
       (setq s (concatenate 'list s (list 0 1 3))))))
 (verify-true (errorp (test-cons-error)) "Cons table exhaustion in concatenate")
 (setq test-cons-error 0)
+(defun test-cons-error ()
+  (let ((s (0 1)) (c 1))
+    (dowhile T
+      (setq s (cons c s))
+      (setq c (+ 1 c)))))
+(verify-true (errorp (test-cons-error)) "Cons table exhaustion in cons")
+(setq test-cons-error 0)
 ;(dump)
 (print "===> Testing complete")
 (terpri)

@@ -50,9 +50,9 @@
 (defun test-cons-error ()
   (let ((s (0 1)) (c 1))
     (dowhile T
-      (setq s (concatenate 'list s (list 0 1 3)))
+      (setq s (cons c s))
       (setq c (+ 1 c)))))
-(test-cons-error)
+(verify-true (errorp (test-cons-error)) "Resource exhaustion in cons")
 (setq test-cons-error 0)
 ;(dump)
 ;
