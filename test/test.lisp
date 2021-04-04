@@ -928,17 +928,19 @@ Testing a longer line that should be split across fragments.
     (dowhile T
       (setq s (concatenate 'string s "1234567890123456")))))
 (verify-true (errorp (test-str-error)) "String exhaustion with full fragments")
+;
 (defun test-str-error ()
   (let ((s "123456789012345"))
     (dowhile T
       (setq s (concatenate 'string s "123456789012345")))))
 (verify-true (errorp (test-str-error)) "String exhaustion with partial fragments")
+;
 (defun test-cons-error ()
   (let ((s (0 1)))
     (dowhile T
       (setq s (concatenate 'list s (list 0 1 3))))))
 (verify-true (errorp (test-cons-error)) "Cons table exhaustion in concatenate")
-(setq test-cons-error 0)
+;
 (defun test-cons-error ()
   (let ((s (0 1)) (c 1))
     (dowhile T
