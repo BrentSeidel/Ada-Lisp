@@ -1,7 +1,8 @@
 #!/bin/sh
 #
 #  This script creates the BBS.lisp.info package file.  It contains
-#  constants for the compile time and date.
+#  constants for the compile time and date.  For each release, update
+#  the version string and version number here.
 #
 cat <<EOF > src/bbs-lisp-info.ads
 package BBS.lisp.info is

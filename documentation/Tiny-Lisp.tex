@@ -2084,7 +2084,7 @@ package body new_line is
 end new_line;
 \end{lstlisting}
 
-It's fairly simple.  Initialize the interpreter and call it.  The only wrinkle is the need to define \function{new\_line}.  The Ada version has an optional parameter of a type defined in \package{Ada.Text\_IO}.  This is a problem when trying to eliminate dependencies on \package{Ada.Text\_IO}.  A more complex example of embedding is found in the \url{https://github.com/BrentSeidel/Ada-Arduino-Due} repository.  This repository contains code that runs on an Arduino Due and includes the definition of several \tl{} operations to access attached hardware.
+It's fairly simple.  Initialize the interpreter and call it.  The only wrinkle is the need to define \function{new\_line}.  The Ada version has an optional parameter of a type defined in \package{Ada.Text\_IO}.  This is a problem when trying to eliminate dependencies on \package{Ada.Text\_IO}.  A more complex example of embedding is found in the \url{https://github.com/BrentSeidel/Ada-Lisp-Embedded} repository.  This repository contains code that runs on an Arduino Due and includes the definition of several \tl{} operations to access attached hardware.
 
 \subsection{Adding Custom Operations}
 The Ada functions that implement the \tl{} operations are defined using one of the two following prototypes:
