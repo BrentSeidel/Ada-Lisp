@@ -615,6 +615,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --
    function eval_dispatch(s : cons_index) return element_type is
       sym : symbol;
+      sym_flag : Boolean := False;
       e : element_type := NIL_ELEM;
       first : constant element_type := cons_table(s).car;
       rest : constant element_type := cons_table(s).cdr;
@@ -622,6 +623,15 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    begin
       if first.kind = E_SYMBOL then
          sym := symb_table(first.sym);
+         sym_flag := true;
+      elsif first.kind = E_STACK then
+         val := BBS.lisp.stack.search_frames(first.st_offset, first.st_name);
+         if val.kind = V_SYMBOL then
+            sym := symb_table(val.sym);
+            sym_flag := True;
+         end if;
+      end if;
+      if sym_flag then
          case sym.kind is
             when SY_BUILTIN =>
                if msg_flag then

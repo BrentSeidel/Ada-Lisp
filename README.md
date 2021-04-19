@@ -47,7 +47,8 @@ It now runs on the Arduino Due.  It took a bit of work to remove all dependencie
 on Ada libraries that aren't available on the Arduino Due.  Another feature added
 was the ability for the host software to add custom lisp commands.  Thus, the
 main Arduino Due program can add custom Lisp commands for accessing the Arduino
-hardware.
+hardware.  An example of this is the Ada-Lisp-Embedded repository at
+https://github.com/BrentSeidel/Ada-Lisp-Embedded
 
 This Lisp interpreter also builds and runs on Windows 10 as well as a Raspberry
 PI under Raspberian.

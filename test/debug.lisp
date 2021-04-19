@@ -19,7 +19,7 @@
 ;  If two values are equal, print pass message, otherwise print fail message
 ;
 (defun verify-equal (expected actual text)
-  (if (= actual expected)
+  (if (= expected actual)
     (progn (setq *PASS-COUNT* (+ *PASS-COUNT* 1)) (print "PASS: Actual "))
     (progn (setq *FAIL-COUNT* (+ *FAIL-COUNT* 1)) (print "***FAIL: Actual ")))
   (print  actual ", Expected " expected " " text)
@@ -45,15 +45,25 @@
 ;  (print "Total test cases:  " (+ *PASS-COUNT* *FAIL-COUNT*)))
 ;--------------------------------------------
 ;
-(print "===> Testing Resource exhaustion")
+;
+;  Test lambda and function passing
+;
+(print "==> Testing Lambda and function passing")
 (terpri)
-(defun test-cons-error ()
-  (let ((s (0 1)) (c 1))
-    (dowhile T
-      (setq s (cons c s))
-      (setq c (+ 1 c)))))
-(verify-true (errorp (test-cons-error)) "Resource exhaustion in cons")
-(setq test-cons-error 0)
+(defun test-lambda (a b c d)
+  (print "Expected value is " a)
+  (terpri)
+  (print "Actual value is " (b c d))
+  (terpri)
+  (verify-equal a (b c d) "Testing lambda"))
+(defun add (a b) (+ a b))
+(test-lambda 3 (lambda (a1 a2) (+ a1 a2)) 1 2)
+(test-lambda 9 add 4 5)
+(test-lambda 6 (lambda (a1 a2) (* a1 a2)) 2 3)
+(test-lambda 12 * 3 4)
+(test-lambda T (lambda (a1 a2) (< a1 a2)) #\A #\B)
+(test-lambda T (lambda (a1 a2)(= a1 (* a2 (/ a1 a2)))) 6 2)
+(setq test-lambda 0)
 ;(dump)
 ;
 ;--------------------------------------------

@@ -91,6 +91,14 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
          if val.kind = V_LAMBDA then
             return True;
          end if;
+         if val.kind = V_SYMBOL then
+            sym_kind := symb_table(val.sym).kind;
+            if (sym_kind = SY_BUILTIN) or
+              (sym_kind = SY_SPECIAL) or
+              (sym_kind = SY_LAMBDA) then
+               return True;
+            end if;
+         end if;
       end if;
       return False;
    end;

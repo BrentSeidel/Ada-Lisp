@@ -379,9 +379,16 @@ package body BBS.lisp.evaluate.func is
       end if;
       while rest > NIL_CONS loop
          if cons_table(name.ps).car.kind = E_STACK then
+--            put("eval_function: Parameter name is ");
+--            print(cons_table(name.ps).car.st_name);
+--            new_line;
             temp_value := first_value(rest);
+--            put_line("eval_function: Processed parameter kind is " & ptr_type'Image(temp_value.kind));
             if temp_value.kind = E_VALUE then
                param_value := temp_value.v;
+            elsif temp_value.kind = E_SYMBOL then
+--               put_line("eval_function: Parameter is symbol of type " & symbol_type'Image(symb_table(temp_value.sym).kind));
+               param_value := (kind => V_SYMBOL, sym => temp_value.sym);
             elsif isList(temp_value) then
                param_value := (kind => V_LIST, l => getList(temp_value));
             elsif temp_value.kind = E_NIL then

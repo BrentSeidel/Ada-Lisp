@@ -22,7 +22,7 @@
 ;  If two values are equal, print pass message, otherwise print fail message
 ;
 (defun verify-equal (expected actual text)
-  (if (= actual expected)
+  (if (= expected actual)
     (progn (setq *PASS-COUNT* (+ *PASS-COUNT* 1)) (print "PASS: Actual "))
     (progn (setq *FAIL-COUNT* (+ *FAIL-COUNT* 1)) (print "***FAIL: Actual ")))
   (print  actual ", Expected " expected " " text)
@@ -489,14 +489,17 @@
 (test-concatenate)
 (setq test-concatenate 0)
 ;
-;  Test lambda
+;  Test lambda and function passing
 ;
-(print "==> Testing Lambda")
+(print "==> Testing Lambda and function passing")
 (terpri)
 (defun test-lambda (a b c d)
   (verify-equal a (b c d) "Testing lambda"))
+(defun add (a b) (+ a b))
 (test-lambda 3 (lambda (a1 a2) (+ a1 a2)) 1 2)
+(test-lambda 9 add 4 5)
 (test-lambda 6 (lambda (a1 a2) (* a1 a2)) 2 3)
+(test-lambda 12 * 3 4)
 (test-lambda T (lambda (a1 a2) (< a1 a2)) #\A #\B)
 (test-lambda T (lambda (a1 a2)(= a1 (* a2 (/ a1 a2)))) 6 2)
 (setq test-lambda 0)
