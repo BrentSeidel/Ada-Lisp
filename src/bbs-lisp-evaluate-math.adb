@@ -36,12 +36,14 @@ package body BBS.lisp.evaluate.math is
          v := el.v;
       else
          error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
+         BBS.lisp.memory.deref(el);
          return (kind => E_ERROR);
       end if;
       if v.kind = V_INTEGER then
          accum := v.i;
       else
-         error("eval_math", "Can't process " & value_type'Image(v.kind));
+         error("eval_math", "Can't process value of type " & value_type'Image(v.kind));
+         BBS.lisp.memory.deref(el);
          return (kind => E_ERROR);
       end if;
       bbs.lisp.memory.deref(el);
@@ -51,10 +53,11 @@ package body BBS.lisp.evaluate.math is
             v := el.v;
          else
             error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
+            BBS.lisp.memory.deref(el);
             return (kind => E_ERROR);
          end if;
          if v.kind /= V_INTEGER then
-            error("eval_math", "Can't process " & value_type'Image(v.kind));
+            error("eval_math", "Can't process value of type " & value_type'Image(v.kind));
             BBS.lisp.memory.deref(el);
             return (kind => E_ERROR);
          end if;

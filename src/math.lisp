@@ -109,3 +109,12 @@
 (defun nand (a b) (not (and a b)))
 ;
 (defun nor (a b) (not (or a b)))
+;
+;  Operations on functions
+;
+(defun sum (min max func)
+  (let ((total 0))
+    (dotimes (x (+ 1 (- max min)))
+      (setq total (+ total (func (+ x min)))))
+    total))
+

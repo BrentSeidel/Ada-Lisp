@@ -123,18 +123,7 @@ package body BBS.lisp.evaluate.loops is
                   e := (kind => E_ERROR);
                   return;
                end if;
-               if rest > NIL_CONS then
-                  limit := cons_table(rest).car;
-                  if isList(limit) then
-                     limit := eval_dispatch(getList(limit));
-                  else
-                     limit := indirect_elem(limit);
-                  end if;
-                  result := cons_table(rest).cdr;
-                  if isList(result) then
-                     result := cons_table(getList(result)).car;
-                  end if;
-               else
+               if rest = NIL_CONS then
                   error("dotimes", "Loop limit not provided.");
                   e := (kind => E_ERROR);
                   return;
