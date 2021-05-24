@@ -94,7 +94,7 @@ package body BBS.lisp.evaluate.loops is
    begin
       case p is
          when PH_QUERY =>
-            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
+            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 2));
          when PH_PARSE_BEGIN =>
             BBS.lisp.stack.start_frame(err);
             if s > NIL_CONS then

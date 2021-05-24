@@ -15,6 +15,7 @@ with BBS.lisp.evaluate.symb;
 with BBS.lisp.evaluate.vars;
 with BBS.lisp.memory;
 with BBS.lisp.parser;
+with BBS.lisp.parser.stdio;
 with BBS.lisp.stack;
 use type BBS.lisp.stack.stack_entry_type;
 with BBS.lisp.strings;
@@ -26,8 +27,13 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                        pvt_msg_flag => msg_flag,
                        pvt_first_char_flag => first_char_flag,
                        output_stream => (io_put_line, io_put, io_new_line),
-                       input_stream => io_get_line) is
+                       input_stream => io_get_line,
+                       parse => parse_buff) is
+    --
+   --  Buffer for keyboard input to parser
    --
+   parse_buff : aliased BBS.lisp.parser.stdio.parser_stdio;
+  --
    --  Initialize the data structures used in the lisp interpreter.  It resets'
    --  the tables and adds the builtin operations to the symbol table.
    --
@@ -155,14 +161,13 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --  a S-expression.
    --
    function read return Element_Type is
-      buff : String(1 .. 256);
-      size : Natural;
       dummy : Boolean;
       el : element_type;
    begin
       Put(prompt1);
-      Get_Line(buff, size);
-      dummy := BBS.lisp.parser.parse(buff, size, el);
+      parse_buff.get_line;
+      dummy := BBS.lisp.parser.parse(parse_buff'Access, el);
+--      dummy := BBS.lisp.parser.parse(parse_buff.buff, parse_buff.last, el);
       return el;
    end;
    --
@@ -208,7 +213,9 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          when E_SYMBOL =>
             print(e.sym);
          when E_TEMPSYM =>
-            put("Tempsym");
+            put("Tempsym[");
+            print(e.tempsym);
+            put("]");
          when E_STACK =>
             print(e.st_name);
       end case;
@@ -316,7 +323,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       exit_flag := False;
       break_flag := false;
       while True loop
---         BBS.lisp.stack.reset;
          BBS.lisp.evaluate.set_exit_block(0);
          e := read;
          if e.kind /= E_ERROR then

@@ -1,13 +1,25 @@
---with bbs.lisp.memory;
 --
 --  This package handles the parsing of input.  Input can be a list, an atom
 --  of either a symbol or integer, or a comment.
 --
 private package bbs.lisp.parser is
    --
+   --  Define an abstract class for providing data to the parser
+   --
+   type parser_buffer is abstract tagged limited null record;
+   type parser_ptr is access all parser_buffer'Class;
+   --
+   function get_char(self : parser_buffer) return Character is abstract;
+   function get_next_char(self : parser_buffer) return Character is abstract;
+   procedure next_char(self : in out parser_buffer) is abstract;
+   function not_end(self : parser_buffer) return Boolean is abstract;
+   function is_end(self : parser_buffer) return Boolean is abstract;
+   procedure set_end(self : in out parser_buffer) is abstract;
+   procedure get_line(self : in out parser_buffer) is abstract;
+   --
    --  The main parser function
    --
-   function parse(buff : in out String; last : in out Integer; e : out element_type) return Boolean
+   function parse(buff : parser_ptr; e : out element_type) return Boolean
      with Global => (Input => (cons_table, symb_table, pvt_string_table));
    -- should be (In_Out => (cons_table, symb_table, pvt_string_table)
 private
@@ -20,14 +32,11 @@ private
    --
    --  Subfunction for parsing lists.  If the buffer ends before the end of the
    --  list is reached, more input is read and the parsing continues.
-   --    ptr    - Position in buffer to examine
-   --    buff   - Character buffer
-   --    last   - Last valid character in buffer
+   --    buff   - Buffer object to parse
    --    s_expr - Parsed s expression
    --    qfixed - The list is quoted
    --
-   function list(ptr : in out Integer; buff : in out String;
-                 last : in out Integer; s_expr : out cons_index;
+   function list(buff : parser_ptr; s_expr : out cons_index;
                  qfixed : Boolean; base : Boolean)
                  return Boolean
      with Global => (Input => (cons_table, symb_table, pvt_string_table));
@@ -37,37 +46,40 @@ private
    --  to either the symbol or temp symbol.  Returns false if the symbol or temp
    --  symbol can't be found or created or if the atom can't be created.
    --
-   function symb(ptr : in out Integer; buff : String; last : Integer; quoted : Boolean)
+   function symb(buff : parser_ptr; quoted : Boolean)
                  return element_type
      with Global => (Input => (symb_table, pvt_string_table));
    -- should be (In_Out => (symb_table, pvt_string_table)
    --
    --  Subfunction for parsing integers
    --
-   procedure int(ptr : in out Integer; buff : String; last : Integer; value : out int32)
+   procedure int(buff : parser_ptr; value : out int32)
      with Global => Null;
    --
    --  Hexidecimal numbers are read in as 32 bit unsigned integers and conerted
    --  to signed 32 bit integers using an unchecked conversion.
    --
-   procedure hex(ptr : in out Integer; buff : String; last : Integer; value : out int32)
+   procedure hex(buff : parser_ptr; value : out int32)
      with Global => Null;
    --
    --  Parse strings
    --
-   function parse_str(ptr : in out Integer; buff : in String;
-                      last : in integer; s : out string_index) return Boolean
+   function parse_str(buff : parser_ptr; s : out string_index) return Boolean
      with Global => (Input => pvt_string_table);
    -- should be (In_Out => string_table);
    --
    --  Parse characters
    --
-   function parse_char(ptr : in out Integer; buff : in String;
-                       last : in Integer; c : out Character) return Boolean
+   function parse_char(buff : parser_ptr; c : out Character) return Boolean
      with Global => Null;
    --
-   --  Procedure to skip white space
+   --  Procedure to skip white space (spaces, tabs, carriage return, or line feed).
    --
-   procedure skip_whitespace(ptr : in out Integer; buff : String; last : Integer)
+   function isWhitespace(c : Character) return Boolean is
+     ((c = ' ') or (c = Character'Val(10)) or (c = Character'Val(13)) or
+          c = Character'Val(9))
      with Global => Null;
+--   procedure skip_whitespace(ptr : in out Integer; buff : String; last : Integer)
+--     with Global => Null;
 end;
+

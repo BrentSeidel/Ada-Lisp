@@ -28,7 +28,7 @@ package body BBS.lisp.evaluate.func is
       --
       case p is
          when PH_QUERY =>
-            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 2));
+            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 4));
             return;
             --
             --  First identify the name, parameter list, and body.  Then perform
@@ -213,7 +213,7 @@ package body BBS.lisp.evaluate.func is
       --
       case p is
          when PH_QUERY =>
-            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
+            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 2));
             return;
             --
             --  First identify the name, parameter list, and body.  Then perform

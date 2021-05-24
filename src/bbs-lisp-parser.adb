@@ -5,18 +5,6 @@ with BBS.lisp.utilities;
 with BBS.lisp.evaluate;
 package body bbs.lisp.parser is
    --
-   --  Utilities to assist in parsing
-   --
-   --
-   --  Procedure to skip white space
-   --
-   procedure skip_whitespace(ptr : in out Integer; buff : String; last : Integer) is
-   begin
-      while (buff(ptr) = ' ') and (ptr < Last) loop
-         ptr := ptr + 1;
-      end loop;
-   end;
-   --
    --  Append an element to a list.  Return true for success or false for failure.
    --  On failure, the list is dereffed.
    --
@@ -29,12 +17,16 @@ package body bbs.lisp.parser is
          flag := append(head, current);
          if not flag then
             error("append_to_list", "Unable to append to list");
+            put("  Element: ");
+            print(e, False, True);
             BBS.lisp.memory.deref(current);
             BBS.lisp.memory.deref(head);
             return False;
          end if;
       else
          error("append_to_list", "Unable to convert element to cons");
+         put("  Element: ");
+         print(e, False, True);
          BBS.lisp.memory.deref(current);
          BBS.lisp.memory.deref(head);
          return False;
@@ -46,15 +38,13 @@ package body bbs.lisp.parser is
    --  This is the basic parser dispatcher.  Based on the first non-space character,
    --  parsing is dispatched to a lower level parser.
    --
-   function parse(buff : in out String; last : in out Integer; e : out element_type) return Boolean is
-      ptr  : Integer;
+   function parse(buff : parser_ptr; e : out element_type) return Boolean is
       head : cons_index;
       flag : Boolean := False;
       qtemp : constant Boolean := False;
    begin
       e := NIL_ELEM;
-      ptr := buff'First;
-      flag := list(ptr, buff, last, head, qtemp, True);
+      flag := list(buff, head, qtemp, True);
       if flag then
          if head = NIL_CONS or else ((cons_table(head).car.kind = E_NIL) and (cons_table(head).cdr.kind = E_NIL)) then
             e := NIL_ELEM;
@@ -72,14 +62,11 @@ package body bbs.lisp.parser is
    --
    --  Subfunction for parsing lists.  If the buffer ends before the end of the
    --  list is reached, more input is read and the parsing continues.
-   --    ptr    - Position in buffer to examine
-   --    buff   - Character buffer
-   --    last   - Last valid character in buffer
+   --    buff   - Character source object
    --    s_expr - Parsed s expression
    --    qfixed - The list is quoted
    --
-   function list(ptr : in out integer; buff : in out String;
-                 last : in out Integer; s_expr : out cons_index;
+   function list(buff : parser_ptr; s_expr : out cons_index;
                  qfixed : Boolean; base : Boolean)
                  return Boolean is
       head : cons_index := NIL_CONS;
@@ -104,11 +91,10 @@ package body bbs.lisp.parser is
          return False;
       end if;
       while (not list_end) loop
-         skip_whitespace(ptr, buff, last);
          --
          --  Check for the end of the list
          --
-         if buff(ptr) = ')' then
+         if buff.get_char = ')' then
             list_end := true;
             item := 0;
             if special_flag then
@@ -123,12 +109,17 @@ package body bbs.lisp.parser is
             end if;
             qtemp := False;
          --
+         --  Skip spaces
+         --
+         elsif isWhitespace(buff.get_char) then
+            buff.next_char;
+         --
          -- Check for starting a new sub-list
          --
-         elsif buff(ptr) = '(' then
-            ptr := ptr + 1;
-            flag := list(ptr, buff, last, current, qfixed or qtemp, False);
-            ptr := ptr + 1;
+         elsif buff.get_char = '(' then
+            buff.next_char;
+            flag := list(buff, current, qfixed or qtemp, False);
+            buff.next_char;
             if flag then
                if (cons_table(current).car.kind = E_NIL) and (cons_table(current).cdr.kind = E_NIL) then
                   BBS.lisp.memory.deref(current);
@@ -169,9 +160,9 @@ package body bbs.lisp.parser is
          --
          --  Check for the start of an integer atom
          --
-         elsif BBS.lisp.utilities.isDigit(buff(ptr)) or
-           ((buff(ptr) = '-') and BBS.lisp.utilities.isDigit(buff(ptr + 1))) then
-            int(ptr, buff, last, value);
+         elsif BBS.lisp.utilities.isDigit(buff.get_char) or
+           ((buff.get_char = '-') and BBS.lisp.utilities.isDigit(buff.get_next_char)) then
+            int(buff, value);
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
             flag := true;
             if cons_table(head).car.kind = E_NIL then
@@ -187,13 +178,13 @@ package body bbs.lisp.parser is
          --
          --  Check for special sequences.
          --
-         elsif buff(ptr) = '#' then
-            ptr := ptr + 1;
-            if (buff(ptr) = 'x') or (buff(ptr) = 'X') then
+         elsif buff.get_char = '#' then
+            buff.next_char;
+            if (buff.get_char = 'x') or (buff.get_char = 'X') then
                --
                --  Hexidecimal number
                --
-               hex(ptr, buff, last, value);
+               hex(buff, value);
                e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
                flag := true;
                if cons_table(head).car.kind = E_NIL then
@@ -205,11 +196,11 @@ package body bbs.lisp.parser is
                      return False;
                   end if;
                end if;
-            elsif buff(ptr) = '\' then
+            elsif buff.get_char = '\' then
                --
                --  Character literal
                --
-               flag := parse_char(ptr, buff, last, char);
+               flag := parse_char(buff, char);
                if flag then
                   e := (kind => E_VALUE, v => (kind => V_CHARACTER, c => char));
                else
@@ -225,7 +216,7 @@ package body bbs.lisp.parser is
                   end if;
                end if;
             else
-               error("list", "Unrecognized special form");
+               error("list", "Unrecognized special form #" & buff.get_char);
                e := (Kind => E_ERROR);
                if cons_table(head).car.kind = E_NIL then
                   cons_table(head).car := e;
@@ -241,8 +232,8 @@ package body bbs.lisp.parser is
          --
          --  Check for the start of a string
          --
-         elsif buff(ptr) = '"' then
-            flag := parse_str(ptr, buff, last, str);
+         elsif buff.get_char = '"' then
+            flag := parse_str(buff, str);
             if flag then
                e := (kind => E_VALUE, v => (kind => V_STRING, s => str));
                if cons_table(head).car.kind = E_NIL then
@@ -264,26 +255,28 @@ package body bbs.lisp.parser is
          --
          --  Check for a comment
          --
-         elsif buff(ptr) = ';' then
-            ptr := last + 1;
+         elsif buff.get_char = ';' then
+            buff.set_end;
             qtemp := False;
          --
          --  Quote the next element.
          --
-         elsif buff(ptr) = ''' then
-            ptr := ptr + 1;
+         elsif buff.get_char = ''' then
+            buff.next_char;
             qtemp := True;
          --
          --  If nothing else, parse it as a symbol
          --
          else
-            e := symb(ptr, buff, last, qfixed or qtemp);
+            e := symb(buff, qfixed or qtemp);
             if cons_table(head).car.kind = E_NIL then
                cons_table(head).car := e;
             else
                flag := append_to_list(head, e);
                if not flag then
                   error("list", "Failed appending symbol to list");
+                  put("  Element: ");
+                  print(e, False, True);
                   return flag;
                end if;
             end if;
@@ -322,13 +315,12 @@ package body bbs.lisp.parser is
          --  If there is no text left to parse and it's not the end of a list,
          --  read some more text and point to the start of it.
          --
-         if ptr > last and base then
+         if buff.is_end and base then
             list_end := True;
          end if;
-         if (ptr > last) and (not list_end) then
+         if buff.is_end and (not list_end) then
             Put(prompt2);
-            Get_Line(buff, last);
-            ptr := 1;
+            buff.Get_Line;
          end if;
          --
          --  For special functions, call the function after the first parameter
@@ -355,7 +347,7 @@ package body bbs.lisp.parser is
    --
    --  Parse a symbol.  The boolean values "T" and "NIL" are also detected here.
    --
-   function symb(ptr : in out integer; buff : String; last : Integer; quoted : Boolean)
+   function symb(buff : parser_ptr; quoted : Boolean)
                  return element_type is
       test : string_index;
       el : element_type;
@@ -364,9 +356,9 @@ package body bbs.lisp.parser is
    begin
       flag := BBS.lisp.memory.alloc(test);
       if flag then
-         while (buff(ptr) /= ')') and (buff(ptr) /= ' ') and (ptr <= Last) loop
-            flag := BBS.lisp.strings.append(test, buff(ptr));
-            ptr := ptr + 1;
+         while (buff.get_char /= ')') and (not isWhitespace(buff.get_char)) and buff.not_end loop
+            flag := BBS.lisp.strings.append(test, buff.get_char);
+            buff.next_char;
          end loop;
          BBS.lisp.strings.uppercase(test);
          --
@@ -379,6 +371,10 @@ package body bbs.lisp.parser is
          if (string_table(test).len = 3) and (string_table(test).str(1..3) = "NIL") then
             BBS.lisp.memory.deref(test);
             return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         end if;
+         if string_table(test).len = 0 then
+            BBS.lisp.memory.deref(test);
+            return NIL_ELEM;
          end if;
          --
          -- Now check for symbols
@@ -403,17 +399,17 @@ package body bbs.lisp.parser is
    --
    --  Parse an integer.
    --
-   procedure int(ptr : in out integer; buff : String; last : Integer; value : out int32) is
+   procedure int(buff : parser_ptr; value : out int32) is
       accumulate : int32 := 0;
       neg : Boolean := False;
    begin
-      if buff(ptr) = '-' then
+      if buff.get_char = '-' then
          neg := true;
-         ptr := ptr + 1;
+         buff.next_char;
       end if;
-      while BBS.lisp.utilities.isDigit(buff(ptr)) and (ptr <= Last) loop
-         accumulate := accumulate*10 + int32'Value(" " & buff(ptr));
-         ptr := ptr + 1;
+      while BBS.lisp.utilities.isDigit(buff.get_char) and buff.not_end loop
+         accumulate := accumulate*10 + int32'Value(" " & buff.get_char);
+         buff.next_char;
       end loop;
       if neg then
          value := -accumulate;
@@ -424,13 +420,13 @@ package body bbs.lisp.parser is
    --
    --  Parse an integer in hexidecimal notation.
    --
-   procedure hex(ptr : in out integer; buff : String; last : Integer; value : out int32) is
+   procedure hex(buff : parser_ptr; value : out int32) is
       accumulate : uint32 := 0;
    begin
-      ptr := ptr + 1;
-      while BBS.lisp.utilities.isHex(buff(ptr)) and (ptr <= Last) loop
-         accumulate := accumulate*16 + BBS.lisp.utilities.hexDigit(buff(ptr));
-         ptr := ptr + 1;
+      buff.next_char;
+      while BBS.lisp.utilities.isHex(buff.get_char) and buff.not_end loop
+         accumulate := accumulate*16 + BBS.lisp.utilities.hexDigit(buff.get_char);
+         buff.next_char;
       end loop;
       value := uint32_to_int32(accumulate);
    end;
@@ -438,8 +434,7 @@ package body bbs.lisp.parser is
    --  Parse strings.  Note that currently strings cannot be broken across lines.
    --  An end of line probably has the same effect as a closing quotation mark.
    --
-   function parse_str(ptr : in out Integer; buff : in String;
-                      last : in integer; s : out string_index) return Boolean is
+   function parse_str(buff : parser_ptr; s : out string_index) return Boolean is
       str  : string_index;
       next : string_index;
       first : string_index;
@@ -451,28 +446,28 @@ package body bbs.lisp.parser is
       if flag then
          s := str;
          first := str;
-         ptr := ptr + 1;
-         while (buff(ptr) /= '"') and (ptr <= last) loop
+         buff.next_char;
+         while (buff.get_char /= '"') and buff.not_end loop
             if string_table(str).len < fragment_len then
                string_table(str).len := string_table(str).len + 1;
-               string_table(str).str(string_table(str).len) := buff(ptr);
+               string_table(str).str(string_table(str).len) := buff.get_char;
             else
                flag := bbs.lisp.memory.alloc(next);
                if flag then
                   string_table(str).next := next;
                   str := next;
                   string_table(str).len := 1;
-                  string_table(str).str(1) := buff(ptr);
+                  string_table(str).str(1) := buff.get_char;
                   string_table(str).next := NIL_STR;
                else
                   bbs.lisp.memory.deref(first);
                   return False;
                end if;
             end if;
-            ptr := ptr + 1;
+            buff.next_char;
          end loop;
       end if;
-      ptr := ptr + 1;
+      buff.next_char;
       return True;
    end;
    --
@@ -489,20 +484,19 @@ package body bbs.lisp.parser is
    --    Return
    --    Backspace
    --
-   function parse_char(ptr : in out Integer; buff : in String;
-                       last : in Integer; c : out Character) return Boolean is
+   function parse_char(buff : parser_ptr; c : out Character) return Boolean is
       temp : String(1 .. 10);
       index : Natural := 1;
    begin
-      ptr := ptr + 1;
-      c := buff(ptr);
-      ptr := ptr + 1;
+      buff.next_char;
+      c := buff.get_char;
+      buff.next_char;
       if BBS.lisp.utilities.isAlpha(c) then
          temp(index) := BBS.lisp.strings.To_Upper(c);
-         while BBS.lisp.utilities.isAlpha(buff(ptr)) and (ptr <= last) and index < 10 loop
+         while BBS.lisp.utilities.isAlpha(buff.get_char) and buff.not_end and index < 10 loop
             index := index + 1;
-            temp(index) := BBS.lisp.strings.To_Upper(buff(ptr));
-            ptr := ptr + 1;
+            temp(index) := BBS.lisp.strings.To_Upper(buff.get_char);
+            buff.next_char;
          end loop;
          if index = 1 then
             return True;

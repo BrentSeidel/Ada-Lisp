@@ -46,24 +46,31 @@
 ;--------------------------------------------
 ;
 ;
-;  Test lambda and function passing
+;  Test progn and return
 ;
-(print "==> Testing Lambda and function passing")
+(print "===> Testing block related operations")
 (terpri)
-(defun test-lambda (a b c d)
-  (print "Expected value is " a)
-  (terpri)
-  (print "Actual value is " (b c d))
-  (terpri)
-  (verify-equal a (b c d) "Testing lambda"))
-(defun add (a b) (+ a b))
-(test-lambda 3 (lambda (a1 a2) (+ a1 a2)) 1 2)
-(test-lambda 9 add 4 5)
-(test-lambda 6 (lambda (a1 a2) (* a1 a2)) 2 3)
-(test-lambda 12 * 3 4)
-(test-lambda T (lambda (a1 a2) (< a1 a2)) #\A #\B)
-(test-lambda T (lambda (a1 a2)(= a1 (* a2 (/ a1 a2)))) 6 2)
-(setq test-lambda 0)
+(defun test-block ()
+  (let ((accum 0) (count 0) result)
+    (setq result (dowhile (< count 10)
+      (print "Count is " count)
+      (terpri)
+      (if (= count 5)
+        (progn
+          (verify-equal 5 count "Loop at 5")
+          (return 50)
+          (verify-equal 1 2 "Return operation failed")))
+       (setq count (+ 1 count))))
+    (verify-equal 50 result "Checking result from return")
+    (verify-equal 5 count "Loop exited at count = 5")
+    (setq count T)
+    (setq accum 0)
+    (dowhile count (if (= accum 5) (setq count NIL)) (setq accum (+ accum 1)))
+    (verify-equal 6 accum "Accumulator is 6")
+    (verify-equal NIL count "Count is set to NIL")
+))
+(test-block)
+(setq test-block 0)
 ;(dump)
 ;
 ;--------------------------------------------

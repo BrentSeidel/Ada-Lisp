@@ -188,7 +188,7 @@
 (test-global)
 (setq test-global 0)
 ;
-;  Test local variables with setq
+;  Test local variables with let and setq
 ;
 (print "===> Testing let")
 (terpri)

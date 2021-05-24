@@ -13,7 +13,7 @@ with Ada.Unchecked_Conversion;
 package BBS.lisp
 with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
                         pvt_msg_flag, pvt_first_char_flag,
-                        output_stream, input_stream) is
+                        output_stream, input_stream, parse) is
    --
    --  Define the basic types used.
    --
@@ -294,7 +294,6 @@ private
          len : Integer range 0..fragment_len;
          str : String (1..fragment_len);
       end record;
-   --
    --
    string_table : array (string_index'First + 1 .. string_index'Last) of fragment
      with Part_Of => pvt_string_table;
