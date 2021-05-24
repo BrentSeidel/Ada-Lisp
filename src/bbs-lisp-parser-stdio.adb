@@ -29,4 +29,13 @@ package body bbs.lisp.parser.stdio is
       Get_Line(self.buff, self.last);
       self.ptr := self.buff'First;
    end;
+   --
+   --  Request more data
+   --
+   procedure request_more(self : in out parser_stdio) is
+   begin
+      Put(prompt2);
+      Get_Line(self.buff, self.last);
+      self.ptr := self.buff'First;
+   end;
 end;

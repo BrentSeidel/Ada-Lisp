@@ -16,6 +16,7 @@ private package bbs.lisp.parser is
    function is_end(self : parser_buffer) return Boolean is abstract;
    procedure set_end(self : in out parser_buffer) is abstract;
    procedure get_line(self : in out parser_buffer) is abstract;
+   procedure request_more(self : in out parser_buffer) is abstract;
    --
    --  The main parser function
    --

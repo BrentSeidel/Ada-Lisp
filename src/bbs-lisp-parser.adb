@@ -319,8 +319,7 @@ package body bbs.lisp.parser is
             list_end := True;
          end if;
          if buff.is_end and (not list_end) then
-            Put(prompt2);
-            buff.Get_Line;
+            buff.request_more;
          end if;
          --
          --  For special functions, call the function after the first parameter

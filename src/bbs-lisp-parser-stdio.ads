@@ -32,6 +32,9 @@ package bbs.lisp.parser.stdio is
    overriding
    procedure get_line(self : in out parser_stdio);
    --
+   overriding
+   procedure request_more(self : in out parser_stdio);
+   --
    procedure init(self : in out parser_stdio);
 
 end;
