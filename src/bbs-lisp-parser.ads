@@ -9,13 +9,14 @@ private package bbs.lisp.parser is
    type parser_buffer is abstract tagged limited null record;
    type parser_ptr is access all parser_buffer'Class;
    --
+   --  Methods that need to be provided by the parser_buffer.
+   --
    function get_char(self : parser_buffer) return Character is abstract;
    function get_next_char(self : parser_buffer) return Character is abstract;
    procedure next_char(self : in out parser_buffer) is abstract;
    function not_end(self : parser_buffer) return Boolean is abstract;
    function is_end(self : parser_buffer) return Boolean is abstract;
    procedure set_end(self : in out parser_buffer) is abstract;
-   procedure get_line(self : in out parser_buffer) is abstract;
    procedure request_more(self : in out parser_buffer) is abstract;
    --
    --  The main parser function
