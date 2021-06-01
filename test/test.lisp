@@ -233,6 +233,22 @@
 (test-dowhile)
 (setq test-dowhile 0)
 ;
+;  Test dolist operation
+;
+(print "===> Testing dolist")
+(terpri)
+(defun test-dolist ()
+  (let ((accum 0) result)
+    (setq result (dolist (n (1 3 5 7 11) 20)
+      (print "Count is " n)
+      (terpri)
+      (setq accum (+ accum n))))
+    (verify-equal 20 result "Result returned")
+    (verify-equal 27 accum "Accumulator is 27")))
+)
+(test-dolist)
+(setq test-dolist 0)
+;
 ;  Test dotimes operation
 ;
 (print "===> Testing dotimes")
@@ -819,6 +835,21 @@ Testing a longer line that should be split across fragments.
 (test-dowhile-err)
 (setq test-dowhile-err 0)
 (setq check-err 0)
+;
+(print "===> Testing DOLIST errors")
+(terpri)
+(defun test-dotimes-err ()
+  (verify-true (errorp (dolist)) "No parameters to dolist")
+  (verify-true (errorp (dolist 1 1)) "Limits need to be a list")
+  (verify-true (errorp (dolist ((1 2 3) 1 2) (print "Hi"))) "Loop variable is a list")
+  (verify-true (errorp (dolist ('print 1 2) (print "Hi"))) "Loop variable is a builtin")
+  (verify-true (errorp (dolist (1) 1)) "No limit variable")
+  (verify-true (errorp (dolist (a #\error) 1)) "Error in limits")
+  (verify-true (errorp (dolist (a -1) 1)) "Limit is not a list")
+  (verify-true (errorp (dolist (a 5) (+ 1 #\error))) "Error in loop body")
+)
+(test-dotimes-err)
+(setq test-dotimes-err 0)
 ;
 (print "===> Testing DOTIMES errors")
 (terpri)

@@ -45,32 +45,21 @@
 ;  (print "Total test cases:  " (+ *PASS-COUNT* *FAIL-COUNT*)))
 ;--------------------------------------------
 ;
+;  Test dolist operation
 ;
-;  Test progn and return
-;
-(print "===> Testing block related operations")
+(print "===> Testing dolist")
 (terpri)
-(defun test-block ()
-  (let ((accum 0) (count 0) result)
-    (setq result (dowhile (< count 10)
-      (print "Count is " count)
+(defun test-dolist ()
+  (let ((accum 0) result)
+    (setq result (dolist (n (1 3 5 7 11) 20)
+      (print "Count is " n)
       (terpri)
-      (if (= count 5)
-        (progn
-          (verify-equal 5 count "Loop at 5")
-          (return 50)
-          (verify-equal 1 2 "Return operation failed")))
-       (setq count (+ 1 count))))
-    (verify-equal 50 result "Checking result from return")
-    (verify-equal 5 count "Loop exited at count = 5")
-    (setq count T)
-    (setq accum 0)
-    (dowhile count (if (= accum 5) (setq count NIL)) (setq accum (+ accum 1)))
-    (verify-equal 6 accum "Accumulator is 6")
-    (verify-equal NIL count "Count is set to NIL")
-))
-(test-block)
-(setq test-block 0)
+      (setq accum (+ accum n))))
+    (verify-equal 20 result "Result returned")
+    (verify-equal 27 accum "Accumulator is 27")))
+)
+(test-dolist)
+(setq test-dolist 0)
 ;(dump)
 ;
 ;--------------------------------------------

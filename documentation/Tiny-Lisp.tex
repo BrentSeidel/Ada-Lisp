@@ -908,12 +908,32 @@ This creates a user defined function.
 \subsection{Common Lisp Compatibility}
 This is more or less a subset of \cl, except that there are probably many corner cases where things don't quite match..
 
+\section{dolist}
+Repeats a series of statements for each element in a list.
+\subsection{Inputs}
+Two or more values.  The first value is a list containing a local variable, the list to iterate over, and an optional return value.   The remaining values are the statements to be executed the specified number of times.
+\subsection{Output}
+Either the provided value or constant \constant{NIL} if no value provided.
+\subsection{Example}
+\begin{lstlisting}
+(setq sum 0)
+(dolist (x (1 2 3) 5)
+  (print "The sum is " sum)
+  (terpri)
+  (setq sum (+ sum x)))
+\end{lstlisting}
+Returns the integer 5 and sets \constant{sum} to 6.
+\subsection{Description}
+On each pass through the loop, the local variable is set to the next value in the list.  The supplied statements are evaluated.  It is not recommended to change the value of the local variable in the body of the loop.  Once the values of the list are exhausted, the loop exits and evaluates the result, if present.
+\subsection{Common Lisp Compatibility}
+The declarations and tags are not supported.
+
 \section{dotimes}
 Repeats a series of statements a specific number of times.
 \subsection{Inputs}
-Two or more values.  The first value is a list containing a local variable and the numb, the remaining values are the statements to be executed the specified number of times.
+Two or more values.  The first value is a list containing a local variable, the loop count, and optionally a return value.  The remaining values are the statements to be executed the specified number of times.
 \subsection{Output}
-A constant \constant{NIL}.
+Either the provided value or constant \constant{NIL} if no value provided.
 \subsection{Example}
 \begin{lstlisting}
 (setq sum 0)
@@ -922,11 +942,11 @@ A constant \constant{NIL}.
   (terpri)
   (setq sum (+ sum x)))
 \end{lstlisting}
-Returns the constant \constant{NIL}.
+Returns the constant \constant{NIL} and sets \constant{sum} to 45.
 \subsection{Description}
-On each pass through the loop, the local variable is set to the next value in the range 0 to the loop limit.  The supplied statements are evaluated.  It is not recommended to change the value of the local variable in the body of the loop.
+On each pass through the loop, the local variable is set to the next value in the range 0 to the loop limit.  The supplied statements are evaluated.  It is not recommended to change the value of the local variable in the body of the loop.  Once the limit is reached, the return value is evaluated, if present.
 \subsection{Common Lisp Compatibility}
-The result-form, declarations, and tags are not supported.
+The declarations and tags are not supported.
 
 \section{dowhile}
 Repeats a series of statements while a condition is \constant{T}.
