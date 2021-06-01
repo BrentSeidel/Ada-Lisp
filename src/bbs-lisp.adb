@@ -69,8 +69,9 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       add_builtin("consp", BBS.lisp.evaluate.pred.consp'Access);
       add_builtin("errorp", BBS.lisp.evaluate.pred.errorp'Access);
       add_special("defun", BBS.lisp.evaluate.func.defun'Access);
-      add_builtin("dowhile", BBS.lisp.evaluate.loops.dowhile'Access);
+      add_special("dolist", BBS.lisp.evaluate.loops.dolist'Access);
       add_special("dotimes", BBS.lisp.evaluate.loops.dotimes'Access);
+      add_builtin("dowhile", BBS.lisp.evaluate.loops.dowhile'Access);
       add_builtin("dump", BBS.lisp.evaluate.misc.dump'Access);
       add_builtin("exit", BBS.lisp.evaluate.misc.quit'Access);
       add_builtin("floatp", BBS.lisp.evaluate.pred.return_false'Access);
@@ -167,14 +168,13 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       Put(prompt1);
       parse_buff.get_line;
       dummy := BBS.lisp.parser.parse(parse_buff'Access, el);
---      dummy := BBS.lisp.parser.parse(parse_buff.buff, parse_buff.last, el);
       return el;
    end;
    --
    --  This procedure evaluates a S-expression.  After the expression is
    --  evaluated, it is dereffed.
    --
-   function  eval(e : element_type) return element_type is
+   function eval(e : element_type) return element_type is
       r : element_type;
       sym : symb_index;
    begin
@@ -193,6 +193,29 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             r := e;
       end case;
       return r;
+   end;
+   --
+   --  Converts an element to a value.  Any element that cannot be converted
+   --  returns a value of V_NONE.
+   --
+   function element_to_value(e : element_type) return value is
+   begin
+      case e.kind is
+         when E_CONS =>
+            return (kind => V_LIST, l => e.ps);
+         when E_ERROR =>
+            return (kind => V_NONE);
+         when E_NIL =>
+            return (kind => V_NONE);
+         when E_TEMPSYM =>
+            return (kind => V_NONE);
+         when E_SYMBOL =>
+            return element_to_value(BBS.lisp.evaluate.indirect_elem(e));
+         when E_STACK =>
+            return element_to_value(BBS.lisp.evaluate.indirect_elem(e));
+         when E_VALUE =>
+            return e.v;
+      end case;
    end;
    --
    --  Prints whatever is pointed to by an element pointer.  If d is true,

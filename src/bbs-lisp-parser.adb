@@ -126,7 +126,7 @@ package body bbs.lisp.parser is
                   flag := append_to_list(head, NIL_ELEM);
                   if not flag then
                      error("list", "Failure appending NIL_ELEM to list");
-                     return flag;
+                     return False;
                   end if;
                else
                   if cons_table(head).car.kind = E_NIL then
@@ -171,7 +171,7 @@ package body bbs.lisp.parser is
                flag := append_to_list(head, e);
                if not flag then
                   error("list", "Failed appending decimal integer to list");
-                  return flag;
+                  return False;
                end if;
             end if;
             qtemp := False;
@@ -277,7 +277,7 @@ package body bbs.lisp.parser is
                   error("list", "Failed appending symbol to list");
                   put("  Element: ");
                   print(e, False, True);
-                  return flag;
+                  return False;
                end if;
             end if;
             if (e.kind = E_SYMBOL) and not (qtemp or qfixed) then

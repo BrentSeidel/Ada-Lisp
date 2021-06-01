@@ -234,6 +234,11 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
      with Global => (Input => (cons_table, symb_table, pvt_string_table),
                      output => output_stream);
    --
+   --  Converts an element to a value.  Any element that cannot be converted
+   --  returns a value of V_NONE.
+   --
+   function element_to_value(e : element_type) return value;
+   --
    --  Some useful constants
    --
    NIL_ELEM : constant element_type := (Kind => E_NIL);

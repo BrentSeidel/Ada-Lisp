@@ -9,14 +9,14 @@ package body BBS.lisp.evaluate.loops is
    --
    procedure dowhile(e : out element_type; s : cons_index) is
       cond : element_type; --  Condition to evaluate
-      list : element_type; --  List of operations to execute
+      body_list : element_type; --  List of operations to execute
       t : element_type := NIL_ELEM;
       temp : element_type;
       error_occured : Boolean := False;
    begin
       if s > cons_index'First then
          cond := cons_table(s).car;
-         list := cons_table(s).cdr;
+         body_list := cons_table(s).cdr;
          --
          --  Loop while the conditions is true.
          --
@@ -36,7 +36,7 @@ package body BBS.lisp.evaluate.loops is
             --
             --  Evaluate all of the items in the list.
             --
-            t := execute_block(list);
+            t := execute_block(body_list);
             if t.kind = E_ERROR then
                error("dowhile", "Error occurred during evaluation of body");
                e := t;
@@ -80,8 +80,8 @@ package body BBS.lisp.evaluate.loops is
    --  (dotimes (local count [result]) <body>).
    --
    procedure dotimes(e : out element_type; s : cons_index; p : phase) is
-      limits : cons_index; --  Condition to evaluate
-      list : element_type; --  List of operations to execute
+      limits : cons_index; --  Loop parameters to evaluate
+      body_list : element_type; --  List of operations to execute
       result : element_type := NIL_ELEM;
       var : element_type := NIL_ELEM;
       rest : cons_index := NIL_CONS;
@@ -98,7 +98,7 @@ package body BBS.lisp.evaluate.loops is
          when PH_PARSE_BEGIN =>
             BBS.lisp.stack.start_frame(err);
             if s > NIL_CONS then
-               list := cons_table(s).car;   -- This is the dotimes symbol and ignored here
+               body_list := cons_table(s).car;   -- This is the dotimes symbol and ignored here
                limits := getList(cons_table(s).cdr);
                --
                --  Extract local variable, limit, and optional result
@@ -172,7 +172,7 @@ package body BBS.lisp.evaluate.loops is
             --
             if s > NIL_CONS then
                limits := getList(cons_table(s).car);
-               list := cons_table(s).cdr;
+               body_list := cons_table(s).cdr;
                --
                --  Extract local variable, limit, and optional result
                --
@@ -229,8 +229,8 @@ package body BBS.lisp.evaluate.loops is
             --
             --  Find the index variable name in the body and convert all occurences.
             --
-            if isList(list) then
-               dummy := BBS.lisp.utilities.replace_sym(getList(list), var);
+            if isList(body_list) then
+               dummy := BBS.lisp.utilities.replace_sym(getList(body_list), var);
             end if;
             --
             --  Build the stack frame
@@ -261,7 +261,7 @@ package body BBS.lisp.evaluate.loops is
                --  Evaluate all of the items in the list.
                --
                BBS.lisp.memory.deref(t);
-               t := execute_block(list);
+               t := execute_block(body_list);
                if t.kind = E_ERROR then
                   error("dotimes", "Error occurred in body");
                   BBS.lisp.stack.exit_frame;
@@ -284,6 +284,211 @@ package body BBS.lisp.evaluate.loops is
                t := indirect_elem(result);
                if t.kind = E_ERROR then
                   error("dotimes", "Error occurred in body");
+               end if;
+            end if;
+            e := t;
+      end case;
+   end;
+   --
+   --  Evaluates a dolist command.  The first item contains up to three elements,
+   --  (local list [result]).  "local" is a local variable created for the body
+   --  of the loop.  "list" is a list of items to be assigned to local.  The
+   --  local variable has values from 0 through count - 1.  "result" is optional.
+   --  If present, it is evaluated and returned when the loop completes.  If
+   --  absent, the loop returns NIL.  The remaining items are commands that are
+   --  executed the specified number of times.
+   --  (dotimes (local count [result]) <body>).
+   --
+   procedure dolist(e : out element_type; s : cons_index; p : phase) is
+      limits : cons_index; --  Loop parameters to evaluate
+      body_list : element_type; --  List of operations to execute
+      result : element_type := NIL_ELEM;
+      var : element_type := NIL_ELEM;
+      rest : cons_index := NIL_CONS;
+      source_list : element_type := NIL_ELEM;
+      limit_value : cons_index := NIL_CONS;
+      dummy : Natural;
+      t : element_type := NIL_ELEM;
+      err : Boolean;
+   begin
+      case p is
+         when PH_QUERY =>
+            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 2));
+         when PH_PARSE_BEGIN =>
+            BBS.lisp.stack.start_frame(err);
+            if s > NIL_CONS then
+               body_list := cons_table(s).car;   -- This is the dolist symbol and ignored here
+               limits := getList(cons_table(s).cdr);
+               --
+               --  Extract local variable, limit, and optional result
+               --
+               if limits = NIL_CONS then
+                  error("dolist", "No parameters provided");
+                  e := (kind => E_ERROR);
+                  return;
+               end if;
+               limits := getList(cons_table(limits).car);
+               if limits = NIL_CONS then
+                  error("dolist", "List not provided for limits.");
+                  e := (kind => E_ERROR);
+                  return;
+               end if;
+               var := cons_table(limits).car;
+               rest := getList(cons_table(limits).cdr);
+               if isList(var) then
+                  error("dolist", "The loop variable cannot be a list.");
+                  BBS.lisp.memory.deref(var);
+                  cons_table(limits).car := (Kind => E_ERROR);
+                  e := (kind => E_ERROR);
+                  return;
+               end if;
+               if rest = NIL_CONS then
+                  error("dolist", "Loop limit not provided.");
+                  e := (kind => E_ERROR);
+                  return;
+               end if;
+               --
+               --  Evaluate and validate the loop parameters
+               --
+               --  First convert the loop variable to a local variable, if not already
+               --  done.
+               --
+               declare
+                  str : string_index;
+               begin
+                  if (var.kind = E_SYMBOL) then
+                     msg("dolist", "Converting symbol to loop variable");
+                     str := symb_table(var.sym).str;
+                  elsif (var.kind = E_TEMPSYM) then
+                     msg("dolist", "Converting tempsym to loop variable");
+                     str := var.tempsym;
+                  elsif var.kind = E_STACK then
+                     msg("dolist", "Converting stack variable to loop variable");
+                     str := var.st_name;
+                  else
+                     error("dolist", "Can't convert item into a loop variable.");
+                     e := (kind => E_ERROR);
+                     return;
+                  end if;
+                  var := (kind => E_STACK, st_name => str, st_offset => 1);
+                  BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
+                                       st_name => str,
+                                       st_value => (kind => V_NONE)), err);
+               end;
+               --
+               --  Var has been converted to a local variable.  Now put it back into
+               --  the list.
+               --
+               cons_table(limits).car := var;
+            end if;
+            e := NIL_ELEM;
+         when PH_PARSE_END =>
+            BBS.lisp.stack.exit_frame;
+            e := NIL_ELEM;
+         when PH_EXECUTE =>
+            --
+            --  EXECUTE Phase
+            --
+            if s > NIL_CONS then
+               limits := getList(cons_table(s).car);
+               body_list := cons_table(s).cdr;
+               --
+               --  Extract local variable, limit, and optional result
+               --
+               if limits = NIL_CONS then
+                  error("dolist", "List not provided for limits.");
+                  e := (kind => E_ERROR);
+                  return;
+               end if;
+               var := cons_table(limits).car;
+               rest := getList(cons_table(limits).cdr);
+               if rest > NIL_CONS then
+                  source_list := cons_table(rest).car;
+                  if isList(source_list) then
+                     source_list := eval_dispatch(getList(source_list));
+                  else
+                     source_list := indirect_elem(source_list);
+                  end if;
+                  result := cons_table(rest).cdr;
+                  if isList(result) then
+                     result := cons_table(getList(result)).car;
+                  end if;
+               else
+                  error("dolist", "Loop limit not provided.");
+                  e := (kind => E_ERROR);
+                  return;
+               end if;
+            end if;
+            --
+            --  Next determine what the loop limit is
+            --
+            if not isList(source_list) then
+               error("dolist", "List not provided for iteration.");
+               e := (kind => E_ERROR);
+               return;
+            end if;
+            --
+            --  Find the index variable name in the body and convert all occurences.
+            --
+            if isList(body_list) then
+               dummy := BBS.lisp.utilities.replace_sym(getList(body_list), var);
+            end if;
+            --
+            --  Build the stack frame
+            --
+            if var.kind = E_STACK then
+               BBS.lisp.stack.start_frame(err);
+               BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
+                                    st_name => var.st_name, st_value =>
+                                      (kind => V_INTEGER, i => 0)), err);
+            else
+               error("dolist", "Loop counter is not a variable");
+               e := (kind => E_ERROR);
+               return;
+            end if;
+            --
+            --  Loop with the index variable in the range 0 .. limit.
+            --
+            limit_value := getList(source_list);
+            while limit_value > NIL_CONS loop
+               --
+               --  Set the value of the local variable on the stack
+               --
+               BBS.lisp.stack.set_entry(BBS.lisp.stack.get_fp + 1,
+                                        (kind => BBS.lisp.stack.ST_VALUE,
+                                         st_name => var.st_name, st_value =>
+                                           element_to_value(cons_table(limit_value).car)), err);
+               --
+               --  Evaluate all of the items in the body list.
+               --
+               BBS.lisp.memory.deref(t);
+               t := execute_block(body_list);
+               if t.kind = E_ERROR then
+                  error("dolist", "Error occurred in body");
+                  BBS.lisp.stack.exit_frame;
+                  e := t;
+                  return;
+               end if;
+               if get_exit_block > 0 then
+                  decrement_exit_block;
+                  exit;
+               end if;
+               --
+               --  Point to next element in the source list
+               --
+               limit_value := getList(cons_table(limit_value).cdr);
+            end loop;
+            BBS.lisp.memory.deref(t);
+            --
+            --  Exit the stack frame
+            --
+            BBS.lisp.stack.exit_frame;
+            if isList(result) then
+               t := eval_dispatch(getList(result));
+            else
+               t := indirect_elem(result);
+               if t.kind = E_ERROR then
+                  error("dolist", "Error occurred in body");
                end if;
             end if;
             e := t;

@@ -11,6 +11,10 @@ package BBS.lisp.evaluate.loops is
    --
    procedure dotimes(e : out element_type; s : cons_index; p : phase);
    --
+   --  Evaluate statements for elements in a list.
+   --
+   procedure dolist(e : out element_type; s : cons_index; p : phase);
+   --
    --  Create a block containing multiple statements
    --
    procedure progn(e : out element_type; s : cons_index);
