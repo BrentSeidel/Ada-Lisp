@@ -19,19 +19,18 @@ AdaCore also provides lots of documentation and tutorial material about Ada.
 Second, you will also need to get the following repository,
 https://github.com/BrentSeidel/BBS-Ada  It should be installed next to
 the Ada-Lisp directory.
-{
--\
- + - BBS-Ada
- + - Ada-Lisp
- ...
-}
+
+> -\
+>  + - BBS-Ada
+>  + - Ada-Lisp
+>  ...
 
 Once all this is done, you can either open lispq.gpr in the GPS (Gnat
 Programming Studio) IDE and build it that way, or you can used gprbuild
 on the command line:
-{
-gprbuild lispq.gpr
-}
+
+> gprbuild lispq.gpr
+
 
 ## Interpreter/Compiler
 I am calling this an interpreter, though the boundaries are a bit fuzzy.  The input text is
