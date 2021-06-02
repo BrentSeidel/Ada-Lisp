@@ -25,6 +25,8 @@ the Ada-Lisp directory.
 >  + - Ada-Lisp
 >  ...
 
+In Ada-Lisp, you will also need to create two subdirectories: "lib" and "obj" that are used by the build process.  Since they don't contain source artifacts, I didn't include them in the repository, but the compiler complains if they are missing.
+
 Once all this is done, you can either open lispq.gpr in the GPS (Gnat
 Programming Studio) IDE and build it that way, or you can used gprbuild
 on the command line:
