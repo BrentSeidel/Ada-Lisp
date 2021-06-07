@@ -244,10 +244,11 @@
     (verify-equal 20 result "Result returned")
     (verify-equal 27 accum "Accumulator is 27")
     (setq accum 0)
-    (dolist (n (1 3 "Hello" T))
+    (setq result 5)
+    (dolist (n (1 3 "Hello" result))
       (if (integerp n) (setq accum (+ accum n)))
       (if (stringp n) (verify-equal "Hello" n "Got a string in the list")))
-    (verify-equal 4 accum "Accumulator is 4")))
+    (verify-equal 9 accum "Accumulator is 9")))
 (test-dolist)
 (setq test-dolist 0)
 ;

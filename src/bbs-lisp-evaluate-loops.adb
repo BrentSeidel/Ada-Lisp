@@ -98,7 +98,6 @@ package body BBS.lisp.evaluate.loops is
          when PH_PARSE_BEGIN =>
             BBS.lisp.stack.start_frame(err);
             if s > NIL_CONS then
-               body_list := cons_table(s).car;   -- This is the dotimes symbol and ignored here
                limits := getList(cons_table(s).cdr);
                --
                --  Extract local variable, limit, and optional result
@@ -317,7 +316,6 @@ package body BBS.lisp.evaluate.loops is
          when PH_PARSE_BEGIN =>
             BBS.lisp.stack.start_frame(err);
             if s > NIL_CONS then
-               body_list := cons_table(s).car;   -- This is the dolist symbol and ignored here
                limits := getList(cons_table(s).cdr);
                --
                --  Extract local variable, limit, and optional result
