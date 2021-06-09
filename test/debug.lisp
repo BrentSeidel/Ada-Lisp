@@ -45,24 +45,21 @@
 ;  (print "Total test cases:  " (+ *PASS-COUNT* *FAIL-COUNT*)))
 ;--------------------------------------------
 ;
-;  Test dolist operation
+;  Test read expression operation
 ;
-(print "===> Testing dolist")
+(print "===> Testing read expression operations")
 (terpri)
-(defun test-dolist ()
-  (let ((accum 0) result)
-    (setq result (dolist (n (1 3 5 7 11) 20)
-      (setq accum (+ accum n))))
-    (verify-equal 20 result "Result returned")
-    (verify-equal 27 accum "Accumulator is 27")
-    (setq accum 0)
-    (dolist (n (1 3 "Hello" T))
-      (if (integerp n) (setq accum (+ accum n)))
-      (if (stringp n) (verify-equal "Hello" n "Got a string in the list")))
-    (verify-equal 4 accum "Accumulator is 4")))
-(test-dolist)
-(setq test-dolist 0)
-;(dump)
+(defun test-read ()
+  (let ((temp (read "(1 2 3)")))
+    (verify-equal 3 (length temp) "Correct number of items parsed")
+    (verify-equal 1 (car temp) "First item is correct"))
+  (verify-true (errorp (read)) "Read needs a parameter")
+  (verify-true (errorp (read 1)) "Read parameter needs to be a string")
+  (verify-true (errorp (read "(1 2 3")) "Parse list error")
+)
+(test-read)
+(setq test-read 0)
+(dump)
 ;
 ;--------------------------------------------
 (print "===> Testing complete")

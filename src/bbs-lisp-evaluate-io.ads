@@ -17,6 +17,10 @@ package BBS.lisp.evaluate.io is
    --
    procedure read_line(e : out element_type; s : cons_index);
    --
+   --  Read a line from a string and parse it.
+   --
+   procedure read_expr(e : out element_type; s : cons_index);
+   --
    --  Print a new line.
    --
    procedure terpri(e : out element_type; s : cons_index)

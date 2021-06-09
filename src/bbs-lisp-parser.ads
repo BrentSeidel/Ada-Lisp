@@ -12,14 +12,14 @@ private package bbs.lisp.parser is
    --  Methods that need to be provided by the parser_buffer.
    --
    function get_char(self : parser_buffer) return Character is abstract;
-   function get_next_char(self : parser_buffer) return Character is abstract;
+   function is_next_digit(self : parser_buffer) return Boolean is abstract;
    procedure next_char(self : in out parser_buffer) is abstract;
    function not_end(self : parser_buffer) return Boolean is abstract;
    function is_end(self : parser_buffer) return Boolean is abstract;
    procedure set_end(self : in out parser_buffer) is abstract;
-   procedure request_more(self : in out parser_buffer) is abstract;
+   function request_more(self : in out parser_buffer) return Boolean is abstract;
    --
-   --  The main parser function
+   --  The main parser function.  Returns True if parsing is successful.
    --
    function parse(buff : parser_ptr; e : out element_type) return Boolean
      with Global => (Input => (cons_table, symb_table, pvt_string_table));

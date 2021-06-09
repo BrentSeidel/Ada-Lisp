@@ -63,8 +63,7 @@ package bbs.lisp.memory is
    --  to other items, they will be recursively dereffed.
    --
    procedure deref(s : cons_index)
-     with pre => (s > NIL_CONS) and (cons_table(s).ref > FREE_CONS),
-     post => (cons_table(s).ref = cons_table(s).ref'Old - 1),
+     with post => (cons_table(s).ref = cons_table(s).ref'Old - 1),
      Global => (in_out => cons_table);
    procedure deref(s : string_index)
      with pre => (s > NIL_STR),

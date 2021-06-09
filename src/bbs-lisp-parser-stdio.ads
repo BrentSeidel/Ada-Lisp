@@ -2,6 +2,7 @@
 --  This package contains data and routines for providing data to the parser
 --  routines.  This is done to allow the parser to be decoupled from I/O.
 --
+with BBS.lisp.utilities;
 package bbs.lisp.parser.stdio is
    --
    --  This object contains the following data:
@@ -12,8 +13,8 @@ package bbs.lisp.parser.stdio is
    type parser_stdio is new parser_buffer with
       record
          buff : String(1 .. 256);
-         ptr  : Integer;
-         last : Integer;
+         ptr  : Natural;
+         last : Natural;
       end record;
    type parser_stdio_ptr is access all parser_stdio'Class;
    --
@@ -22,10 +23,11 @@ package bbs.lisp.parser.stdio is
    overriding
    function get_char(self : parser_stdio) return Character is (self.buff(self.ptr));
    --
-   --  Gets the character after the one selected by ptr
+   --  Checks if the character after ptr is a digit.
    --
    overriding
-   function get_next_char(self : parser_stdio) return Character is(self.buff(self.ptr + 1));
+   function is_next_digit(self : parser_stdio) return Boolean is ((self.ptr <= self.last)
+                                                                  and then (BBS.lisp.utilities.isDigit(self.buff(self.ptr + 1))));
    --
    --  Increment ptr to point to the next character
    --
@@ -55,7 +57,7 @@ package bbs.lisp.parser.stdio is
    --  Prints a prompt and reads a line.  All values in object are set.
    --
    overriding
-   procedure request_more(self : in out parser_stdio);
+   function request_more(self : in out parser_stdio) return Boolean;
    --
    --  Initializes the object to contain valid values
    --

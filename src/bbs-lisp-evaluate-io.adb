@@ -1,5 +1,12 @@
 with BBS.lisp.memory;
+with BBS.lisp.parser;
+with BBS.lisp.parser.string;
 package body BBS.lisp.evaluate.io is
+   --
+   --  Parser object used for read_expr.  This needs to be statically allocated
+   --  so that the address can be taken.
+   --
+   str : aliased BBS.lisp.parser.string.parser_string;
    --
    --  Print stuff
    --
@@ -61,6 +68,43 @@ package body BBS.lisp.evaluate.io is
          end loop;
       end if;
       e := (kind => E_VALUE, v => (kind => V_STRING, s => first));
+   end;
+   --
+   --  Read a line from a string and parse it.
+   --
+   procedure read_expr(e : out element_type; s : cons_index) is
+      t   : cons_index := s;
+      car : element_type;
+      v   : value;
+   begin
+      if s > NIL_CONS then
+         car := first_value(t);
+         if car.kind = E_VALUE then
+            v := car.v;
+         else
+            error("read_expr", "Must have a value parameter");
+            e := (kind => E_ERROR);
+            return;
+         end if;
+         if v.kind /= V_STRING then
+            error("read_expr", "Must have a string parameter");
+            e := (kind => E_ERROR);
+            return;
+         end if;
+      else
+         error("read_expr", "Must have a parameter");
+         e := (kind => E_ERROR);
+         return;
+      end if;
+      --
+      --  Now we have a string parameter, parse it.
+      --
+      str.init(v.s);
+      if not BBS.lisp.parser.parse(str'Access, e) then
+         error("read_expr", "Parsing failed");
+         BBS.lisp.memory.deref(e);
+         e := (kind => E_ERROR);
+      end if;
    end;
    --
    procedure terpri(e : out element_type; s : cons_index) is

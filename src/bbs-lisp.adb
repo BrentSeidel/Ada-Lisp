@@ -101,6 +101,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       add_builtin("progn", BBS.lisp.evaluate.loops.progn'Access);
       add_builtin("quote", BBS.lisp.evaluate.list.quote'Access);
       add_builtin("rationalp", BBS.lisp.evaluate.pred.return_false'Access);
+      add_builtin("read", BBS.lisp.evaluate.io.read_expr'Access);
       add_builtin("read-line", BBS.lisp.evaluate.io.read_line'Access);
       add_builtin("realp", BBS.lisp.evaluate.pred.return_false'Access);
       add_builtin("return", BBS.lisp.evaluate.loops.return_from'Access);

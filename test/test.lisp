@@ -575,6 +575,21 @@
 Testing a longer line that should be split across fragments.
 (setq test-io 0)
 ;
+;  Test read expression operation
+;
+(print "===> Testing read expression operations")
+(terpri)
+(defun test-read ()
+  (let ((temp (read "(1 2 3)")))
+    (verify-equal 3 (length temp) "Correct number of items parsed")
+    (verify-equal 1 (car temp) "First item is correct"))
+  (verify-true (errorp (read)) "Read needs a parameter")
+  (verify-true (errorp (read 1)) "Read parameter needs to be a string")
+  (verify-true (errorp (read "(1 2 3")) "Parse list error")
+)
+(test-read)
+(setq test-read 0)
+;
 ;  Test memory operations.  These read and write arbitrary memory, which
 ;  can have unpleasant side effects.  Only the error cases are tested.
 ;

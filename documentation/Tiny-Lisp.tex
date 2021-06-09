@@ -1459,6 +1459,22 @@ Since \datatype{rational numbers} are not a supported datatype, this always retu
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+\section{read}
+Reads text from a \datatype{string} and attempts to parse it as a \tl{} expression.
+\subsection{Inputs}
+A \datatype{string}.
+\subsection{Output}
+A \datatype{list}.
+\subsection{Example}
+\begin{lstlisting}
+(read "(+ 1 2)")
+\end{lstlisting}
+Returns a \datatype{list} containing `+', `1', and `2'.
+\subsection{Description}
+Redirects the parser input to read from a \datatype{string} in order to parse it as a \tl{} expression.
+\subsection{Common Lisp Compatibility}
+None of the \cl{} optional parameters are supported and input can only come from a \datatype{string}.
+
 \section{read-line}
 Reads a line of text from the input stream.
 \subsection{Inputs}

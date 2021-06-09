@@ -30,12 +30,15 @@ package body bbs.lisp.parser.stdio is
       self.ptr := self.buff'First;
    end;
    --
-   --  Request more data
+   --  Request more data.  This will always return True since more input
+   --  can be read from stdio.  Yes, there are exceptions, but these are on
+   --  platforms that can throw exceptions.
    --
-   procedure request_more(self : in out parser_stdio) is
+   function request_more(self : in out parser_stdio) return Boolean is
    begin
       Put(prompt2);
       Get_Line(self.buff, self.last);
       self.ptr := self.buff'First;
+      return True;
    end;
 end;
