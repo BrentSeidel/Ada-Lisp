@@ -46,11 +46,12 @@ package body bbs.lisp.parser is
       e := NIL_ELEM;
       flag := list(buff, head, qtemp, True);
       if flag then
-         if head = NIL_CONS or else ((cons_table(head).car.kind = E_NIL) and (cons_table(head).cdr.kind = E_NIL)) then
+         if head = NIL_CONS then
             e := NIL_ELEM;
-            BBS.lisp.memory.deref(head);
          else
-            e := BBS.lisp.evaluate.makeList(head);
+            e := cons_table(head).car;
+            cons_table(head).car := NIL_ELEM;
+            BBS.lisp.memory.deref(head);
          end if;
       else
          error("parse", "Error in parsing list.");
@@ -85,12 +86,12 @@ package body bbs.lisp.parser is
       test_char : Character;
       qtemp : Boolean := False;  --  Flag for quoting items
    begin
+      s_expr := NIL_CONS;
       flag := bbs.lisp.memory.alloc(head);
       if not flag then
          error("list", "Unable to allocate cons for head");
          return False;
       end if;
-      s_expr := head;
       while (not list_end) loop
          --
          --  Check for the end of the list
@@ -344,12 +345,7 @@ package body bbs.lisp.parser is
          end if;
          item := item + 1;
       end loop;
-      if base and head > NIL_CONS then
-         s_expr := BBS.lisp.evaluate.getList(cons_table(head).car);
-         cons_table(head).car := NIL_ELEM;
-         cons_table(head).cdr := NIL_ELEM;
-         bbs.lisp.memory.deref(head);
-      end if;
+      s_expr := head;
       return True;
    end;
    --

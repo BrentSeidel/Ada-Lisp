@@ -105,21 +105,37 @@ package body BBS.lisp.evaluate.cond is
             when SYM_GT =>
                return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b > v2.b));
          end case;
-      elsif (v1.kind = V_QSYMBOL) and (v2.kind = V_QSYMBOL) then
-         case b is
+      elsif ((v1.kind = V_QSYMBOL) or (v1.kind = V_SYMBOL)) and
+        ((v2.kind = V_QSYMBOL) or (v2.kind = V_SYMBOL)) then
+         declare
+            s1 : symb_index;
+            s2 : symb_index;
+         begin
+            if v1.kind = V_QSYMBOL then
+               s1 := v1.qsym;
+            else
+               s1 := v1.sym;
+            end if;
+            if v2.kind = V_QSYMBOL then
+               s2 := v2.qsym;
+            else
+               s2 := v2.sym;
+            end if;
+            case b is
             when SYM_EQ =>
-               return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.qsym = v2.qsym));
+               return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => s1 = s2));
             when SYM_NE =>
-               return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.qsym /= v2.qsym));
+               return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => s1 /= s2));
             when SYM_LT =>
-               error("eval_comp", "Can only compare symbols for equality.");
+               error("eval_comp", "Can only compare quoted symbols for equality.");
                return (Kind => E_ERROR);
             when SYM_GT =>
-               error("eval_comp", "Can only compare symbols for equality.");
+               error("eval_comp", "Can only compare quoted symbols for equality.");
                return (Kind => E_ERROR);
-         end case;
+            end case;
+         end;
       else
-         error("eval_comp", "Can only compare elements of the same type.");
+         error("eval_comp", "Comparison of the provided types is not supported.");
          put("First type is " & value_type'Image(v1.kind));
          put_line(", second type is " & value_type'Image(v2.kind));
          BBS.lisp.memory.deref(v1);
