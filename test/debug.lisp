@@ -45,27 +45,19 @@
 ;  (print "Total test cases:  " (+ *PASS-COUNT* *FAIL-COUNT*)))
 ;--------------------------------------------
 ;
-;  Test read expression operation
+;  Test eval operation
 ;
-(print "===> Testing read expression operations")
+(print "===> Testing eval operations")
 (terpri)
-(defun test-read ()
-  (let ((temp (read "(1 2 3)")))
-    (verify-equal 3 (length temp) "Correct number of items parsed")
-    (verify-equal 1 (car temp) "First item is correct"))
-  (let ((temp (read "(+ 1 2 3 4 -5 -6 -7 -8)")))
-    (verify-equal 9 (length temp) "Longer list parsed")
-    (verify-equal + (car temp) "First item is addition symbol"))
-  (verify-true (errorp (read)) "Read needs a parameter")
-  (verify-true (errorp (read 1)) "Read parameter needs to be a string")
-  (verify-true (errorp (read "(1 2 3")) "Parse list error")
-  (verify-true (errorp (read "(1 2 ; Comment)")) "Parse with a comment")
-  (verify-equal 123 (read "123") "Read an integer")
-  (verify-true (read "t") "Read true")
-  (verify-false (read "nil") "Read nil")
+(defun test-eval ()
+  (verify-equal 4 (eval (read "(+ 1 2 1)")) "Simple addition")
+  (verify-true (errorp (eval)) "No parameter to eval")
+  (verify-equal 1 (eval 1) "Integer parameter to eval")
+  (verify-true (errorp (eval (read "(+ 1 2"))) "Error passed to eval")
+  (verify-equal 0 (eval *FAIL-COUNT*) "There should be no failures")
 )
-(test-read)
-(setq test-read 0)
+(test-eval)
+(setq test-eval 0)
 ;(dump)
 ;
 ;--------------------------------------------

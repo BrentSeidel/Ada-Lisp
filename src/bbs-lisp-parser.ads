@@ -81,7 +81,5 @@ private
      ((c = ' ') or (c = Character'Val(10)) or (c = Character'Val(13)) or
           c = Character'Val(9))
      with Global => Null;
---   procedure skip_whitespace(ptr : in out Integer; buff : String; last : Integer)
---     with Global => Null;
 end;
 

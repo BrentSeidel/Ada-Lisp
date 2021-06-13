@@ -597,6 +597,20 @@ Testing a longer line that should be split across fragments.
 (test-read)
 (setq test-read 0)
 ;
+;  Test eval operation
+;
+(print "===> Testing eval operations")
+(terpri)
+(defun test-eval ()
+  (verify-equal 4 (eval (read "(+ 1 2 1)")) "Simple addition")
+  (verify-true (errorp (eval)) "No parameter to eval")
+  (verify-equal 1 (eval 1) "Integer parameter to eval")
+  (verify-true (errorp (eval (read "(+ 1 2"))) "Error passed to eval")
+  (verify-equal 0 (eval *FAIL-COUNT*) "There should be no failures")
+)
+(test-eval)
+(setq test-eval 0)
+;
 ;  Test memory operations.  These read and write arbitrary memory, which
 ;  can have unpleasant side effects.  Only the error cases are tested.
 ;

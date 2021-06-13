@@ -332,6 +332,22 @@ package body BBS.lisp.evaluate.func is
       return;
    end;
    --
+   --  Evaluates a lisp form.  Basically this takes the first parameter and passes
+   --  it to the evaluator.
+   --
+   procedure eval_list(e : out element_type; s : cons_index) is
+      first_param : element_type;
+      t : cons_index := s;
+   begin
+      if s = NIL_CONS then
+         error("eval_list", "No parameter given to eval");
+         e := (kind => E_ERROR);
+         return;
+      end if;
+      first_param := first_value(t);
+      e := eval(first_param);
+   end;
+   --
    --  Functions for evaluating lisp functions.
    --    s points to the function definition
    --    e points to the parameters being passed to the function

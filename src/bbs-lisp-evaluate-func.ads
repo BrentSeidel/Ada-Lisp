@@ -28,6 +28,11 @@ package BBS.lisp.evaluate.func is
    --
    procedure lambda(e : out element_type; s : cons_index; p : phase);
    --
+   --  Evaluates a lisp form.  Basically this takes the first parameter and passes
+   --  it to the evaluator.
+   --
+   procedure eval_list(e : out element_type; s : cons_index);
+   --
    --  Functions for evaluating lisp functions
    --
    function eval_function(s : cons_index; e : cons_index) return element_type;

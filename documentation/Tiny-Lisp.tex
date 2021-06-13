@@ -1001,6 +1001,22 @@ If the parameter represents an error condition, return \constant{T}, otherwise r
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.  \cl{} provides more comprehensive error handling, signaling, and trapping.
 
+\section{eval}
+Evaluates a \tl{} element.
+\subsection{Inputs}
+A value.
+\subsection{Output}
+A value.
+\subsection{Example}
+\begin{lstlisting}
+(eval (read "(+ 1 2 3)"))
+\end{lstlisting}
+Returns an \datatype{integer} value of 6.
+\subsection{Description}
+This passes the first parameter to the \tl{} evaluator.  If the parameter is a list and the first element in the list is a \tl{} builtin or special function, or is a symbol for a user defined function, or otherwise a valid \tl{} expression, the expression is evaluated and the result returned.  If the parameter is a symbol, the value of the symbol is returned.  Otherwise, the value of the first parameter is returned.
+\subsection{Common Lisp Compatibility}
+This is mostly compatible with \cl.
+
 \section{exit}
 Exits the \tl{} interpreter.
 \subsection{Inputs}
@@ -1013,7 +1029,7 @@ A value.
 \end{lstlisting}
 No value can be returned as the interpreter exits..
 \subsection{Description}
-This is a way to exit the \tl{} iterpreter.
+This is a way to exit the \tl{} interpreter.
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl, but some implementations (i.e. SBCL) do have it.
 

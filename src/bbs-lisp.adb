@@ -73,6 +73,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       add_special("dotimes", BBS.lisp.evaluate.loops.dotimes'Access);
       add_builtin("dowhile", BBS.lisp.evaluate.loops.dowhile'Access);
       add_builtin("dump", BBS.lisp.evaluate.misc.dump'Access);
+      add_builtin("eval", BBS.lisp.evaluate.func.eval_list'Access);
       add_builtin("exit", BBS.lisp.evaluate.misc.quit'Access);
       add_builtin("floatp", BBS.lisp.evaluate.pred.return_false'Access);
       add_builtin("fresh-line", BBS.lisp.evaluate.io.fresh_line'Access);
@@ -179,20 +180,19 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       r : element_type;
       sym : symb_index;
    begin
-      case e.kind is
-         when E_CONS =>
-            r := eval_dispatch(e.ps);
-            BBS.lisp.memory.deref(e.ps);
-         when E_SYMBOL =>
-            sym := e.sym;
-            if symb_table(sym).kind = SY_VARIABLE then
-               r := symb_table(sym).pv;
-            else
-               r := e;
-            end if;
-         when others =>
+      if BBS.lisp.evaluate.isList(e) then
+         r := eval_dispatch(BBS.lisp.evaluate.getList(e));
+         BBS.lisp.memory.deref(e);
+      elsif e.kind = E_SYMBOL then
+         sym := e.sym;
+         if symb_table(sym).kind = SY_VARIABLE then
+            r := symb_table(sym).pv;
+         else
             r := e;
-      end case;
+         end if;
+      else
+         r := e;
+      end if;
       return r;
    end;
    --
