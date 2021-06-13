@@ -23,9 +23,10 @@ package body bbs.lisp.parser.string is
       end if;
    end;
    --
-   --  Sets pointer to the end of the buffer
+   --  This should advance the pointer until either an end of line character
+   --  (ASCII 10 or 13) is reached or the end of the Lisp string is reached.
    --
-   procedure set_end(self : in out parser_string) is
+   procedure next_line(self : in out parser_string) is
    begin
       self.current := NIL_STR;
    end;

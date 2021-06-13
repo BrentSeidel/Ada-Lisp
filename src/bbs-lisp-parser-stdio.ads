@@ -44,11 +44,11 @@ package bbs.lisp.parser.stdio is
    overriding
    function is_end(self : parser_stdio) return Boolean is (self.ptr > self.last);
    --
-   --  Sets ptr to be greater than last so that the tests not_end and is_end will
-   --  indicate the end.
+   --  Since each object only contains a single line, this sets the pointer to
+   --  the end of the string so that is_end will return True.
    --
    overriding
-   procedure set_end(self : in out parser_stdio);
+   procedure next_line(self : in out parser_stdio);
    --
    --  Reads a line without providing a prompt.  All values in the object are set.
    --

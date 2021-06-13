@@ -17,7 +17,7 @@ package body bbs.lisp.parser.stdio is
    --
    --  Sets pointer to the end of the buffer
    --
-   procedure set_end(self : in out parser_stdio) is
+   procedure next_line(self : in out parser_stdio) is
    begin
       self.ptr := self.last + 1;
    end;

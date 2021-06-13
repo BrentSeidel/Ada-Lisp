@@ -44,11 +44,11 @@ package bbs.lisp.parser.string is
    function is_end(self : parser_string) return Boolean is ((self.current = NIL_STR) or else
                                                              (self.ptr > string_table(self.current).len));
    --
-   --  Sets ptr to be greater than last so that the tests not_end and is_end will
-   --  indicate the end.
+   --  This should advance the pointer until either an end of line character
+   --  (ASCII 10 or 13) is reached or the end of the Lisp string is reached.
    --
    overriding
-   procedure set_end(self : in out parser_string);
+   procedure next_line(self : in out parser_string);
    --
    --  Used to request more data.  This will fail when reading a Lisp string.
    --

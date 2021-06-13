@@ -16,7 +16,7 @@ private package bbs.lisp.parser is
    procedure next_char(self : in out parser_buffer) is abstract;
    function not_end(self : parser_buffer) return Boolean is abstract;
    function is_end(self : parser_buffer) return Boolean is abstract;
-   procedure set_end(self : in out parser_buffer) is abstract;
+   procedure next_line(self : in out parser_buffer) is abstract;
    function request_more(self : in out parser_buffer) return Boolean is abstract;
    --
    --  The main parser function.  Returns True if parsing is successful.

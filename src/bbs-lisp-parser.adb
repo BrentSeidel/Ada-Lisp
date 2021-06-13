@@ -70,7 +70,6 @@ package body bbs.lisp.parser is
                  qfixed : Boolean; base : Boolean)
                  return Boolean is
       head : cons_index := NIL_CONS;
-      current : cons_index := NIL_CONS;
       temp : cons_index := NIL_CONS;
       str  : string_index;
       value : int32;
@@ -120,45 +119,49 @@ package body bbs.lisp.parser is
          -- Check for starting a new sub-list
          --
          elsif test_char = '(' then
-            buff.next_char;
-            flag := list(buff, current, qfixed or qtemp, False);
-            buff.next_char;
-            if flag then
-               if (cons_table(current).car.kind = E_NIL) and (cons_table(current).cdr.kind = E_NIL) then
-                  BBS.lisp.memory.deref(current);
-                  flag := append_to_list(head, NIL_ELEM);
-                  if not flag then
-                     error("list", "Failure appending NIL_ELEM to list");
-                     BBS.lisp.memory.deref(head);
-                     return False;
-                  end if;
-               else
-                  if cons_table(head).car.kind = E_NIL then
-                     cons_table(head).car := BBS.lisp.evaluate.makeList(current);
+            declare
+               current : cons_index := NIL_CONS;
+            begin
+               buff.next_char;
+               flag := list(buff, current, qfixed or qtemp, False);
+               buff.next_char;
+               if flag then
+                  if (cons_table(current).car.kind = E_NIL) and (cons_table(current).cdr.kind = E_NIL) then
+                     BBS.lisp.memory.deref(current);
+                     flag := append_to_list(head, NIL_ELEM);
+                     if not flag then
+                        error("list", "Failure appending NIL_ELEM to list");
+                        BBS.lisp.memory.deref(head);
+                        return False;
+                     end if;
                   else
-                     flag := BBS.lisp.memory.alloc(temp);
-                     if flag then
-                        cons_table(temp).car := BBS.lisp.evaluate.makeList(current);
-                        flag := append(head, temp);
-                        if not flag then
-                           error("list", "Unable to append to list");
+                     if cons_table(head).car.kind = E_NIL then
+                        cons_table(head).car := BBS.lisp.evaluate.makeList(current);
+                     else
+                        flag := BBS.lisp.memory.alloc(temp);
+                        if flag then
+                           cons_table(temp).car := BBS.lisp.evaluate.makeList(current);
+                           flag := append(head, temp);
+                           if not flag then
+                              error("list", "Unable to append to list");
+                              BBS.lisp.memory.deref(current);
+                              BBS.lisp.memory.deref(head);
+                              return False;
+                           end if;
+                        else
+                           error("list", "Unable to convert element to cons");
                            BBS.lisp.memory.deref(current);
                            BBS.lisp.memory.deref(head);
                            return False;
                         end if;
-                     else
-                        error("list", "Unable to convert element to cons");
-                        BBS.lisp.memory.deref(current);
-                        BBS.lisp.memory.deref(head);
-                        return False;
                      end if;
                   end if;
+               else
+                  error ("list", "Error parsing list");
+                  BBS.lisp.memory.deref(head);
+                  return False;
                end if;
-            else
-               error ("list", "Error parsing list");
-               BBS.lisp.memory.deref(head);
-               return False;
-            end if;
+            end;
             qtemp := False;
          --
          --  Check for the start of an integer atom
@@ -254,7 +257,6 @@ package body bbs.lisp.parser is
                end if;
             else
                error("list", "Could not allocate string fragment.");
-               BBS.lisp.memory.deref(current);
                BBS.lisp.memory.deref(head);
                return False;
             end if;
@@ -263,7 +265,7 @@ package body bbs.lisp.parser is
          --  Check for a comment
          --
          elsif test_char = ';' then
-            buff.set_end;
+            buff.next_line;
             qtemp := False;
          --
          --  Quote the next element.
@@ -299,19 +301,16 @@ package body bbs.lisp.parser is
                            item_count := Natural(e.v.i);
                         else
                            error("list", "Query returned value less than 0");
-                           BBS.lisp.memory.deref(current);
                            BBS.lisp.memory.deref(head);
                            return False;
                         end if;
                      else
                         error("list", "Query did not return an integer");
-                        BBS.lisp.memory.deref(current);
                         BBS.lisp.memory.deref(head);
                         return False;
                      end if;
                   else
                      error("list", "Query did not return a value");
-                     BBS.lisp.memory.deref(current);
                      BBS.lisp.memory.deref(head);
                      return False;
                   end if;
