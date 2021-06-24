@@ -1,6 +1,6 @@
-with "../BBS-Ada/bbs.gpr";
+with "../BBS-Ada/bbs_raven.gpr";
 
-library project Bbs_Lisp is
+library project Bbs_Lisp_raven is
 
    for Languages use ("Ada");
    for Library_Name use "Bbs-Lisp";
@@ -20,5 +20,5 @@ library project Bbs_Lisp is
       for Switches ("ada") use ("-j4");
    end Builder;
 
-end Bbs_Lisp;
+end Bbs_Lisp_raven;
 

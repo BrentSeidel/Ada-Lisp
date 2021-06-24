@@ -1,5 +1,5 @@
 with "../BBS-Ada/bbs_raven.gpr";
-with "bbs_lisp.gpr";
+with "bbs_lisp_raven.gpr";
 
 project Lispq is
 
