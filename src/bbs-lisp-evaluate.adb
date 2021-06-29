@@ -13,9 +13,9 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
             return e.v.b;
          end if;
          return True;
-      elsif e.kind = E_CONS then
-         if (cons_table(e.ps).car.kind = E_NIL)
-           and (cons_table(e.ps).cdr.kind = E_NIL) then
+      elsif isList(e) then
+         if (cons_table(getList(e)).car.kind = E_NIL)
+           and (cons_table(getList(e)).cdr.kind = E_NIL) then
             return False;
          end if;
       end if;
@@ -27,9 +27,6 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function isList(e : element_type) return Boolean is
    begin
-      if e.kind = E_CONS then
-         return True;
-      end if;
       if e.kind = E_VALUE then
          if e.v.kind = V_LIST then
             return True;
@@ -43,12 +40,8 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function getList(e : element_type) return cons_index is
    begin
-      if e.kind = E_CONS then
-         return e.ps;
-      else
-         if e.kind = E_VALUE and then e.v.kind = V_LIST then
-            return e.v.l;
-         end if;
+      if e.kind = E_VALUE and then e.v.kind = V_LIST then
+         return e.v.l;
       end if;
       return NIL_CONS;
    end;
@@ -57,7 +50,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function makeList(s : cons_index) return element_type is
    begin
-      return (Kind => E_CONS, ps => s);
+      return (Kind => E_VALUE, v => (kind => V_LIST, l => s));
    end;
    --
    --  This checks to see if the element represents a function call.  The element

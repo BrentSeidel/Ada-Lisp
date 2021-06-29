@@ -80,7 +80,7 @@ package body BBS.lisp.evaluate.str is
             return;
          end if;
       else
-         error("char", "First parameter should be a string, not " &
+         error("char", "First parameter should be a value, not " &
                  ptr_type'Image(p1.kind));
          e := (kind => E_ERROR);
          return;
@@ -94,7 +94,7 @@ package body BBS.lisp.evaluate.str is
             return;
          end if;
       else
-         error("char", "Second parameter should be an integer, not " &
+         error("char", "Second parameter should be an value, not " &
                  ptr_type'Image(p2.kind));
          e := (kind => E_ERROR);
          return;
@@ -148,7 +148,7 @@ package body BBS.lisp.evaluate.str is
             return;
          end if;
       else
-         error("parse-integer", "Parameter must be a string, not " &
+         error("parse-integer", "Parameter must be a value, not " &
                  ptr_type'Image(p1.kind));
          e := (kind => E_ERROR);
          return;

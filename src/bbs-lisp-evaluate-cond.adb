@@ -195,7 +195,7 @@ package body BBS.lisp.evaluate.cond is
       if s1 > NIL_CONS then
          p2 := cons_table(s1).car;
          if isList(cons_table(s1).cdr) then
-            s1 := cons_table(s1).cdr.ps;
+            s1 := getList(cons_table(s1).cdr);
             p3 := cons_table(s1).car;
          else
             p3 := cons_table(s1).cdr;
@@ -212,7 +212,7 @@ package body BBS.lisp.evaluate.cond is
       t := NIL_ELEM;
       if isTrue(p1) then
          if isFunction(p2) then
-            t := eval_dispatch(p2.ps);
+            t := eval_dispatch(getList(p2));
             if t.kind = E_ERROR then
                error("eval_if", "Error in evaluating true branch");
             end if;
@@ -221,7 +221,7 @@ package body BBS.lisp.evaluate.cond is
          end if;
       else
          if isFunction(p3) then
-            t := eval_dispatch(p3.ps);
+            t := eval_dispatch(getList(p3));
             if t.kind = E_ERROR then
                error("eval_if", "Error in evaluating false branch");
             end if;

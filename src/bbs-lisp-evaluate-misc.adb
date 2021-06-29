@@ -71,11 +71,12 @@ package body BBS.lisp.evaluate.misc is
          e := p1;
          return;
       end if;
-      if p1.kind = E_VALUE then
-         v := p1.v;
-      else
+      if p1.kind /= E_VALUE then
          error("sleep", "Parameter does not evaluate to a value");
+         e := (kind => E_ERROR);
+         return;
       end if;
+      v := p1.v;
       if v.kind = V_INTEGER then
          delay until Ada.Real_Time.Clock + Ada.Real_Time.To_Time_Span(Duration(v.i)/1000.0);
          e := NIL_ELEM;

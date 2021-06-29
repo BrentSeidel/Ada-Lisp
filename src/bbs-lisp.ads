@@ -33,7 +33,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --  can be a cons cell, a value, a symbol, a temporary symbol a stack
    --  variable, or nothing.
    --
-   type ptr_type is (E_CONS, E_ERROR, E_NIL, E_STACK, E_SYMBOL,
+   type ptr_type is (E_ERROR, E_NIL, E_STACK, E_SYMBOL,
                      E_TEMPSYM, E_VALUE);
    --
    --  This indicates what kind of data is in a value.  These are the allowed
@@ -112,8 +112,6 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    type element_type(kind : ptr_type := E_NIL) is
       record
          case kind is
-            when E_CONS =>
-               ps : cons_index;
             when E_ERROR =>
                null;
             when E_NIL =>

@@ -1,11 +1,10 @@
+with BBS.lisp.evaluate;
 package body bbs.lisp.debug is
 
    --
    procedure dump(e : element_type) is
    begin
       case e.kind is
-         when E_CONS =>
-            dump(e.ps);
          when E_NIL =>
             put(" NIL");
          when E_VALUE =>
@@ -16,19 +15,14 @@ package body bbs.lisp.debug is
    end;
    --
    procedure dump(s : cons_index) is
-      temp : element_type;
+      temp : cons_index := s;
    begin
       Put("(");
-      temp := (kind => E_CONS, ps => s);
-      while temp.kind /= E_NIL loop
-         if temp.kind = E_CONS then
-            if cons_table(temp.ps).car.kind = E_CONS then
-               dump(cons_table(temp.ps).car.ps);
-            end if;
-            temp := cons_table(temp.ps).cdr;
-         else
-            temp := NIL_ELEM;
+      while temp > NIL_CONS loop
+         if BBS.lisp.evaluate.isList(cons_table(temp).car) then
+            dump(BBS.lisp.evaluate.getList(cons_table(temp).car));
          end if;
+         temp := BBS.lisp.evaluate.getList(cons_table(temp).cdr);
       end loop;
       put(")");
    end;

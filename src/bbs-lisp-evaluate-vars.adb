@@ -38,7 +38,7 @@ package body BBS.lisp.evaluate.vars is
             if s > cons_index'First then
                p1 := cons_table(s).car;  --  Should be symbol for setq
                p2 := cons_table(s).cdr;
-               p3 := cons_table(p2.ps).car; --  Should be a symbol or tempsym
+               p3 := cons_table(getList(p2)).car; --  Should be a symbol or tempsym
                if p3.kind = E_SYMBOL then
                   symb := p3.sym;
                   if (symb_table(symb).kind = SY_BUILTIN) or
@@ -51,7 +51,7 @@ package body BBS.lisp.evaluate.vars is
                   str := p3.tempsym;
                   p3 := find_variable(str, True);
                   BBS.lisp.memory.deref(str);
-                  cons_table(p2.ps).car := p3;
+                  cons_table(getList(p2)).car := p3;
                elsif p3.kind = E_STACK then
                   null;
                else

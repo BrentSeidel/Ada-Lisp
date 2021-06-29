@@ -101,9 +101,7 @@ package body bbs.lisp.memory is
    --
    procedure ref(e : element_type) is
    begin
-      if e.kind = E_CONS then
-         ref(e.ps);
-      elsif e.kind = E_VALUE then
+      if e.kind = E_VALUE then
          if e.v.kind = V_STRING then
             ref(e.v.s);
          elsif e.v.kind = V_LIST then
@@ -157,9 +155,7 @@ package body bbs.lisp.memory is
    --
    procedure deref(e : element_type) is
    begin
-      if e.kind = E_CONS then
-         deref(e.ps);
-      elsif e.kind = E_VALUE then
+      if e.kind = E_VALUE then
          deref(e.v);
       elsif e.kind = E_STACK then
          deref(e.st_name);

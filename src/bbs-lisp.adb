@@ -202,8 +202,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    function element_to_value(e : element_type) return value is
    begin
       case e.kind is
-         when E_CONS =>
-            return (kind => V_LIST, l => e.ps);
          when E_ERROR =>
             return (kind => V_NONE);
          when E_NIL =>
@@ -226,8 +224,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    procedure print(e : element_type; d : Boolean; nl : Boolean) is
    begin
       case e.kind is
-         when E_CONS =>
-            print(e.ps);
          when E_ERROR =>
             put("ERROR");
          when E_NIL =>
@@ -262,7 +258,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          put(")");
          return;
       end if;
-      temp := (kind => E_CONS, ps => s);
+      temp := BBS.lisp.evaluate.makeList(s);
       while temp.kind /= E_NIL loop
          if BBS.lisp.evaluate.isList(temp)  then
             list := BBS.lisp.evaluate.getList(temp);
@@ -613,13 +609,13 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    begin
       t := s1;
       while cons_table(t).cdr.kind /= E_NIL loop
-         if cons_table(t).cdr.kind = E_CONS then
-            t := cons_table(t).cdr.ps;
+         if BBS.lisp.evaluate.isList(cons_table(t).cdr) then
+            t := BBS.lisp.evaluate.getList(cons_table(t).cdr);
          else
             return False;
             end if;
       end loop;
-      cons_table(t).cdr := (Kind => E_CONS, ps => s2);
+      cons_table(t).cdr := BBS.lisp.evaluate.makeList(s2);
       return True;
    end;
    --
@@ -648,7 +644,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       sym_flag : Boolean := False;
       e : element_type := NIL_ELEM;
       first : constant element_type := cons_table(s).car;
-      rest : constant element_type := cons_table(s).cdr;
+      rest : constant cons_index := BBS.lisp.evaluate.getList(cons_table(s).cdr);
       val : value;
    begin
       if first.kind = E_SYMBOL then
@@ -669,33 +665,21 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                   Print(sym.str);
                   New_Line;
                end if;
-               if rest.kind = E_CONS then
-                  sym.f.all(e, rest.ps);
-               else
-                  sym.f.all(e, NIL_CONS);
-               end if;
+               sym.f.all(e, rest);
             when SY_SPECIAL =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating special ");
                   Print(sym.str);
                   New_Line;
                end if;
-               if rest.kind = E_CONS then
-                  sym.s.all(e, rest.ps, PH_EXECUTE);
-               else
-                  sym.s.all(e, NIL_CONS, PH_EXECUTE);
-               end if;
+               sym.s.all(e, rest, PH_EXECUTE);
             when SY_LAMBDA =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating lambda ");
                   print(sym.ps);
                   new_line;
                end if;
-               if rest.kind = E_CONS then
-                  e := bbs.lisp.evaluate.func.eval_function(sym.ps, rest.ps);
-               else
-                  e := bbs.lisp.evaluate.func.eval_function(sym.ps, NIL_CONS);
-               end if;
+               e := bbs.lisp.evaluate.func.eval_function(sym.ps, rest);
             when SY_VARIABLE =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating variable ");
@@ -708,11 +692,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                      print(sym.ps);
                      new_line;
                   end if;
-                  if rest.kind = E_CONS then
-                     e := bbs.lisp.evaluate.func.eval_function(sym.pv.v.lam, rest.ps);
-                  else
-                     e := bbs.lisp.evaluate.func.eval_function(sym.pv.v.lam, NIL_CONS);
-                  end if;
+                  e := bbs.lisp.evaluate.func.eval_function(sym.pv.v.lam, rest);
                else
                   BBS.lisp.memory.ref(sym.pv);
                   e := sym.pv;
@@ -732,14 +712,10 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                print(first.v.lam);
                new_line;
             end if;
-            if rest.kind = E_CONS then
-               e := bbs.lisp.evaluate.func.eval_function(first.v.lam, rest.ps);
-            else
-               e := bbs.lisp.evaluate.func.eval_function(first.v.lam, NIL_CONS);
-            end if;
+            e := bbs.lisp.evaluate.func.eval_function(first.v.lam, rest);
          else
             BBS.lisp.memory.ref(s);
-            e := (kind => E_CONS, ps => s);
+            e := BBS.lisp.evaluate.makeList(s);
          end if;
       elsif first.kind = E_STACK then
          val := BBS.lisp.stack.search_frames(first.st_offset, first.st_name);
@@ -749,22 +725,18 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                print(val);
                new_line;
             end if;
-            if rest.kind = E_CONS then
-               e := bbs.lisp.evaluate.func.eval_function(val.lam, rest.ps);
-            else
-               e := bbs.lisp.evaluate.func.eval_function(val.lam, NIL_CONS);
-            end if;
+            e := bbs.lisp.evaluate.func.eval_function(val.lam, rest);
          else
             BBS.lisp.memory.ref(s);
-            e := (kind => E_CONS, ps => s);
+            e := BBS.lisp.evaluate.makeList(s);
          end if;
-      elsif first.kind = E_CONS then
+      elsif BBS.lisp.evaluate.isList(first) then
          if msg_flag then
             Put("eval_dispatch: Evaluating cons ");
-            print(first.ps);
+            print(BBS.lisp.evaluate.getList(first));
             new_line;
          end if;
-         e := (kind => E_CONS, ps => s);
+         e := BBS.lisp.evaluate.makeList(s);
       else  --  Not a symbol, just return the value.
          if msg_flag then
             Put("eval_dispatch: Evaluating non-symbol ");
@@ -772,7 +744,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             new_line;
          end if;
          BBS.lisp.memory.ref(s);
-         e := (kind => E_CONS, ps => s);
+         e := BBS.lisp.evaluate.makeList(s);
       end if;
       if msg_flag then
          Put("eval_dispatch: Returning value: ");

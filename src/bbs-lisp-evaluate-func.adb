@@ -40,8 +40,8 @@ package body BBS.lisp.evaluate.func is
                --  First process the symbol for the function.
                --
                p2 := cons_table(s).cdr;
-               p3 := cons_table(p2.ps).car;   --  Should be a symbol or tempsym
-               temp := getList(cons_table(p2.ps).cdr); --  Should be parameter list.
+               p3 := cons_table(getList(p2)).car;   --  Should be a symbol or tempsym
+               temp := getList(cons_table(getList(p2)).cdr); --  Should be parameter list.
                --
                --  Process the function name
                --
@@ -57,7 +57,7 @@ package body BBS.lisp.evaluate.func is
                   flag := get_symb(symb, p3.tempsym);
                   if flag then
                      BBS.lisp.memory.ref(p3.tempsym);
-                     cons_table(p2.ps).car := (Kind => E_SYMBOL, sym => symb);
+                     cons_table(getList(p2)).car := (Kind => E_SYMBOL, sym => symb);
                   else
                      error("defun", "Unable to add symbol.");
                      e := (Kind => E_ERROR);
@@ -138,7 +138,7 @@ package body BBS.lisp.evaluate.func is
             end if;
             if error_occured then
                BBS.lisp.memory.deref(params);
-               temp := getList(cons_table(p2.ps).cdr);
+               temp := getList(cons_table(getList(p2)).cdr);
                cons_table(temp).car := (Kind => E_ERROR);
                e := (Kind => E_ERROR);
             end if;
@@ -394,16 +394,11 @@ package body BBS.lisp.evaluate.func is
          return (Kind => E_ERROR);
       end if;
       while rest > NIL_CONS loop
-         if cons_table(name.ps).car.kind = E_STACK then
---            put("eval_function: Parameter name is ");
---            print(cons_table(name.ps).car.st_name);
---            new_line;
+         if cons_table(getList(name)).car.kind = E_STACK then
             temp_value := first_value(rest);
---            put_line("eval_function: Processed parameter kind is " & ptr_type'Image(temp_value.kind));
             if temp_value.kind = E_VALUE then
                param_value := temp_value.v;
             elsif temp_value.kind = E_SYMBOL then
---               put_line("eval_function: Parameter is symbol of type " & symbol_type'Image(symb_table(temp_value.sym).kind));
                param_value := (kind => V_SYMBOL, sym => temp_value.sym);
             elsif isList(temp_value) then
                param_value := (kind => V_LIST, l => getList(temp_value));
@@ -413,7 +408,7 @@ package body BBS.lisp.evaluate.func is
                param_value := (kind => V_NONE);
             end if;
             BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
-                                 st_name => cons_table(name.ps).car.st_name,
+                                 st_name => cons_table(getList(name)).car.st_name,
                                  st_value => param_value), err);
             if err then
                error("function evaluation", "Error adding parameters to stack frame");
@@ -426,7 +421,7 @@ package body BBS.lisp.evaluate.func is
             BBS.lisp.stack.exit_frame;
             return (kind => E_ERROR);
          end if;
-         name  := cons_table(name.ps).cdr;
+         name  := cons_table(getList(name)).cdr;
       end loop;
       --
       --  Evaluate the function
