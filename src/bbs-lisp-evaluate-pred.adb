@@ -12,7 +12,7 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if s = cons_index'First then
-         error("symbolp", "Internal error, not passed a list.");
+         error("atomp", "Internal error, not passed a list.");
          e := (kind => E_ERROR);
          return;
       end if;
@@ -65,7 +65,7 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if s = NIL_CONS then
-         error("symbolp", "Internal error, not passed a list.");
+         error("consp", "Internal error, not passed a list.");
          e := (kind => E_ERROR);
          return;
       end if;

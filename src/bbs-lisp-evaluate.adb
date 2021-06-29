@@ -8,16 +8,16 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    begin
       if e.kind = E_NIL then
          return False;
-      elsif e.kind = E_VALUE then
-         if e.v.kind = V_BOOLEAN  then
-            return e.v.b;
-         end if;
-         return True;
       elsif isList(e) then
          if (cons_table(getList(e)).car.kind = E_NIL)
            and (cons_table(getList(e)).cdr.kind = E_NIL) then
             return False;
          end if;
+      elsif e.kind = E_VALUE then
+         if e.v.kind = V_BOOLEAN  then
+            return e.v.b;
+         end if;
+         return True;
       end if;
       return True;
    end;
@@ -99,21 +99,19 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --  Evaluate a list of statements.
    --
    function execute_block(e : element_type) return element_type is
-      statement : element_type := e;
+      statement : cons_index := getList(e);
       ret_val   : element_type;
-      list      : cons_index;
    begin
       --
       --  Evaluate the function
       --
       ret_val := NIL_ELEM;
-      while isList(statement) loop
+      while statement > NIL_CONS loop
          BBS.lisp.memory.deref(ret_val);
-         list := getList(statement);
-         if isList(cons_table(list).car) then
-            ret_val := eval_dispatch(getList(cons_table(list).car));
+         if isList(cons_table(statement).car) then
+            ret_val := eval_dispatch(getList(cons_table(statement).car));
          else
-            ret_val := indirect_elem(cons_table(list).car);
+            ret_val := indirect_elem(cons_table(statement).car);
          end if;
          if ret_val.kind = E_ERROR then
             error("block execution", "Operation returned an error");
@@ -122,7 +120,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
          if exit_block > 0 then
             exit;
          end if;
-         statement := cons_table(list).cdr;
+         statement := getList(cons_table(statement).cdr);
       end loop;
       return ret_val;
    end;

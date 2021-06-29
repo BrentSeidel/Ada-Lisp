@@ -47,8 +47,8 @@ package body BBS.lisp.evaluate.list is
       s1 : cons_index;
    begin
       first := first_value(rest);
-      if isList(first) then
-         s1 := getList(first);
+      s1 := getList(first);
+      if s1 > NIL_CONS then
          temp := cons_table(s1).car;
          BBS.lisp.memory.ref(temp);
          e := temp;
@@ -66,8 +66,8 @@ package body BBS.lisp.evaluate.list is
       s1 : cons_index;
    begin
       first := first_value(rest);
-      if isList(first) then
-         s1 := getList(first);
+      s1 := getList(first);
+      if s1 > NIL_CONS then
          temp := cons_table(s1).cdr;
          BBS.lisp.memory.ref(temp);
          e := temp;

@@ -250,29 +250,24 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --  This procedure print a S-expression.
    --
    procedure print(s : cons_index) is
-      temp : element_type;
-      list : cons_index;
+      list : cons_index := s;
    begin
       Put("(");
       if s = NIL_CONS then
          put(")");
          return;
       end if;
-      temp := BBS.lisp.evaluate.makeList(s);
-      while temp.kind /= E_NIL loop
-         if BBS.lisp.evaluate.isList(temp)  then
-            list := BBS.lisp.evaluate.getList(temp);
-            if BBS.lisp.evaluate.isList(cons_table(list).car) then
-               print(BBS.lisp.evaluate.getList(cons_table(list).car));
-            else
-               print(cons_table(list).car, False, False);
-            end if;
-            temp := cons_table(list).cdr;
+      while list > NIL_CONS loop
+         if BBS.lisp.evaluate.isList(cons_table(list).car) then
+            print(BBS.lisp.evaluate.getList(cons_table(list).car));
          else
-            put(" . ");
-            print(temp, False, False);
-            temp := NIL_ELEM;
+            print(cons_table(list).car, False, False);
          end if;
+         if not BBS.lisp.evaluate.isList(cons_table(list).cdr) and (cons_table(list).cdr.kind /= E_NIL) then
+            put(" . ");
+            print(cons_table(list).cdr, False, False);
+         end if;
+         list := BBS.lisp.evaluate.getList(cons_table(list).cdr);
       end loop;
       put(")");
    end;
@@ -609,11 +604,10 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    begin
       t := s1;
       while cons_table(t).cdr.kind /= E_NIL loop
-         if BBS.lisp.evaluate.isList(cons_table(t).cdr) then
-            t := BBS.lisp.evaluate.getList(cons_table(t).cdr);
-         else
+         t := BBS.lisp.evaluate.getList(cons_table(t).cdr);
+         if t = NIL_CONS then
             return False;
-            end if;
+         end if;
       end loop;
       cons_table(t).cdr := BBS.lisp.evaluate.makeList(s2);
       return True;
