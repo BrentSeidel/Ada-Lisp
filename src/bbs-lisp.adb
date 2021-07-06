@@ -13,6 +13,7 @@ with BBS.lisp.evaluate.pred;
 with BBS.lisp.evaluate.str;
 with BBS.lisp.evaluate.symb;
 with BBS.lisp.evaluate.vars;
+with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.parser;
 with BBS.lisp.parser.stdio;
@@ -492,9 +493,11 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       temp : symb_index;
       symb : symbol;
       offset : Natural;
-      sp : stack_index;
+--      sp : BBS.lisp.stack.stack_index;
+      sp : Natural;
       found : Boolean := False;
       item : BBS.lisp.stack.stack_entry;
+      err : Boolean;
    begin
       BBS.lisp.strings.uppercase(n);
       --
@@ -521,15 +524,15 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       --
       --  Search stack frames.
       --
-      offset := BBS.lisp.stack.find_offset(n, sp);
-      if (sp > stack_index'First) and (offset > 0) then
-         item := BBS.lisp.stack.get_entry(sp);
+      offset := BBS.lisp.global.stack.find_offset(n, sp);
+      if offset > Natural'First then
+         item := BBS.lisp.global.stack.get_entry(sp, err);
          if item.kind = BBS.lisp.stack.ST_VALUE then
             BBS.lisp.memory.ref(item.st_name);
             return (kind => E_STACK, st_name => item.st_name, st_offset => offset);
          else
             error("find_variable", "Item on stack is of type " &
-                    BBS.lisp.stack.stack_entry_type'Image(BBS.lisp.stack.get_entry(sp).kind));
+                    BBS.lisp.stack.stack_entry_type'Image(BBS.lisp.global.stack.get_entry(sp, err).kind));
          end if;
       end if;
       --
@@ -645,7 +648,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          sym := symb_table(first.sym);
          sym_flag := true;
       elsif first.kind = E_STACK then
-         val := BBS.lisp.stack.search_frames(first.st_offset, first.st_name);
+         val := BBS.lisp.global.stack.search_frames(first.st_offset, first.st_name);
          if val.kind = V_SYMBOL then
             sym := symb_table(val.sym);
             sym_flag := True;
@@ -712,7 +715,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             e := BBS.lisp.evaluate.makeList(s);
          end if;
       elsif first.kind = E_STACK then
-         val := BBS.lisp.stack.search_frames(first.st_offset, first.st_name);
+         val := BBS.lisp.global.stack.search_frames(first.st_offset, first.st_name);
          if val.kind = V_LAMBDA then
             if msg_flag then
                Put("eval_dispatch: Evaluating lambda ");

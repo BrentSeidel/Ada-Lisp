@@ -4,53 +4,27 @@
 --
 with BBS.lisp.strings;
 with BBS.lisp.memory;
-package body BBS.lisp.stack
-with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
-                       pvt_fp => frame_pointer, pvt_fc => frame_count) is
+package body BBS.lisp.stack is
    --
-   function isFull return Boolean is
+   function isFull(self : lisp_stack) return Boolean is
    begin
-      return (stack_pointer = FULL_STACK);
+      return (self.sp = self.size);
    end;
    --
---   function isEmpty return Boolean is
---   begin
---      return (stack_pointer = EMPTY_STACK);
---   end;
+   --  Adding items to the stack.  Popping actually isn't done.  Items are removed
+   --  from the stack as part of the exit_frame.
    --
-   --  Adding and removing items from the stack
    --
---   procedure pop(v : out stack_entry) is
---      t : stack_entry := (kind => ST_EMPTY);
---   begin
---      if not isEmpty then
---         t := stack(stack_pointer);
---         if t.kind = ST_VALUE then
---            BBS.lisp.memory.deref(t.st_name);
---            BBS.lisp.memory.deref(t.st_value);
---         else
---            put_line("stack.pop: Popped stack frame");
---         end if;
---         stack(stack_pointer) := (kind => ST_EMPTY);
---         stack_pointer := stack_pointer - 1;
---      else
---         error("pop", "Stack underflow");
---      end if;
---      v := t;
---   end;
-   --
-   procedure push(v : stack_entry; err : out Boolean) is
+   procedure push(self : in out lisp_stack; name : string_index; val : value; err : out Boolean) is
    begin
-      if not isFull then
-         if v.kind = ST_VALUE then
-            BBS.lisp.memory.ref(v.st_name);
-            BBS.lisp.memory.ref(v.st_value);
-         end if;
-         stack_pointer := stack_pointer + 1;
-         stack(stack_pointer) := v;
+      if not self.isFull then
+         BBS.lisp.memory.ref(name);
+         BBS.lisp.memory.ref(val);
+         self.sp := self.sp + 1;
+         self.stack(self.sp) := (kind => ST_VALUE, st_name => name, st_value => val);
          err := False;
       else
-         error("push", "Stack overflow");
+         error("Push", "Stack overflow");
          err := True;
       end if;
    end;
@@ -78,53 +52,56 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
    --
    --  Start a stack frame
    --
-   procedure start_frame(err : out Boolean) is
+   procedure start_frame(self : in out lisp_stack; err : out Boolean) is
    begin
-      frame_count := frame_count + 1;
-      push((kind => ST_FRAME, number => frame_count, next => frame_pointer), err);
-      if not err then
-         frame_pointer := stack_pointer;
+      if not self.isFull then
+         self.fc := self.fc + 1;
+         self.sp := self.sp + 1;
+         self.stack(self.sp) := (kind => ST_FRAME, number => self.fc, next => self.fp);
+         self.fp := self.sp;
+         err := False;
       else
-         frame_count := frame_count - 1;
+         error("Start_frame", "Stack overflow");
+         err := True;
       end if;
    end;
    --
    --  Exit a stack frame
    --
-   procedure exit_frame is
-      frame : constant stack_entry := stack(frame_pointer);
+   procedure exit_frame(self : in out lisp_stack) is
+      frame : constant stack_entry := self.stack(self.fp);
    begin
       if frame.kind /= ST_FRAME then
          error("exit_frame", "Not a stack frame.");
-         put_line("exit_frame: Frame pointer is: " & stack_index'Image(frame_pointer));
+         put_line("exit_frame: Frame pointer is: " & Natural'Image(self.fp));
          put_line("exit_frame: Stack entry type is: " & stack_entry_type'Image(frame.kind));
          return;
       end if;
-      for temp in frame_pointer .. stack_pointer loop
-         if stack(temp).kind = ST_VALUE then
-            BBS.lisp.memory.deref(stack(temp).st_name);
-            BBS.lisp.memory.deref(stack(temp).st_value);
+      for temp in self.fp .. self.sp loop
+         if self.stack(temp).kind = ST_VALUE then
+            BBS.lisp.memory.deref(self.stack(temp).st_name);
+            BBS.lisp.memory.deref(self.stack(temp).st_value);
          end if;
-         stack(temp) := (kind => ST_EMPTY);
+         self.stack(temp) := (kind => ST_EMPTY);
       end loop;
-      stack_pointer := frame_pointer - 1;
-      frame_pointer := frame.next;
-      frame_count := frame.number - 1;
+      self.sp := self.fp - 1;
+      self.fp := frame.next;
+      self.fc := frame.number - 1;
    end;
    --
    --  Returns the frame pointer
    --
-   function get_fp return stack_index is
+   function get_fp(self : lisp_stack) return Natural is
    begin
-      return frame_pointer;
+      return self.fp;
    end;
    --
    --  Sets an entry on the stack
    --
-   procedure set_entry(e : stack_index; v : stack_entry; err : out Boolean) is
+   procedure set_entry(self : in out lisp_stack; e : Natural; v : stack_entry; err : out Boolean) is
    begin
-      if e <= stack_pointer then
-         stack(e) := v;
+      if e <= self.sp then
+         self.stack(e) := v;
          err := False;
       else
          error("set_entry", "Stack index out of range");
@@ -134,11 +111,11 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
    --
    --  Sets the value of an entry on the stack
    --
-   procedure set_value(e : stack_index; v : value; err : out Boolean) is
+   procedure set_value(self : in out lisp_stack; e : Natural; v : value; err : out Boolean) is
    begin
-      if e <= stack_pointer then
-         if stack(e).kind = ST_VALUE then
-            stack(e).st_value := v;
+      if e <= self.sp then
+         if self.stack(e).kind = ST_VALUE then
+            self.stack(e).st_value := v;
             err := False;
          else
             error("set_value", "Entry is not a value type");
@@ -152,9 +129,16 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
    --
    --  Gets an entry from the stack
    --
-   function get_entry(e : stack_index) return stack_entry is
+   function get_entry(self : in out lisp_stack; e : Natural; err : out Boolean) return stack_entry is
    begin
-      return stack(e);
+      if e <= self.sp then
+         err := False;
+         return self.stack(e);
+      else
+         err := True;
+         error("get_entry", "Index out of range.");
+         return (kind => ST_EMPTY);
+      end if;
    end;
    --
 --   procedure dump is
@@ -190,43 +174,34 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
    --  look backwards through the stack frames for a match to the name.  If
    --  found, the value is returned.  If not found, a value of none is returned.
    --
-   function search_frames(offset : Natural; name : string_index) return value is
-      frame : stack_index := frame_pointer;
+   --
+   function search_frames(self : lisp_stack; offset : Natural; name : string_index) return value is
+      frame : Natural := self.fp;
       test : stack_entry;
       test_name : string_index;
       eq : comparison;
    begin
-      while frame > EMPTY_STACK loop
-         if Integer(frame) + Integer(offset) > Integer(FULL_STACK) then
+      while frame > Natural'First loop
+         if frame + offset > self.size then
             error("search frames", "Stack pointer value out of range");
             return (Kind => V_NONE);
          end if;
-         test := stack(stack_index(Integer(frame) + Integer(offset)));
+         test := self.stack(frame + offset);
          if test.kind = ST_VALUE then
             test_name := test.st_name;
             eq := BBS.lisp.strings.compare(name, test_name);
             if eq = CMP_EQ then
-               if test.kind = ST_VALUE then
-                  return test.st_value;
-               else
-                  error("search_frames", "Found unexpected entry type " & stack_entry_type'Image(test.kind));
-                  put("Searching for variable <");
-                  print(name);
-                  Put_Line(">");
---                  dump;
-                  frame := EMPTY_STACK;
-               end if;
+               return test.st_value;
             end if;
          end if;
-         if stack(frame).kind = ST_FRAME then
-            frame := stack(frame).next;
+         if self.stack(frame).kind = ST_FRAME then
+            frame := self.stack(frame).next;
          else
             error("search_frames", "Did not find frame entry on stack");
             put("Searching for variable <");
             print(name);
             Put_Line(">");
---            dump;
-            frame := EMPTY_STACK;
+            frame := Natural'First;
          end if;
       end loop;
       return (kind => V_NONE);
@@ -236,18 +211,18 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
    --  look backwards through the stack frames for a match to the name.  If
    --  found, the stack index of the variable is returned, if not 0 is returned.
    --
-   function search_frames(offset : Natural; name : string_index) return stack_index is
-      frame : stack_index := frame_pointer;
+   function search_frames(self : lisp_stack; offset : Natural; name : string_index) return Natural is
+      frame : Natural := self.fp;
       test : stack_entry;
       test_name : string_index;
       eq : comparison;
    begin
-      while frame > EMPTY_STACK loop
-         if Integer(frame) + Integer(offset) > Integer(FULL_STACK) then
+      while frame > Natural'First loop
+         if frame + offset > self.size then
             error("search frames", "Stack pointer value out of range");
-            return EMPTY_STACK;
+            return Natural'First;
          end if;
-         test := stack(stack_index(Integer(frame) + Integer(offset)));
+         test := self.stack(frame + offset);
          if test.kind = ST_VALUE then
             test_name := test.st_name;
          end if;
@@ -255,38 +230,36 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
             eq := BBS.lisp.strings.compare(name, test_name);
             if eq = CMP_EQ then
                if test.kind = ST_VALUE then
-                  return stack_index(Integer(frame) + Integer(offset));
+                  return frame + offset;
                else
                   error("search_frames", "Found unexpected entry type " & stack_entry_type'Image(test.kind));
                   put("Searching for variable <");
                   print(name);
                   Put_Line(">");
---                  dump;
-                  frame := EMPTY_STACK;
+                  frame := Natural'First;
                end if;
             end if;
          end if;
-         if stack(frame).kind = ST_FRAME then
-            frame := stack(frame).next;
+         if self.stack(frame).kind = ST_FRAME then
+            frame := self.stack(frame).next;
          else
             error("search_frames", "Did not find frame entry on stack");
---            dump;
-            frame := EMPTY_STACK;
+            frame := Natural'First;
          end if;
       end loop;
-      return EMPTY_STACK;
+      return Natural'First;
    end;
    --
    --  Searches the stack to find a variable and returns the stack index and offset
    --
-   function find_offset(name : string_index; index : out stack_index) return Natural is
-      sp : stack_index := stack_pointer;
-      fp : stack_index := frame_pointer;
+   function find_offset(self : lisp_stack; name : string_index; index : out Natural) return Natural is
+      sp : Natural := self.sp;
+      fp : Natural := self.fp;
       item  : stack_entry;
       eq : comparison := CMP_NE;
    begin
-      while sp > EMPTY_STACK loop
-         item := stack(sp);
+      while sp > Natural'First loop
+         item := self.stack(sp);
          case item.kind is
             when ST_FRAME =>
                fp := item.next;
@@ -300,12 +273,11 @@ with Refined_State => (pvt_stack => stack, pvt_sp => stack_pointer,
       end loop;
       if eq = CMP_EQ then
          index := sp;
-         return Natural(sp - fp);
+         return sp - fp;
       else
-         index := EMPTY_STACK;
+         index := Natural'First;
          return Natural'First;
       end if;
    end;
    --
-
 end;

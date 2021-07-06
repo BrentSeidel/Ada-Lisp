@@ -1,5 +1,7 @@
+with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.stack;
+--use type BBS.lisp.stack.stack_index;
 with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.loops is
    --
@@ -96,7 +98,7 @@ package body BBS.lisp.evaluate.loops is
          when PH_QUERY =>
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 2));
          when PH_PARSE_BEGIN =>
-            BBS.lisp.stack.start_frame(err);
+            BBS.lisp.global.stack.start_frame(err);
             if s > NIL_CONS then
                limits := getList(cons_table(s).cdr);
                --
@@ -151,9 +153,10 @@ package body BBS.lisp.evaluate.loops is
                      return;
                   end if;
                   var := (kind => E_STACK, st_name => str, st_offset => 1);
-                  BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
-                                       st_name => str,
-                                       st_value => (kind => V_NONE)), err);
+--                  BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
+--                                       st_name => str,
+--                                       st_value => (kind => V_NONE)), err);
+                  BBS.lisp.global.stack.push(str, (kind => V_NONE), err);
                end;
                --
                --  Var has been converted to a local variable.  Now put it back into
@@ -163,7 +166,7 @@ package body BBS.lisp.evaluate.loops is
             end if;
             e := NIL_ELEM;
          when PH_PARSE_END =>
-            BBS.lisp.stack.exit_frame;
+            BBS.lisp.global.stack.exit_frame;
             e := NIL_ELEM;
          when PH_EXECUTE =>
             --
@@ -235,10 +238,11 @@ package body BBS.lisp.evaluate.loops is
             --  Build the stack frame
             --
             if var.kind = E_STACK then
-               BBS.lisp.stack.start_frame(err);
-               BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
-                                    st_name => var.st_name, st_value =>
-                                      (kind => V_INTEGER, i => 0)), err);
+               BBS.lisp.global.stack.start_frame(err);
+               BBS.lisp.global.stack.push(var.st_name, (kind => V_INTEGER, i => 0), err);
+--               BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
+--                                    st_name => var.st_name, st_value =>
+--                                      (kind => V_INTEGER, i => 0)), err);
             else
                error("dotimes", "Loop counter is not a variable");
                e := (kind => E_ERROR);
@@ -251,7 +255,7 @@ package body BBS.lisp.evaluate.loops is
                --
                --  Set the value of the local variable on the stack
                --
-               BBS.lisp.stack.set_entry(BBS.lisp.stack.get_fp + 1,
+               BBS.lisp.global.stack.set_entry(BBS.lisp.global.stack.get_fp + 1,
                                         (kind => BBS.lisp.stack.ST_VALUE,
                                          st_name => var.st_name, st_value =>
                                            (kind => V_INTEGER, i => int32(index))),
@@ -263,7 +267,7 @@ package body BBS.lisp.evaluate.loops is
                t := execute_block(body_list);
                if t.kind = E_ERROR then
                   error("dotimes", "Error occurred in body");
-                  BBS.lisp.stack.exit_frame;
+                  BBS.lisp.global.stack.exit_frame;
                   e := t;
                   return;
                end if;
@@ -276,7 +280,7 @@ package body BBS.lisp.evaluate.loops is
             --
             --  Exit the stack frame
             --
-            BBS.lisp.stack.exit_frame;
+            BBS.lisp.global.stack.exit_frame;
             if isList(result) then
                t := eval_dispatch(getList(result));
             else
@@ -314,7 +318,7 @@ package body BBS.lisp.evaluate.loops is
          when PH_QUERY =>
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 2));
          when PH_PARSE_BEGIN =>
-            BBS.lisp.stack.start_frame(err);
+            BBS.lisp.global.stack.start_frame(err);
             if s > NIL_CONS then
                limits := getList(cons_table(s).cdr);
                --
@@ -369,9 +373,7 @@ package body BBS.lisp.evaluate.loops is
                      return;
                   end if;
                   var := (kind => E_STACK, st_name => str, st_offset => 1);
-                  BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
-                                       st_name => str,
-                                       st_value => (kind => V_NONE)), err);
+                  BBS.lisp.global.stack.push(str, (kind => V_NONE), err);
                end;
                --
                --  Var has been converted to a local variable.  Now put it back into
@@ -381,7 +383,7 @@ package body BBS.lisp.evaluate.loops is
             end if;
             e := NIL_ELEM;
          when PH_PARSE_END =>
-            BBS.lisp.stack.exit_frame;
+            BBS.lisp.global.stack.exit_frame;
             e := NIL_ELEM;
          when PH_EXECUTE =>
             --
@@ -435,10 +437,8 @@ package body BBS.lisp.evaluate.loops is
             --  Build the stack frame
             --
             if var.kind = E_STACK then
-               BBS.lisp.stack.start_frame(err);
-               BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
-                                    st_name => var.st_name, st_value =>
-                                      (kind => V_INTEGER, i => 0)), err);
+               BBS.lisp.global.stack.start_frame(err);
+               BBS.lisp.global.stack.push(var.st_name, (kind => V_INTEGER, i => 0), err);
             else
                error("dolist", "Loop counter is not a variable");
                e := (kind => E_ERROR);
@@ -452,7 +452,7 @@ package body BBS.lisp.evaluate.loops is
                --
                --  Set the value of the local variable on the stack
                --
-               BBS.lisp.stack.set_entry(BBS.lisp.stack.get_fp + 1,
+               BBS.lisp.global.stack.set_entry(BBS.lisp.global.stack.get_fp + 1,
                                         (kind => BBS.lisp.stack.ST_VALUE,
                                          st_name => var.st_name, st_value =>
                                            element_to_value(cons_table(limit_value).car)), err);
@@ -463,7 +463,7 @@ package body BBS.lisp.evaluate.loops is
                t := execute_block(body_list);
                if t.kind = E_ERROR then
                   error("dolist", "Error occurred in body");
-                  BBS.lisp.stack.exit_frame;
+                  BBS.lisp.global.stack.exit_frame;
                   e := t;
                   return;
                end if;
@@ -480,7 +480,7 @@ package body BBS.lisp.evaluate.loops is
             --
             --  Exit the stack frame
             --
-            BBS.lisp.stack.exit_frame;
+            BBS.lisp.global.stack.exit_frame;
             if isList(result) then
                t := eval_dispatch(getList(result));
             else

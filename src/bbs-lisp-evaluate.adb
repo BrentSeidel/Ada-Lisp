@@ -1,3 +1,4 @@
+with BBS.lisp.global;
 with BBS.lisp.memory;
 package body BBS.lisp.evaluate
 with Refined_State =>  (pvt_exit_block => exit_block) is
@@ -80,7 +81,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
             return True;
          end if;
       elsif temp.kind = E_STACK then
-         val := BBS.lisp.stack.search_frames(temp.st_offset, temp.st_name);
+         val := BBS.lisp.global.stack.search_frames(temp.st_offset, temp.st_name);
          if val.kind = V_LAMBDA then
             return True;
          end if;
@@ -164,7 +165,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
          end if;
       end if;
       if e.kind = E_STACK then
-         val := BBS.lisp.stack.search_frames(e.st_offset, e.st_name);
+         val := BBS.lisp.global.stack.search_frames(e.st_offset, e.st_name);
          return (kind => E_VALUE, v => val);
       end if;
       return e;
