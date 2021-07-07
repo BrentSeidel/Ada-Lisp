@@ -1,7 +1,6 @@
 with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.stack;
---use type BBS.lisp.stack.stack_index;
 with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.loops is
    --

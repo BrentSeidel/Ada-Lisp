@@ -493,7 +493,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       temp : symb_index;
       symb : symbol;
       offset : Natural;
---      sp : BBS.lisp.stack.stack_index;
       sp : Natural;
       found : Boolean := False;
       item : BBS.lisp.stack.stack_entry;

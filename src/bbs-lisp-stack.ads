@@ -21,14 +21,7 @@ package BBS.lisp.stack is
          end case;
       end record;
    --
-   type lisp_stack_array is array (Natural range <>) of stack_entry;
-   type lisp_stack(size : Natural) is tagged record
-      sp : Natural;  -- Stack pointer
-      fp : Natural;  -- Frame pointer
-      fc : Natural;  -- Frame counter
-      stack : lisp_stack_array (0 .. size);
-   end record;
-   --
+   type lisp_stack(size : Natural) is tagged private;
    --
    --  Status functions for the stack
    --
@@ -94,6 +87,16 @@ package BBS.lisp.stack is
    --  Gets an entry from the stack
    --
    function get_entry(self : in out lisp_stack; e : Natural; err : out Boolean) return stack_entry;
+   --
+private
+   --
+   type lisp_stack_array is array (Natural range <>) of stack_entry;
+   type lisp_stack(size : Natural) is tagged record
+      sp : Natural;  -- Stack pointer
+      fp : Natural;  -- Frame pointer
+      fc : Natural;  -- Frame counter
+      stack : lisp_stack_array (0 .. size);
+   end record;
    --
 end;
 

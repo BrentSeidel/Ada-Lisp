@@ -27,7 +27,6 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    type cons_index is range -1 .. max_cons;
    type symb_index is range -1 .. max_symb;
    type string_index is range -1 .. max_string;
---   type stack_index is range 0 .. max_stack;
    --
    --
    --  This indicates what type of an object an element_type is pointing to.  It
@@ -64,7 +63,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    type phase is (PH_QUERY, PH_PARSE_BEGIN, PH_PARSE_END, PH_EXECUTE);
    --
    --  Define the 32 bit signed and unsigned integer types along with unchecked
-   --  conversions.  This is to support bitwise logical operations..
+   --  conversions.  This is to support bitwise logical operations.
    --
    type int32 is range -(2**31) .. 2**31 - 1
      with Size => 32;
@@ -178,7 +177,6 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --
    --  The main data tables for various kinds of data.
    --
-   --
    --  Since this interpreter is designed to be used on embedded computers with
    --  no operating system and possibly no dynamic memory allocation, The
    --  statically allocated data structures are defined here.
@@ -242,11 +240,10 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --
    NIL_ELEM : constant element_type := (Kind => E_NIL);
    NIL_CONS : constant cons_index := cons_index'First;
-   NIL_STR : constant string_index := string_index'First;
-   NIL_SYM : constant symb_index := symb_index'First;
+   NIL_STR  : constant string_index := string_index'First;
+   NIL_SYM  : constant symb_index := symb_index'First;
    --
    --  Define some enumerations
-   --
    --
    --  Type to indicate the result of comparisons.  The CMP_NE options is
    --  available for comparisons that cannot be ordered, otherwise CMP_LT or

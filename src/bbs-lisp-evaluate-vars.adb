@@ -1,6 +1,5 @@
 with BBS.lisp.global;
 with BBS.lisp.memory;
-with BBS.lisp.stack;
 package body BBS.lisp.evaluate.vars is
    --
    --  This sets a symbol or stack variable to a value.  The first parameter
