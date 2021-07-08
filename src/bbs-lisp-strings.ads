@@ -25,12 +25,16 @@ private package bbs.lisp.strings is
    procedure uppercase(s : string_index)
      with Global => (In_Out => pvt_string_table);
    --
-   --  Compare two strings
+   --  type comparison is (CMP_EQ, CMP_LT, CMP_GT, CMP_NE);
    --
-   --   type comparison is (CMP_EQ, CMP_LT, CMP_GT, CMP_NE);
+   --  Compare two Lisp strings
    --
    function compare(s1 : string_index; s2 : string_index) return comparison
      with Global => (Input => pvt_string_table);
+   --
+   --   Compare a Lisp string with an Ada String
+   --
+   function compare(s1 : string_index; s2 : String) return comparison;
    --
    --  Returns the length of a string in characters
    --

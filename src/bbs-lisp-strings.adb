@@ -16,7 +16,7 @@ package body bbs.lisp.strings is
       end loop;
    end;
    --
-   --  Compare two strings.  This loops through the two strings and compares
+   --  Compare two Lisp strings.  This loops through the two strings and compares
    --  character by character.  As soon as a character is not equal, it returns
    --  CMP_LT or CMP_GT.  If one string is longer than the the other, but
    --  otherwise equal, the longer string is greater than the shorter one.
@@ -60,6 +60,49 @@ package body bbs.lisp.strings is
       if (next1 > NIL_STR) and (next2 = NIL_STR) then
          return CMP_GT;
       elsif (next1 = NIL_STR) and (next2 > NIL_STR) then
+         return CMP_LT;
+      end if;
+      return CMP_EQ;
+   end;
+   --
+   --  Compare a Lisp string and an Ada String.  This loops through the two
+   --  strings and compares character by character.  As soon as a character is
+   --  not equal, it returns CMP_LT or CMP_GT.  If one string is longer than the
+   --  other, but otherwise equal, the longer string is greater than the shorter one.
+   --
+   function compare(s1 : string_index; s2 : String) return comparison is
+      next1 : string_index := s1;
+      nxt1 : string_index;
+      len1 : Integer := s2'First;
+      s2_ptr : Integer := s2'First;
+      limit : Integer;
+   begin
+      while next1 > NIL_STR loop
+         len1 := s2'First;
+         limit := string_table(next1).len;
+         if (s2'Last - s2_ptr) < limit then
+            limit := s2'Last - s2_ptr + 1;
+         end if;
+         for i in 1 .. limit loop
+            if string_table(next1).str(i) < s2(s2_ptr) then
+               return CMP_LT;
+            elsif string_table(next1).str(i) > s2(s2_ptr) then
+               return CMP_GT;
+            end if;
+            s2_ptr := s2_ptr + 1;
+            len1 := len1 + 1;
+         end loop;
+         nxt1 := next1;
+         next1 := string_table(nxt1).next;
+      end loop;
+      if (string_table(nxt1).len - len1) < (s2'Last - s2_ptr) then
+         return CMP_LT;
+      elsif (string_table(nxt1).len - len1) > (s2'Last - s2_ptr) then
+         return CMP_GT;
+      end if;
+      if (next1 > NIL_STR) and (s2'Last = s2_ptr) then
+         return CMP_GT;
+      elsif (next1 = NIL_STR) and (s2'Last > s2_ptr) then
          return CMP_LT;
       end if;
       return CMP_EQ;

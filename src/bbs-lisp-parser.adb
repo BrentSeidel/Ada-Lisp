@@ -365,17 +365,17 @@ package body bbs.lisp.parser is
          end loop;
          BBS.lisp.strings.uppercase(test);
          --
-         --  Check for boolean values.
+         --  Check for boolean values (T or NIL).
          --
-         if (string_table(test).len = 1) and (string_table(test).str(1) = 'T') then
+         if BBS.lisp.strings.compare(test, "T") = CMP_EQ then
             BBS.lisp.memory.deref(test);
             return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
          end if;
-         if (string_table(test).len = 3) and (string_table(test).str(1..3) = "NIL") then
+         if BBS.lisp.strings.compare(test, "NIL") = CMP_EQ then
             BBS.lisp.memory.deref(test);
             return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
          end if;
-         if string_table(test).len = 0 then
+         if BBS.lisp.strings.length(test) = 0 then
             BBS.lisp.memory.deref(test);
             return NIL_ELEM;
          end if;
@@ -439,33 +439,16 @@ package body bbs.lisp.parser is
    --
    function parse_str(buff : parser_ptr; s : out string_index) return Boolean is
       str  : string_index;
-      next : string_index;
-      first : string_index;
       flag : Boolean;
    begin
       flag := bbs.lisp.memory.alloc(str);
-      string_table(str).len := 0;
-      string_table(str).next := NIL_STR;
       if flag then
          s := str;
-         first := str;
          buff.next_char;
          while (buff.get_char /= '"') and buff.not_end loop
-            if string_table(str).len < fragment_len then
-               string_table(str).len := string_table(str).len + 1;
-               string_table(str).str(string_table(str).len) := buff.get_char;
-            else
-               flag := bbs.lisp.memory.alloc(next);
-               if flag then
-                  string_table(str).next := next;
-                  str := next;
-                  string_table(str).len := 1;
-                  string_table(str).str(1) := buff.get_char;
-                  string_table(str).next := NIL_STR;
-               else
-                  bbs.lisp.memory.deref(first);
-                  return False;
-               end if;
+            if not BBS.lisp.strings.append(str, buff.get_char) then
+               bbs.lisp.memory.deref(str);
+               return False;
             end if;
             buff.next_char;
          end loop;
