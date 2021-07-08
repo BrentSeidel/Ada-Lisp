@@ -1,4 +1,5 @@
 with BBS.lisp.memory;
+with BBS.lisp.strings;
 package body BBS.lisp.evaluate.symb is
    --
    --  Initialize the symbol indices.  Return true if successful or false it not.
@@ -150,9 +151,7 @@ package body BBS.lisp.evaluate.symb is
             e := (kind => E_VALUE, v => v2);
          elsif v2.kind = V_CHARACTER then
             --  character -> string
-            if BBS.lisp.memory.alloc(str) then
-               string_table(str).str(1) := v2.c;
-               string_table(str).len := 1;
+            if BBS.lisp.strings.str_to_lisp(str, v2.c & "") then
                e := (kind => E_VALUE, v  => (kind => V_STRING, s => str));
             else
                error("coerce", "Unable to allocate string fragment.");
@@ -160,20 +159,20 @@ package body BBS.lisp.evaluate.symb is
             end if;
          elsif v2.kind = V_BOOLEAN then
             --  boolean -> string
-            if BBS.lisp.memory.alloc(str) then
-               if v2.b then
-                  string_table(str).str(1) := 'T';
-                  string_table(str).len := 1;
+            if v2.b then
+               if BBS.lisp.strings.str_to_lisp(str, "T") then
+                  e := (kind => E_VALUE, v  => (kind => V_STRING, s => str));
                else
-                  string_table(str).str(1) := 'N';
-                  string_table(str).str(2) := 'I';
-                  string_table(str).str(3) := 'L';
-                  string_table(str).len := 3;
+                  error("coerce", "Unable to allocate string fragment.");
+                  e := (kind => E_ERROR);
                end if;
-               e := (kind => E_VALUE, v  => (kind => V_STRING, s => str));
             else
-               error("coerce", "Unable to allocate string fragment.");
-               e := (kind => E_ERROR);
+               if BBS.lisp.strings.str_to_lisp(str, "NIL") then
+                  e := (kind => E_VALUE, v  => (kind => V_STRING, s => str));
+               else
+                  error("coerce", "Unable to allocate string fragment.");
+                  e := (kind => E_ERROR);
+               end if;
             end if;
          else
             error("coerce", "Unable to convert " & value_type'Image(v2.kind) &
@@ -252,10 +251,6 @@ package body BBS.lisp.evaluate.symb is
          declare
             str_head : string_index := NIL_STR;
             dest_str : string_index := NIL_STR;
-            src_str  : string_index := NIL_STR;
-            temp_str : string_index := NIL_STR;
-            dest_ptr : Integer;
-            src_ptr  : integer;
          begin
             if not BBS.lisp.memory.alloc(str_head) then
                error("concatenate", "Unable to allocate string fragment.");
@@ -264,7 +259,6 @@ package body BBS.lisp.evaluate.symb is
                return;
             end if;
             dest_str := str_head;
-            dest_ptr := 1;
             if s1 = NIL_CONS then
                error("concatenate", "Cannot concatenate a single element.");
                e := (kind => E_ERROR);
@@ -291,45 +285,16 @@ package body BBS.lisp.evaluate.symb is
                if v2.kind /= V_STRING then
                   error("concatenate", "Unable to concatenate " & value_type'Image(v2.kind) &
                           " to a string.");
-                  BBS.lisp.memory.deref(v2);
+                  BBS.lisp.memory.deref(t2);
                   e := (kind => E_ERROR);
                   return;
                end if;
-               src_ptr := 1;
-               src_str := v2.s;
-               if dest_ptr > fragment_len then
-                  if not BBS.lisp.memory.alloc(temp_str) then
-                     error("concatenate", "Unable to allocate string fragment");
-                     BBS.lisp.memory.deref(str_head);
-                     e := (kind => E_ERROR);
-                     return;
-                  end if;
-                  string_table(dest_str).next := temp_str;
-                  dest_str := temp_str;
-                  dest_ptr := 1;
+               if not BBS.lisp.strings.append(dest_str, v2.s) then
+                  error("concatenate", "Unable to allocate string fragment");
+                  BBS.lisp.memory.deref(str_head);
+                  e := (kind => E_ERROR);
+                  return;
                end if;
-               loop
-                  string_table(dest_str).str(dest_ptr) := string_table(src_str).str(src_ptr);
-                  string_table(dest_str).len := string_table(dest_str).len + 1;
-                  dest_ptr := dest_ptr + 1;
-                  src_ptr := src_ptr + 1;
-                  if (src_ptr > fragment_len) or (src_ptr > string_table(src_str).len) then
-                     src_str := string_table(src_str).next;
-                     src_ptr := 1;
-                  end if;
-                  exit when src_str = NIL_STR;
-                  if dest_ptr > fragment_len then
-                     if not BBS.lisp.memory.alloc(temp_str) then
-                        error("concatenate", "Unable to allocate string fragment");
-                        BBS.lisp.memory.deref(str_head);
-                        e := (kind => E_ERROR);
-                        return;
-                     end if;
-                     string_table(dest_str).next := temp_str;
-                     dest_str := temp_str;
-                     dest_ptr := 1;
-                  end if;
-               end loop;
                BBS.lisp.memory.deref(t2);
             end loop;
             e := (kind => E_VALUE, v => (kind => V_STRING, s => str_head));
