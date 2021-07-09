@@ -73,4 +73,36 @@ private package bbs.lisp.strings is
    --
    function To_Lower(c : Character) return Character
      with Global => Null;
+   --
+   --  -------------------------------------------------------------------------
+   --
+   --  String iterator.  This can be used for looping through the characters in
+   --  a string.  This is designed primarily to be used by BBS.lisp.parser.string.
+   --
+   type str_iterator is record
+      base    : string_index;
+      current : string_index;
+      ptr     : Natural;
+   end record;
+   --
+   --  Initializes the object to contain valid values
+   --
+   procedure init(self : in out str_iterator; s : string_index);
+   --
+   --  Gets the character selected by ptr.
+   --
+   function get_char(self : str_iterator) return Character;
+   --
+   --  Looks ahead to the next character after the current one
+   --
+   function get_next_char(self : str_iterator) return Character;
+   --
+   --  Increment ptr to point to the next character
+   --
+   procedure next_char(self : in out str_iterator);
+   --
+   --  Tests if the end of the string has been reached.
+   --
+   function is_end(self : str_iterator) return Boolean is ((self.current = NIL_STR) or else
+                                                             (self.ptr > string_table(self.current).len));
 end;

@@ -389,4 +389,82 @@ package body bbs.lisp.strings is
       return u;
    end;
    --
+   --  -------------------------------------------------------------------------
+   --
+   --  String iterator.  This can be used for looping through the characters in
+   --  a string.  This is designed primarily to be used by BBS.lisp.parser.string.
+   --
+   --
+   --  Initialize the buffer object
+   --
+   procedure init(self : in out str_iterator; s : string_index) is
+   begin
+      self.ptr := 1;
+      self.base := s;
+      self.current := s;
+   end;
+   --
+   --  Move pointer to point to the next character in the string
+   --
+   procedure next_char(self : in out str_iterator) is
+   begin
+      if self.current > NIL_STR then
+         self.ptr := self.ptr + 1;
+         if (self.ptr > string_table(self.current).len) then
+            self.ptr := 1;
+            self.current := string_table(self.current).next;
+         end if;
+      end if;
+   end;
+   --
+   --
+   --  Gets the character selected by ptr.
+   --
+   function get_char(self : str_iterator) return Character is
+   begin
+      if self.current > NIL_STR then
+         if self.ptr <= string_table(self.current).len then
+            return (string_table(self.current).str(self.ptr));
+         end if;
+      end if;
+      return ' ';
+   end;
+   --
+   --  Looks ahead to the next character after the current one.
+   --
+   function get_next_char(self : str_iterator) return Character is
+      next : string_index;
+   begin
+      --
+      --  Check easiest case first
+      --
+      if self.current = NIL_STR then
+         return ' ';
+      end if;
+      --
+      --  Now, we know that current points to an existing fragment.  Check if
+      --  the next character is in the current fragment. (most common case)
+      --
+      if self.ptr < string_table(self.current).len then
+         return string_table(self.current).str(self.ptr);
+      end if;
+      --
+      -- Check if the current fragment is the last.  If so, there is no next character.
+      --
+      next := string_table(self.current).next;
+      if next = NIL_STR then
+         return ' ';
+      end if;
+      --
+      --  Make sure that the length of the next fragment is greater than 0
+      --
+      if string_table(next).len = 0 then
+         return ' ';
+      end if;
+      --
+      -- Check the first character in the next fragment
+      --
+      return string_table(next).str(1);
+   end;
+   --
 end;

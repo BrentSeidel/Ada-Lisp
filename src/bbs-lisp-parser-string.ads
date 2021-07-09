@@ -2,7 +2,8 @@
 --  This package contains data and routines for providing data to the parser
 --  routines.  This is done to allow the parser to be decoupled from I/O.
 --
-package bbs.lisp.parser.string is
+with BBS.lisp.strings;
+package BBS.lisp.parser.string is
    --
    --  This object contains the following data:
    --    base    - Pointer to the first fragment of the string (may not be needed)
@@ -11,9 +12,7 @@ package bbs.lisp.parser.string is
    --
    type parser_string is new parser_buffer with
       record
-         base    : string_index;
-         current : string_index;
-         ptr     : Natural;
+         s : BBS.lisp.strings.str_iterator;
       end record;
    type parser_string_ptr is access all parser_string'Class;
    --
@@ -35,14 +34,12 @@ package bbs.lisp.parser.string is
    --  Tests if ptr is less than or equal to last.
    --
    overriding
-   function not_end(self : parser_string) return Boolean is ((self.current > NIL_STR) and then
-                                                             (self.ptr <= string_table(self.current).len));
+   function not_end(self : parser_string) return Boolean is (not BBS.lisp.strings.is_end(self.s));
    --
    --  Tests if ptr is greater than last (the opposite of not_end)
    --
    overriding
-   function is_end(self : parser_string) return Boolean is ((self.current = NIL_STR) or else
-                                                             (self.ptr > string_table(self.current).len));
+   function is_end(self : parser_string) return Boolean is (BBS.lisp.strings.is_end(self.s));
    --
    --  This should advance the pointer until either an end of line character
    --  (ASCII 10 or 13) is reached or the end of the Lisp string is reached.
