@@ -1,6 +1,7 @@
 with BBS.lisp.memory;
 with BBS.lisp.parser;
 with BBS.lisp.parser.string;
+with BBS.lisp.strings;
 package body BBS.lisp.evaluate.io is
    --
    --  Parser object used for read_expr.  This needs to be statically allocated
@@ -34,40 +35,23 @@ package body BBS.lisp.evaluate.io is
       pragma Unreferenced (s);
       buff : String(1 .. 256);
       size : Natural;
-      ptr : Natural := buff'First;
       str  : string_index;
-      next : string_index;
       first : string_index;
-      flag : Boolean;
    begin
       Get_Line(buff, size);
-      flag := BBS.lisp.memory.alloc(str);
-      if flag then
-         string_table(str).len := 0;
-         string_table(str).next := NIL_STR;
+      if BBS.lisp.memory.alloc(str) then
          first := str;
-         while (ptr <= size) loop
-            if string_table(str).len < fragment_len then
-               string_table(str).len := string_table(str).len + 1;
-               string_table(str).str(string_table(str).len) := buff(ptr);
-            else
-               flag := bbs.lisp.memory.alloc(next);
-               if flag then
-                  string_table(str).next := next;
-                  str := next;
-                  string_table(str).len := 1;
-                  string_table(str).str(1) := buff(ptr);
-                  string_table(str).next := NIL_STR;
-               else
-                  bbs.lisp.memory.deref(first);
-                  e := NIL_ELEM;
-                  return;
-               end if;
+         for ptr in buff'First .. size loop
+            if not BBS.lisp.strings.append(str, buff(ptr)) then
+               bbs.lisp.memory.deref(str);
+               e := NIL_ELEM;
+               return;
             end if;
-            ptr := ptr + 1;
          end loop;
-      end if;
       e := (kind => E_VALUE, v => (kind => V_STRING, s => first));
+      else
+         e := NIL_ELEM;
+      end if;
    end;
    --
    --  Read a line from a string and parse it.
