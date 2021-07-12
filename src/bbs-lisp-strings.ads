@@ -74,6 +74,47 @@ private package bbs.lisp.strings is
    function To_Lower(c : Character) return Character
      with Global => Null;
    --
+   --  Copy helper function
+   --
+   type transform is (NONE, UPPER, LOWER);
+   function copy(s : string_index; t : transform) return element_type;
+   --
+   --  Functions for character positions.
+   --
+   --  Given a string index and an offset, follow the link list to find the
+   --  fragment that contains the offset and position in that fragment.  If the
+   --  offset is beyond the end of the string,  str is set to NIL_STR and
+   --  the offset to 0.
+   --
+   procedure cannonicalize(str : in out string_index; offset : in out Natural);
+   --
+   --  Update a string index and offset in cannonical form to point to the next
+   --  character in cannonical form.  If not in cannonical form, or if the next
+   --  character is past end end of the string, str is set to NIL_STR and offset
+   --  is set to 0.
+   --
+   procedure move_to_next_char(str : in out string_index; offset : in out Natural);
+   --
+   --  Get a character at a cannonicalized position.  This must be a valid position.
+   --
+   function get_char_at(str : string_index; offset : Natural) return Character is
+     (string_table(str).str(offset))
+       with pre => ((str /= NIL_STR) and (offset > 0) and (offset <= string_table(str).len));
+   --
+   --  Parse a string as an integer.  Starts at the first character in the string
+   --  and proceeds until either the end of the string fragment or an illegal
+   --  character is found.
+   --
+   function parse_integer(str : string_index) return int32
+     with pre => (str /= NIL_STR);
+   --
+   --  Get a substring of a string.  An ending offset of -1 means the end of the
+   --  source string.
+   --
+   function substring(str : string_index; start_offset : Integer; len : Integer)
+                      return string_index
+     with pre => (str /= NIL_STR);
+   --
    --  -------------------------------------------------------------------------
    --
    --  String iterator.  This can be used for looping through the characters in

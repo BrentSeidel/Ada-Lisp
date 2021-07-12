@@ -1,4 +1,5 @@
 with BBS.lisp.memory;
+with BBS.lisp.utilities;
 package body bbs.lisp.strings is
    --
    --  Converts a string to upper-case in place.
@@ -389,6 +390,188 @@ package body bbs.lisp.strings is
       return u;
    end;
    --
+   --  Copy helper function
+   --
+   function copy(s : string_index; t : transform) return element_type is
+      flag : Boolean;
+      source : string_index := s;
+      new_frag : string_index;
+      head : string_index;
+      temp : string_index;
+   begin
+      flag := BBS.lisp.memory.alloc(head);
+      if not flag then
+         error("string copy", "Unable to allocate string fragment.");
+         return (kind => E_ERROR);
+      end if;
+      new_frag := head;
+      string_table(new_frag).len := string_table(source).len;
+      for index in 1 .. fragment_len loop
+         case t is
+            when NONE =>
+               string_table(new_frag).str(index) := string_table(source).str(index);
+            when UPPER =>
+               string_table(new_frag).str(index) := BBS.lisp.strings.To_Upper(string_table(source).str(index));
+            when LOWER =>
+               string_table(new_frag).str(index) := BBS.lisp.strings.To_Lower(string_table(source).str(index));
+         end case;
+      end loop;
+      source := string_table(source).next;
+      while source /= string_index'First loop
+         flag := BBS.lisp.memory.alloc(temp);
+         if not flag then
+            error("string copy", "Unable to allocate string fragment.");
+            BBS.lisp.memory.deref(head);
+            return (kind => E_ERROR);
+         end if;
+         string_table(new_frag).next := temp;
+         new_frag := temp;
+         string_table(new_frag).len := string_table(source).len;
+         for index in 1 .. fragment_len loop
+            case t is
+            when NONE =>
+               string_table(new_frag).str(index) := string_table(source).str(index);
+            when UPPER =>
+               string_table(new_frag).str(index) := To_Upper(string_table(source).str(index));
+            when LOWER =>
+               string_table(new_frag).str(index) := To_Lower(string_table(source).str(index));
+            end case;
+         end loop;
+         source := string_table(source).next;
+      end loop;
+      return (kind => E_VALUE, v => (kind => V_STRING, s => head));
+   end;
+   --
+   --  Functions for character positions.
+   --
+   --  Given a string index and an offset, follow the link list to find the
+   --  fragment that contains the offset and position in that fragment.  If the
+   --  offset is beyond the end of the string,  str is set to NIL_STR and
+   --  the offset to 0.
+   --
+   procedure cannonicalize(str : in out string_index; offset : in out Natural) is
+   begin
+      if str > NIL_STR then
+         while offset > string_table(str).len loop
+            offset := offset - string_table(str).len;
+            str := string_table(str).next;
+            exit when str = NIL_STR;
+         end loop;
+      end if;
+      if str = NIL_STR then
+         offset := 0;
+      end if;
+   end;
+   --
+   --  Update a string index and offset in cannonical form to point to the next
+   --  character in cannonical form.  If not in cannonical form, or if the next
+   --  character is past end end of the string, str is set to NIL_STR and offset
+   --  is set to 0.
+   --
+   procedure move_to_next_char(str : in out string_index; offset : in out Natural) is
+   begin
+      if str > NIL_STR then
+         offset := offset + 1;
+         if offset > string_table(str).len then
+            offset := 1;
+            str := string_table(str).next;
+         end if;
+      end if;
+      if str = NIL_STR then
+         offset := 0;
+      end if;
+   end;
+   --
+   --  Parse a string as an integer.  Starts at the first character in the string
+   --  and proceeds until either the end of the string fragment or an illegal
+   --  character is found.
+   --
+   function parse_integer(str : string_index) return int32 is
+      accumulate : int32 := 0;
+      neg : Boolean := False;
+      ptr : Integer;
+   begin
+      ptr := 1;
+      if string_table(str).len > 0 then
+         if string_table(str).str(ptr) = '-' then
+            neg := true;
+            ptr := ptr + 1;
+         end if;
+         while BBS.lisp.utilities.isDigit(string_table(str).str(ptr))
+           and (ptr <= string_table(str).len) loop
+            accumulate := accumulate*10 + int32'Value(" " & string_table(str).str(ptr));
+            ptr := ptr + 1;
+         end loop;
+         if neg then
+            accumulate := -accumulate;
+         end if;
+         return accumulate;
+      else
+         return 0;
+      end if;
+   end;
+   --
+   --  Get a substring of a string.  An ending offset of -1 means the end of the
+   --  source string.
+   --
+   function substring(str : string_index; start_offset : Integer; len : Integer)
+                      return string_index is
+      source : string_index := str;
+      head  : string_index;
+      dest  : string_index;
+      temp  : string_index;
+      start : Integer := start_offset;
+      count : Integer := len;
+      flag  : Boolean;
+   begin
+      flag := BBS.lisp.memory.alloc(head);
+      if not flag then
+         error("substring", "Unable to allocate string fragment.");
+         return NIL_STR;
+      end if;
+      dest := head;
+      loop
+         --
+         --  Fill destination fragment
+         --
+         for index in 1 .. fragment_len loop
+            string_table(dest).str(index) := string_table(source).str(start);
+            string_table(dest).len := string_table(dest).len + 1;
+            if count /= -1 then
+               count := count - 1;
+            end if;
+            exit when count = 0;
+            start := start + 1;
+            exit when (start > string_table(source).len) and (start <= fragment_len);
+            if start > fragment_len then
+               start := 1;
+               source := string_table(source).next;
+            end if;
+            exit when source = NIL_STR;
+         end loop;
+         --
+         --  Check if done
+         --
+         if count = 0 then
+            return head;
+         end if;
+         if (start > string_table(source).len) and (start <= fragment_len) then
+            return head;
+         end if;
+         --
+         --  Allocate a new fragment for the destination
+         --
+         flag := BBS.lisp.memory.alloc(temp);
+         if not flag then
+            error("substring", "Unable to allocate string fragment.");
+            BBS.lisp.memory.deref(head);
+            return NIL_STR;
+         end if;
+         string_table(dest).next := temp;
+         dest := temp;
+      end loop;
+   end;
+   --
    --  -------------------------------------------------------------------------
    --
    --  String iterator.  This can be used for looping through the characters in
@@ -408,13 +591,7 @@ package body bbs.lisp.strings is
    --
    procedure next_char(self : in out str_iterator) is
    begin
-      if self.current > NIL_STR then
-         self.ptr := self.ptr + 1;
-         if (self.ptr > string_table(self.current).len) then
-            self.ptr := 1;
-            self.current := string_table(self.current).next;
-         end if;
-      end if;
+      move_to_next_char(self.current, self.ptr);
    end;
    --
    --

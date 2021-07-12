@@ -29,13 +29,8 @@ package BBS.lisp.evaluate.str is
    procedure string_downcase(e : out element_type; s : cons_index);
 private
    --
-   --  Helper functions for length (note that length of a string is in
+   --  Helper functions for length of a list (note that length of a string is in
    --  BBS.lisp.strings).
    --
    function length(s : cons_index) return int32;
-   --
-   --  Copy string with transformations
-   --
-   type transform is (NONE, UPPER, LOWER);
-   function copy(s : string_index; t : transform) return element_type;
 end;
