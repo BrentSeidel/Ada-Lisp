@@ -1,4 +1,3 @@
-with BBS.lisp.memory;
 with BBS.lisp.utilities;
 package body bbs.lisp.strings is
    --
@@ -133,7 +132,7 @@ package body bbs.lisp.strings is
       first : string_index;
       flag  : Boolean;
    begin
-      flag := bbs.lisp.memory.alloc(prev);
+      flag := alloc(prev);
       s := prev;
       first := prev;
       if flag then
@@ -142,7 +141,7 @@ package body bbs.lisp.strings is
                string_table(prev).len := string_table(prev).len + 1;
                string_table(prev).str(string_table(prev).len) := str(ptr);
             else
-               flag := bbs.lisp.memory.alloc(next);
+               flag := alloc(next);
                if flag then
                   string_table(prev).next := next;
                   prev := next;
@@ -150,7 +149,7 @@ package body bbs.lisp.strings is
                   string_table(prev).str(1) := str(ptr);
                   string_table(prev).next := NIL_STR;
                else
-                  bbs.lisp.memory.deref(first);
+                  deref(first);
                   prev := NIL_STR;
                   return False;
                end if;
@@ -179,7 +178,7 @@ package body bbs.lisp.strings is
          string_table(nxt).str(string_table(nxt).len) := c;
          return True;
       else
-         flag := BBS.lisp.memory.alloc(frag);
+         flag := alloc(frag);
          if flag then
             string_table(frag).str(1) := c;
             string_table(frag).len := 1;
@@ -224,7 +223,7 @@ package body bbs.lisp.strings is
       --  Check if the last fragment is full.  If so, add a new fragment.
       --
       if dest_ptr > fragment_len then
-         if not BBS.lisp.memory.alloc(temp_str) then
+         if not alloc(temp_str) then
             error("append", "Unable to allocate string fragment");
             return False;
          end if;
@@ -250,7 +249,7 @@ package body bbs.lisp.strings is
          --  Add a new fragment when needed.
          --
          if dest_ptr > fragment_len then
-            if not BBS.lisp.memory.alloc(temp_str) then
+            if not alloc(temp_str) then
                error("append", "Unable to allocate string fragment");
                return False;
             end if;
@@ -399,7 +398,7 @@ package body bbs.lisp.strings is
       head : string_index;
       temp : string_index;
    begin
-      flag := BBS.lisp.memory.alloc(head);
+      flag := alloc(head);
       if not flag then
          error("string copy", "Unable to allocate string fragment.");
          return (kind => E_ERROR);
@@ -418,10 +417,10 @@ package body bbs.lisp.strings is
       end loop;
       source := string_table(source).next;
       while source /= string_index'First loop
-         flag := BBS.lisp.memory.alloc(temp);
+         flag := alloc(temp);
          if not flag then
             error("string copy", "Unable to allocate string fragment.");
-            BBS.lisp.memory.deref(head);
+            deref(head);
             return (kind => E_ERROR);
          end if;
          string_table(new_frag).next := temp;
@@ -524,7 +523,7 @@ package body bbs.lisp.strings is
       count : Integer := len;
       flag  : Boolean;
    begin
-      flag := BBS.lisp.memory.alloc(head);
+      flag := alloc(head);
       if not flag then
          error("substring", "Unable to allocate string fragment.");
          return NIL_STR;
@@ -561,10 +560,10 @@ package body bbs.lisp.strings is
          --
          --  Allocate a new fragment for the destination
          --
-         flag := BBS.lisp.memory.alloc(temp);
+         flag := alloc(temp);
          if not flag then
             error("substring", "Unable to allocate string fragment.");
-            BBS.lisp.memory.deref(head);
+            deref(head);
             return NIL_STR;
          end if;
          string_table(dest).next := temp;
@@ -642,6 +641,94 @@ package body bbs.lisp.strings is
       -- Check the first character in the next fragment
       --
       return string_table(next).str(1);
+   end;
+   --
+   --  -------------------------------------------------------------------------
+   --
+   --  String memory management.
+   --
+   function count_free_str return Natural is
+      count : Natural := 0;
+   begin
+      for i in string_table'Range loop
+         if string_table(i).ref = 0 then
+            count := count + 1;
+         end if;
+      end loop;
+      return count;
+   end;
+   --
+   --  Find an unused string fragment, mark it as USED, and return the index
+   --  in s.  Return false if no such cell could be found.
+   --
+   function alloc(s : out string_index) return Boolean is
+   begin
+      for i in string_table'Range loop
+         if string_table(i).ref = FREE_STR then
+            s := i;
+            string_table(i).ref := FREE_STR + 1;
+            string_table(i).len := 0;
+            string_table(i).next := NIL_STR;
+            return True;
+         end if;
+      end loop;
+      s := NIL_STR;
+      return False;
+   end;
+   --
+   --  Increments the reference count of a string.
+   --
+   procedure ref(s : string_index) is
+   begin
+      if string_table(s).ref = FREE_STR then
+         error("ref string", "Attempting to ref an unallocated string.");
+      end if;
+    string_table(s).ref := string_table(s).ref + 1;
+   end;
+   --
+   --  Decrements the reference count of a string.
+   --
+   procedure deref(s : string_index) is
+      next : string_index;
+      prev : string_index;
+   begin
+      if string_table(s).ref > FREE_STR then
+         string_table(s).ref := string_table(s).ref - 1;
+      else
+         error("deref string", "Attempt to deref an unreffed string at index "
+              & string_index'Image(s));
+      end if;
+      --
+      --  If the reference count goes to zero, deref the next fragment.
+      --
+      if string_table(s).ref = FREE_STR then
+         prev := s;
+         next := string_table(s).next;
+         string_table(prev).len := 0;
+         string_table(prev).next := NIL_STR;
+         while next > NIL_STR loop
+            if string_table(next).ref > FREE_STR then
+               string_table(next).ref := string_table(next).ref - 1;
+            else
+               error("deref string", "Attempt to deref an unreffed string at index "
+                     & string_index'Image(s));
+            end if;
+            exit when string_table(next).ref > FREE_STR;
+            prev := next;
+            next := string_table(prev).next;
+            string_table(prev).len := 0;
+            string_table(prev).next := NIL_STR;
+         end loop;
+      end if;
+   end;
+   --
+   --  Reset the string table
+   --
+   procedure reset_string_table is
+   begin
+      for i in string_table'Range loop
+         string_table(i).ref := FREE_STR;
+      end loop;
    end;
    --
 end;

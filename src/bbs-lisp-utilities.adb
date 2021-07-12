@@ -61,7 +61,7 @@ package body bbs.lisp.utilities is
          end if;
          if bbs.lisp.strings.compare(name, var_name) = CMP_EQ then
             if flag then
-               BBS.lisp.memory.deref(name);
+               BBS.lisp.strings.deref(name);
             end if;
             replace := var;
             return True;

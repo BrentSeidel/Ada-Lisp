@@ -17,8 +17,6 @@ package bbs.lisp.memory is
    --
    function count_free_cons return Natural
      with Ghost;
-   function count_free_str return Natural
-     with Ghost;
    --
    --  Reset some of the memory tables back to their starting state.
    --
@@ -36,10 +34,6 @@ package bbs.lisp.memory is
      post => (if count_free_cons = 0 then alloc'Result = False
                 else alloc'Result = True);
    -- should really be (In_Out => const_table);
-   function alloc(s : out string_index) return Boolean
-     with Global => (Input => pvt_string_table),
-     post => (if count_free_str = 0 then alloc'Result = False
-                else alloc'Result = True);
    -- should really be (In_Out => pvt_string_table);
    --
    --  Increment the reference count of various items.  This is typically done
@@ -49,9 +43,6 @@ package bbs.lisp.memory is
      with pre => (s > NIL_CONS and cons_table(s).ref > FREE_CONS),
      post => (cons_table(s).ref = cons_table(s).ref'Old + 1),
      Global => (in_out => cons_table);
-   procedure ref(s : string_index)
-     with pre => (s > NIL_STR),
-     Global => (In_Out => pvt_string_table);
    procedure ref(e : element_type)
      with Global => (In_Out => (cons_table, pvt_string_table));
    procedure ref(v : value)
@@ -65,9 +56,6 @@ package bbs.lisp.memory is
    procedure deref(s : cons_index)
      with post => (cons_table(s).ref = cons_table(s).ref'Old - 1),
      Global => (in_out => cons_table);
-   procedure deref(s : string_index)
-     with pre => (s > NIL_STR),
-     Global => (In_Out => pvt_string_table);
    procedure deref(e : element_type)
      with Global => (In_Out => (cons_table, pvt_string_table));
    procedure deref(v : value)

@@ -1,6 +1,7 @@
 with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.stack;
+with BBS.lisp.strings;
 with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.func is
    --
@@ -57,7 +58,7 @@ package body BBS.lisp.evaluate.func is
                elsif p3.Kind = E_TEMPSYM then
                   flag := get_symb(symb, p3.tempsym);
                   if flag then
-                     BBS.lisp.memory.ref(p3.tempsym);
+                     BBS.lisp.strings.ref(p3.tempsym);
                      cons_table(getList(p2)).car := (Kind => E_SYMBOL, sym => symb);
                   else
                      error("defun", "Unable to add symbol.");

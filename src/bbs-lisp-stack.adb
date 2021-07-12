@@ -18,7 +18,7 @@ package body BBS.lisp.stack is
    procedure push(self : in out lisp_stack; name : string_index; val : value; err : out Boolean) is
    begin
       if not self.isFull then
-         BBS.lisp.memory.ref(name);
+         BBS.lisp.strings.ref(name);
          BBS.lisp.memory.ref(val);
          self.sp := self.sp + 1;
          self.stack(self.sp) := (kind => ST_VALUE, st_name => name, st_value => val);
@@ -79,7 +79,7 @@ package body BBS.lisp.stack is
       end if;
       for temp in self.fp .. self.sp loop
          if self.stack(temp).kind = ST_VALUE then
-            BBS.lisp.memory.deref(self.stack(temp).st_name);
+            BBS.lisp.strings.deref(self.stack(temp).st_name);
             BBS.lisp.memory.deref(self.stack(temp).st_value);
          end if;
          self.stack(temp) := (kind => ST_EMPTY);

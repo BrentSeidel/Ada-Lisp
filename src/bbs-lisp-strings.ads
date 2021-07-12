@@ -146,4 +146,36 @@ private package bbs.lisp.strings is
    --
    function is_end(self : str_iterator) return Boolean is ((self.current = NIL_STR) or else
                                                              (self.ptr > string_table(self.current).len));
+   --
+   --  -------------------------------------------------------------------------
+   --
+   --  String memory management.
+   --
+   function count_free_str return Natural
+     with Ghost;
+   --
+   --  Allocate a string
+   --
+   function alloc(s : out string_index) return Boolean
+     with Global => (Input => pvt_string_table),
+     post => (if count_free_str = 0 then alloc'Result = False
+                else alloc'Result = True);
+   -- should really be (In_Out => pvt_string_table);
+   --
+   --  Increase the reference count of a string
+   --
+   procedure ref(s : string_index)
+     with pre => (s > NIL_STR),
+     Global => (In_Out => pvt_string_table);
+   --
+   --  Decrease the reference count of a string and deallocate if the count
+   --  reaches 0.
+   --
+   procedure deref(s : string_index)
+     with pre => (s > NIL_STR),
+     Global => (In_Out => pvt_string_table);
+   --
+   --  Reset string table
+   --
+   procedure reset_string_table;
 end;

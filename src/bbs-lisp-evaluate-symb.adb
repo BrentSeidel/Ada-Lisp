@@ -252,7 +252,7 @@ package body BBS.lisp.evaluate.symb is
             str_head : string_index := NIL_STR;
             dest_str : string_index := NIL_STR;
          begin
-            if not BBS.lisp.memory.alloc(str_head) then
+            if not BBS.lisp.strings.alloc(str_head) then
                error("concatenate", "Unable to allocate string fragment.");
                BBS.lisp.memory.deref(t2);
                e := (kind => E_ERROR);
@@ -291,7 +291,7 @@ package body BBS.lisp.evaluate.symb is
                end if;
                if not BBS.lisp.strings.append(dest_str, v2.s) then
                   error("concatenate", "Unable to allocate string fragment");
-                  BBS.lisp.memory.deref(str_head);
+                  BBS.lisp.strings.deref(str_head);
                   e := (kind => E_ERROR);
                   return;
                end if;

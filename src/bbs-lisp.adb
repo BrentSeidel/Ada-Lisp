@@ -470,7 +470,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       end loop;
       if available then
          s := free;
-         BBS.lisp.memory.ref(n);
+         BBS.lisp.strings.ref(n);
          symb_table(s) := (ref => 1, kind => SY_EMPTY, str => n);
          return True;
       end if;
@@ -527,7 +527,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       if offset > Natural'First then
          item := BBS.lisp.global.stack.get_entry(sp, err);
          if item.kind = BBS.lisp.stack.ST_VALUE then
-            BBS.lisp.memory.ref(item.st_name);
+            BBS.lisp.strings.ref(item.st_name);
             return (kind => E_STACK, st_name => item.st_name, st_offset => offset);
          else
             error("find_variable", "Item on stack is of type " &
@@ -549,12 +549,12 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       --
       if create then
          if available then
-            BBS.lisp.memory.ref(n);
+            BBS.lisp.strings.ref(n);
             symb_table(free) := (ref => 1, kind => SY_EMPTY, str => n);
             return (kind => E_SYMBOL, sym => free);
          end if;
       else
-         BBS.lisp.memory.ref(n);
+         BBS.lisp.strings.ref(n);
          return (kind => E_TEMPSYM, tempsym => n);
       end if;
       error("find_variable", "Oddly, no option matched.");

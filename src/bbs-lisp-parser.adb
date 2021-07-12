@@ -357,7 +357,7 @@ package body bbs.lisp.parser is
       symb : symb_index;
       flag : Boolean;
    begin
-      flag := BBS.lisp.memory.alloc(test);
+      flag := BBS.lisp.strings.alloc(test);
       if flag then
          while (buff.get_char /= ')') and (not isWhitespace(buff.get_char)) and buff.not_end loop
             flag := BBS.lisp.strings.append(test, buff.get_char);
@@ -368,15 +368,15 @@ package body bbs.lisp.parser is
          --  Check for boolean values (T or NIL).
          --
          if BBS.lisp.strings.compare(test, "T") = CMP_EQ then
-            BBS.lisp.memory.deref(test);
+            BBS.lisp.strings.deref(test);
             return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
          end if;
          if BBS.lisp.strings.compare(test, "NIL") = CMP_EQ then
-            BBS.lisp.memory.deref(test);
+            BBS.lisp.strings.deref(test);
             return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
          end if;
          if BBS.lisp.strings.length(test) = 0 then
-            BBS.lisp.memory.deref(test);
+            BBS.lisp.strings.deref(test);
             return NIL_ELEM;
          end if;
          --
@@ -392,7 +392,7 @@ package body bbs.lisp.parser is
                error("parse symbol", "Unable to allocate string fragment.");
             end if;
          end if;
-         BBS.lisp.memory.deref(test);
+         BBS.lisp.strings.deref(test);
          return el;
       else
          error("parse symbol", "Unable to allocate string fragment.");
@@ -441,13 +441,13 @@ package body bbs.lisp.parser is
       str  : string_index;
       flag : Boolean;
    begin
-      flag := bbs.lisp.memory.alloc(str);
+      flag := bbs.lisp.strings.alloc(str);
       if flag then
          s := str;
          buff.next_char;
          while (buff.get_char /= '"') and buff.not_end loop
             if not BBS.lisp.strings.append(str, buff.get_char) then
-               bbs.lisp.memory.deref(str);
+               bbs.lisp.strings.deref(str);
                return False;
             end if;
             buff.next_char;

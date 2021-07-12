@@ -39,11 +39,11 @@ package body BBS.lisp.evaluate.io is
       first : string_index;
    begin
       Get_Line(buff, size);
-      if BBS.lisp.memory.alloc(str) then
+      if BBS.lisp.strings.alloc(str) then
          first := str;
          for ptr in buff'First .. size loop
             if not BBS.lisp.strings.append(str, buff(ptr)) then
-               bbs.lisp.memory.deref(str);
+               bbs.lisp.strings.deref(str);
                e := NIL_ELEM;
                return;
             end if;

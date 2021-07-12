@@ -72,8 +72,8 @@ package body BBS.lisp.evaluate.cond is
             eq : comparison;
          begin
             eq := bbs.lisp.strings.compare(v1.s, v2.s);
-            BBS.lisp.memory.deref(v1.s);
-            BBS.lisp.memory.deref(v2.s);
+            BBS.lisp.strings.deref(v1.s);
+            BBS.lisp.strings.deref(v2.s);
             case b is
                when SYM_EQ =>
                   if eq = CMP_EQ then

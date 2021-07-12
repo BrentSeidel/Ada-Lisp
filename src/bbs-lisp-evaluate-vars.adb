@@ -1,5 +1,6 @@
 with BBS.lisp.global;
 with BBS.lisp.memory;
+with BBS.lisp.strings;
 package body BBS.lisp.evaluate.vars is
    --
    --  This sets a symbol or stack variable to a value.  The first parameter
@@ -50,7 +51,7 @@ package body BBS.lisp.evaluate.vars is
                elsif p3.kind = E_TEMPSYM then
                   str := p3.tempsym;
                   p3 := find_variable(str, True);
-                  BBS.lisp.memory.deref(str);
+                  BBS.lisp.strings.deref(str);
                   cons_table(getList(p2)).car := p3;
                elsif p3.kind = E_STACK then
                   null;
