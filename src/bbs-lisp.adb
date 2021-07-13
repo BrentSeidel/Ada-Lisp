@@ -24,7 +24,6 @@ with BBS.lisp.strings;
 package body bbs.lisp
 with Refined_State => (pvt_exit_flag => exit_flag,
                        pvt_break_flag => break_flag,
-                       pvt_string_table => string_table,
                        pvt_msg_flag => msg_flag,
                        pvt_first_char_flag => first_char_flag,
                        output_stream => (io_put_line, io_put, io_new_line),
@@ -315,14 +314,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --  Procedure to print a string
    --
    procedure print(s : string_index) is
-      next : string_index := s;
-      nxt : string_index;
    begin
-      while next > NIL_STR loop
-         nxt := next;
-         Put(string_table(nxt).str(1..string_table(nxt).len));
-         next := string_table(nxt).next;
-      end loop;
+      BBS.lisp.strings.print(s);
    end;
    --
    function exit_lisp return Boolean is
@@ -401,15 +394,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --
    procedure dump_strings is
    begin
-      for i in string_index'First + 1 .. string_index'Last loop
-         if string_table(i).ref > 0 then
-            Put("String " & Integer'Image(Integer(i)) & " contains: <"
-                                 & string_table(i).str & ">, ");
-            Put("Reference count: " & str_ref_count'Image(string_table(i).ref));
-            Put(", Length: " & Integer'Image(Integer(string_table(i).len)));
-            Put_Line(", Next: " & string_index'Image(string_table(i).next));
-         end if;
-      end loop;
+      BBS.lisp.strings.dump_strings;
    end;
    --
    --  Functions for symbols.

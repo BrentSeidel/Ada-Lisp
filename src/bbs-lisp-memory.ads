@@ -21,7 +21,7 @@ package bbs.lisp.memory is
    --  Reset some of the memory tables back to their starting state.
    --
    procedure reset_tables
-     with Global => (Output => (cons_table, symb_table, pvt_string_table));
+     with Global => (Output => (cons_table, symb_table));
    --
    --  Allocate various types of items.  The table is searched for an entry with
    --  a reference count of zero.  If such an entry is found, its reference
@@ -44,9 +44,9 @@ package bbs.lisp.memory is
      post => (cons_table(s).ref = cons_table(s).ref'Old + 1),
      Global => (in_out => cons_table);
    procedure ref(e : element_type)
-     with Global => (In_Out => (cons_table, pvt_string_table));
+     with Global => (In_Out => (cons_table));
    procedure ref(v : value)
-     with Global => (In_Out => (cons_table, pvt_string_table));
+     with Global => (In_Out => (cons_table));
    --
    --  Decrement the reference count for various items.  This is done when the
    --  reference is no longer needed.  If the reference count reaches 0, the
@@ -57,8 +57,8 @@ package bbs.lisp.memory is
      with post => (cons_table(s).ref = cons_table(s).ref'Old - 1),
      Global => (in_out => cons_table);
    procedure deref(e : element_type)
-     with Global => (In_Out => (cons_table, pvt_string_table));
+     with Global => (In_Out => (cons_table));
    procedure deref(v : value)
-     with Global => (In_Out => (cons_table, pvt_string_table));
+     with Global => (In_Out => (cons_table));
    --
 end;

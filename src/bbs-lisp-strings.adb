@@ -1,6 +1,34 @@
 with BBS.lisp.utilities;
 package body bbs.lisp.strings is
    --
+   --  Procedure to print a string
+   --
+   procedure print(s : string_index) is
+      next : string_index := s;
+      nxt : string_index;
+   begin
+      while next > NIL_STR loop
+         nxt := next;
+         Put(string_table(nxt).str(1..string_table(nxt).len));
+         next := string_table(nxt).next;
+      end loop;
+   end;
+   --
+   --  For debugging, dump all strings
+   --
+   procedure dump_strings is
+   begin
+      for i in string_index'First + 1 .. string_index'Last loop
+         if string_table(i).ref > 0 then
+            Put("String " & Integer'Image(Integer(i)) & " contains: <"
+                                 & string_table(i).str & ">, ");
+            Put("Reference count: " & str_ref_count'Image(string_table(i).ref));
+            Put(", Length: " & Integer'Image(Integer(string_table(i).len)));
+            Put_Line(", Next: " & string_index'Image(string_table(i).next));
+         end if;
+      end loop;
+   end;
+   --
    --  Converts a string to upper-case in place.
    --
    procedure uppercase(s : string_index) is

@@ -24,7 +24,7 @@ with Abstract_State =>  pvt_exit_block is
    --  statement executed.
    --
    function execute_block(e : element_type) return element_type
-     with Global => (input => (cons_table, symb_table, pvt_string_table,
+     with Global => (input => (cons_table, symb_table,
                                pvt_exit_flag, pvt_break_flag, pvt_msg_flag,
                                pvt_exit_block, pvt_first_char_flag));
    --  should be (In_Out => (cons_table, symb_table, pvt_string_table,
@@ -36,7 +36,7 @@ with Abstract_State =>  pvt_exit_block is
    --  points to the original atom.
    --
    function indirect_elem(e : element_type) return element_type
-     with Global => (input => (pvt_string_table, symb_table));
+     with Global => (input => (symb_table));
    --
    --  This procedure extracts the first value from an element.  This value may
    --  be a value, a variable, or a list.  If the list starts with an expression,

@@ -22,7 +22,7 @@ private package bbs.lisp.parser is
    --  The main parser function.  Returns True if parsing is successful.
    --
    function parse(buff : parser_ptr; e : out element_type) return Boolean
-     with Global => (Input => (cons_table, symb_table, pvt_string_table));
+     with Global => (Input => (cons_table, symb_table));
    -- should be (In_Out => (cons_table, symb_table, pvt_string_table)
 private
    --
@@ -41,8 +41,8 @@ private
    function list(buff : parser_ptr; s_expr : out cons_index;
                  qfixed : Boolean; base : Boolean)
                  return Boolean
-     with Global => (Input => (cons_table, symb_table, pvt_string_table));
-   -- should be (In_Out => (cons_table, symb_table, pvt_string_table)
+     with Global => (Input => (cons_table, symb_table));
+   -- should be (In_Out => (cons_table, symb_table)
    --
    --  Subfunction for parsing symbols or temp symbols.  A is an atom that points
    --  to either the symbol or temp symbol.  Returns false if the symbol or temp
@@ -50,8 +50,8 @@ private
    --
    function symb(buff : parser_ptr; quoted : Boolean)
                  return element_type
-     with Global => (Input => (symb_table, pvt_string_table));
-   -- should be (In_Out => (symb_table, pvt_string_table)
+     with Global => (Input => (symb_table));
+   -- should be (In_Out => (symb_table)
    --
    --  Subfunction for parsing integers
    --
@@ -66,9 +66,7 @@ private
    --
    --  Parse strings
    --
-   function parse_str(buff : parser_ptr; s : out string_index) return Boolean
-     with Global => (Input => pvt_string_table);
-   -- should be (In_Out => string_table);
+   function parse_str(buff : parser_ptr; s : out string_index) return Boolean;
    --
    --  Parse characters
    --

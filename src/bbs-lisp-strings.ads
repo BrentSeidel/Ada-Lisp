@@ -6,31 +6,30 @@ private package bbs.lisp.strings is
    --
    --  Structures and definitions for handling strings
    --
---   fragment_len : constant Integer := 16;
---   type fragment is
---      record
---         ref : str_ref_count;
---         next : string_index;
---         len : Integer range 0..fragment_len;
---         str : String (1..fragment_len);
---      end record;
+   fragment_len : constant Integer := 16;
+   type fragment is
+      record
+         ref : str_ref_count;
+         next : string_index;
+         len : Integer range 0..fragment_len;
+         str : String (1..fragment_len);
+      end record;
    --
---   string_table : array (string_index'First + 1 .. string_index'Last) of fragment
---     with Part_Of => pvt_string_table;
+   --  The string table.
+   --
+   string_table : array (string_index'First + 1 .. string_index'Last) of fragment;
    --
    --  Converts a string to upper-case in place.
    --  In place lowercase is never used.  If it's ever needed, this routine
    --  can provide a template for it.
    --
-   procedure uppercase(s : string_index)
-     with Global => (In_Out => pvt_string_table);
+   procedure uppercase(s : string_index);
    --
    --  type comparison is (CMP_EQ, CMP_LT, CMP_GT, CMP_NE);
    --
    --  Compare two Lisp strings
    --
-   function compare(s1 : string_index; s2 : string_index) return comparison
-     with Global => (Input => pvt_string_table);
+   function compare(s1 : string_index; s2 : string_index) return comparison;
    --
    --   Compare a Lisp string with an Ada String
    --
@@ -38,22 +37,18 @@ private package bbs.lisp.strings is
    --
    --  Returns the length of a string in characters
    --
-   function length(s : string_index) return int32
-     with Global => (Input => pvt_string_table);
+   function length(s : string_index) return int32;
    --
    --  Converts a fixed length Ada string to a Lisp string.  Returns false if
    --  the Lisp string cannot be allocated.
    --
-   function str_to_lisp(s : out string_index; str : String) return Boolean
-     with Global => (Input => pvt_string_table);
+   function str_to_lisp(s : out string_index; str : String) return Boolean;
    -- Should really be (In_Out => pvt_string_table);
    --
    --  Functions to append to an existing string.  Returns False if an error
    --  occurs.
    --
-   function append(s : string_index; c : Character) return Boolean
-     with Global => (Input => pvt_string_table);
-   -- Should really be (In_Out => pvt_string_table);
+   function append(s : string_index; c : Character) return Boolean;
    --
    --  Appends the string pointed to by str to the string pointed to by dest.
    --  Note that dest is updated to point to the last fragment in the string.
@@ -115,6 +110,13 @@ private package bbs.lisp.strings is
                       return string_index
      with pre => (str /= NIL_STR);
    --
+   --  Print a string
+   --
+   procedure print(s : string_index);
+   --
+   --  Dump the string table
+   --
+   procedure dump_strings;
    --  -------------------------------------------------------------------------
    --
    --  String iterator.  This can be used for looping through the characters in
@@ -157,25 +159,28 @@ private package bbs.lisp.strings is
    --  Allocate a string
    --
    function alloc(s : out string_index) return Boolean
-     with Global => (Input => pvt_string_table),
-     post => (if count_free_str = 0 then alloc'Result = False
+     with post => (if count_free_str = 0 then alloc'Result = False
                 else alloc'Result = True);
    -- should really be (In_Out => pvt_string_table);
    --
    --  Increase the reference count of a string
    --
    procedure ref(s : string_index)
-     with pre => (s > NIL_STR),
-     Global => (In_Out => pvt_string_table);
+     with pre => (s > NIL_STR);
    --
    --  Decrease the reference count of a string and deallocate if the count
    --  reaches 0.
    --
    procedure deref(s : string_index)
-     with pre => (s > NIL_STR),
-     Global => (In_Out => pvt_string_table);
+     with pre => (s > NIL_STR);
    --
    --  Reset string table
    --
    procedure reset_string_table;
+   --
+   --  Get the reference count for a string fragment
+   --
+   function ref_count(s : string_index) return str_ref_count
+   is (string_table(s).ref) with pre => (s > NIL_STR);
+   --
 end;

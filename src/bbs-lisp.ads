@@ -11,7 +11,7 @@
 --
 with Ada.Unchecked_Conversion;
 package BBS.lisp
-with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
+with Abstract_State => (pvt_exit_flag, pvt_break_flag,
                         pvt_msg_flag, pvt_first_char_flag,
                         output_stream, input_stream, parse) is
    --
@@ -188,7 +188,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --
    procedure init(p_put_line : t_put_line; p_put : t_put_line;
                   p_new_line : t_newline; p_get_line : t_get_line)
-     with Global => (Output => (cons_table, symb_table, pvt_string_table,
+     with Global => (Output => (cons_table, symb_table,
                                output_stream, input_stream, pvt_first_char_flag));
    --
    --  The read procedure/function reads the complete text of an s-expression
@@ -196,7 +196,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --  that can be evaluated.
    --
    function read return Element_Type
-     with Global => (Input => (input_stream, cons_table, symb_table, pvt_string_table));
+     with Global => (Input => (input_stream, cons_table, symb_table));
    --
    --  This procedure evaluates a binary s-expression and returns the resuls.
    --
@@ -216,7 +216,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
    --  these should never be changed.  No value is returned.
    --
    procedure add_builtin(n : String; f : execute_function)
-     with Global => (In_Out => (symb_table, pvt_string_table));
+     with Global => (In_Out => (symb_table));
    --
    --  Procedures for printing error and non-error messages.  Pass in string
    --  representing the function name and the message.  This is intended to
@@ -228,7 +228,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag, pvt_string_table,
      with Global => (Input => pvt_msg_flag,
                      output => output_stream);
    procedure print(e : element_type; d : Boolean; nl : Boolean)
-     with Global => (Input => (cons_table, symb_table, pvt_string_table),
+     with Global => (Input => (cons_table, symb_table),
                      output => output_stream);
    --
    --  Converts an element to a value.  Any element that cannot be converted
@@ -285,44 +285,28 @@ private
    first_char_flag : Boolean := True
      with Part_Of => pvt_first_char_flag;
    --
-   --  Structures and definitions for handling strings
-   --
-   fragment_len : constant Integer := 16;
-   type fragment is
-      record
-         ref : str_ref_count;
-         next : string_index;
-         len : Integer range 0..fragment_len;
-         str : String (1..fragment_len);
-      end record;
-   --
-   string_table : array (string_index'First + 1 .. string_index'Last) of fragment
-     with Part_Of => pvt_string_table;
-   --
    --  Initialize the data structures used in the lisp interpreter.
    --
    procedure init
-   with Global => (Output => (cons_table, symb_table, pvt_string_table));
+   with Global => (Output => (cons_table, symb_table));
    --
    --  These procedures print various types of objects.
    --
    procedure print(s : cons_index)
-     with Global => (Input => (cons_table, symb_table, pvt_string_table));
+     with Global => (Input => (cons_table, symb_table));
    procedure print(v : value)
-     with Global => (Input => (cons_table, symb_table, pvt_string_table));
-   procedure print(s : string_index)
-     with Global => (Input => pvt_string_table);
+     with Global => (Input => (cons_table, symb_table));
+   procedure print(s : string_index);
    procedure print(s : symb_index)
-     with Global => (Input => (cons_table, symb_table, pvt_string_table));
+     with Global => (Input => (cons_table, symb_table));
    --
    --  For debugging, dump the various tables
    --
    procedure dump_cons
-     with Global => (Input => (cons_table, symb_table, pvt_string_table));
+     with Global => (Input => (cons_table, symb_table));
    procedure dump_symbols
-     with Global => (Input => (cons_table, symb_table, pvt_string_table));
-   procedure dump_strings
-     with Global => (Input => pvt_string_table);
+     with Global => (Input => (cons_table, symb_table));
+   procedure dump_strings;
    --
    --  Local functions and procedures
    --
@@ -364,7 +348,7 @@ private
      with Global => (Input => symb_table);
    --  It really is (In_Out => symb_table)
    function get_symb(s : out symb_index; n : string_index) return Boolean
-     with Global => (Input => (symb_table, pvt_string_table));
+     with Global => (Input => (symb_table));
    --  It really is (In_Out => (symb_table, pvt_string_table))
    --
    --  Finds a symbol and returns it.  Returns false if symbol can't be found.
@@ -376,7 +360,7 @@ private
    --  these should never be changed.  No value is returned.
    --
    procedure add_special(n : String; f : special_function)
-     with Global => (In_Out => (symb_table, pvt_string_table));
+     with Global => (In_Out => (symb_table));
    --
    --  Utility functions for manipulating lists
    --

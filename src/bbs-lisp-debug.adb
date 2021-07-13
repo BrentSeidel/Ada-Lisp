@@ -1,4 +1,5 @@
 with BBS.lisp.evaluate;
+with BBS.lisp.strings;
 package body bbs.lisp.debug is
 
    --
@@ -35,7 +36,7 @@ package body bbs.lisp.debug is
          when V_CHARACTER =>
             Put("'" & v.c & "'");
          when V_STRING =>
-            put(" STR: Ref: " & str_ref_count'Image(string_table(v.s).ref) & " Value: ");
+            put(" STR: Ref: " & str_ref_count'Image(BBS.lisp.strings.ref_count(v.s)) & " Value: ");
             print(v.s);
          when V_BOOLEAN =>
             if v.b then
