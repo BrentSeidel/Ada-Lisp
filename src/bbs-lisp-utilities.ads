@@ -17,8 +17,8 @@ package bbs.lisp.utilities is
    --  by var.  This means that stack variables will shadow symbols.
    --
    function replace_sym(s : cons_index; var : element_type) return Natural
-     with Global => (Input => (cons_table, symb_table));
-   -- Really should be (Input => symb_table, In_Out => cons_table).
+     with Global => (Input => (cons_table));
+   -- Really should be (In_Out => cons_table).
    --
    --  Function to determine if a character is a digit or not in different number
    --  systems.

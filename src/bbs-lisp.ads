@@ -74,12 +74,10 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    function int32_to_uint32 is
       new Ada.Unchecked_Conversion(source => int32, target => uint32);
    --
-   --  Types for reference counts
+   --  Types for cons reference counts
    --
    type cons_ref_count is new Natural;
-   type str_ref_count  is new Natural;
    FREE_CONS : constant cons_ref_count := cons_ref_count'First;
-   FREE_STR  : constant str_ref_count := str_ref_count'First;
    --
    --  Define the contents of records.
    --
@@ -152,29 +150,6 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --
    type special_function is access procedure(e : out element_type; s : cons_index; p : phase);
    --
-   --  A symbol give a perminant name to a piece of data.  These can be global
-   --  variables, user defined functions, or builtin functions.  The builtin
-   --  functions are predefined and cannot be changed.
-   --  A symbol record contains a name and a type
-   --
-   type symbol(kind : symbol_type := SY_EMPTY) is
-      record
-         ref : Natural;
-         str : string_index;
-         case kind is
-            when SY_SPECIAL =>
-               s : special_function;
-            when SY_BUILTIN =>
-               f : execute_function;
-            when SY_LAMBDA =>
-               ps : cons_index;
-            when SY_VARIABLE =>
-               pv : element_type;
-            when SY_EMPTY =>
-               null;
-         end case;
-      end record;
-   --
    --  The main data tables for various kinds of data.
    --
    --  Since this interpreter is designed to be used on embedded computers with
@@ -182,21 +157,19 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  statically allocated data structures are defined here.
    --
    cons_table : array (cons_index'First + 1 .. cons_index'Last) of cons;
-   symb_table : array (symb_index'First + 1 .. symb_index'Last) of symbol;
    --
    --  Do initialization and define text I/O routines
    --
    procedure init(p_put_line : t_put_line; p_put : t_put_line;
                   p_new_line : t_newline; p_get_line : t_get_line)
-     with Global => (Output => (cons_table, symb_table,
-                               output_stream, input_stream, pvt_first_char_flag));
+     with Global => (Output => (cons_table, input_stream, pvt_first_char_flag));
    --
    --  The read procedure/function reads the complete text of an s-expression
    --  from some input device.  The string is then parsed into a binary form
    --  that can be evaluated.
    --
    function read return Element_Type
-     with Global => (Input => (input_stream, cons_table, symb_table));
+     with Global => (Input => (input_stream, cons_table));
    --
    --  This procedure evaluates a binary s-expression and returns the resuls.
    --
@@ -215,8 +188,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  during initialization to identify the builtin operations.  Once created,
    --  these should never be changed.  No value is returned.
    --
-   procedure add_builtin(n : String; f : execute_function)
-     with Global => (In_Out => (symb_table));
+   procedure add_builtin(n : String; f : execute_function);
    --
    --  Procedures for printing error and non-error messages.  Pass in string
    --  representing the function name and the message.  This is intended to
@@ -228,7 +200,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
      with Global => (Input => pvt_msg_flag,
                      output => output_stream);
    procedure print(e : element_type; d : Boolean; nl : Boolean)
-     with Global => (Input => (cons_table, symb_table),
+     with Global => (Input => (cons_table),
                      output => output_stream);
    --
    --  Converts an element to a value.  Any element that cannot be converted
@@ -288,24 +260,24 @@ private
    --  Initialize the data structures used in the lisp interpreter.
    --
    procedure init
-   with Global => (Output => (cons_table, symb_table));
+   with Global => (Output => (cons_table));
    --
    --  These procedures print various types of objects.
    --
    procedure print(s : cons_index)
-     with Global => (Input => (cons_table, symb_table));
+     with Global => (Input => (cons_table));
    procedure print(v : value)
-     with Global => (Input => (cons_table, symb_table));
+     with Global => (Input => (cons_table));
    procedure print(s : string_index);
    procedure print(s : symb_index)
-     with Global => (Input => (cons_table, symb_table));
+     with Global => (Input => (cons_table));
    --
    --  For debugging, dump the various tables
    --
    procedure dump_cons
-     with Global => (Input => (cons_table, symb_table));
+     with Global => (Input => (cons_table));
    procedure dump_symbols
-     with Global => (Input => (cons_table, symb_table));
+     with Global => (Input => (cons_table));
    procedure dump_strings;
    --
    --  Local functions and procedures
@@ -344,12 +316,8 @@ private
    --  If a symbol exists, return it, otherwise create a new symbol.  Returns
    --  false if symbol doesn't exist and can't be created.
    --
-   function get_symb(s : out symb_index; n : String) return Boolean
-     with Global => (Input => symb_table);
-   --  It really is (In_Out => symb_table)
-   function get_symb(s : out symb_index; n : string_index) return Boolean
-     with Global => (Input => (symb_table));
-   --  It really is (In_Out => (symb_table, pvt_string_table))
+   function get_symb(s : out symb_index; n : String) return Boolean;
+   function get_symb(s : out symb_index; n : string_index) return Boolean;
    --
    --  Finds a symbol and returns it.  Returns false if symbol can't be found.
    --
@@ -359,8 +327,7 @@ private
    --  during initialization to identify the special operations.  Once created,
    --  these should never be changed.  No value is returned.
    --
-   procedure add_special(n : String; f : special_function)
-     with Global => (In_Out => (symb_table));
+   procedure add_special(n : String; f : special_function);
    --
    --  Utility functions for manipulating lists
    --
@@ -376,4 +343,4 @@ private
    function eval_dispatch(s : cons_index) return element_type;
 
 
-end bbs.lisp;
+end BBS.lisp;

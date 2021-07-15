@@ -2,6 +2,7 @@ with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.stack;
 with BBS.lisp.strings;
+with BBS.lisp.symbols;
 with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.func is
    --
@@ -49,8 +50,7 @@ package body BBS.lisp.evaluate.func is
                --
                if p3.Kind = E_SYMBOL then
                   symb := p3.sym;
-                  if (symb_table(symb).Kind = SY_BUILTIN) or
-                    (symb_table(symb).Kind = SY_SPECIAL) then
+                  if BBS.lisp.symbols.isFixed(symb) then
                      error("defun", "Can't assign a value to a builtin or special symbol.");
                      e := (Kind => E_ERROR);
                      return;
@@ -99,14 +99,13 @@ package body BBS.lisp.evaluate.func is
                      offset : Natural := 1;
                   begin
                      if (el.Kind = E_SYMBOL) then
-                        if (symb_table(el.sym).Kind = SY_BUILTIN) or
-                          (symb_table(el.sym).Kind = SY_SPECIAL) then
+                        if BBS.lisp.symbols.isFixed(el.sym) then
                            error("defun", "Parameter can't be a builtin or special symbol.");
                            cons_table(temp).car := (Kind => E_ERROR);
                            error_occured := True;
                         else
                            msg("defun", "Converting symbol to parameter.");
-                           str := symb_table(el.sym).str;
+                           str := BBS.lisp.symbols.get_name(el.sym);
                            el := (Kind => E_STACK, st_name => str,
                                st_offset => offset);
                            BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);
@@ -178,15 +177,15 @@ package body BBS.lisp.evaluate.func is
             --
             --  If something else was attached to the symbol, deref it.
             --
-            if symb_table(symb).kind = SY_LAMBDA then
-               BBS.lisp.memory.deref(symb_table(symb).ps);
-            elsif symb_table(symb).kind = SY_VARIABLE then
-               BBS.lisp.memory.deref(symb_table(symb).pv);
+            if BBS.lisp.symbols.get_type(symb) = SY_LAMBDA then
+               BBS.lisp.memory.deref(BBS.lisp.symbols.get_list(symb));
+            elsif BBS.lisp.symbols.get_type(symb) = SY_VARIABLE then
+               BBS.lisp.memory.deref(BBS.lisp.symbols.get_value(symb));
             end if;
             temp := getList(cons_table(s).cdr);
             cons_table(s).cdr := NIL_ELEM;
-            symb_table(symb) := (ref => 1, str => symb_table(symb).str,
-                                 kind => SY_LAMBDA, ps => temp);
+            BBS.lisp.symbols.set_sym(symb, (ref => 1, str => BBS.lisp.symbols.get_name(symb),
+                                            kind => SY_LAMBDA, ps => temp));
       end case;
       e := NIL_ELEM;
    end;
@@ -249,13 +248,12 @@ package body BBS.lisp.evaluate.func is
                      end if;
                      el :=  cons_table(temp).car;
                      if (el.kind = E_SYMBOL) then
-                        if (symb_table(el.sym).Kind = SY_BUILTIN) or
-                          (symb_table(el.sym).Kind = SY_SPECIAL) then
+                        if BBS.lisp.symbols.isFixed(el.sym) then
                            error("lambda", "Parameter can't be a builtin or special symbol.");
                            cons_table(temp).car := (Kind => E_ERROR);
                            error_occured := True;
                         else
-                           str := symb_table(el.sym).str;
+                           str := BBS.lisp.symbols.get_name(el.sym);
                            msg("lambda", "Converting symbol to parameter");
                            el := (kind => E_STACK, st_name => str,
                                st_offset => offset);

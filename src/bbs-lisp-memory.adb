@@ -1,5 +1,6 @@
 with BBS.lisp.strings;
-package body bbs.lisp.memory is
+with BBS.lisp.symbols;
+package body BBS.lisp.memory is
    --
    --  Ghost functions used in some proofs.
    --
@@ -24,9 +25,7 @@ package body bbs.lisp.memory is
          cons_table(i).car := (Kind => E_NIL);
          cons_table(i).cdr := (Kind => E_NIL);
       end loop;
-      for i in symb_table'Range loop
-         symb_table(i).ref := 0;
-      end loop;
+      BBS.lisp.symbols.reset_symbol_table;
       BBS.lisp.strings.reset_string_table;
    end;
    --

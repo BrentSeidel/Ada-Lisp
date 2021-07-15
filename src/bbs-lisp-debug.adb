@@ -1,6 +1,7 @@
 with BBS.lisp.evaluate;
 with BBS.lisp.strings;
-package body bbs.lisp.debug is
+with BBS.lisp.symbols;
+package body BBS.lisp.debug is
 
    --
    procedure dump(e : element_type) is
@@ -36,7 +37,7 @@ package body bbs.lisp.debug is
          when V_CHARACTER =>
             Put("'" & v.c & "'");
          when V_STRING =>
-            put(" STR: Ref: " & str_ref_count'Image(BBS.lisp.strings.ref_count(v.s)) & " Value: ");
+            put(" STR: Ref: " & BBS.lisp.strings.str_ref_count'Image(BBS.lisp.strings.ref_count(v.s)) & " Value: ");
             print(v.s);
          when V_BOOLEAN =>
             if v.b then
@@ -55,8 +56,8 @@ package body bbs.lisp.debug is
    --
    procedure dump(s : symb_index) is
    begin
-      print(symb_table(s).str);
-      case symb_table(s).kind is
+      print(BBS.lisp.symbols.get_name(s));
+      case BBS.lisp.symbols.get_type(s) is
          when SY_BUILTIN =>
             Put(" <BUILTIN>");
          when SY_SPECIAL =>
@@ -64,7 +65,7 @@ package body bbs.lisp.debug is
          when SY_LAMBDA =>
             Put(" <FUNCTION>");
          when SY_VARIABLE =>
-            dump(symb_table(s).pv);
+            dump(BBS.lisp.symbols.get_value(s));
          when others =>
             Put(" <UNKNOWN>");
       end case;

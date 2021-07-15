@@ -2,7 +2,7 @@
 --  This package handles the parsing of input.  Input can be a list, an atom
 --  of either a symbol or integer, or a comment.
 --
-private package bbs.lisp.parser is
+private package BBS.lisp.parser is
    --
    --  Define an abstract class for providing data to the parser
    --
@@ -22,8 +22,8 @@ private package bbs.lisp.parser is
    --  The main parser function.  Returns True if parsing is successful.
    --
    function parse(buff : parser_ptr; e : out element_type) return Boolean
-     with Global => (Input => (cons_table, symb_table));
-   -- should be (In_Out => (cons_table, symb_table, pvt_string_table)
+     with Global => (Input => (cons_table));
+   -- should be (In_Out => (cons_table, pvt_string_table)
 private
    --
    --  Utilities to assist in parsing
@@ -41,17 +41,15 @@ private
    function list(buff : parser_ptr; s_expr : out cons_index;
                  qfixed : Boolean; base : Boolean)
                  return Boolean
-     with Global => (Input => (cons_table, symb_table));
-   -- should be (In_Out => (cons_table, symb_table)
+     with Global => (Input => (cons_table));
+   -- should be (In_Out => (cons_table)
    --
    --  Subfunction for parsing symbols or temp symbols.  A is an atom that points
    --  to either the symbol or temp symbol.  Returns false if the symbol or temp
    --  symbol can't be found or created or if the atom can't be created.
    --
    function symb(buff : parser_ptr; quoted : Boolean)
-                 return element_type
-     with Global => (Input => (symb_table));
-   -- should be (In_Out => (symb_table)
+                 return element_type;
    --
    --  Subfunction for parsing integers
    --

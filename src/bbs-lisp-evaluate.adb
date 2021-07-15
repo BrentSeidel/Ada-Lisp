@@ -1,5 +1,6 @@
 with BBS.lisp.global;
 with BBS.lisp.memory;
+with BBS.lisp.symbols;
 package body BBS.lisp.evaluate
 with Refined_State =>  (pvt_exit_block => exit_block) is
    --
@@ -59,7 +60,6 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function isFunction(e : element_type) return Boolean is
       temp : element_type;
-      sym_kind : symbol_type;
       list : cons_index;
       val : value;
    begin
@@ -70,12 +70,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
          temp := e;
       end if;
       if temp.kind = E_SYMBOL then
-         sym_kind := symb_table(temp.sym).kind;
-         if (sym_kind = SY_BUILTIN) or
-           (sym_kind = SY_SPECIAL) or
-           (sym_kind = SY_LAMBDA) then
-            return True;
-         end if;
+         return BBS.lisp.symbols.isFunction(temp.sym);
       elsif temp.kind = E_VALUE then
          if temp.v.kind = V_LAMBDA then
             return True;
@@ -86,12 +81,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
             return True;
          end if;
          if val.kind = V_SYMBOL then
-            sym_kind := symb_table(val.sym).kind;
-            if (sym_kind = SY_BUILTIN) or
-              (sym_kind = SY_SPECIAL) or
-              (sym_kind = SY_LAMBDA) then
-               return True;
-            end if;
+            return BBS.lisp.symbols.isFunction(val.sym);
          end if;
       end if;
       return False;
@@ -160,8 +150,8 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    begin
       if e.kind = E_SYMBOL then
          sym := e.sym;
-         if symb_table(sym).kind = SY_VARIABLE then
-            return symb_table(sym).pv;
+         if BBS.lisp.symbols.get_type(sym) = SY_VARIABLE then
+            return BBS.lisp.symbols.get_value(sym);
          end if;
       end if;
       if e.kind = E_STACK then

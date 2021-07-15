@@ -1,5 +1,5 @@
 with BBS.lisp.utilities;
-package body bbs.lisp.strings is
+package body BBS.lisp.strings is
    --
    --  Procedure to print a string
    --
@@ -509,6 +509,13 @@ package body bbs.lisp.strings is
       end if;
    end;
    --
+   --  Get a character at a cannonicalized position.  This must be a valid position.
+   --
+   function get_char_at(str : string_index; offset : Natural) return Character is
+   begin
+      return string_table(str).str(offset);
+   end;
+   --
    --  Parse a string as an integer.  Starts at the first character in the string
    --  and proceeds until either the end of the string fragment or an illegal
    --  character is found.
@@ -671,6 +678,13 @@ package body bbs.lisp.strings is
       return string_table(next).str(1);
    end;
    --
+   --  Tests if the end of the string has been reached.
+   --
+   function is_end(self : str_iterator) return Boolean is
+   begin
+      return (self.current = NIL_STR) or else (self.ptr > string_table(self.current).len);
+   end;
+   --
    --  -------------------------------------------------------------------------
    --
    --  String memory management.
@@ -757,6 +771,13 @@ package body bbs.lisp.strings is
       for i in string_table'Range loop
          string_table(i).ref := FREE_STR;
       end loop;
+   end;
+   --
+   --  Get the reference count for a string fragment
+   --
+   function ref_count(s : string_index) return str_ref_count is
+   begin
+      return string_table(s).ref;
    end;
    --
 end;

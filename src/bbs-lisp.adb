@@ -20,8 +20,9 @@ with BBS.lisp.parser.stdio;
 with BBS.lisp.stack;
 use type BBS.lisp.stack.stack_entry_type;
 with BBS.lisp.strings;
+with BBS.lisp.symbols;
 --
-package body bbs.lisp
+package body BBS.lisp
 with Refined_State => (pvt_exit_flag => exit_flag,
                        pvt_break_flag => break_flag,
                        pvt_msg_flag => msg_flag,
@@ -185,8 +186,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          BBS.lisp.memory.deref(e);
       elsif e.kind = E_SYMBOL then
          sym := e.sym;
-         if symb_table(sym).kind = SY_VARIABLE then
-            r := symb_table(sym).pv;
+         if BBS.lisp.symbols.get_type(sym) = SY_VARIABLE then
+            r := BBS.lisp.symbols.get_value(sym);
          else
             r := e;
          end if;
@@ -307,7 +308,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --
    procedure print(s : symb_index) is
    begin
-      print(symb_table(s).str);
+      print(BBS.lisp.symbols.get_name(s));
       Put(" ");
    end;
    --
@@ -367,12 +368,12 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    procedure dump_symbols is
    begin
       for i in symb_index'First + 1 .. symb_index'Last loop
-         if symb_table(i).ref > 0 then
+         if BBS.lisp.symbols.get_ref(i) > 0 then
             Put("Symbol " & Integer'Image(Integer(i))
                             & " Name ");
-            print((symb_table(i).str));
+            print(BBS.lisp.symbols.get_name(i));
             Put(" contains: <");
-            case symb_table(i).kind is
+            case BBS.lisp.symbols.get_type(i) is
                when SY_BUILTIN =>
                   Put("Builtin");
                when SY_SPECIAL =>
@@ -381,7 +382,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                   Put("Lambda");
                when SY_VARIABLE =>
                   Put("Variable: ");
-                  print(symb_table(i).pv, False, False);
+                  print(BBS.lisp.symbols.get_value(i), False, False);
                when SY_EMPTY =>
                   Put("Empty");
             end case;
@@ -415,11 +416,11 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       if flag then
          BBS.lisp.strings.uppercase(temp);
          for i in symb_index'First + 1 .. symb_index'Last loop
-            if symb_table(i).ref = 0 then
+            if BBS.lisp.symbols.get_ref(i) = 0 then
                free := i;
                available := True;
             else
-               if bbs.lisp.strings.compare(temp, symb_table(i).str) = CMP_EQ then
+               if bbs.lisp.strings.compare(temp, BBS.lisp.symbols.get_name(i)) = CMP_EQ then
                   s := i;
                   return True;
                end if;
@@ -427,7 +428,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          end loop;
          if available then
             s := free;
-            symb_table(s) := (ref => 1, kind => SY_EMPTY, str => temp);
+            BBS.lisp.symbols.set_sym(s, (ref => 1, kind => SY_EMPTY, str => temp));
+--            symb_table(s) := (ref => 1, kind => SY_EMPTY, str => temp);
             return True;
          end if;
       else
@@ -443,11 +445,11 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    begin
       BBS.lisp.strings.uppercase(n);
       for i in symb_index'First + 1 .. symb_index'Last loop
-         if symb_table(i).ref = 0 then
+         if BBS.lisp.symbols.get_ref(i) = 0 then
             free := i;
             available := True;
          else
-            if bbs.lisp.strings.compare(n, symb_table(i).str) = CMP_EQ then
+            if bbs.lisp.strings.compare(n, BBS.lisp.symbols.get_name(i)) = CMP_EQ then
                s := i;
                return True;
             end if;
@@ -456,7 +458,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       if available then
          s := free;
          BBS.lisp.strings.ref(n);
-         symb_table(s) := (ref => 1, kind => SY_EMPTY, str => n);
+         BBS.lisp.symbols.set_sym(s, (ref => 1, kind => SY_EMPTY, str => n));
+--         symb_table(s) := (ref => 1, kind => SY_EMPTY, str => n);
          return True;
       end if;
       s := NIL_SYM;
@@ -476,7 +479,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       free : symb_index;
       available : Boolean := False;
       temp : symb_index;
-      symb : symbol;
+      symb : BBS.lisp.symbols.symbol;
       offset : Natural;
       sp : Natural;
       found : Boolean := False;
@@ -488,13 +491,13 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       --  Search the symbol table
       --
       for i in symb_index'First + 1 .. symb_index'Last loop
-         if symb_table(i).ref = 0 then
+         if BBS.lisp.symbols.get_ref(i) = 0 then
             free := i;
             available := True;
          else
-            if bbs.lisp.strings.compare(n, symb_table(i).str) = CMP_EQ then
+            if bbs.lisp.strings.compare(n, BBS.lisp.symbols.get_name(i)) = CMP_EQ then
                temp := i;
-               symb := symb_table(temp);
+               symb := BBS.lisp.symbols.get_sym(temp);
                found := True;
                exit;
             end if;
@@ -535,7 +538,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       if create then
          if available then
             BBS.lisp.strings.ref(n);
-            symb_table(free) := (ref => 1, kind => SY_EMPTY, str => n);
+            BBS.lisp.symbols.set_sym(free, (ref => 1, kind => SY_EMPTY, str => n));
             return (kind => E_SYMBOL, sym => free);
          end if;
       else
@@ -550,8 +553,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       sym : symb_index;
    begin
       if get_symb(sym, n) then
-         symb_table(sym) := (ref => 1, Kind => SY_BUILTIN, f => f,
-                             str => symb_table(sym).str);
+         BBS.lisp.symbols.set_sym(sym, (ref => 1, Kind => SY_BUILTIN, f => f,
+                                        str => BBS.lisp.symbols.get_name(sym)));
       else
          error("add_builtin", "Unable to add builtin symbol " & n);
       end if;
@@ -561,8 +564,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       sym : symb_index;
    begin
       if get_symb(sym, n) then
-         symb_table(sym) := (ref => 1, Kind => SY_SPECIAL, s => f,
-                             str => symb_table(sym).str);
+         BBS.lisp.symbols.set_sym(sym, (ref => 1, Kind => SY_SPECIAL, s => f,
+                                        str => BBS.lisp.symbols.get_name(sym)));
       else
          error("add_special", "Unable to add special symbol " & n);
       end if;
@@ -621,7 +624,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --  are handled in this function.  The rest are passed off to sub-functions.
    --
    function eval_dispatch(s : cons_index) return element_type is
-      sym : symbol;
+      sym : BBS.lisp.symbols.symbol;
       sym_flag : Boolean := False;
       e : element_type := NIL_ELEM;
       first : constant element_type := cons_table(s).car;
@@ -629,12 +632,12 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       val : value;
    begin
       if first.kind = E_SYMBOL then
-         sym := symb_table(first.sym);
+         sym := BBS.lisp.symbols.get_sym(first.sym);
          sym_flag := true;
       elsif first.kind = E_STACK then
          val := BBS.lisp.global.stack.search_frames(first.st_offset, first.st_name);
          if val.kind = V_SYMBOL then
-            sym := symb_table(val.sym);
+            sym := BBS.lisp.symbols.get_sym(val.sym);
             sym_flag := True;
          end if;
       end if;
@@ -733,6 +736,5 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       end if;
       return e;
    end;
-
-
-end bbs.lisp;
+   --
+end BBS.lisp;

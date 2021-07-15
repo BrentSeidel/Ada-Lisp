@@ -1,9 +1,10 @@
 with BBS.lisp;
-with BBS.lisp.strings;
-with BBS.lisp.memory;
-with BBS.lisp.utilities;
 with BBS.lisp.evaluate;
-package body bbs.lisp.parser is
+with BBS.lisp.memory;
+with BBS.lisp.strings;
+with BBS.lisp.symbols;
+with BBS.lisp.utilities;
+package body BBS.lisp.parser is
    --
    --  Append an element to a list.  Return true for success or false for failure.
    --  On failure, the list is dereffed.
@@ -78,7 +79,7 @@ package body bbs.lisp.parser is
       list_end : Boolean := False;
       item : Natural := 0;
       special_flag : Boolean := False;
-      special_symb : symbol := (ref => 1, str => NIL_STR, Kind => SY_EMPTY);
+      special_symb : BBS.lisp.symbols.symbol := (ref => 1, str => NIL_STR, Kind => SY_EMPTY);
       begin_called : Boolean := False;
       item_count : Natural := 0;
       char : Character;
@@ -291,9 +292,9 @@ package body bbs.lisp.parser is
                end if;
             end if;
             if (e.kind = E_SYMBOL) and not (qtemp or qfixed) then
-               if (symb_table(e.sym).kind = SY_SPECIAL) and (item = 0) then
+               if (BBS.lisp.symbols.get_type(e.sym) = SY_SPECIAL) and (item = 0) then
                   special_flag := True;
-                  special_symb := symb_table(e.sym);
+                  special_symb := BBS.lisp.symbols.get_sym(e.sym);
                   special_symb.s.all(e, head, PH_QUERY);
                   if e.kind = E_VALUE then
                      if e.v.kind = V_INTEGER then

@@ -1,7 +1,8 @@
+with BBS.lisp.evaluate;
 with BBS.lisp.memory;
 with BBS.lisp.strings;
-with BBS.lisp.evaluate;
-package body bbs.lisp.utilities is
+with BBS.lisp.symbols;
+package body BBS.lisp.utilities is
    --
    --  Various utility functions
    --
@@ -47,7 +48,7 @@ package body bbs.lisp.utilities is
          flag : Boolean := False;  --  Was it a tempsym?
       begin
          if e.kind = E_SYMBOL then
-            name := symb_table(e.sym).str;
+            name := BBS.lisp.symbols.get_name(e.sym);
          elsif e.kind = E_TEMPSYM then
             name := e.tempsym;
             flag := True;

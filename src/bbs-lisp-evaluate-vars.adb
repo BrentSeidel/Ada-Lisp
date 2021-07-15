@@ -1,6 +1,7 @@
 with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.strings;
+with BBS.lisp.symbols;
 package body BBS.lisp.evaluate.vars is
    --
    --  This sets a symbol or stack variable to a value.  The first parameter
@@ -21,11 +22,11 @@ package body BBS.lisp.evaluate.vars is
 
       procedure deref_previous(s : symb_index) is
       begin
-         if symb_table(s).kind = SY_VARIABLE then
-            BBS.lisp.memory.deref(symb_table(s).pv);
+         if BBS.lisp.symbols.get_type(s) = SY_VARIABLE then
+            BBS.lisp.memory.deref(BBS.lisp.symbols.get_value(s));
          end if;
-         if symb_table(s).kind = SY_LAMBDA then
-            BBS.lisp.memory.deref(symb_table(s).ps);
+         if BBS.lisp.symbols.get_type(s) = SY_LAMBDA then
+            BBS.lisp.memory.deref(BBS.lisp.symbols.get_list(s));
          end if;
       end;
 
@@ -42,8 +43,7 @@ package body BBS.lisp.evaluate.vars is
                p3 := cons_table(getList(p2)).car; --  Should be a symbol or tempsym
                if p3.kind = E_SYMBOL then
                   symb := p3.sym;
-                  if (symb_table(symb).kind = SY_BUILTIN) or
-                    (symb_table(symb).kind = SY_SPECIAL) then
+                  if BBS.lisp.symbols.isFixed(symb) then
                      error("setq", "Can't assign a value to a builtin or special symbol");
                      e := (kind => E_ERROR);
                      return;
@@ -83,8 +83,7 @@ package body BBS.lisp.evaluate.vars is
                   return;
                end if;
                if not stacked then
-                  if (symb_table(symb).kind = SY_BUILTIN) or
-                    (symb_table(symb).kind = SY_SPECIAL) then
+                  if BBS.lisp.symbols.isFixed(symb) then
                      error("setq", "Can't assign a value to a builtin or special symbol");
                      e := (kind => E_ERROR);
                      return;
@@ -124,8 +123,8 @@ package body BBS.lisp.evaluate.vars is
                   end if;
                else
                   deref_previous(symb);
-                  symb_table(symb) := (ref => 1, Kind => SY_VARIABLE,
-                                       pv => p2, str => symb_table(symb).str);
+                  BBS.lisp.symbols.set_sym(symb, (ref => 1, Kind => SY_VARIABLE,
+                                       pv => p2, str => BBS.lisp.symbols.get_name(symb)));
                end if;
                e := p2;
             else
@@ -192,7 +191,7 @@ package body BBS.lisp.evaluate.vars is
                         el := cons_table(locals).car;
                      end if;
                      if el.kind = E_SYMBOL then
-                        str := symb_table(el.sym).str;
+                        str := BBS.lisp.symbols.get_name(el.sym);
                         msg("let", "Converting symbol to local variable");
                      elsif el.kind = E_TEMPSYM then
                         str := el.tempsym;

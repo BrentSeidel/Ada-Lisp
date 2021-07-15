@@ -2,22 +2,12 @@
 --  This package contains internal functions that support operations on the
 --  lisp strings.
 --
-private package bbs.lisp.strings is
+package BBS.lisp.strings is
    --
-   --  Structures and definitions for handling strings
+   --  Types for string reference counts
    --
-   fragment_len : constant Integer := 16;
-   type fragment is
-      record
-         ref : str_ref_count;
-         next : string_index;
-         len : Integer range 0..fragment_len;
-         str : String (1..fragment_len);
-      end record;
-   --
-   --  The string table.
-   --
-   string_table : array (string_index'First + 1 .. string_index'Last) of fragment;
+   type str_ref_count  is new Natural;
+   FREE_STR  : constant str_ref_count := str_ref_count'First;
    --
    --  Converts a string to upper-case in place.
    --  In place lowercase is never used.  If it's ever needed, this routine
@@ -92,9 +82,8 @@ private package bbs.lisp.strings is
    --
    --  Get a character at a cannonicalized position.  This must be a valid position.
    --
-   function get_char_at(str : string_index; offset : Natural) return Character is
-     (string_table(str).str(offset))
-       with pre => ((str /= NIL_STR) and (offset > 0) and (offset <= string_table(str).len));
+   function get_char_at(str : string_index; offset : Natural) return Character
+       with pre => ((str /= NIL_STR) and (offset > 0));
    --
    --  Parse a string as an integer.  Starts at the first character in the string
    --  and proceeds until either the end of the string fragment or an illegal
@@ -146,8 +135,7 @@ private package bbs.lisp.strings is
    --
    --  Tests if the end of the string has been reached.
    --
-   function is_end(self : str_iterator) return Boolean is ((self.current = NIL_STR) or else
-                                                             (self.ptr > string_table(self.current).len));
+   function is_end(self : str_iterator) return Boolean;
    --
    --  -------------------------------------------------------------------------
    --
@@ -181,6 +169,23 @@ private package bbs.lisp.strings is
    --  Get the reference count for a string fragment
    --
    function ref_count(s : string_index) return str_ref_count
-   is (string_table(s).ref) with pre => (s > NIL_STR);
+     with pre => (s > NIL_STR);
    --
+private
+   --
+   --  Structures and definitions for handling strings
+   --
+   fragment_len : constant Integer := 16;
+   type fragment is
+      record
+         ref : str_ref_count;
+         next : string_index;
+         len : Integer range 0..fragment_len;
+         str : String (1..fragment_len);
+      end record;
+   --
+   --  The string table.
+   --
+   string_table : array (string_index'First + 1 .. string_index'Last) of fragment;
+
 end;

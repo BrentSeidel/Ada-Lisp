@@ -4,6 +4,7 @@
 --  and some of them will return constant values because Tiny-Lisp doesn't
 --  implement some things.
 --
+with BBS.lisp.symbols;
 package body BBS.lisp.evaluate.pred is
    --
    --  These return true of false depending on the type of data passed.
@@ -52,8 +53,7 @@ package body BBS.lisp.evaluate.pred is
       end if;
       p := first_value(t);
       if p.kind = E_SYMBOL then
-         if (symb_table(p.sym).kind = SY_BUILTIN) or
-           (symb_table(p.sym).kind = SY_SPECIAL) then
+         if BBS.lisp.symbols.isFixed(p.sym) then
             e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
             return;
          end if;
@@ -105,9 +105,7 @@ package body BBS.lisp.evaluate.pred is
       end if;
       p := first_value(t);
       if p.kind = E_SYMBOL then
-         if (symb_table(p.sym).kind = SY_BUILTIN) or
-           (symb_table(p.sym).kind = SY_SPECIAL) or
-           (symb_table(p.sym).kind = SY_LAMBDA) then
+         if BBS.lisp.symbols.isFunction(p.sym) then
             e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
             return;
          end if;

@@ -71,7 +71,7 @@ package body BBS.lisp.evaluate.cond is
          declare
             eq : comparison;
          begin
-            eq := bbs.lisp.strings.compare(v1.s, v2.s);
+            eq := BBS.lisp.strings.compare(v1.s, v2.s);
             BBS.lisp.strings.deref(v1.s);
             BBS.lisp.strings.deref(v2.s);
             case b is

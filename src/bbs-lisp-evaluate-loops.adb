@@ -1,6 +1,7 @@
 with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.stack;
+with BBS.lisp.symbols;
 with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.loops is
    --
@@ -139,7 +140,7 @@ package body BBS.lisp.evaluate.loops is
                begin
                   if (var.kind = E_SYMBOL) then
                      msg("dotimes", "Converting symbol to loop variable");
-                     str := symb_table(var.sym).str;
+                     str := BBS.lisp.symbols.get_name(var.sym);
                   elsif (var.kind = E_TEMPSYM) then
                      msg("dotimes", "Converting tempsym to loop variable");
                      str := var.tempsym;
@@ -359,7 +360,7 @@ package body BBS.lisp.evaluate.loops is
                begin
                   if (var.kind = E_SYMBOL) then
                      msg("dolist", "Converting symbol to loop variable");
-                     str := symb_table(var.sym).str;
+                     str := BBS.lisp.symbols.get_name(var.sym);
                   elsif (var.kind = E_TEMPSYM) then
                      msg("dolist", "Converting tempsym to loop variable");
                      str := var.tempsym;

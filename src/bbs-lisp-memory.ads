@@ -3,7 +3,7 @@
 --  be dynamically allocated and deallocated.  Reference counting is used to
 --  determine if a particular entry is free or not.
 --
-package bbs.lisp.memory is
+package BBS.lisp.memory is
    --
    --  Utility functions for allocating and freeing items.  Memory management
    --  uses a reference counting system.  When references are added, the count
@@ -21,7 +21,7 @@ package bbs.lisp.memory is
    --  Reset some of the memory tables back to their starting state.
    --
    procedure reset_tables
-     with Global => (Output => (cons_table, symb_table));
+     with Global => (Output => (cons_table));
    --
    --  Allocate various types of items.  The table is searched for an entry with
    --  a reference count of zero.  If such an entry is found, its reference
