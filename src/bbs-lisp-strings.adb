@@ -762,7 +762,8 @@ package body BBS.lisp.strings is
       end loop;
    end;
    --
-   --  Get the reference count for a string fragment
+   --  Get the reference count for a string fragment.  Used primarily for
+   --  debugging.
    --
    function ref_count(s : string_index) return str_ref_count is
    begin

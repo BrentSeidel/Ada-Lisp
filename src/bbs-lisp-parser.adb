@@ -40,11 +40,9 @@ package body BBS.lisp.parser is
       head : cons_index;
       qtemp : constant Boolean := False;
    begin
-      e := NIL_ELEM;
       if list(buff, head, qtemp, True) then
-         if head = NIL_CONS then
-            e := NIL_ELEM;
-         else
+         e := NIL_ELEM;
+         if head /= NIL_CONS then
             e := cons_table(head).car;
             cons_table(head).car := NIL_ELEM;
             BBS.lisp.memory.deref(head);

@@ -30,7 +30,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                        output_stream => (io_put_line, io_put, io_new_line),
                        input_stream => io_get_line,
                        parse => parse_buff) is
-    --
+   --
    --  Buffer for keyboard input to parser
    --
    parse_buff : aliased BBS.lisp.parser.stdio.parser_stdio;
@@ -131,6 +131,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       io_new_line := p_new_line;
       io_get_line := p_get_line;
       init;
+      parse_buff.init;
    end;
    --
    --  Replacements for Text_IO to make porting to embedded systems easier.

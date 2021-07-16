@@ -213,7 +213,12 @@
       (verify-equal 1 a "A is 1")
       (setq a 20)
       (verify-equal 20 a "A is 20"))
-    (verify-equal 4 a "A is 4")))
+    (verify-equal 4 a "A is 4"))
+  (let ((a 1))
+    (if NIL (setq a 10))
+    (verify-equal 1 a "One branch if not executed")
+    (if T (setq a 10))
+    (verify-equal a 10 "One branch if executed")))
 (test-let)
 (setq test-let 0)
 ;
@@ -491,6 +496,9 @@
 (terpri)
 (defun test-concatenate ()
   (verify-equal "Hello world!" (concatenate 'string "Hello" " " "world" "!") "String concatenation")
+  (verify-equal "This is a longer string that spans multiple fragments. Another fairly long string"
+   (concatenate 'string "This is a longer string that spans multiple fragments" ". "
+      "Another fairly long string") "Concatenate long strings")
   (verify-false (errorp (concatenate 'list (1 2 3) (4 5 6))) "Concatenate lists")
   (verify-equal 6 (length (concatenate 'list (1 2 3) (4 5 6))) "Concatenate lists")
   (verify-true (errorp (concatenate)) "Concatenate with no parameters")
