@@ -429,7 +429,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          if available then
             s := free;
             BBS.lisp.symbols.set_sym(s, (ref => 1, kind => SY_EMPTY, str => temp));
---            symb_table(s) := (ref => 1, kind => SY_EMPTY, str => temp);
             return True;
          end if;
       else
@@ -459,7 +458,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          s := free;
          BBS.lisp.strings.ref(n);
          BBS.lisp.symbols.set_sym(s, (ref => 1, kind => SY_EMPTY, str => n));
---         symb_table(s) := (ref => 1, kind => SY_EMPTY, str => n);
          return True;
       end if;
       s := NIL_SYM;

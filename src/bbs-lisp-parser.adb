@@ -11,12 +11,9 @@ package body BBS.lisp.parser is
    --
    function append_to_list(head : cons_index; e : element_type) return Boolean is
       current : cons_index;
-      flag : Boolean;
    begin
-      flag := elem_to_cons(current, e);
-      if flag then
-         flag := append(head, current);
-         if not flag then
+      if elem_to_cons(current, e) then
+         if not append(head, current) then
             error("append_to_list", "Unable to append to list");
             put("  Element: ");
             print(e, False, True);
@@ -41,12 +38,10 @@ package body BBS.lisp.parser is
    --
    function parse(buff : parser_ptr; e : out element_type) return Boolean is
       head : cons_index;
-      flag : Boolean := False;
       qtemp : constant Boolean := False;
    begin
       e := NIL_ELEM;
-      flag := list(buff, head, qtemp, True);
-      if flag then
+      if list(buff, head, qtemp, True) then
          if head = NIL_CONS then
             e := NIL_ELEM;
          else
@@ -54,11 +49,11 @@ package body BBS.lisp.parser is
             cons_table(head).car := NIL_ELEM;
             BBS.lisp.memory.deref(head);
          end if;
-      else
-         error("parse", "Error in parsing list.");
-         e := (kind => E_ERROR);
+         return True;
       end if;
-      return flag;
+      error("parse", "Error in parsing list.");
+      e := (kind => E_ERROR);
+      return False;
    end;
    --
    --  Subfunction for parsing lists.  If the buffer ends before the end of the
@@ -74,7 +69,6 @@ package body BBS.lisp.parser is
       temp : cons_index := NIL_CONS;
       str  : string_index;
       value : int32;
-      flag : Boolean;
       e : element_type;
       list_end : Boolean := False;
       item : Natural := 0;
@@ -87,8 +81,7 @@ package body BBS.lisp.parser is
       qtemp : Boolean := False;  --  Flag for quoting items
    begin
       s_expr := NIL_CONS;
-      flag := bbs.lisp.memory.alloc(head);
-      if not flag then
+      if not BBS.lisp.memory.alloc(head) then
          error("list", "Unable to allocate cons for head");
          return False;
       end if;
@@ -124,13 +117,11 @@ package body BBS.lisp.parser is
                current : cons_index := NIL_CONS;
             begin
                buff.next_char;
-               flag := list(buff, current, qfixed or qtemp, False);
-               buff.next_char;
-               if flag then
+               if list(buff, current, qfixed or qtemp, False) then
+                  buff.next_char;
                   if (cons_table(current).car.kind = E_NIL) and (cons_table(current).cdr.kind = E_NIL) then
                      BBS.lisp.memory.deref(current);
-                     flag := append_to_list(head, NIL_ELEM);
-                     if not flag then
+                     if not append_to_list(head, NIL_ELEM) then
                         error("list", "Failure appending NIL_ELEM to list");
                         BBS.lisp.memory.deref(head);
                         return False;
@@ -139,11 +130,9 @@ package body BBS.lisp.parser is
                      if cons_table(head).car.kind = E_NIL then
                         cons_table(head).car := BBS.lisp.evaluate.makeList(current);
                      else
-                        flag := BBS.lisp.memory.alloc(temp);
-                        if flag then
+                        if BBS.lisp.memory.alloc(temp) then
                            cons_table(temp).car := BBS.lisp.evaluate.makeList(current);
-                           flag := append(head, temp);
-                           if not flag then
+                           if not append(head, temp) then
                               error("list", "Unable to append to list");
                               BBS.lisp.memory.deref(current);
                               BBS.lisp.memory.deref(head);
@@ -158,6 +147,7 @@ package body BBS.lisp.parser is
                      end if;
                   end if;
                else
+                  buff.next_char;
                   error ("list", "Error parsing list");
                   BBS.lisp.memory.deref(head);
                   return False;
@@ -171,12 +161,10 @@ package body BBS.lisp.parser is
            ((test_char = '-') and buff.is_next_digit) then
             int(buff, value);
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
-            flag := true;
             if cons_table(head).car.kind = E_NIL then
                cons_table(head).car := e;
             else
-               flag := append_to_list(head, e);
-               if not flag then
+               if not append_to_list(head, e) then
                   error("list", "Failed appending decimal integer to list");
                   BBS.lisp.memory.deref(head);
                   return False;
@@ -194,12 +182,10 @@ package body BBS.lisp.parser is
                --
                hex(buff, value);
                e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
-               flag := true;
                if cons_table(head).car.kind = E_NIL then
                   cons_table(head).car := e;
                else
-                  flag := append_to_list(head, e);
-                  if not flag then
+                  if not append_to_list(head, e) then
                      error("list", "Failed appending hexidecimal integer to list");
                      BBS.lisp.memory.deref(head);
                      return False;
@@ -209,8 +195,7 @@ package body BBS.lisp.parser is
                --
                --  Character literal
                --
-               flag := parse_char(buff, char);
-               if flag then
+               if parse_char(buff, char) then
                   e := (kind => E_VALUE, v => (kind => V_CHARACTER, c => char));
                else
                   e := (kind => E_ERROR);
@@ -218,8 +203,7 @@ package body BBS.lisp.parser is
                if cons_table(head).car.kind = E_NIL then
                   cons_table(head).car := e;
                else
-                  flag := append_to_list(head, e);
-                  if not flag then
+                  if not append_to_list(head, e) then
                      error("list", "Failed appending character to list");
                      BBS.lisp.memory.deref(head);
                      return False;
@@ -231,8 +215,7 @@ package body BBS.lisp.parser is
                if cons_table(head).car.kind = E_NIL then
                   cons_table(head).car := e;
                else
-                  flag := append_to_list(head, e);
-                  if not flag then
+                  if not append_to_list(head, e) then
                      error("list", "Failed appending error to list");
                      BBS.lisp.memory.deref(head);
                      return False;
@@ -244,16 +227,14 @@ package body BBS.lisp.parser is
          --  Check for the start of a string
          --
          elsif test_char = '"' then
-            flag := parse_str(buff, str);
-            if flag then
+            if parse_str(buff, str) then
                e := (kind => E_VALUE, v => (kind => V_STRING, s => str));
                if cons_table(head).car.kind = E_NIL then
                   cons_table(head).car := e;
                else
-                  flag := append_to_list(head, e);
-                  if not flag then
+                  if not append_to_list(head, e) then
                      error("list", "Failed appending string to list");
-                     return flag;
+                     return False;
                   end if;
                end if;
             else
@@ -282,8 +263,7 @@ package body BBS.lisp.parser is
             if cons_table(head).car.kind = E_NIL then
                cons_table(head).car := e;
             else
-               flag := append_to_list(head, e);
-               if not flag then
+               if not append_to_list(head, e) then
                   error("list", "Failed appending symbol to list");
                   put("  Element: ");
                   print(e, False, True);
@@ -357,9 +337,14 @@ package body BBS.lisp.parser is
       el : element_type;
       symb : symb_index;
       flag : Boolean;
+      pragma Unreferenced(flag);
+      --
+      --  The append to string is assumed to succeed.  There is a slight chance
+      --  that this won't succeed, but if so, there are probably bigger problems.
+      --  This should be cleaned up at some point.
+      --
    begin
-      flag := BBS.lisp.strings.alloc(test);
-      if flag then
+      if BBS.lisp.strings.alloc(test) then
          while (buff.get_char /= ')') and (not isWhitespace(buff.get_char)) and buff.not_end loop
             flag := BBS.lisp.strings.append(test, buff.get_char);
             buff.next_char;
@@ -440,10 +425,8 @@ package body BBS.lisp.parser is
    --
    function parse_str(buff : parser_ptr; s : out string_index) return Boolean is
       str  : string_index;
-      flag : Boolean;
    begin
-      flag := bbs.lisp.strings.alloc(str);
-      if flag then
+      if BBS.lisp.strings.alloc(str) then
          s := str;
          buff.next_char;
          while (buff.get_char /= '"') and buff.not_end loop

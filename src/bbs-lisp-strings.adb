@@ -158,19 +158,16 @@ package body BBS.lisp.strings is
       prev  : string_index;
       next  : string_index;
       first : string_index;
-      flag  : Boolean;
    begin
-      flag := alloc(prev);
-      s := prev;
-      first := prev;
-      if flag then
+      if alloc(prev) then
+         s := prev;
+         first := prev;
          for ptr in str'First .. str'Last loop
             if string_table(prev).len < fragment_len then
                string_table(prev).len := string_table(prev).len + 1;
                string_table(prev).str(string_table(prev).len) := str(ptr);
             else
-               flag := alloc(next);
-               if flag then
+               if alloc(next) then
                   string_table(prev).next := next;
                   prev := next;
                   string_table(prev).len := 1;
@@ -183,10 +180,10 @@ package body BBS.lisp.strings is
                end if;
             end if;
          end loop;
-      else
-         prev := NIL_STR;
+         return True;
       end if;
-      return flag;
+      s := NIL_STR;
+      return False;
    end;
    --
    --  Functions to append to an existing string.
@@ -194,7 +191,6 @@ package body BBS.lisp.strings is
    function append(s : string_index; c : Character) return Boolean is
       next : string_index := s;
       nxt : string_index;
-      flag : Boolean;
       frag : string_index;
    begin
       while next > NIL_STR loop
@@ -206,8 +202,7 @@ package body BBS.lisp.strings is
          string_table(nxt).str(string_table(nxt).len) := c;
          return True;
       else
-         flag := alloc(frag);
-         if flag then
+         if  alloc(frag) then
             string_table(frag).str(1) := c;
             string_table(frag).len := 1;
             string_table(nxt).next := frag;
@@ -420,14 +415,12 @@ package body BBS.lisp.strings is
    --  Copy helper function
    --
    function copy(s : string_index; t : transform) return element_type is
-      flag : Boolean;
       source : string_index := s;
       new_frag : string_index;
       head : string_index;
       temp : string_index;
    begin
-      flag := alloc(head);
-      if not flag then
+      if not alloc(head) then
          error("string copy", "Unable to allocate string fragment.");
          return (kind => E_ERROR);
       end if;
@@ -445,8 +438,7 @@ package body BBS.lisp.strings is
       end loop;
       source := string_table(source).next;
       while source /= string_index'First loop
-         flag := alloc(temp);
-         if not flag then
+         if not alloc(temp) then
             error("string copy", "Unable to allocate string fragment.");
             deref(head);
             return (kind => E_ERROR);
@@ -556,10 +548,8 @@ package body BBS.lisp.strings is
       temp  : string_index;
       start : Integer := start_offset;
       count : Integer := len;
-      flag  : Boolean;
    begin
-      flag := alloc(head);
-      if not flag then
+      if not alloc(head) then
          error("substring", "Unable to allocate string fragment.");
          return NIL_STR;
       end if;
@@ -595,8 +585,7 @@ package body BBS.lisp.strings is
          --
          --  Allocate a new fragment for the destination
          --
-         flag := alloc(temp);
-         if not flag then
+         if not alloc(temp) then
             error("substring", "Unable to allocate string fragment.");
             deref(head);
             return NIL_STR;
