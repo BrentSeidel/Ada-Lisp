@@ -355,21 +355,6 @@ package body BBS.lisp.parser is
          end loop;
          BBS.lisp.strings.uppercase(test);
          --
-         --  Check for boolean values (T or NIL).
-         --
-         if BBS.lisp.strings.compare(test, "T") = CMP_EQ then
-            BBS.lisp.strings.deref(test);
-            return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-         end if;
-         if BBS.lisp.strings.compare(test, "NIL") = CMP_EQ then
-            BBS.lisp.strings.deref(test);
-            return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-         end if;
-         if BBS.lisp.strings.length(test) = 0 then
-            BBS.lisp.strings.deref(test);
-            return NIL_ELEM;
-         end if;
-         --
          -- Now check for symbols
          --
          if not quoted then

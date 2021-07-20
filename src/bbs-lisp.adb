@@ -1,18 +1,5 @@
 with BBS.lisp.evaluate;
---with BBS.lisp.evaluate.bool;
---with BBS.lisp.evaluate.char;
---with BBS.lisp.evaluate.cond;
 with BBS.lisp.evaluate.func;
---with BBS.lisp.evaluate.io;
---with BBS.lisp.evaluate.list;
---with BBS.lisp.evaluate.loops;
---with BBS.lisp.evaluate.math;
---with BBS.lisp.evaluate.mem;
---with BBS.lisp.evaluate.misc;
---with BBS.lisp.evaluate.pred;
---with BBS.lisp.evaluate.str;
---with BBS.lisp.evaluate.symb;
---with BBS.lisp.evaluate.vars;
 with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.parser;
@@ -446,7 +433,11 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       --
       fsym := BBS.lisp.symbols.find_name(n);
       if fsym.kind = ST_FIXED then
-         return (Kind => E_SYMBOL, sym => fsym);
+         if BBS.lisp.symbols.get_type(fsym) = SY_VARIABLE then
+            return BBS.lisp.symbols.get_value(fsym);
+         else
+            return (Kind => E_SYMBOL, sym => fsym);
+         end if;
       end if;
       --
       --  Search the symbol table
