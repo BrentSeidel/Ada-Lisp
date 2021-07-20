@@ -108,8 +108,8 @@ package body BBS.lisp.evaluate.cond is
       elsif ((v1.kind = V_QSYMBOL) or (v1.kind = V_SYMBOL)) and
         ((v2.kind = V_QSYMBOL) or (v2.kind = V_SYMBOL)) then
          declare
-            s1 : symb_index;
-            s2 : symb_index;
+            s1 : symbol_ptr;
+            s2 : symbol_ptr;
          begin
             if v1.kind = V_QSYMBOL then
                s1 := v1.qsym;

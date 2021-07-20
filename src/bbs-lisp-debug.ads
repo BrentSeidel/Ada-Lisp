@@ -7,7 +7,7 @@ package BBS.lisp.debug is
      with Global => (Input => (cons_table));
    procedure dump(s : cons_index)
      with Global => (Input => (cons_table));
-   procedure dump(s : symb_index)
+   procedure dump(s : symbol_ptr)
      with Global => (Input => (cons_table));
    procedure dump(v : value)
      with Global => (Input => (cons_table));

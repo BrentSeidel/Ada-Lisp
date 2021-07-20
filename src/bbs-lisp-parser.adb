@@ -71,7 +71,8 @@ package body BBS.lisp.parser is
       list_end : Boolean := False;
       item : Natural := 0;
       special_flag : Boolean := False;
-      special_symb : BBS.lisp.symbols.symbol := (ref => 1, str => NIL_STR, Kind => SY_EMPTY);
+      special_symb : BBS.lisp.symbols.sym_body := (kind => SY_EMPTY);
+      special_ptr  : symbol_ptr := (kind => ST_NULL);
       begin_called : Boolean := False;
       item_count : Natural := 0;
       char : Character;
@@ -97,7 +98,11 @@ package body BBS.lisp.parser is
                else
                   error("list", "Internal error, parse end attempted to be called before parse begin");
                   put("Probably missing parameters to operation ");
-                  print(special_symb.str);
+                  if special_ptr.kind = ST_FIXED then
+                     put(BBS.lisp.symbols.get_name(special_ptr).all);
+                  else
+                     print(BBS.lisp.symbols.get_name(special_ptr));
+                  end if;
                   new_line;
                end if;
             end if;
@@ -272,6 +277,7 @@ package body BBS.lisp.parser is
             if (e.kind = E_SYMBOL) and not (qtemp or qfixed) then
                if (BBS.lisp.symbols.get_type(e.sym) = SY_SPECIAL) and (item = 0) then
                   special_flag := True;
+                  special_ptr := e.sym;
                   special_symb := BBS.lisp.symbols.get_sym(e.sym);
                   special_symb.s.all(e, head, PH_QUERY);
                   if e.kind = E_VALUE then
@@ -333,7 +339,7 @@ package body BBS.lisp.parser is
                  return element_type is
       test : string_index;
       el : element_type;
-      symb : symb_index;
+      symb : symbol_ptr;
       flag : Boolean;
       pragma Unreferenced(flag);
       --
@@ -373,7 +379,7 @@ package body BBS.lisp.parser is
                el := (Kind => E_VALUE, v => (kind => V_QSYMBOL, qsym => symb));
             else
                el := (kind => E_ERROR);
-               error("parse symbol", "Unable to allocate string fragment.");
+               error("parse symbol", "Unable to allocate symbol entry.");
             end if;
          end if;
          BBS.lisp.strings.deref(test);

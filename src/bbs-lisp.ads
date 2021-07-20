@@ -27,20 +27,32 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    type cons_index is range -1 .. max_cons;
    type symb_index is range -1 .. max_symb;
    type string_index is range -1 .. max_string;
+   type fsymb_index is new Positive;
+   type symbol_table is (ST_NULL, ST_FIXED, ST_DYNAMIC);
+   type symbol_ptr(kind : symbol_table := ST_NULL) is
+      record
+         case kind is
+            when ST_NULL =>
+               null;
+            when ST_FIXED =>
+               f : fsymb_index;
+            when ST_DYNAMIC =>
+               d : symb_index;
+         end case;
+      end record;
    --
    --
    --  This indicates what type of an object an element_type is pointing to.  It
    --  can be a cons cell, a value, a symbol, a temporary symbol a stack
    --  variable, or nothing.
    --
-   type ptr_type is (E_ERROR, E_NIL, E_STACK, E_SYMBOL,
-                     E_TEMPSYM, E_VALUE);
+   type ptr_type is (E_ERROR, E_NIL, E_STACK, E_SYMBOL, E_TEMPSYM, E_VALUE);
    --
    --  This indicates what kind of data is in a value.  These are the allowed
    --  data types.
    --
    type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
-                      V_LAMBDA, V_SYMBOL, V_QSYMBOL, V_NONE);
+                       V_LAMBDA, V_SYMBOL, V_QSYMBOL, V_NONE);
    --
    --  This indicates what kind of data is in a symbol.
    --
@@ -97,9 +109,9 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
          when V_LAMBDA =>
             lam : cons_index;
          when V_SYMBOL =>
-            sym : symb_index;
+            sym : symbol_ptr;
          when V_QSYMBOL =>
-            qsym : symb_index;
+            qsym : symbol_ptr;
          when V_NONE =>
             null;
          end case;
@@ -117,7 +129,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
             when E_TEMPSYM =>
                tempsym : string_index;
             when E_SYMBOL =>
-               sym : symb_index;
+               sym : symbol_ptr;
             when E_STACK =>
                st_name : string_index;
                st_offset : Natural;
@@ -213,7 +225,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    NIL_ELEM : constant element_type := (Kind => E_NIL);
    NIL_CONS : constant cons_index := cons_index'First;
    NIL_STR  : constant string_index := string_index'First;
-   NIL_SYM  : constant symb_index := symb_index'First;
+   NIL_SYM  : constant symbol_ptr := (kind => ST_NULL);
    --
    --  Define some enumerations
    --
@@ -257,11 +269,6 @@ private
    first_char_flag : Boolean := True
      with Part_Of => pvt_first_char_flag;
    --
-   --  Initialize the data structures used in the lisp interpreter.
-   --
-   procedure init
-   with Global => (Output => (cons_table));
-   --
    --  These procedures print various types of objects.
    --
    procedure print(s : cons_index)
@@ -269,8 +276,7 @@ private
    procedure print(v : value)
      with Global => (Input => (cons_table));
    procedure print(s : string_index);
-   procedure print(s : symb_index)
-     with Global => (Input => (cons_table));
+   procedure print(s : symbol_ptr);
    --
    --  For debugging, dump the various tables
    --
@@ -279,6 +285,7 @@ private
    procedure dump_symbols
      with Global => (Input => (cons_table));
    procedure dump_strings;
+   procedure dump_sym_ptr(s : symbol_ptr);
    --
    --  Local functions and procedures
    --
@@ -316,8 +323,8 @@ private
    --  If a symbol exists, return it, otherwise create a new symbol.  Returns
    --  false if symbol doesn't exist and can't be created.
    --
-   function get_symb(s : out symb_index; n : String) return Boolean;
-   function get_symb(s : out symb_index; n : string_index) return Boolean;
+   function get_symb(s : out symbol_ptr; n : String) return Boolean;
+   function get_symb(s : out symbol_ptr; n : string_index) return Boolean;
    --
    --  Finds a symbol and returns it.  Returns false if symbol can't be found.
    --

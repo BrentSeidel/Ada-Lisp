@@ -1,18 +1,18 @@
 with BBS.lisp.evaluate;
-with BBS.lisp.evaluate.bool;
-with BBS.lisp.evaluate.char;
-with BBS.lisp.evaluate.cond;
+--with BBS.lisp.evaluate.bool;
+--with BBS.lisp.evaluate.char;
+--with BBS.lisp.evaluate.cond;
 with BBS.lisp.evaluate.func;
-with BBS.lisp.evaluate.io;
-with BBS.lisp.evaluate.list;
-with BBS.lisp.evaluate.loops;
-with BBS.lisp.evaluate.math;
-with BBS.lisp.evaluate.mem;
-with BBS.lisp.evaluate.misc;
-with BBS.lisp.evaluate.pred;
-with BBS.lisp.evaluate.str;
-with BBS.lisp.evaluate.symb;
-with BBS.lisp.evaluate.vars;
+--with BBS.lisp.evaluate.io;
+--with BBS.lisp.evaluate.list;
+--with BBS.lisp.evaluate.loops;
+--with BBS.lisp.evaluate.math;
+--with BBS.lisp.evaluate.mem;
+--with BBS.lisp.evaluate.misc;
+--with BBS.lisp.evaluate.pred;
+--with BBS.lisp.evaluate.str;
+--with BBS.lisp.evaluate.symb;
+--with BBS.lisp.evaluate.vars;
 with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.parser;
@@ -34,92 +34,10 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --  Buffer for keyboard input to parser
    --
    parse_buff : aliased BBS.lisp.parser.stdio.parser_stdio;
-  --
-   --  Initialize the data structures used in the lisp interpreter.  It resets'
+   --
+   --  Initialize the data structures used in the lisp interpreter.  It resets
    --  the tables and adds the builtin operations to the symbol table.
    --
-   procedure init is
-   begin
-      bbs.lisp.memory.reset_tables;
-      --
-      add_builtin("+", BBS.lisp.evaluate.math.add'Access);
-      add_builtin("-", BBS.lisp.evaluate.math.sub'Access);
-      add_builtin("*", BBS.lisp.evaluate.math.mul'Access);
-      add_builtin("/", BBS.lisp.evaluate.math.div'Access);
-      add_builtin("=", BBS.lisp.evaluate.cond.eq'Access);
-      add_builtin("/=", BBS.lisp.evaluate.cond.ne'Access);
-      add_builtin("<", BBS.lisp.evaluate.cond.lt'Access);
-      add_builtin(">", BBS.lisp.evaluate.cond.gt'Access);
-      add_builtin("and", BBS.lisp.evaluate.bool.eval_and'Access);
-      add_builtin("arrayp", BBS.lisp.evaluate.pred.return_false'Access);
-      add_builtin("atomp", BBS.lisp.evaluate.pred.atomp'Access);
-      add_builtin("bit-vector-p", BBS.lisp.evaluate.pred.return_false'Access);
-      add_builtin("car", BBS.lisp.evaluate.list.car'Access);
-      add_builtin("cdr", BBS.lisp.evaluate.list.cdr'Access);
-      add_builtin("char", BBS.lisp.evaluate.str.char'Access);
-      add_builtin("char-code", BBS.lisp.evaluate.char.char_code'Access);
-      add_builtin("char-downcase", BBS.lisp.evaluate.char.char_downcase'Access);
-      add_builtin("char-upcase", BBS.lisp.evaluate.char.char_upcase'Access);
-      add_builtin("characterp", BBS.lisp.evaluate.pred.characterp'Access);
-      add_builtin("code-char", BBS.lisp.evaluate.char.code_char'Access);
-      add_builtin("coerce", BBS.lisp.evaluate.symb.coerce'Access);
-      add_builtin("compiled-function-p", BBS.lisp.evaluate.pred.compiled_function_p'Access);
-      add_builtin("complexp", BBS.lisp.evaluate.pred.return_false'Access);
-      add_builtin("concatenate", BBS.lisp.evaluate.symb.concatenate'Access);
-      add_builtin("cons", BBS.lisp.evaluate.list.cons'Access);
-      add_builtin("consp", BBS.lisp.evaluate.pred.consp'Access);
-      add_builtin("errorp", BBS.lisp.evaluate.pred.errorp'Access);
-      add_special("defun", BBS.lisp.evaluate.func.defun'Access);
-      add_special("dolist", BBS.lisp.evaluate.loops.dolist'Access);
-      add_special("dotimes", BBS.lisp.evaluate.loops.dotimes'Access);
-      add_builtin("dowhile", BBS.lisp.evaluate.loops.dowhile'Access);
-      add_builtin("dump", BBS.lisp.evaluate.misc.dump'Access);
-      add_builtin("eval", BBS.lisp.evaluate.func.eval_list'Access);
-      add_builtin("exit", BBS.lisp.evaluate.misc.quit'Access);
-      add_builtin("floatp", BBS.lisp.evaluate.pred.return_false'Access);
-      add_builtin("fresh-line", BBS.lisp.evaluate.io.fresh_line'Access);
-      add_builtin("functionp", BBS.lisp.evaluate.pred.functionp'Access);
-      add_builtin("if", BBS.lisp.evaluate.cond.eval_if'Access);
-      add_builtin("integerp", BBS.lisp.evaluate.pred.integerp'Access);
-      add_special("lambda", BBS.lisp.evaluate.func.lambda'Access);
-      add_builtin("length", BBS.lisp.evaluate.str.length'Access);
-      add_special("let", BBS.lisp.evaluate.vars.local'Access);
-      add_builtin("list", BBS.lisp.evaluate.list.list'Access);
-      add_builtin("listp", BBS.lisp.evaluate.pred.listp'Access);
-      add_builtin("msg", BBS.lisp.evaluate.misc.msg'Access);
-      add_builtin("not", BBS.lisp.evaluate.bool.eval_not'Access);
-      add_builtin("null", BBS.lisp.evaluate.pred.nullp'Access);
-      add_builtin("numberp", BBS.lisp.evaluate.pred.numberp'Access);
-      add_builtin("or", BBS.lisp.evaluate.bool.eval_or'Access);
-      add_builtin("packagep", BBS.lisp.evaluate.pred.return_false'Access);
-      add_builtin("parse-integer", BBS.lisp.evaluate.str.parse_integer'Access);
-      add_builtin("peek8", BBS.lisp.evaluate.mem.peek8'Access);
-      add_builtin("peek16", BBS.lisp.evaluate.mem.peek16'Access);
-      add_builtin("peek32", BBS.lisp.evaluate.mem.peek32'Access);
-      add_builtin("poke8", BBS.lisp.evaluate.mem.poke8'Access);
-      add_builtin("poke16", BBS.lisp.evaluate.mem.poke16'Access);
-      add_builtin("poke32", BBS.lisp.evaluate.mem.poke32'Access);
-      add_builtin("print", BBS.lisp.evaluate.io.print'Access);
-      add_builtin("progn", BBS.lisp.evaluate.loops.progn'Access);
-      add_builtin("quote", BBS.lisp.evaluate.list.quote'Access);
-      add_builtin("rationalp", BBS.lisp.evaluate.pred.return_false'Access);
-      add_builtin("read", BBS.lisp.evaluate.io.read_expr'Access);
-      add_builtin("read-line", BBS.lisp.evaluate.io.read_line'Access);
-      add_builtin("realp", BBS.lisp.evaluate.pred.return_false'Access);
-      add_builtin("return", BBS.lisp.evaluate.loops.return_from'Access);
-      add_special("setq", BBS.lisp.evaluate.vars.setq'Access);
-      add_builtin("simple-bit-vector-p", BBS.lisp.evaluate.pred.return_false'Access);
-      add_builtin("simple-string-p", BBS.lisp.evaluate.pred.simple_string_p'Access);
-      add_builtin("simple-vector-p", BBS.lisp.evaluate.pred.return_false'Access);
-      add_builtin("sleep", BBS.lisp.evaluate.misc.sleep'Access);
-      add_builtin("string-downcase", BBS.lisp.evaluate.str.string_downcase'Access);
-      add_builtin("string-upcase", BBS.lisp.evaluate.str.string_upcase'Access);
-      add_builtin("stringp", BBS.lisp.evaluate.pred.stringp'Access);
-      add_builtin("subseq", BBS.lisp.evaluate.str.subseq'Access);
-      add_builtin("symbolp", BBS.lisp.evaluate.pred.symbolp'Access);
-      add_builtin("terpri", BBS.lisp.evaluate.io.terpri'Access);
-      add_builtin("vectorp", BBS.lisp.evaluate.pred.return_false'Access);
-   end;
    --
    --  Do initialization and define text I/O routines
    --
@@ -130,7 +48,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       io_put      := p_put;
       io_new_line := p_new_line;
       io_get_line := p_get_line;
-      init;
+      BBS.lisp.memory.reset_tables;
       parse_buff.init;
    end;
    --
@@ -180,7 +98,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --
    function eval(e : element_type) return element_type is
       r : element_type;
-      sym : symb_index;
+      sym : symbol_ptr;
    begin
       if BBS.lisp.evaluate.isList(e) then
          r := eval_dispatch(BBS.lisp.evaluate.getList(e));
@@ -307,9 +225,13 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --
    --  Print a symbol (BUILTIN, LAMBDA, VARIABLE, EMPTY)
    --
-   procedure print(s : symb_index) is
+   procedure print(s : symbol_ptr) is
    begin
-      print(BBS.lisp.symbols.get_name(s));
+      if s.kind = ST_FIXED then
+         put(BBS.lisp.symbols.get_name(s).all);
+      else
+         print(BBS.lisp.symbols.get_name(s));
+      end if;
       Put(" ");
    end;
    --
@@ -319,6 +241,25 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    begin
       BBS.lisp.strings.print(s);
    end;
+   --
+   --  Dump a symbol pointer.
+   --
+   procedure dump_sym_ptr(s : symbol_ptr) is
+   begin
+      case s.kind is
+         when ST_NULL =>
+            put_line("<Null symbol>");
+         when ST_FIXED =>
+            put_line("Fixed: " & fsymb_index'Image(s.f) & ", name <" &
+                       BBS.lisp.symbols.get_name(s).all & ">");
+         when ST_DYNAMIC =>
+            put("Dynamic: " & symb_index'Image(s.d) & ", name <");
+            print(BBS.lisp.symbols.get_name(s));
+            put_line(">");
+      end case;
+   end;
+   --
+   --  Return the exit flag.
    --
    function exit_lisp return Boolean is
    begin
@@ -367,14 +308,16 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    end;
    --
    procedure dump_symbols is
+      ptr : symbol_ptr;
    begin
       for i in symb_index'First + 1 .. symb_index'Last loop
-         if BBS.lisp.symbols.get_ref(i) > 0 then
+         ptr := (kind => ST_DYNAMIC, d => i);
+         if BBS.lisp.symbols.get_ref(ptr) > 0 then
             Put("Symbol " & Integer'Image(Integer(i))
                             & " Name ");
-            print(BBS.lisp.symbols.get_name(i));
+            print(BBS.lisp.symbols.get_name(ptr));
             Put(" contains: <");
-            case BBS.lisp.symbols.get_type(i) is
+            case BBS.lisp.symbols.get_type(ptr) is
                when SY_BUILTIN =>
                   Put("Builtin");
                when SY_SPECIAL =>
@@ -383,7 +326,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                   Put("Lambda");
                when SY_VARIABLE =>
                   Put("Variable: ");
-                  print(BBS.lisp.symbols.get_value(i), False, False);
+                  print(BBS.lisp.symbols.get_value(ptr), False, False);
                when SY_EMPTY =>
                   Put("Empty");
             end case;
@@ -407,8 +350,9 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --
    --  The get_symb() functions will probably be depricated for most uses.
    --
-   function get_symb(s : out symb_index; n : String) return Boolean is
+   function get_symb(s : out symbol_ptr; n : String) return Boolean is
       free : symb_index;
+      fixed : symbol_ptr;
       available : Boolean := False;
       temp : string_index;
       flag : Boolean;
@@ -416,52 +360,63 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       flag := BBS.lisp.strings.str_to_lisp(temp, n);
       if flag then
          BBS.lisp.strings.uppercase(temp);
+         fixed := BBS.lisp.symbols.find_name(temp);
+         if fixed.kind = ST_FIXED then
+            s := fixed;
+            return True;
+         end if;
          for i in symb_index'First + 1 .. symb_index'Last loop
-            if BBS.lisp.symbols.get_ref(i) = 0 then
+            if BBS.lisp.symbols.get_ref((kind => ST_DYNAMIC, d => i)) = 0 then
                free := i;
                available := True;
             else
-               if bbs.lisp.strings.compare(temp, BBS.lisp.symbols.get_name(i)) = CMP_EQ then
-                  s := i;
+               if bbs.lisp.strings.compare(temp, BBS.lisp.symbols.get_name((kind => ST_DYNAMIC, d => i))) = CMP_EQ then
+                  s := (kind => ST_DYNAMIC, d => i);
                   return True;
                end if;
             end if;
          end loop;
          if available then
-            s := free;
-            BBS.lisp.symbols.set_sym(s, (ref => 1, kind => SY_EMPTY, str => temp));
+            s := (kind => ST_DYNAMIC, d => free);
+            BBS.lisp.symbols.add_sym(s, (ref => 1, name => temp, kind => SY_EMPTY, b => (kind => SY_EMPTY)));
             return True;
          end if;
       else
          error("get_symb", "Unable to allocate symbol name.");
       end if;
-      s := NIL_SYM;
+      s := (kind => ST_NULL);
       return False;
    end;
    --
-   function get_symb(s : out symb_index; n : string_index) return Boolean is
+   function get_symb(s : out symbol_ptr; n : string_index) return Boolean is
       free : symb_index;
+      fixed : symbol_ptr;
       available : Boolean := False;
    begin
       BBS.lisp.strings.uppercase(n);
+      fixed := BBS.lisp.symbols.find_name(n);
+      if fixed.kind = ST_FIXED then
+         s := fixed;
+         return True;
+      end if;
       for i in symb_index'First + 1 .. symb_index'Last loop
-         if BBS.lisp.symbols.get_ref(i) = 0 then
+         if BBS.lisp.symbols.get_ref((kind => ST_DYNAMIC, d => i)) = 0 then
             free := i;
             available := True;
          else
-            if bbs.lisp.strings.compare(n, BBS.lisp.symbols.get_name(i)) = CMP_EQ then
-               s := i;
+            if bbs.lisp.strings.compare(n, BBS.lisp.symbols.get_name((kind => ST_DYNAMIC, d => i))) = CMP_EQ then
+               s := (kind => ST_DYNAMIC, d => i);
                return True;
             end if;
          end if;
       end loop;
       if available then
-         s := free;
+         s := (kind => ST_DYNAMIC, d => free);
          BBS.lisp.strings.ref(n);
-         BBS.lisp.symbols.set_sym(s, (ref => 1, kind => SY_EMPTY, str => n));
+         BBS.lisp.symbols.add_sym(s, (ref => 1, name => n, kind => SY_EMPTY, b => (kind => SY_EMPTY)));
          return True;
       end if;
-      s := NIL_SYM;
+      s := (kind => ST_NULL);
       return False;
    end;
    --
@@ -475,28 +430,35 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --  5. If create is False, return a tempsym.
    --
    function find_variable(n : string_index; create : Boolean) return element_type is
-      free : symb_index;
+      free : symbol_ptr;
+      fsym : symbol_ptr;
       available : Boolean := False;
       temp : symb_index;
-      symb : BBS.lisp.symbols.symbol;
+      symb : BBS.lisp.symbols.sym_body;
       offset : Natural;
       sp : Natural;
       found : Boolean := False;
       item : BBS.lisp.stack.stack_entry;
       err : Boolean;
    begin
-      BBS.lisp.strings.uppercase(n);
+      --
+      --  Check the fixed symbol table
+      --
+      fsym := BBS.lisp.symbols.find_name(n);
+      if fsym.kind = ST_FIXED then
+         return (Kind => E_SYMBOL, sym => fsym);
+      end if;
       --
       --  Search the symbol table
       --
       for i in symb_index'First + 1 .. symb_index'Last loop
-         if BBS.lisp.symbols.get_ref(i) = 0 then
-            free := i;
+         if BBS.lisp.symbols.get_ref((kind => ST_DYNAMIC, d => i)) = 0 then
+            free := (kind => ST_DYNAMIC, d => i);
             available := True;
          else
-            if bbs.lisp.strings.compare(n, BBS.lisp.symbols.get_name(i)) = CMP_EQ then
+            if bbs.lisp.strings.compare(n, BBS.lisp.symbols.get_name((kind => ST_DYNAMIC, d => i))) = CMP_EQ then
                temp := i;
-               symb := BBS.lisp.symbols.get_sym(temp);
+               symb := BBS.lisp.symbols.get_sym((kind => ST_DYNAMIC, d => temp));
                found := True;
                exit;
             end if;
@@ -504,7 +466,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       end loop;
       if found then
          if (symb.kind = SY_BUILTIN) or (symb.kind = SY_SPECIAL) then
-            return (kind => E_SYMBOL, sym => temp);
+            return (kind => E_SYMBOL, sym => (kind => ST_DYNAMIC, d => temp));
          end if;
       end if;
       --
@@ -527,7 +489,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       --
       if found then
          if (symb.kind = SY_LAMBDA) or (symb.kind = SY_VARIABLE) or (symb.kind = SY_EMPTY) then
-            return (kind => E_SYMBOL, sym => temp);
+            return (kind => E_SYMBOL, sym => (kind => ST_DYNAMIC, d => temp));
          end if;
       end if;
       --
@@ -537,7 +499,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       if create then
          if available then
             BBS.lisp.strings.ref(n);
-            BBS.lisp.symbols.set_sym(free, (ref => 1, kind => SY_EMPTY, str => n));
+            BBS.lisp.symbols.add_sym(free, (ref => 1, kind => SY_EMPTY, name => n, b => (kind => SY_EMPTY)));
             return (kind => E_SYMBOL, sym => free);
          end if;
       else
@@ -549,22 +511,20 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    end;
    --
    procedure add_builtin(n : String; f : execute_function) is
-      sym : symb_index;
+      sym : symbol_ptr;
    begin
       if get_symb(sym, n) then
-         BBS.lisp.symbols.set_sym(sym, (ref => 1, Kind => SY_BUILTIN, f => f,
-                                        str => BBS.lisp.symbols.get_name(sym)));
+         BBS.lisp.symbols.set_sym(sym, (kind => SY_BUILTIN, f => f));
       else
          error("add_builtin", "Unable to add builtin symbol " & n);
       end if;
    end;
    --
    procedure add_special(n : String; f : special_function) is
-      sym : symb_index;
+      sym : symbol_ptr;
    begin
       if get_symb(sym, n) then
-         BBS.lisp.symbols.set_sym(sym, (ref => 1, Kind => SY_SPECIAL, s => f,
-                                        str => BBS.lisp.symbols.get_name(sym)));
+         BBS.lisp.symbols.set_sym(sym, (kind => SY_SPECIAL, s => f));
       else
          error("add_special", "Unable to add special symbol " & n);
       end if;
@@ -623,7 +583,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --  are handled in this function.  The rest are passed off to sub-functions.
    --
    function eval_dispatch(s : cons_index) return element_type is
-      sym : BBS.lisp.symbols.symbol;
+      sym : BBS.lisp.symbols.sym_body;
       sym_flag : Boolean := False;
       e : element_type := NIL_ELEM;
       first : constant element_type := cons_table(s).car;
@@ -632,7 +592,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    begin
       if first.kind = E_SYMBOL then
          sym := BBS.lisp.symbols.get_sym(first.sym);
-         sym_flag := true;
+         sym_flag := True;
       elsif first.kind = E_STACK then
          val := BBS.lisp.global.stack.search_frames(first.st_offset, first.st_name);
          if val.kind = V_SYMBOL then
@@ -645,14 +605,22 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             when SY_BUILTIN =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating builtin ");
-                  Print(sym.str);
+                  if first.sym.kind = ST_FIXED then
+                     put(BBS.lisp.symbols.get_name(first.sym).all);
+                  else
+                     Print(BBS.lisp.symbols.get_name(first.sym));
+                  end if;
                   New_Line;
                end if;
                sym.f.all(e, rest);
             when SY_SPECIAL =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating special ");
-                  Print(sym.str);
+                  if first.sym.kind = ST_FIXED then
+                     put(BBS.lisp.symbols.get_name(first.sym).all);
+                  else
+                     Print(BBS.lisp.symbols.get_name(first.sym));
+                  end if;
                   New_Line;
                end if;
                sym.s.all(e, rest, PH_EXECUTE);
@@ -666,7 +634,11 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             when SY_VARIABLE =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating variable ");
-                  print(sym.str);
+                  if first.sym.kind = ST_FIXED then
+                     put(BBS.lisp.symbols.get_name(first.sym).all);
+                  else
+                     Print(BBS.lisp.symbols.get_name(first.sym));
+                  end if;
                   new_line;
                end if;
                if (sym.pv.kind = E_VALUE) and then (sym.pv.v.kind = V_LAMBDA) then
@@ -683,7 +655,11 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             when others =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating unknown ");
-                  print(sym.str);
+                  if first.sym.kind = ST_FIXED then
+                     put(BBS.lisp.symbols.get_name(first.sym).all);
+                  else
+                     Print(BBS.lisp.symbols.get_name(first.sym));
+                  end if;
                   new_line;
                end if;
                e := NIL_ELEM;

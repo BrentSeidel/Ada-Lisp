@@ -145,7 +145,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --  original atom is returned.
    --
    function indirect_elem(e : element_type) return element_type is
-      sym : symb_index;
+      sym : symbol_ptr;
       val : value;
    begin
       if e.kind = E_SYMBOL then

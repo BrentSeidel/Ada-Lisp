@@ -22,7 +22,7 @@ package body BBS.lisp.evaluate.func is
       temp : cons_index;
       p2 : element_type;
       p3 : element_type;
-      symb : symb_index;
+      symb : symbol_ptr;
       flag : Boolean;
       error_occured : Boolean := False;
    begin
@@ -99,7 +99,7 @@ package body BBS.lisp.evaluate.func is
                      offset : Natural := 1;
                   begin
                      if (el.Kind = E_SYMBOL) then
-                        if BBS.lisp.symbols.isFixed(el.sym) then
+                        if BBS.lisp.symbols.isFixed(el.sym) or (el.sym.kind = ST_FIXED) then
                            error("defun", "Parameter can't be a builtin or special symbol.");
                            cons_table(temp).car := (Kind => E_ERROR);
                            error_occured := True;
@@ -184,8 +184,7 @@ package body BBS.lisp.evaluate.func is
             end if;
             temp := getList(cons_table(s).cdr);
             cons_table(s).cdr := NIL_ELEM;
-            BBS.lisp.symbols.set_sym(symb, (ref => 1, str => BBS.lisp.symbols.get_name(symb),
-                                            kind => SY_LAMBDA, ps => temp));
+            BBS.lisp.symbols.set_sym(symb, (kind => SY_LAMBDA, ps => temp));
       end case;
       e := NIL_ELEM;
    end;
@@ -248,7 +247,7 @@ package body BBS.lisp.evaluate.func is
                      end if;
                      el :=  cons_table(temp).car;
                      if (el.kind = E_SYMBOL) then
-                        if BBS.lisp.symbols.isFixed(el.sym) then
+                        if BBS.lisp.symbols.isFixed(el.sym) or (el.sym.kind = ST_FIXED) then
                            error("lambda", "Parameter can't be a builtin or special symbol.");
                            cons_table(temp).car := (Kind => E_ERROR);
                            error_occured := True;
