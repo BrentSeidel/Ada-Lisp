@@ -27,6 +27,19 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    type cons_index is range -1 .. max_cons;
    type symb_index is range -1 .. max_symb;
    type string_index is range -1 .. max_string;
+   type fsymb_index is new Positive;
+   type symbol_table is (ST_NULL, ST_FIXED, ST_DYNAMIC);
+   type symbol_ptr(kind : symbol_table := ST_NULL) is
+      record
+         case kind is
+            when ST_NULL =>
+               null;
+            when ST_FIXED =>
+               f : fsymb_index;
+            when ST_DYNAMIC =>
+               d : symb_index;
+         end case;
+      end record;
    --
    --
    --  This indicates what type of an object an element_type is pointing to.  It

@@ -408,30 +408,10 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --  The get_symb() functions will probably be depricated for most uses.
    --
    function get_symb(s : out symb_index; n : String) return Boolean is
-      free : symb_index;
-      available : Boolean := False;
       temp : string_index;
-      flag : Boolean;
    begin
-      flag := BBS.lisp.strings.str_to_lisp(temp, n);
-      if flag then
-         BBS.lisp.strings.uppercase(temp);
-         for i in symb_index'First + 1 .. symb_index'Last loop
-            if BBS.lisp.symbols.get_ref(i) = 0 then
-               free := i;
-               available := True;
-            else
-               if bbs.lisp.strings.compare(temp, BBS.lisp.symbols.get_name(i)) = CMP_EQ then
-                  s := i;
-                  return True;
-               end if;
-            end if;
-         end loop;
-         if available then
-            s := free;
-            BBS.lisp.symbols.set_sym(s, (ref => 1, kind => SY_EMPTY, str => temp));
-            return True;
-         end if;
+      if BBS.lisp.strings.str_to_lisp(temp, n) then
+         return get_symb(s, temp);
       else
          error("get_symb", "Unable to allocate symbol name.");
       end if;
