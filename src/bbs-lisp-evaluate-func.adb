@@ -184,8 +184,7 @@ package body BBS.lisp.evaluate.func is
             end if;
             temp := getList(cons_table(s).cdr);
             cons_table(s).cdr := NIL_ELEM;
-            BBS.lisp.symbols.set_sym(symb, (ref => 1, str => BBS.lisp.symbols.get_name(symb),
-                                            kind => SY_LAMBDA, ps => temp));
+            BBS.lisp.symbols.set_sym((kind => ST_DYNAMIC, d => symb), (kind => SY_LAMBDA, ps => temp));
       end case;
       e := NIL_ELEM;
    end;

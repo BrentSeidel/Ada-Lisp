@@ -123,8 +123,8 @@ package body BBS.lisp.evaluate.vars is
                   end if;
                else
                   deref_previous(symb);
-                  BBS.lisp.symbols.set_sym(symb, (ref => 1, Kind => SY_VARIABLE,
-                                       pv => p2, str => BBS.lisp.symbols.get_name(symb)));
+                  BBS.lisp.symbols.set_sym((kind => ST_DYNAMIC, d => symb), (Kind => SY_VARIABLE,
+                                       pv => p2));
                end if;
                e := p2;
             else

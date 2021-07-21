@@ -438,7 +438,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       if available then
          s := free;
          BBS.lisp.strings.ref(n);
-         BBS.lisp.symbols.set_sym(s, (ref => 1, kind => SY_EMPTY, str => n));
+         BBS.lisp.symbols.set_sym(s, (ref => 1, kind => SY_EMPTY, name => n, b => (kind => SY_EMPTY)));
          return True;
       end if;
       s := NIL_SYM;
@@ -517,7 +517,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       if create then
          if available then
             BBS.lisp.strings.ref(n);
-            BBS.lisp.symbols.set_sym(free, (ref => 1, kind => SY_EMPTY, str => n));
+            BBS.lisp.symbols.add_sym((kind => ST_DYNAMIC, d => free), (ref => 1, kind => SY_EMPTY, name => n, b => (kind => SY_EMPTY)));
             return (kind => E_SYMBOL, sym => free);
          end if;
       else
@@ -532,8 +532,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       sym : symb_index;
    begin
       if get_symb(sym, n) then
-         BBS.lisp.symbols.set_sym(sym, (ref => 1, Kind => SY_BUILTIN, f => f,
-                                        str => BBS.lisp.symbols.get_name(sym)));
+         BBS.lisp.symbols.set_sym((kind => ST_DYNAMIC, d => sym), (Kind => SY_BUILTIN, f => f));
       else
          error("add_builtin", "Unable to add builtin symbol " & n);
       end if;
@@ -543,8 +542,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       sym : symb_index;
    begin
       if get_symb(sym, n) then
-         BBS.lisp.symbols.set_sym(sym, (ref => 1, Kind => SY_SPECIAL, s => f,
-                                        str => BBS.lisp.symbols.get_name(sym)));
+         BBS.lisp.symbols.set_sym((kind => ST_DYNAMIC, d => sym), (Kind => SY_SPECIAL, s => f));
       else
          error("add_special", "Unable to add special symbol " & n);
       end if;
@@ -625,45 +623,45 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             when SY_BUILTIN =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating builtin ");
-                  Print(sym.str);
+                  Print(sym.name);
                   New_Line;
                end if;
-               sym.f.all(e, rest);
+               sym.b.f.all(e, rest);
             when SY_SPECIAL =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating special ");
-                  Print(sym.str);
+                  Print(sym.name);
                   New_Line;
                end if;
-               sym.s.all(e, rest, PH_EXECUTE);
+               sym.b.s.all(e, rest, PH_EXECUTE);
             when SY_LAMBDA =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating lambda ");
-                  print(sym.ps);
+                  print(sym.b.ps);
                   new_line;
                end if;
-               e := bbs.lisp.evaluate.func.eval_function(sym.ps, rest);
+               e := bbs.lisp.evaluate.func.eval_function(sym.b.ps, rest);
             when SY_VARIABLE =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating variable ");
-                  print(sym.str);
+                  print(sym.name);
                   new_line;
                end if;
-               if (sym.pv.kind = E_VALUE) and then (sym.pv.v.kind = V_LAMBDA) then
+               if (sym.b.pv.kind = E_VALUE) and then (sym.b.pv.v.kind = V_LAMBDA) then
                   if msg_flag then
                      Put("eval_dispatch: Evaluating lambda ");
-                     print(sym.ps);
+                     print(sym.b.ps);
                      new_line;
                   end if;
-                  e := bbs.lisp.evaluate.func.eval_function(sym.pv.v.lam, rest);
+                  e := bbs.lisp.evaluate.func.eval_function(sym.b.pv.v.lam, rest);
                else
-                  BBS.lisp.memory.ref(sym.pv);
-                  e := sym.pv;
+                  BBS.lisp.memory.ref(sym.b.pv);
+                  e := sym.b.pv;
                end if;
             when others =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating unknown ");
-                  print(sym.str);
+                  print(sym.name);
                   new_line;
                end if;
                e := NIL_ELEM;
