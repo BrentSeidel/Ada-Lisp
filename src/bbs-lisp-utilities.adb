@@ -48,6 +48,9 @@ package body BBS.lisp.utilities is
          flag : Boolean := False;  --  Was it a tempsym?
       begin
          if e.kind = E_SYMBOL then
+            if e.sym.kind = ST_FIXED then
+               return False;
+            end if;
             name := BBS.lisp.symbols.get_name(e.sym);
          elsif e.kind = E_TEMPSYM then
             name := e.tempsym;

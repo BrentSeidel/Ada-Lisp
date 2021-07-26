@@ -18,16 +18,11 @@ private
    --  indices so the symbol table doesn't have to be searched each time.
    --
    not_initialized : Boolean := True;
-   sym_bool : symb_index := NIL_SYM;
-   sym_char : symb_index := NIL_SYM;
-   sym_int  : symb_index := NIL_SYM;
-   sym_list : symb_index := NIL_SYM;
-   sym_str  : symb_index := NIL_SYM;
---   sym_bool : symbol_ptr := (kind => ST_NULL);
---   sym_char : symbol_ptr := (kind => ST_NULL);
---   sym_int  : symbol_ptr := (kind => ST_NULL);
---   sym_list : symbol_ptr := (kind => ST_NULL);
---   sym_str  : symbol_ptr := (kind => ST_NULL);
+   sym_bool : symbol_ptr := (kind => ST_NULL);
+   sym_char : symbol_ptr := (kind => ST_NULL);
+   sym_int  : symbol_ptr := (kind => ST_NULL);
+   sym_list : symbol_ptr := (kind => ST_NULL);
+   sym_str  : symbol_ptr := (kind => ST_NULL);
    --
    --  Initialize the symbol indices.  Return true if successful or false it not.
    --

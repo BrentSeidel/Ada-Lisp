@@ -156,10 +156,7 @@ package body BBS.lisp.evaluate.str is
       start : Integer;
       p3 : element_type;  --  Parameter 3 (ending position) (optional)
       stop : Integer;  -- Last character, -1 means end of source string
---      flag : Boolean;
       head : string_index;
---      new_frag : string_index;
---      temp : string_index;
    begin
       if s = NIL_CONS then
          error("subseq", "Internal error.  Should have a list.");

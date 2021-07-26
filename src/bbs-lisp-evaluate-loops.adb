@@ -138,7 +138,7 @@ package body BBS.lisp.evaluate.loops is
                declare
                   str : string_index;
                begin
-                  if (var.kind = E_SYMBOL) then
+                  if (var.kind = E_SYMBOL) and then (var.sym.kind = ST_DYNAMIC) then
                      msg("dotimes", "Converting symbol to loop variable");
                      str := BBS.lisp.symbols.get_name(var.sym);
                   elsif (var.kind = E_TEMPSYM) then
@@ -358,7 +358,7 @@ package body BBS.lisp.evaluate.loops is
                declare
                   str : string_index;
                begin
-                  if (var.kind = E_SYMBOL) then
+                  if (var.kind = E_SYMBOL) and then (var.sym.kind = ST_DYNAMIC) then
                      msg("dolist", "Converting symbol to loop variable");
                      str := BBS.lisp.symbols.get_name(var.sym);
                   elsif (var.kind = E_TEMPSYM) then

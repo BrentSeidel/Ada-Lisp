@@ -71,7 +71,7 @@ package body BBS.lisp.parser is
       list_end : Boolean := False;
       item : Natural := 0;
       special_flag : Boolean := False;
-      special_symb : BBS.lisp.symbols.sym_body := (Kind => SY_EMPTY);
+      special_symb : BBS.lisp.symbols.sym_body := (kind => SY_EMPTY);
       special_ptr  : symbol_ptr := (kind => ST_NULL);
       begin_called : Boolean := False;
       item_count : Natural := 0;
@@ -339,7 +339,7 @@ package body BBS.lisp.parser is
                  return element_type is
       test : string_index;
       el : element_type;
-      symb : symb_index;
+      symb : symbol_ptr;
       flag : Boolean;
       pragma Unreferenced(flag);
       --
@@ -355,21 +355,6 @@ package body BBS.lisp.parser is
          end loop;
          BBS.lisp.strings.uppercase(test);
          --
-         --  Check for boolean values (T or NIL).
-         --
-         if BBS.lisp.strings.compare(test, "T") = CMP_EQ then
-            BBS.lisp.strings.deref(test);
-            return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-         end if;
-         if BBS.lisp.strings.compare(test, "NIL") = CMP_EQ then
-            BBS.lisp.strings.deref(test);
-            return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-         end if;
-         if BBS.lisp.strings.length(test) = 0 then
-            BBS.lisp.strings.deref(test);
-            return NIL_ELEM;
-         end if;
-         --
          -- Now check for symbols
          --
          if not quoted then
@@ -379,7 +364,7 @@ package body BBS.lisp.parser is
                el := (Kind => E_VALUE, v => (kind => V_QSYMBOL, qsym => symb));
             else
                el := (kind => E_ERROR);
-               error("parse symbol", "Unable to allocate string fragment.");
+               error("parse symbol", "Unable to allocate symbol entry.");
             end if;
          end if;
          BBS.lisp.strings.deref(test);

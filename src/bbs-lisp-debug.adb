@@ -54,9 +54,13 @@ package body BBS.lisp.debug is
       Put_Line(">");
    end;
    --
-   procedure dump(s : symb_index) is
+   procedure dump(s : symbol_ptr) is
    begin
-      print(BBS.lisp.symbols.get_name(s));
+      if s.kind = ST_FIXED then
+         put(BBS.lisp.symbols.get_name(s).all);
+      else
+         print(BBS.lisp.symbols.get_name(s));
+      end if;
       case BBS.lisp.symbols.get_type(s) is
          when SY_BUILTIN =>
             Put(" <BUILTIN>");

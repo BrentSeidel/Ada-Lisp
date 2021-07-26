@@ -43,7 +43,7 @@ package body BBS.lisp.evaluate.pred is
    end;
    --
    procedure compiled_function_p(e : out element_type; s : cons_index) is
-      t  : cons_index := s;
+      t : cons_index := s;
       p : element_type;
    begin
       if s = NIL_CONS then

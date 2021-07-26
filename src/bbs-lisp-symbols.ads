@@ -1,6 +1,6 @@
 --
 --  This package contains the data structures and routines for accessing the
---  symbol table.
+--  symbol table.  This includes the fixed symbol table.
 --
 with BBS.lisp.evaluate.bool;
 with BBS.lisp.evaluate.char;
@@ -43,21 +43,9 @@ package BBS.lisp.symbols is
    --
    type symbol is
       record
-         ref : Natural;
+         ref  : Natural;
          name : string_index;
          b    : sym_body;
---         case kind is
---            when SY_SPECIAL =>
---               s : special_function;
---            when SY_BUILTIN =>
---               f : execute_function;
---            when SY_LAMBDA =>
---               ps : cons_index;
---            when SY_VARIABLE =>
---               pv : element_type;
---            when SY_EMPTY =>
---               null;
---         end case;
       end record;
    --
    --  Fixed symbols are like regular symbols except that the name is an Ada
@@ -73,49 +61,31 @@ package BBS.lisp.symbols is
    --
    --  Get the type of the symbol
    --
-   function get_type(s : symb_index) return symbol_type
-     with pre => (s /= NIL_SYM);
-   --
    function get_type(s : symbol_ptr) return symbol_type
      with pre => (s.kind /= ST_NULL);
    --
    --  Check if symbol is fixed (builtin or special)
-   --
-   function isFixed(s : symb_index) return Boolean
-     with pre => (s /= NIL_SYM);
    --
    function isFixed(s : symbol_ptr) return Boolean
      with pre => (s.kind /= ST_NULL);
    --
    --  Check if symbol is a function (builtin, special, or user defined function)
    --
-   function isFunction(s : symb_index) return Boolean
-     with pre => (s /= NIL_SYM);
-   --
    function isFunction(s : symbol_ptr) return Boolean
      with pre => (s.kind /= ST_NULL);
    --
    --  If symbol is a variable, get the symbol value.
-   --
-   function get_value(s : symb_index) return element_type
-     with pre => (get_type(s) = SY_VARIABLE);
    --
    function get_value(s : symbol_ptr) return element_type
      with pre => (get_type(s) = SY_VARIABLE);
    --
    --  If symbol is a lambda, get the list.
    --
-   function get_list(s : symb_index) return cons_index
-     with pre => (get_type(s) = SY_LAMBDA);
-   --
    function get_list(s : symbol_ptr) return cons_index
      with pre => (get_type(s) = SY_LAMBDA);
    --
    --  Get a symbol's name (there are two different routines because the name is
    --  stored differently between fixed and dynamic symbols.
-   --
-   function get_name(s : symb_index) return string_index
-     with pre => (s /= NIL_SYM);
    --
    function get_name(s : symbol_ptr) return string_index
      with pre => (s.kind = ST_DYNAMIC);
@@ -125,24 +95,15 @@ package BBS.lisp.symbols is
    --
    --  Get a symbol's reference count
    --
-   function get_ref(s : symb_index) return Natural
-     with pre => (s /= NIL_SYM);
-   --
    function get_ref(s : symbol_ptr) return Natural
      with pre => (s.kind /= ST_NULL);
    --
    --  Get a symbol from the symbol table
    --
-   function get_sym(s : symb_index) return symbol
-     with pre => (s /= NIL_SYM);
-   --
    function get_sym(s : symbol_ptr) return sym_body
      with pre => (s.kind /= ST_NULL);
    --
    --  Set a symbol entry
-   --
-   procedure set_sym(s : symb_index; val : symbol)
-     with pre => (s /= NIL_SYM);
    --
    procedure set_sym(s : symbol_ptr; val : sym_body)
      with pre => (s.kind = ST_DYNAMIC);
@@ -165,7 +126,6 @@ private
    --  The symbol table.
    --
    symb_table : array (symb_index'First + 1 .. symb_index'Last) of symbol;
-   --
    --
    --  Define the constant strings for the fixed symbol table.
    --

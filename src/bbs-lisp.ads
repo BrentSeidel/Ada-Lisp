@@ -46,14 +46,13 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  can be a cons cell, a value, a symbol, a temporary symbol a stack
    --  variable, or nothing.
    --
-   type ptr_type is (E_ERROR, E_NIL, E_STACK, E_SYMBOL,
-                     E_TEMPSYM, E_VALUE);
+   type ptr_type is (E_ERROR, E_NIL, E_STACK, E_SYMBOL, E_TEMPSYM, E_VALUE);
    --
    --  This indicates what kind of data is in a value.  These are the allowed
    --  data types.
    --
    type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
-                      V_LAMBDA, V_SYMBOL, V_QSYMBOL, V_NONE, V_EXTRA);
+                       V_LAMBDA, V_SYMBOL, V_QSYMBOL, V_NONE);
    --
    --  This indicates what kind of data is in a symbol.
    --
@@ -110,13 +109,11 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
          when V_LAMBDA =>
             lam : cons_index;
          when V_SYMBOL =>
-            sym : symb_index;
+            sym : symbol_ptr;
          when V_QSYMBOL =>
-            qsym : symb_index;
+            qsym : symbol_ptr;
          when V_NONE =>
             null;
-         when V_EXTRA =>
-            e : symbol_ptr;
          end case;
       end record;
    --
@@ -228,7 +225,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    NIL_ELEM : constant element_type := (Kind => E_NIL);
    NIL_CONS : constant cons_index := cons_index'First;
    NIL_STR  : constant string_index := string_index'First;
-   NIL_SYM  : constant symb_index := symb_index'First;
+   NIL_SYM  : constant symbol_ptr := (kind => ST_NULL);
    --
    --  Define some enumerations
    --
@@ -272,11 +269,6 @@ private
    first_char_flag : Boolean := True
      with Part_Of => pvt_first_char_flag;
    --
-   --  Initialize the data structures used in the lisp interpreter.
-   --
-   procedure init
-   with Global => (Output => (cons_table));
-   --
    --  These procedures print various types of objects.
    --
    procedure print(s : cons_index)
@@ -284,7 +276,6 @@ private
    procedure print(v : value);
    procedure print(s : string_index);
    procedure print(s : symbol_ptr);
-   procedure print(s : symb_index);
    --
    --  For debugging, dump the various tables
    --
@@ -293,6 +284,7 @@ private
    procedure dump_symbols
      with Global => (Input => (cons_table));
    procedure dump_strings;
+   procedure dump_sym_ptr(s : symbol_ptr);
    --
    --  Local functions and procedures
    --
@@ -330,11 +322,9 @@ private
    --  If a symbol exists, return it, otherwise create a new symbol.  Returns
    --  false if symbol doesn't exist and can't be created.
    --
-   function get_symb(s : out symb_index; n : String) return Boolean;
-   function get_symb(s : out symb_index; n : string_index) return Boolean;
-   --
    function get_symb(s : out symbol_ptr; n : String) return Boolean;
    function get_symb(s : out symbol_ptr; n : string_index) return Boolean;
+   --
    --
    --  Finds a symbol and returns it.  Returns false if symbol can't be found.
    --

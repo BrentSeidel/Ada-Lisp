@@ -186,6 +186,7 @@ package body BBS.lisp.evaluate.symb is
          put("Type is: ");
          print(v1);
          new_line;
+
       end if;
       BBS.lisp.memory.deref(t2);
       e := (kind => E_ERROR);

@@ -10,7 +10,7 @@ package body BBS.lisp.evaluate.vars is
    --  The assigned value is the result of evaluating the second parameter.
    --
    procedure setq(e : out element_type; s : cons_index; p : phase) is
-      symb : symb_index;
+      symb : symbol_ptr;
       p1 : element_type;
       p2 : element_type;
       p3 : element_type;
@@ -20,7 +20,7 @@ package body BBS.lisp.evaluate.vars is
       index : Natural;
       err : Boolean := False;
 
-      procedure deref_previous(s : symb_index) is
+      procedure deref_previous(s : symbol_ptr) is
       begin
          if BBS.lisp.symbols.get_type(s) = SY_VARIABLE then
             BBS.lisp.memory.deref(BBS.lisp.symbols.get_value(s));
@@ -42,7 +42,7 @@ package body BBS.lisp.evaluate.vars is
                p2 := cons_table(s).cdr;
                p3 := cons_table(getList(p2)).car; --  Should be a symbol or tempsym
                if p3.kind = E_SYMBOL then
-                  symb := p3.sym.d;
+                  symb := p3.sym;
                   if BBS.lisp.symbols.isFixed(symb) then
                      error("setq", "Can't assign a value to a builtin or special symbol");
                      e := (kind => E_ERROR);
@@ -73,7 +73,7 @@ package body BBS.lisp.evaluate.vars is
             if s > NIL_CONS then
                p1 := cons_table(s).car;  --  Should be symbol name
                if p1.kind = E_SYMBOL then
-                  symb := p1.sym.d;
+                  symb := p1.sym;
                elsif p1.kind = E_STACK then
                   stacked := True;
                else
@@ -123,8 +123,7 @@ package body BBS.lisp.evaluate.vars is
                   end if;
                else
                   deref_previous(symb);
-                  BBS.lisp.symbols.set_sym((kind => ST_DYNAMIC, d => symb), (Kind => SY_VARIABLE,
-                                       pv => p2));
+                  BBS.lisp.symbols.set_sym(symb, (Kind => SY_VARIABLE, pv => p2));
                end if;
                e := p2;
             else
@@ -190,7 +189,7 @@ package body BBS.lisp.evaluate.vars is
                      else
                         el := cons_table(locals).car;
                      end if;
-                     if el.kind = E_SYMBOL then
+                     if (el.kind = E_SYMBOL) and then (el.sym.kind = ST_DYNAMIC) then
                         str := BBS.lisp.symbols.get_name(el.sym);
                         msg("let", "Converting symbol to local variable");
                      elsif el.kind = E_TEMPSYM then
