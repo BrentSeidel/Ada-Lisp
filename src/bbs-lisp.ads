@@ -20,8 +20,8 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  Sizes for the global data structures.  These can be adjusted as needed.
    --
    max_cons : constant Integer := 500;
-   max_symb : constant Integer := 300;
-   max_string : constant Integer := 500;
+   max_symb : constant Integer := 250;
+   max_string : constant Integer := 450;
    max_stack : constant Integer := 100;
    --
    type cons_index is range -1 .. max_cons;

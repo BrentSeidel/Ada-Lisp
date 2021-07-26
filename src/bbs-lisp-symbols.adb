@@ -8,9 +8,9 @@ package body BBS.lisp.symbols is
    function get_type(s : symbol_ptr) return symbol_type is
    begin
       if s.kind = ST_FIXED then
-         return index(s.f).kind;
+         return index(s.f).b.kind;
       else
-         return symb_table(s.d).kind;
+         return symb_table(s.d).b.kind;
       end if;
    end;
    --
@@ -90,23 +90,7 @@ package body BBS.lisp.symbols is
    --
    procedure set_sym(s : symbol_ptr; val : sym_body) is
    begin
-      case val.Kind is
-         when SY_SPECIAL =>
-            symb_table(s.d) := (ref => 1, name => get_name(s),
-                                kind => SY_SPECIAL, b => val);
-         when SY_BUILTIN =>
-            symb_table(s.d) := (ref => 1, name => get_name(s),
-                                kind => SY_BUILTIN, b => val);
-         when SY_LAMBDA =>
-            symb_table(s.d) := (ref => 1, name => get_name(s),
-                                kind => SY_LAMBDA, b => val);
-         when SY_VARIABLE =>
-            symb_table(s.d) := (ref => 1, name => get_name(s),
-                                kind => SY_VARIABLE, b => val);
-         when SY_EMPTY =>
-            symb_table(s.d) := (ref => 1, name => get_name(s),
-                                kind => SY_EMPTY, b => val);
-      end case;
+      symb_table(s.d).b := val;
    end;
    --
    --  Add a new symbol entry
