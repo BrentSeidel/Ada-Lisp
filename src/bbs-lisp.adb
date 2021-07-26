@@ -180,7 +180,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --
    function eval(e : element_type) return element_type is
       r : element_type;
-      sym : symb_index;
+      sym : symbol_ptr;
    begin
       if BBS.lisp.evaluate.isList(e) then
          r := eval_dispatch(BBS.lisp.evaluate.getList(e));
@@ -300,16 +300,26 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             print(v.qsym);
          when V_NONE =>
             put(" Empty");
---         when others =>
---            Put("<Unknown value kind " & value_type'Image(v.kind) & ">");
+         when others =>
+            Put("<Unknown value kind " & value_type'Image(v.kind) & ">");
       end case;
    end;
    --
    --  Print a symbol (BUILTIN, LAMBDA, VARIABLE, EMPTY)
    --
+   procedure print(s : symbol_ptr) is
+   begin
+      if s.kind = ST_FIXED then
+         put(BBS.lisp.symbols.get_name(s).all);
+      else
+         print(BBS.lisp.symbols.get_name(s));
+      end if;
+      Put(" ");
+   end;
+   --
    procedure print(s : symb_index) is
    begin
-      print(BBS.lisp.symbols.get_name(s));
+      print(BBS.lisp.symbols.get_name((kind => ST_DYNAMIC, d => s)));
       Put(" ");
    end;
    --
@@ -438,10 +448,80 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       if available then
          s := free;
          BBS.lisp.strings.ref(n);
-         BBS.lisp.symbols.set_sym(s, (ref => 1, kind => SY_EMPTY, name => n, b => (kind => SY_EMPTY)));
+         BBS.lisp.symbols.set_sym(s, (ref => 1, name => n, b => (kind => SY_EMPTY)));
          return True;
       end if;
       s := NIL_SYM;
+      return False;
+   end;
+   --
+   function get_symb(s : out symbol_ptr; n : String) return Boolean is
+      free : symb_index;
+      fixed : symbol_ptr;
+      available : Boolean := False;
+      temp : string_index;
+      flag : Boolean;
+   begin
+      flag := BBS.lisp.strings.str_to_lisp(temp, n);
+      if flag then
+         BBS.lisp.strings.uppercase(temp);
+         fixed := BBS.lisp.symbols.find_name(temp);
+         if fixed.kind = ST_FIXED then
+            s := fixed;
+            return True;
+         end if;
+         for i in symb_index'First + 1 .. symb_index'Last loop
+            if BBS.lisp.symbols.get_ref((kind => ST_DYNAMIC, d => i)) = 0 then
+               free := i;
+               available := True;
+            else
+               if bbs.lisp.strings.compare(temp, BBS.lisp.symbols.get_name((kind => ST_DYNAMIC, d => i))) = CMP_EQ then
+                  s := (kind => ST_DYNAMIC, d => i);
+                  return True;
+               end if;
+            end if;
+         end loop;
+         if available then
+            s := (kind => ST_DYNAMIC, d => free);
+            BBS.lisp.symbols.add_sym(s, (ref => 1, name => temp, b => (kind => SY_EMPTY)));
+            return True;
+         end if;
+      else
+         error("get_symb", "Unable to allocate symbol name.");
+      end if;
+      s := (kind => ST_NULL);
+      return False;
+   end;
+   --
+   function get_symb(s : out symbol_ptr; n : string_index) return Boolean is
+      free : symb_index;
+      fixed : symbol_ptr;
+      available : Boolean := False;
+   begin
+      BBS.lisp.strings.uppercase(n);
+      fixed := BBS.lisp.symbols.find_name(n);
+      if fixed.kind = ST_FIXED then
+         s := fixed;
+         return True;
+      end if;
+      for i in symb_index'First + 1 .. symb_index'Last loop
+         if BBS.lisp.symbols.get_ref((kind => ST_DYNAMIC, d => i)) = 0 then
+            free := i;
+            available := True;
+         else
+            if bbs.lisp.strings.compare(n, BBS.lisp.symbols.get_name((kind => ST_DYNAMIC, d => i))) = CMP_EQ then
+               s := (kind => ST_DYNAMIC, d => i);
+               return True;
+            end if;
+         end if;
+      end loop;
+      if available then
+         s := (kind => ST_DYNAMIC, d => free);
+         BBS.lisp.strings.ref(n);
+         BBS.lisp.symbols.add_sym(s, (ref => 1, name => n, b => (kind => SY_EMPTY)));
+         return True;
+      end if;
+      s := (kind => ST_NULL);
       return False;
    end;
    --
@@ -483,8 +563,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          end if;
       end loop;
       if found then
-         if (symb.kind = SY_BUILTIN) or (symb.kind = SY_SPECIAL) then
-            return (kind => E_SYMBOL, sym => temp);
+         if (symb.b.kind = SY_BUILTIN) or (symb.b.kind = SY_SPECIAL) then
+            return (kind => E_SYMBOL, sym => (kind => ST_DYNAMIC, d => temp));
          end if;
       end if;
       --
@@ -506,8 +586,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       --  so, then use it.
       --
       if found then
-         if (symb.kind = SY_LAMBDA) or (symb.kind = SY_VARIABLE) or (symb.kind = SY_EMPTY) then
-            return (kind => E_SYMBOL, sym => temp);
+         if (symb.b.kind = SY_LAMBDA) or (symb.b.kind = SY_VARIABLE) or (symb.b.kind = SY_EMPTY) then
+            return (kind => E_SYMBOL, sym => (kind => ST_DYNAMIC, d => temp));
          end if;
       end if;
       --
@@ -517,8 +597,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       if create then
          if available then
             BBS.lisp.strings.ref(n);
-            BBS.lisp.symbols.add_sym((kind => ST_DYNAMIC, d => free), (ref => 1, kind => SY_EMPTY, name => n, b => (kind => SY_EMPTY)));
-            return (kind => E_SYMBOL, sym => free);
+            BBS.lisp.symbols.add_sym((kind => ST_DYNAMIC, d => free), (ref => 1, name => n, b => (kind => SY_EMPTY)));
+            return (kind => E_SYMBOL, sym => (kind => ST_DYNAMIC, d => free));
          end if;
       else
          BBS.lisp.strings.ref(n);
@@ -609,7 +689,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       val : value;
    begin
       if first.kind = E_SYMBOL then
-         sym := BBS.lisp.symbols.get_sym(first.sym);
+         sym := BBS.lisp.symbols.get_sym(first.sym.d);
          sym_flag := true;
       elsif first.kind = E_STACK then
          val := BBS.lisp.global.stack.search_frames(first.st_offset, first.st_name);
@@ -619,7 +699,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          end if;
       end if;
       if sym_flag then
-         case sym.kind is
+         case sym.b.kind is
             when SY_BUILTIN =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating builtin ");

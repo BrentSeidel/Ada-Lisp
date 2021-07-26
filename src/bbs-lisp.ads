@@ -20,8 +20,8 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  Sizes for the global data structures.  These can be adjusted as needed.
    --
    max_cons : constant Integer := 500;
-   max_symb : constant Integer := 300;
-   max_string : constant Integer := 500;
+   max_symb : constant Integer := 250;
+   max_string : constant Integer := 450;
    max_stack : constant Integer := 100;
    --
    type cons_index is range -1 .. max_cons;
@@ -53,7 +53,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  data types.
    --
    type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
-                      V_LAMBDA, V_SYMBOL, V_QSYMBOL, V_NONE);
+                      V_LAMBDA, V_SYMBOL, V_QSYMBOL, V_NONE, V_EXTRA);
    --
    --  This indicates what kind of data is in a symbol.
    --
@@ -115,6 +115,8 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
             qsym : symb_index;
          when V_NONE =>
             null;
+         when V_EXTRA =>
+            e : symbol_ptr;
          end case;
       end record;
    --
@@ -130,7 +132,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
             when E_TEMPSYM =>
                tempsym : string_index;
             when E_SYMBOL =>
-               sym : symb_index;
+               sym : symbol_ptr;
             when E_STACK =>
                st_name : string_index;
                st_offset : Natural;
@@ -279,11 +281,10 @@ private
    --
    procedure print(s : cons_index)
      with Global => (Input => (cons_table));
-   procedure print(v : value)
-     with Global => (Input => (cons_table));
+   procedure print(v : value);
    procedure print(s : string_index);
-   procedure print(s : symb_index)
-     with Global => (Input => (cons_table));
+   procedure print(s : symbol_ptr);
+   procedure print(s : symb_index);
    --
    --  For debugging, dump the various tables
    --
@@ -331,6 +332,9 @@ private
    --
    function get_symb(s : out symb_index; n : String) return Boolean;
    function get_symb(s : out symb_index; n : string_index) return Boolean;
+   --
+   function get_symb(s : out symbol_ptr; n : String) return Boolean;
+   function get_symb(s : out symbol_ptr; n : string_index) return Boolean;
    --
    --  Finds a symbol and returns it.  Returns false if symbol can't be found.
    --

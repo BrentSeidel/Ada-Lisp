@@ -22,7 +22,7 @@ package body BBS.lisp.evaluate.func is
       temp : cons_index;
       p2 : element_type;
       p3 : element_type;
-      symb : symb_index;
+      symb : symbol_ptr;
       flag : Boolean;
       error_occured : Boolean := False;
    begin
@@ -184,7 +184,7 @@ package body BBS.lisp.evaluate.func is
             end if;
             temp := getList(cons_table(s).cdr);
             cons_table(s).cdr := NIL_ELEM;
-            BBS.lisp.symbols.set_sym((kind => ST_DYNAMIC, d => symb), (kind => SY_LAMBDA, ps => temp));
+            BBS.lisp.symbols.set_sym(symb, (kind => SY_LAMBDA, ps => temp));
       end case;
       e := NIL_ELEM;
    end;
@@ -390,7 +390,7 @@ package body BBS.lisp.evaluate.func is
             if temp_value.kind = E_VALUE then
                param_value := temp_value.v;
             elsif temp_value.kind = E_SYMBOL then
-               param_value := (kind => V_SYMBOL, sym => temp_value.sym);
+               param_value := (kind => V_SYMBOL, sym => temp_value.sym.d);
             elsif isList(temp_value) then
                param_value := (kind => V_LIST, l => getList(temp_value));
             elsif temp_value.kind = E_NIL then

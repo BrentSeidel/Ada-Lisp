@@ -277,7 +277,7 @@ package body BBS.lisp.parser is
             if (e.kind = E_SYMBOL) and not (qtemp or qfixed) then
                if (BBS.lisp.symbols.get_type(e.sym) = SY_SPECIAL) and (item = 0) then
                   special_flag := True;
-                  special_ptr := (kind => ST_DYNAMIC, d => e.sym);
+                  special_ptr := e.sym;
                   special_symb := BBS.lisp.symbols.get_sym(special_ptr);
                   special_symb.s.all(e, head, PH_QUERY);
                   if e.kind = E_VALUE then

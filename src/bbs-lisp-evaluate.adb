@@ -149,7 +149,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       val : value;
    begin
       if e.kind = E_SYMBOL then
-         sym := e.sym;
+         sym := e.sym.d;
          if BBS.lisp.symbols.get_type(sym) = SY_VARIABLE then
             return BBS.lisp.symbols.get_value(sym);
          end if;

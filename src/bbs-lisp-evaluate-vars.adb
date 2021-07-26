@@ -42,7 +42,7 @@ package body BBS.lisp.evaluate.vars is
                p2 := cons_table(s).cdr;
                p3 := cons_table(getList(p2)).car; --  Should be a symbol or tempsym
                if p3.kind = E_SYMBOL then
-                  symb := p3.sym;
+                  symb := p3.sym.d;
                   if BBS.lisp.symbols.isFixed(symb) then
                      error("setq", "Can't assign a value to a builtin or special symbol");
                      e := (kind => E_ERROR);
@@ -73,7 +73,7 @@ package body BBS.lisp.evaluate.vars is
             if s > NIL_CONS then
                p1 := cons_table(s).car;  --  Should be symbol name
                if p1.kind = E_SYMBOL then
-                  symb := p1.sym;
+                  symb := p1.sym.d;
                elsif p1.kind = E_STACK then
                   stacked := True;
                else
