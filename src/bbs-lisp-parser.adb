@@ -278,7 +278,7 @@ package body BBS.lisp.parser is
                if (BBS.lisp.symbols.get_type(e.sym) = SY_SPECIAL) and (item = 0) then
                   special_flag := True;
                   special_ptr := e.sym;
-                  special_symb := BBS.lisp.symbols.get_sym(e.sym);
+                  special_symb := BBS.lisp.symbols.get_sym(special_ptr);
                   special_symb.s.all(e, head, PH_QUERY);
                   if e.kind = E_VALUE then
                      if e.v.kind = V_INTEGER then

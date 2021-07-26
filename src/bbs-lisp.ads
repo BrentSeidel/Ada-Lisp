@@ -273,8 +273,7 @@ private
    --
    procedure print(s : cons_index)
      with Global => (Input => (cons_table));
-   procedure print(v : value)
-     with Global => (Input => (cons_table));
+   procedure print(v : value);
    procedure print(s : string_index);
    procedure print(s : symbol_ptr);
    --
