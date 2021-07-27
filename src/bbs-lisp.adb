@@ -309,8 +309,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                   Put("Builtin");
                when SY_SPECIAL =>
                   Put("Special");
-               when SY_LAMBDA =>
-                  Put("Lambda");
+--               when SY_LAMBDA =>
+--                  Put("Lambda");
                when SY_VARIABLE =>
                   Put("Variable: ");
                   print(BBS.lisp.symbols.get_value(ptr), False, False);
@@ -455,7 +455,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       --  so, then use it.
       --
       if found then
-         if (symb.kind = SY_LAMBDA) or (symb.kind = SY_VARIABLE) or (symb.kind = SY_EMPTY) then
+         if (symb.kind = SY_VARIABLE) or (symb.kind = SY_EMPTY) then
             return (kind => E_SYMBOL, sym => (kind => ST_DYNAMIC, d => temp));
          end if;
       end if;
@@ -591,13 +591,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                   New_Line;
                end if;
                sym.s.all(e, rest, PH_EXECUTE);
-            when SY_LAMBDA =>
-               if msg_flag then
-                  Put("eval_dispatch: Evaluating lambda ");
-                  print(sym.ps);
-                  new_line;
-               end if;
-               e := bbs.lisp.evaluate.func.eval_function(sym.ps, rest);
             when SY_VARIABLE =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating variable ");
@@ -611,7 +604,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                if (sym.pv.kind = E_VALUE) and then (sym.pv.v.kind = V_LAMBDA) then
                   if msg_flag then
                      Put("eval_dispatch: Evaluating lambda ");
-                     print(sym.ps);
+                     print(sym.pv.v);
                      new_line;
                   end if;
                   e := bbs.lisp.evaluate.func.eval_function(sym.pv.v.lam, rest);

@@ -177,14 +177,15 @@ package body BBS.lisp.evaluate.func is
             --
             --  If something else was attached to the symbol, deref it.
             --
-            if BBS.lisp.symbols.get_type(symb) = SY_LAMBDA then
-               BBS.lisp.memory.deref(BBS.lisp.symbols.get_list(symb));
-            elsif BBS.lisp.symbols.get_type(symb) = SY_VARIABLE then
+            if BBS.lisp.symbols.get_type(symb) = SY_VARIABLE then
                BBS.lisp.memory.deref(BBS.lisp.symbols.get_value(symb));
             end if;
             temp := getList(cons_table(s).cdr);
             cons_table(s).cdr := NIL_ELEM;
-            BBS.lisp.symbols.set_sym(symb, (kind => SY_LAMBDA, ps => temp));
+            BBS.lisp.symbols.set_sym(symb, (kind => SY_VARIABLE,
+                                            pv => (kind => E_VALUE,
+                                                   v => (kind => V_LAMBDA,
+                                                         lam => temp))));
       end case;
       e := NIL_ELEM;
    end;

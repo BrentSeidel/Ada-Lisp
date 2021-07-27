@@ -4,6 +4,7 @@
 --  and some of them will return constant values because Tiny-Lisp doesn't
 --  implement some things.
 --
+with BBS.lisp.memory;
 with BBS.lisp.symbols;
 package body BBS.lisp.evaluate.pred is
    --
@@ -58,6 +59,7 @@ package body BBS.lisp.evaluate.pred is
             return;
          end if;
       end if;
+      BBS.lisp.memory.deref(p);
       e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
    end;
    --
@@ -107,15 +109,18 @@ package body BBS.lisp.evaluate.pred is
       if p.kind = E_SYMBOL then
          if BBS.lisp.symbols.isFunction(p.sym) then
             e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+            BBS.lisp.memory.deref(p);
             return;
          end if;
       end if;
       if p.kind = E_VALUE then
          if p.v.kind = V_LAMBDA then
             e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+            BBS.lisp.memory.deref(p);
             return;
          end if;
       end if;
+      BBS.lisp.memory.deref(p);
       e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
    end;
    --

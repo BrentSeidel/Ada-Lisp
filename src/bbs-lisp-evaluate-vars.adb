@@ -20,16 +20,6 @@ package body BBS.lisp.evaluate.vars is
       index : Natural;
       err : Boolean := False;
 
-      procedure deref_previous(s : symbol_ptr) is
-      begin
-         if BBS.lisp.symbols.get_type(s) = SY_VARIABLE then
-            BBS.lisp.memory.deref(BBS.lisp.symbols.get_value(s));
-         end if;
-         if BBS.lisp.symbols.get_type(s) = SY_LAMBDA then
-            BBS.lisp.memory.deref(BBS.lisp.symbols.get_list(s));
-         end if;
-      end;
-
    begin
       case p is
          when PH_QUERY =>
@@ -122,7 +112,9 @@ package body BBS.lisp.evaluate.vars is
                      end if;
                   end if;
                else
-                  deref_previous(symb);
+                  if BBS.lisp.symbols.get_type(symb) = SY_VARIABLE then
+                     BBS.lisp.memory.deref(BBS.lisp.symbols.get_value(symb));
+                  end if;
                   BBS.lisp.symbols.set_sym(symb, (Kind => SY_VARIABLE, pv => p2));
                end if;
                e := p2;

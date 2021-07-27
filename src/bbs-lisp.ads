@@ -58,7 +58,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --
    type symbol_type is (SY_SPECIAL,  -- A special form that need support during parsing
                         SY_BUILTIN,  -- A normal builtin function
-                        SY_LAMBDA,   -- A user defined function
+--                        SY_LAMBDA,   -- A user defined function
                         SY_VARIABLE, -- A value, not a function
                         SY_EMPTY);   -- No contents
 

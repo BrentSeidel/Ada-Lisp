@@ -27,8 +27,6 @@ package BBS.lisp.symbols is
                s : special_function;
             when SY_BUILTIN =>
                f : execute_function;
-            when SY_LAMBDA =>
-               ps : cons_index;
             when SY_VARIABLE =>
                pv : element_type;
             when SY_EMPTY =>
@@ -82,7 +80,8 @@ package BBS.lisp.symbols is
    --  If symbol is a lambda, get the list.
    --
    function get_list(s : symbol_ptr) return cons_index
-     with pre => (get_type(s) = SY_LAMBDA);
+     with pre => (get_type(s) = SY_VARIABLE);
+--     with pre => (get_type(s) = SY_LAMBDA);
    --
    --  Get a symbol's name (there are two different routines because the name is
    --  stored differently between fixed and dynamic symbols.

@@ -66,8 +66,8 @@ package body BBS.lisp.debug is
             Put(" <BUILTIN>");
          when SY_SPECIAL =>
             Put(" <SPECIAL>");
-         when SY_LAMBDA =>
-            Put(" <FUNCTION>");
+--         when SY_LAMBDA =>
+--            Put(" <FUNCTION>");
          when SY_VARIABLE =>
             dump(BBS.lisp.symbols.get_value(s));
          when others =>
