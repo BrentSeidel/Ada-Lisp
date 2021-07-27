@@ -55,10 +55,10 @@ package body BBS.lisp.evaluate.func is
                      e := (Kind => E_ERROR);
                      return;
                   end if;
-               elsif p3.Kind = E_TEMPSYM then
-                  flag := get_symb(symb, p3.tempsym);
+               elsif (p3.kind = E_VALUE) and then (p3.v.Kind = V_TEMPSYM) then
+                  flag := get_symb(symb, p3.v.tempsym);
                   if flag then
-                     BBS.lisp.strings.ref(p3.tempsym);
+                     BBS.lisp.strings.ref(p3.v.tempsym);
                      cons_table(getList(p2)).car := (Kind => E_SYMBOL, sym => symb);
                   else
                      error("defun", "Unable to add symbol.");
@@ -110,9 +110,9 @@ package body BBS.lisp.evaluate.func is
                                st_offset => offset);
                            BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);
                         end if;
-                     elsif (el.kind = E_TEMPSYM) then
+                     elsif (el.kind = E_VALUE) and then (el.v.kind = V_TEMPSYM) then
                         msg("defun", "Converting tempsym to parameter.");
-                        str := el.tempsym;
+                        str := el.v.tempsym;
                         el := (Kind => E_STACK, st_name => str,
                                st_offset => offset);
                         BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);
@@ -259,9 +259,9 @@ package body BBS.lisp.evaluate.func is
                                st_offset => offset);
                            BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);
                         end if;
-                     elsif (el.kind = E_TEMPSYM) then
+                     elsif (el.kind = E_VALUE) and then (el.v.kind = V_TEMPSYM) then
                         msg("lambda", "Converting tempsym to parameter");
-                        str := el.tempsym;
+                        str := el.v.tempsym;
                         el := (kind => E_STACK, st_name => str,
                                st_offset => offset);
                         BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);

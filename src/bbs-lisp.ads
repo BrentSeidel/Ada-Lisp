@@ -46,19 +46,23 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  can be a cons cell, a value, a symbol, a temporary symbol a stack
    --  variable, or nothing.
    --
-   type ptr_type is (E_ERROR, E_NIL, E_STACK, E_SYMBOL, E_TEMPSYM, E_VALUE);
+   type ptr_type is (E_ERROR,
+                     E_NIL,
+                     E_STACK,
+                     E_SYMBOL,
+                     E_VALUE);
    --
    --  This indicates what kind of data is in a value.  These are the allowed
    --  data types.
    --
    type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
-                       V_LAMBDA, V_SYMBOL, V_QSYMBOL, V_NONE);
+                       V_LAMBDA, V_TEMPSYM, V_SYMBOL, V_QSYMBOL, V_STACK, V_ERROR,
+                       V_NONE);
    --
    --  This indicates what kind of data is in a symbol.
    --
    type symbol_type is (SY_SPECIAL,  -- A special form that need support during parsing
                         SY_BUILTIN,  -- A normal builtin function
---                        SY_LAMBDA,   -- A user defined function
                         SY_VARIABLE, -- A value, not a function
                         SY_EMPTY);   -- No contents
 
@@ -108,10 +112,17 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
             l : cons_index;
          when V_LAMBDA =>
             lam : cons_index;
+         when V_TEMPSYM =>
+            tempsym : string_index;
          when V_SYMBOL =>
             sym : symbol_ptr;
          when V_QSYMBOL =>
             qsym : symbol_ptr;
+         when V_STACK =>
+            st_name : string_index;
+            st_offset : Natural;
+         when V_ERROR =>
+            null;
          when V_NONE =>
             null;
          end case;
@@ -126,8 +137,6 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
                null;
             when E_NIL =>
                null;
-            when E_TEMPSYM =>
-               tempsym : string_index;
             when E_SYMBOL =>
                sym : symbol_ptr;
             when E_STACK =>

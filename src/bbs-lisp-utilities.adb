@@ -52,8 +52,8 @@ package body BBS.lisp.utilities is
                return False;
             end if;
             name := BBS.lisp.symbols.get_name(e.sym);
-         elsif e.kind = E_TEMPSYM then
-            name := e.tempsym;
+         elsif (e.kind = E_VALUE) and then (e.v.kind = V_TEMPSYM) then
+            name := e.v.tempsym;
             flag := True;
          else
             return False;

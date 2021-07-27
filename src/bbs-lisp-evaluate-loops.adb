@@ -141,9 +141,9 @@ package body BBS.lisp.evaluate.loops is
                   if (var.kind = E_SYMBOL) and then (var.sym.kind = ST_DYNAMIC) then
                      msg("dotimes", "Converting symbol to loop variable");
                      str := BBS.lisp.symbols.get_name(var.sym);
-                  elsif (var.kind = E_TEMPSYM) then
+                  elsif (var.kind = E_VALUE) and then (var.v.kind = V_TEMPSYM) then
                      msg("dotimes", "Converting tempsym to loop variable");
-                     str := var.tempsym;
+                     str := var.v.tempsym;
                   elsif var.kind = E_STACK then
                      msg("dotimes", "Converting stack variable to loop variable");
                      str := var.st_name;
@@ -361,9 +361,9 @@ package body BBS.lisp.evaluate.loops is
                   if (var.kind = E_SYMBOL) and then (var.sym.kind = ST_DYNAMIC) then
                      msg("dolist", "Converting symbol to loop variable");
                      str := BBS.lisp.symbols.get_name(var.sym);
-                  elsif (var.kind = E_TEMPSYM) then
+                  elsif (var.kind = E_VALUE) and then (var.v.kind = V_TEMPSYM) then
                      msg("dolist", "Converting tempsym to loop variable");
-                     str := var.tempsym;
+                     str := var.v.tempsym;
                   elsif var.kind = E_STACK then
                      msg("dolist", "Converting stack variable to loop variable");
                      str := var.st_name;

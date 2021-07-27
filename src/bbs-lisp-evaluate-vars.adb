@@ -38,8 +38,8 @@ package body BBS.lisp.evaluate.vars is
                      e := (kind => E_ERROR);
                      return;
                   end if;
-               elsif p3.kind = E_TEMPSYM then
-                  str := p3.tempsym;
+               elsif (p3.kind = E_VALUE) and then (p3.v.kind = V_TEMPSYM) then
+                  str := p3.v.tempsym;
                   p3 := find_variable(str, True);
                   BBS.lisp.strings.deref(str);
                   cons_table(getList(p2)).car := p3;
@@ -184,8 +184,8 @@ package body BBS.lisp.evaluate.vars is
                      if (el.kind = E_SYMBOL) and then (el.sym.kind = ST_DYNAMIC) then
                         str := BBS.lisp.symbols.get_name(el.sym);
                         msg("let", "Converting symbol to local variable");
-                     elsif el.kind = E_TEMPSYM then
-                        str := el.tempsym;
+                     elsif (el.kind = E_VALUE) and then (el.v.kind = v_TEMPSYM) then
+                        str := el.v.tempsym;
                         msg("let", "Converting tempsym to local variable");
                      elsif el.kind = E_STACK then
                         msg("let", "Converting stack variable to local variable");

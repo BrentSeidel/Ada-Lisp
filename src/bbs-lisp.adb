@@ -37,6 +37,14 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       io_get_line := p_get_line;
       BBS.lisp.memory.reset_tables;
       parse_buff.init;
+      put_line("init: cons size is " & Integer'Image(cons'Size) & " bytes");
+      put_line("init: cons_table size is " & Integer'Image(cons_table'Size) & " bytes");
+      put_line("init: element size is " & Integer'Image(element_type'Size) & " bytes");
+      put_line("init: value size is " & Integer'Image(value'Size) & " bytes");
+      put_line("init: element size is " & Integer'Image(element_type'Size) & " bytes");
+      put_line("init: symbol size is " & Integer'Image(BBS.lisp.symbols.symbol'Size) & " bytes");
+      put_line("init: fixed symbol size is " & Integer'Image(BBS.lisp.symbols.fixed_symbol'Size) & " bytes");
+      put_line("init: symbol body size is " & Integer'Image(BBS.lisp.symbols.sym_body'Size) & " bytes");
    end;
    --
    --  Replacements for Text_IO to make porting to embedded systems easier.
@@ -113,8 +121,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             return (kind => V_NONE);
          when E_NIL =>
             return (kind => V_NONE);
-         when E_TEMPSYM =>
-            return (kind => V_NONE);
+--         when E_TEMPSYM =>
+--            return (kind => V_NONE);
          when E_SYMBOL =>
             return element_to_value(BBS.lisp.evaluate.indirect_elem(e));
          when E_STACK =>
@@ -139,10 +147,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             print(e.v);
          when E_SYMBOL =>
             print(e.sym);
-         when E_TEMPSYM =>
-            put("Tempsym[");
-            print(e.tempsym);
-            put("]");
          when E_STACK =>
             print(e.st_name);
       end case;
@@ -198,11 +202,19 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             print(v.l);
          when V_LAMBDA =>
             print(v.lam);
+         when V_TEMPSYM =>
+            put("Tempsym[");
+            print(v.tempsym);
+            put("]");
          when V_SYMBOL =>
             print(v.sym);
          when V_QSYMBOL =>
             put("'");
             print(v.qsym);
+         when V_STACK =>
+            print(v.st_name);
+         when V_ERROR =>
+            put("ERROR");
          when V_NONE =>
             put(" Empty");
 --         when others =>
@@ -309,8 +321,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                   Put("Builtin");
                when SY_SPECIAL =>
                   Put("Special");
---               when SY_LAMBDA =>
---                  Put("Lambda");
                when SY_VARIABLE =>
                   Put("Variable: ");
                   print(BBS.lisp.symbols.get_value(ptr), False, False);
@@ -471,7 +481,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          end if;
       else
          BBS.lisp.strings.ref(n);
-         return (kind => E_TEMPSYM, tempsym => n);
+         return (kind => E_VALUE, v=> (kind => V_TEMPSYM, tempsym => n));
       end if;
       error("find_variable", "Oddly, no option matched.");
       return (kind => E_ERROR);
