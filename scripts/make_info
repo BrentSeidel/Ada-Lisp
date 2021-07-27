@@ -12,7 +12,7 @@ package BBS.lisp.info is
    --
    name           : constant String  := "Tiny Lisp";
    timestamp      : constant String  := "`date`";
-   build_date     : constant String  := "`date +"%Y-%b-%d"`";
+   build_date     : constant String  := "`date +"%Y-%b-%d"` (`git rev-parse --abbrev-ref HEAD`)";
    version_string : constant String  := "V00.02+";
    version_date   : constant Integer := `date +"%Y%m%d"`;  -- yyyymmdd
    version_number : constant Integer := 2;
