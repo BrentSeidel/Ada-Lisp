@@ -7,8 +7,6 @@ package body BBS.lisp.debug is
    procedure dump(e : element_type) is
    begin
       case e.kind is
-         when E_NIL =>
-            put(" NIL");
          when E_VALUE =>
             dump(e.v);
          when others =>
@@ -66,8 +64,6 @@ package body BBS.lisp.debug is
             Put(" <BUILTIN>");
          when SY_SPECIAL =>
             Put(" <SPECIAL>");
---         when SY_LAMBDA =>
---            Put(" <FUNCTION>");
          when SY_VARIABLE =>
             dump(BBS.lisp.symbols.get_value(s));
          when others =>

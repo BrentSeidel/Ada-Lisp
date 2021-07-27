@@ -45,6 +45,18 @@ package body BBS.lisp.evaluate.cond is
          BBS.lisp.memory.deref(t1);
          return (kind => E_ERROR);
       end if;
+      --
+      --  A value of V_NONE is equivalent to a boolean False.
+      --
+      if v1.kind = V_NONE then
+         v1 := (kind => V_BOOLEAN, b => False);
+      end if;
+      if v2.kind = V_NONE then
+         v2 := (kind => V_BOOLEAN, b => False);
+      end if;
+      --
+      --  Integer comparison
+      --
       if (v1.kind = V_INTEGER) and (v2.kind = V_INTEGER) then
          case b is
             when SYM_EQ =>
@@ -56,6 +68,9 @@ package body BBS.lisp.evaluate.cond is
             when SYM_GT =>
                return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.i > v2.i));
          end case;
+         --
+         --  Character comparison
+         --
       elsif (v1.kind = V_CHARACTER) and (v2.kind = V_CHARACTER) then
          case b is
             when SYM_EQ =>
@@ -67,6 +82,9 @@ package body BBS.lisp.evaluate.cond is
             when SYM_GT =>
                return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.c > v2.c));
          end case;
+         --
+         --  String comparison
+         --
       elsif (v1.kind = V_STRING) and (v2.kind = V_STRING) then
          declare
             eq : comparison;
@@ -94,6 +112,9 @@ package body BBS.lisp.evaluate.cond is
             end case;
          end;
          return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+         --
+         --  Boolean comparison
+         --
       elsif (v1.kind = V_BOOLEAN) and (v2.kind = V_BOOLEAN) then
          case b is
             when SYM_EQ =>
@@ -105,6 +126,9 @@ package body BBS.lisp.evaluate.cond is
             when SYM_GT =>
                return (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => v1.b > v2.b));
          end case;
+         --
+         --  Symbol comparison
+         --
       elsif ((v1.kind = V_QSYMBOL) or (v1.kind = V_SYMBOL)) and
         ((v2.kind = V_QSYMBOL) or (v2.kind = V_SYMBOL)) then
          declare
@@ -135,6 +159,9 @@ package body BBS.lisp.evaluate.cond is
             end case;
          end;
       else
+         --
+         --  Other comparisons are not supported.
+         --
          error("eval_comp", "Comparison of the provided types is not supported.");
          put("First type is " & value_type'Image(v1.kind));
          put_line(", second type is " & value_type'Image(v2.kind));

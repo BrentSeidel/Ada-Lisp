@@ -119,10 +119,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       case e.kind is
          when E_ERROR =>
             return (kind => V_NONE);
-         when E_NIL =>
-            return (kind => V_NONE);
---         when E_TEMPSYM =>
---            return (kind => V_NONE);
          when E_SYMBOL =>
             return element_to_value(BBS.lisp.evaluate.indirect_elem(e));
          when E_STACK =>
@@ -141,8 +137,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       case e.kind is
          when E_ERROR =>
             put("ERROR");
-         when E_NIL =>
-            put("Nil");
          when E_VALUE =>
             print(e.v);
          when E_SYMBOL =>
@@ -174,7 +168,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          else
             print(cons_table(list).car, False, False);
          end if;
-         if not BBS.lisp.evaluate.isList(cons_table(list).cdr) and (cons_table(list).cdr.kind /= E_NIL) then
+         if not BBS.lisp.evaluate.isList(cons_table(list).cdr) and (cons_table(list).cdr /= NIL_ELEM) then
             put(" . ");
             print(cons_table(list).cdr, False, False);
          end if;
@@ -216,7 +210,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          when V_ERROR =>
             put("ERROR");
          when V_NONE =>
-            put(" Empty");
+            put(" Nil");
 --         when others =>
 --            Put("<Unknown value kind " & value_type'Image(v.kind) & ">");
       end case;
@@ -529,7 +523,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       t : cons_index;
    begin
       t := s1;
-      while cons_table(t).cdr.kind /= E_NIL loop
+      while cons_table(t).cdr /= NIL_ELEM loop
          t := BBS.lisp.evaluate.getList(cons_table(t).cdr);
          if t = NIL_CONS then
             return False;

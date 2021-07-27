@@ -22,8 +22,8 @@ package body BBS.lisp.memory is
    begin
       for i in cons_table'Range loop
          cons_table(i).ref := FREE_CONS;
-         cons_table(i).car := (Kind => E_NIL);
-         cons_table(i).cdr := (Kind => E_NIL);
+         cons_table(i).car := NIL_ELEM;
+         cons_table(i).cdr := NIL_ELEM;
       end loop;
       BBS.lisp.symbols.reset_symbol_table;
       BBS.lisp.strings.reset_string_table;
@@ -38,8 +38,8 @@ package body BBS.lisp.memory is
          if cons_table(i).ref = FREE_CONS then
             s := i;
             cons_table(i).ref := FREE_CONS + 1;
-            cons_table(i).car := (Kind => E_NIL);
-            cons_table(i).cdr := (Kind => E_NIL);
+            cons_table(i).car := NIL_ELEM;
+            cons_table(i).cdr := NIL_ELEM;
             return True;
          end if;
       end loop;

@@ -47,7 +47,6 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  variable, or nothing.
    --
    type ptr_type is (E_ERROR,
-                     E_NIL,
                      E_STACK,
                      E_SYMBOL,
                      E_VALUE);
@@ -130,12 +129,10 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --
    --  An element_type can contain a value or point to a cons cell.
    --
-   type element_type(kind : ptr_type := E_NIL) is
+   type element_type(kind : ptr_type := E_VALUE) is
       record
          case kind is
             when E_ERROR =>
-               null;
-            when E_NIL =>
                null;
             when E_SYMBOL =>
                sym : symbol_ptr;
@@ -231,7 +228,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --
    --  Some useful constants
    --
-   NIL_ELEM : constant element_type := (Kind => E_NIL);
+   NIL_ELEM : constant element_type := (Kind => E_VALUE, v => (kind => V_NONE));
    NIL_CONS : constant cons_index := cons_index'First;
    NIL_STR  : constant string_index := string_index'First;
    NIL_SYM  : constant symbol_ptr := (kind => ST_NULL);

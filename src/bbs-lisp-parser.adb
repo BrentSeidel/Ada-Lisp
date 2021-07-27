@@ -122,7 +122,7 @@ package body BBS.lisp.parser is
                buff.next_char;
                if list(buff, current, qfixed or qtemp, False) then
                   buff.next_char;
-                  if (cons_table(current).car.kind = E_NIL) and (cons_table(current).cdr.kind = E_NIL) then
+                  if (cons_table(current).car = NIL_ELEM) and (cons_table(current).cdr = NIL_ELEM) then
                      BBS.lisp.memory.deref(current);
                      if not append_to_list(head, NIL_ELEM) then
                         error("list", "Failure appending NIL_ELEM to list");
@@ -130,7 +130,7 @@ package body BBS.lisp.parser is
                         return False;
                      end if;
                   else
-                     if cons_table(head).car.kind = E_NIL then
+                     if cons_table(head).car = NIL_ELEM then
                         cons_table(head).car := BBS.lisp.evaluate.makeList(current);
                      else
                         if BBS.lisp.memory.alloc(temp) then
@@ -164,7 +164,7 @@ package body BBS.lisp.parser is
            ((test_char = '-') and buff.is_next_digit) then
             int(buff, value);
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
-            if cons_table(head).car.kind = E_NIL then
+            if cons_table(head).car = NIL_ELEM then
                cons_table(head).car := e;
             else
                if not append_to_list(head, e) then
@@ -185,7 +185,7 @@ package body BBS.lisp.parser is
                --
                hex(buff, value);
                e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
-               if cons_table(head).car.kind = E_NIL then
+               if cons_table(head).car = NIL_ELEM then
                   cons_table(head).car := e;
                else
                   if not append_to_list(head, e) then
@@ -203,7 +203,7 @@ package body BBS.lisp.parser is
                else
                   e := (kind => E_ERROR);
                end if;
-               if cons_table(head).car.kind = E_NIL then
+               if cons_table(head).car = NIL_ELEM then
                   cons_table(head).car := e;
                else
                   if not append_to_list(head, e) then
@@ -215,7 +215,7 @@ package body BBS.lisp.parser is
             else
                error("list", "Unrecognized special form #" & buff.get_char);
                e := (Kind => E_ERROR);
-               if cons_table(head).car.kind = E_NIL then
+               if cons_table(head).car = NIL_ELEM then
                   cons_table(head).car := e;
                else
                   if not append_to_list(head, e) then
@@ -232,7 +232,7 @@ package body BBS.lisp.parser is
          elsif test_char = '"' then
             if parse_str(buff, str) then
                e := (kind => E_VALUE, v => (kind => V_STRING, s => str));
-               if cons_table(head).car.kind = E_NIL then
+               if cons_table(head).car = NIL_ELEM then
                   cons_table(head).car := e;
                else
                   if not append_to_list(head, e) then
@@ -263,7 +263,7 @@ package body BBS.lisp.parser is
          --
          else
             e := symb(buff, qfixed or qtemp);
-            if cons_table(head).car.kind = E_NIL then
+            if cons_table(head).car = NIL_ELEM then
                cons_table(head).car := e;
             else
                if not append_to_list(head, e) then

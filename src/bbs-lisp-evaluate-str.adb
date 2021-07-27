@@ -27,7 +27,7 @@ package body BBS.lisp.evaluate.str is
          else
             e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
          end if;
-      elsif p1.kind = E_NIL then
+      elsif p1 = NIL_ELEM then
          e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 0));
       else
          e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 1));
@@ -46,7 +46,7 @@ package body BBS.lisp.evaluate.str is
          last := t;
          t := getList(cons_table(t).cdr);
       end loop;
-      if cons_table(last).cdr.kind /= E_NIL then
+      if cons_table(last).cdr /= NIL_ELEM then
          c := c + 1;
       end if;
       return c;

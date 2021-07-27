@@ -41,7 +41,7 @@ package body BBS.lisp.evaluate.bool is
       ptr : cons_index;
       temp : element_type;
 
-      function accumulate(t : element_type; first : Boolean) return ptr_type is
+      function accumulate(t : element_type; first : Boolean) return value_type is
          v : value;
       begin
          if t.kind = E_VALUE then
@@ -49,7 +49,7 @@ package body BBS.lisp.evaluate.bool is
          else
             error("eval_and", "Can't process element " & ptr_type'Image(temp.kind));
             BBS.lisp.memory.deref(temp);
-            return E_ERROR;
+            return V_ERROR;
          end if;
          if (v.kind = V_INTEGER and first) or (v.kind = V_INTEGER and int_op) then
             accum_i := uint32_to_int32(int32_to_uint32(accum_i) and
@@ -61,16 +61,16 @@ package body BBS.lisp.evaluate.bool is
          else
             error("eval_and", "Can't process " & value_type'Image(v.kind));
             BBS.lisp.memory.deref(temp);
-            return E_ERROR;
+            return V_ERROR;
          end if;
-         return E_NIL;
+         return V_NONE;
       end;
       --
    begin
       if s > NIL_CONS then
          ptr := s;
          temp := first_value(ptr);
-         if accumulate(temp, True) = E_ERROR then
+         if accumulate(temp, True) = V_ERROR then
             error("eval_and", "Error processing parameter.");
             e := (kind => E_ERROR);
             return;
@@ -79,7 +79,7 @@ package body BBS.lisp.evaluate.bool is
             if (int_op and (accum_i /= 0)) or ((not int_op) and accum_b) then
                loop
                   temp := first_value(ptr);
-                  if accumulate(temp, False) = E_ERROR then
+                  if accumulate(temp, False) = V_ERROR then
                      error("eval_and", "Error processing parameter.");
                      e := (kind => E_ERROR);
                      return;
@@ -115,7 +115,7 @@ package body BBS.lisp.evaluate.bool is
       ptr : cons_index;
       temp : element_type;
 
-      function accumulate(t : element_type; first : Boolean) return ptr_type is
+      function accumulate(t : element_type; first : Boolean) return value_type is
          v : value;
       begin
          if t.kind = E_VALUE then
@@ -123,7 +123,7 @@ package body BBS.lisp.evaluate.bool is
          else
             error("eval_or", "Can't process element " & ptr_type'Image(temp.kind));
             BBS.lisp.memory.deref(temp);
-            return E_ERROR;
+            return V_ERROR;
          end if;
          if (v.kind = V_INTEGER and first) or (v.kind = V_INTEGER and int_op) then
             accum_i := uint32_to_int32(int32_to_uint32(accum_i) or
@@ -135,16 +135,16 @@ package body BBS.lisp.evaluate.bool is
          else
             error("eval_or", "Can't process " & value_type'Image(v.kind));
             BBS.lisp.memory.deref(temp);
-            return E_ERROR;
+            return V_ERROR;
          end if;
-         return E_NIL;
+         return V_NONE;
       end;
       --
    begin
       if s > NIL_CONS then
          ptr := s;
          temp := first_value(ptr);
-         if accumulate(temp, True) = E_ERROR then
+         if accumulate(temp, True) = V_ERROR then
             error("eval_or", "Error processing parameter.");
             e := (kind => E_ERROR);
             return;
@@ -153,7 +153,7 @@ package body BBS.lisp.evaluate.bool is
             if (int_op and (accum_i /= -1)) or ((not int_op) and (not accum_b)) then
                loop
                   temp := first_value(ptr);
-                  if accumulate(temp, False) = E_ERROR then
+                  if accumulate(temp, False) = V_ERROR then
                      error("eval_or", "Error processing parameter.");
                      e := (kind => E_ERROR);
                      return;

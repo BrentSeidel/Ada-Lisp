@@ -8,11 +8,11 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function isTrue(e : element_type) return Boolean is
    begin
-      if e.kind = E_NIL then
+      if e = NIL_ELEM then
          return False;
       elsif isList(e) then
-         if (cons_table(getList(e)).car.kind = E_NIL)
-           and (cons_table(getList(e)).cdr.kind = E_NIL) then
+         if (cons_table(getList(e)).car = NIL_ELEM)
+           and (cons_table(getList(e)).cdr = NIL_ELEM) then
             return False;
          end if;
       elsif e.kind = E_VALUE then
@@ -174,7 +174,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       else
          first := cons_table(s).car;
          s := getList(cons_table(s).cdr);
-         if first.kind = E_NIL then
+         if first = NIL_ELEM then
             null;
          elsif isList(first) then
             if isFunction(first) then

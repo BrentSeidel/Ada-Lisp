@@ -19,7 +19,7 @@ package body BBS.lisp.utilities is
          last := t;
          t := BBS.lisp.evaluate.getList(cons_table(t).cdr);
       end loop;
-      if cons_table(last).cdr.kind /= E_NIL then
+      if cons_table(last).cdr /= NIL_ELEM then
          c := c + 1;
       end if;
       return c;

@@ -164,7 +164,7 @@ package body BBS.lisp.evaluate.func is
                e := (kind => E_ERROR);
                return;
             end if;
-            if (not isList(params)) and (params.kind /= E_NIL) then
+            if (not isList(params)) and (params /= NIL_ELEM) then
                error("defun", "Parameter list must be a list or NIL.");
                e := (kind => E_ERROR);
                return;
@@ -307,7 +307,7 @@ package body BBS.lisp.evaluate.func is
                e := (kind => E_ERROR);
                return;
             end if;
-            if (not isList(params)) and (params.kind /= E_NIL) then
+            if (not isList(params)) and (params /= NIL_ELEM) then
                error("lambda", "Parameter list must be a list or NIL.");
                e := (kind => E_ERROR);
                return;
@@ -365,7 +365,7 @@ package body BBS.lisp.evaluate.func is
       supplied := bbs.lisp.utilities.count(e);
       if isList(params) then
          requested := bbs.lisp.utilities.count(getList(params));
-      elsif params.kind = E_NIL then
+      elsif params = NIL_ELEM then
          requested := 0;
       else
          requested := 1;
@@ -394,7 +394,7 @@ package body BBS.lisp.evaluate.func is
                param_value := (kind => V_SYMBOL, sym => temp_value.sym);
             elsif isList(temp_value) then
                param_value := (kind => V_LIST, l => getList(temp_value));
-            elsif temp_value.kind = E_NIL then
+            elsif temp_value = NIL_ELEM then
                param_value := (kind => V_BOOLEAN, b => False);
             else
                param_value := (kind => V_NONE);
