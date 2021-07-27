@@ -117,8 +117,8 @@ package body BBS.lisp.memory is
    begin
       if e.kind = E_VALUE then
          deref(e.v);
-      elsif e.kind = E_STACK then
-         BBS.lisp.strings.deref(e.st_name);
+--      elsif e.kind = E_STACK then
+--         BBS.lisp.strings.deref(e.st_name);
       end if;
    end;
    --
@@ -132,6 +132,8 @@ package body BBS.lisp.memory is
          deref(v.l);
       elsif v.kind = V_LAMBDA then
          deref(v.lam);
+      elsif v.kind = V_STACK then
+         BBS.lisp.strings.deref(v.st_name);
       end if;
    end;
    --

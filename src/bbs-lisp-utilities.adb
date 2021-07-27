@@ -58,8 +58,8 @@ package body BBS.lisp.utilities is
          else
             return False;
          end if;
-         if var.kind = E_STACK then
-            var_name := var.st_name;
+         if (var.kind = E_VALUE) and then (var.v.kind = V_STACK) then
+            var_name := var.v.st_name;
          else
             error("replace_syms.process_element", "Improper element in library");
          end if;

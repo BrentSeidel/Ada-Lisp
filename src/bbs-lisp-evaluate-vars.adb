@@ -43,7 +43,7 @@ package body BBS.lisp.evaluate.vars is
                   p3 := find_variable(str, True);
                   BBS.lisp.strings.deref(str);
                   cons_table(getList(p2)).car := p3;
-               elsif p3.kind = E_STACK then
+               elsif (p3.kind = E_VALUE) and then (p3.v.kind = V_STACK) then
                   null;
                else
                   error("setq", "First parameter is not a symbol or temporary symbol.");
@@ -64,7 +64,7 @@ package body BBS.lisp.evaluate.vars is
                p1 := cons_table(s).car;  --  Should be symbol name
                if p1.kind = E_SYMBOL then
                   symb := p1.sym;
-               elsif p1.kind = E_STACK then
+               elsif (p1.kind = E_VALUE) and then (p1.v.kind = V_STACK) then
                   stacked := True;
                else
                   error("setq", "First parameter is not a symbol.");
@@ -97,8 +97,8 @@ package body BBS.lisp.evaluate.vars is
                   --  Check for stack variables
                   --
                if stacked then
-                  if p1.kind = E_STACK then
-                     index := BBS.lisp.global.stack.search_frames(p1.st_offset, p1.st_name);
+                  if (p1.kind = E_VALUE) and then (p1.v.kind = V_STACK) then
+                     index := BBS.lisp.global.stack.search_frames(p1.v.st_offset, p1.v.st_name);
                      BBS.lisp.memory.deref(BBS.lisp.global.stack.get_entry(index, err).st_value);
                      if p2.kind = E_VALUE then
                         BBS.lisp.global.stack.set_value(index, p2.v, err);
@@ -184,12 +184,12 @@ package body BBS.lisp.evaluate.vars is
                      if (el.kind = E_SYMBOL) and then (el.sym.kind = ST_DYNAMIC) then
                         str := BBS.lisp.symbols.get_name(el.sym);
                         msg("let", "Converting symbol to local variable");
-                     elsif (el.kind = E_VALUE) and then (el.v.kind = v_TEMPSYM) then
+                     elsif (el.kind = E_VALUE) and then (el.v.kind = V_TEMPSYM) then
                         str := el.v.tempsym;
                         msg("let", "Converting tempsym to local variable");
-                     elsif el.kind = E_STACK then
+                     elsif (el.kind = E_VALUE) and then (el.v.kind = V_STACK) then
                         msg("let", "Converting stack variable to local variable");
-                        str := el.st_name;
+                        str := el.v.st_name;
                      else
                         error("let", "Can't convert item into a local variable.");
                         print(el, False, True);
@@ -197,8 +197,8 @@ package body BBS.lisp.evaluate.vars is
                         e := (kind => E_ERROR);
                         return;
                      end if;
-                     el := (kind => E_STACK, st_name => str,
-                            st_offset => offset);
+                     el := (kind => E_VALUE, v => (kind => V_STACK, st_name => str,
+                            st_offset => offset));
                      BBS.lisp.global.stack.push(str, (kind => V_NONE), err);
                      if err then
                         error("let", "Error building stack frame during parsing");
@@ -284,8 +284,8 @@ package body BBS.lisp.evaluate.vars is
                   else
                      el := cons_table(locals).car;
                   end if;
-                  if (el.kind = E_STACK) then
-                     BBS.lisp.global.stack.push(el.st_name, local_val, err);
+                  if (el.kind = E_VALUE) and then (el.v.kind = V_STACK) then
+                     BBS.lisp.global.stack.push(el.v.st_name, local_val, err);
                      if err then
                         error("let", "Error building stack frame during execution");
                      BBS.lisp.global.stack.exit_frame;

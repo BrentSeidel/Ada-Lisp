@@ -144,18 +144,15 @@ package body BBS.lisp.evaluate.loops is
                   elsif (var.kind = E_VALUE) and then (var.v.kind = V_TEMPSYM) then
                      msg("dotimes", "Converting tempsym to loop variable");
                      str := var.v.tempsym;
-                  elsif var.kind = E_STACK then
+                  elsif (var.kind = E_VALUE) and then (var.v.kind = V_STACK) then
                      msg("dotimes", "Converting stack variable to loop variable");
-                     str := var.st_name;
+                     str := var.v.st_name;
                   else
                      error("dotimes", "Can't convert item into a loop variable.");
                      e := (kind => E_ERROR);
                      return;
                   end if;
-                  var := (kind => E_STACK, st_name => str, st_offset => 1);
---                  BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
---                                       st_name => str,
---                                       st_value => (kind => V_NONE)), err);
+                  var := (kind => E_VALUE, v => (kind => V_STACK, st_name => str, st_offset => 1));
                   BBS.lisp.global.stack.push(str, (kind => V_NONE), err);
                end;
                --
@@ -237,12 +234,9 @@ package body BBS.lisp.evaluate.loops is
             --
             --  Build the stack frame
             --
-            if var.kind = E_STACK then
+            if (var.kind = E_VALUE) and then (var.v.kind = V_STACK) then
                BBS.lisp.global.stack.start_frame(err);
-               BBS.lisp.global.stack.push(var.st_name, (kind => V_INTEGER, i => 0), err);
---               BBS.lisp.stack.push((kind => BBS.lisp.stack.ST_VALUE,
---                                    st_name => var.st_name, st_value =>
---                                      (kind => V_INTEGER, i => 0)), err);
+               BBS.lisp.global.stack.push(var.v.st_name, (kind => V_INTEGER, i => 0), err);
             else
                error("dotimes", "Loop counter is not a variable");
                e := (kind => E_ERROR);
@@ -257,7 +251,7 @@ package body BBS.lisp.evaluate.loops is
                --
                BBS.lisp.global.stack.set_entry(BBS.lisp.global.stack.get_fp + 1,
                                         (kind => BBS.lisp.stack.ST_VALUE,
-                                         st_name => var.st_name, st_value =>
+                                         st_name => var.v.st_name, st_value =>
                                            (kind => V_INTEGER, i => int32(index))),
                                        err);
                --
@@ -364,15 +358,15 @@ package body BBS.lisp.evaluate.loops is
                   elsif (var.kind = E_VALUE) and then (var.v.kind = V_TEMPSYM) then
                      msg("dolist", "Converting tempsym to loop variable");
                      str := var.v.tempsym;
-                  elsif var.kind = E_STACK then
+                  elsif (var.kind = E_VALUE) and then (var.v.kind = V_STACK) then
                      msg("dolist", "Converting stack variable to loop variable");
-                     str := var.st_name;
+                     str := var.v.st_name;
                   else
                      error("dolist", "Can't convert item into a loop variable.");
                      e := (kind => E_ERROR);
                      return;
                   end if;
-                  var := (kind => E_STACK, st_name => str, st_offset => 1);
+                  var := (kind => E_VALUE, v => (kind => V_STACK, st_name => str, st_offset => 1));
                   BBS.lisp.global.stack.push(str, (kind => V_NONE), err);
                end;
                --
@@ -436,9 +430,9 @@ package body BBS.lisp.evaluate.loops is
             --
             --  Build the stack frame
             --
-            if var.kind = E_STACK then
+            if (var.kind = E_VALUE) and then (var.v.kind = V_STACK) then
                BBS.lisp.global.stack.start_frame(err);
-               BBS.lisp.global.stack.push(var.st_name, (kind => V_INTEGER, i => 0), err);
+               BBS.lisp.global.stack.push(var.v.st_name, (kind => V_INTEGER, i => 0), err);
             else
                error("dolist", "Loop counter is not a variable");
                e := (kind => E_ERROR);
@@ -454,7 +448,7 @@ package body BBS.lisp.evaluate.loops is
                --
                BBS.lisp.global.stack.set_entry(BBS.lisp.global.stack.get_fp + 1,
                                         (kind => BBS.lisp.stack.ST_VALUE,
-                                         st_name => var.st_name, st_value =>
+                                         st_name => var.v.st_name, st_value =>
                                            element_to_value(cons_table(limit_value).car)), err);
                --
                --  Evaluate all of the items in the body list.

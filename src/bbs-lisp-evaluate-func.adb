@@ -106,15 +106,15 @@ package body BBS.lisp.evaluate.func is
                         else
                            msg("defun", "Converting symbol to parameter.");
                            str := BBS.lisp.symbols.get_name(el.sym);
-                           el := (Kind => E_STACK, st_name => str,
-                               st_offset => offset);
+                           el := (kind => E_VALUE, v => (Kind => V_STACK, st_name => str,
+                               st_offset => offset));
                            BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);
                         end if;
                      elsif (el.kind = E_VALUE) and then (el.v.kind = V_TEMPSYM) then
                         msg("defun", "Converting tempsym to parameter.");
                         str := el.v.tempsym;
-                        el := (Kind => E_STACK, st_name => str,
-                               st_offset => offset);
+                        el := (kind => E_VALUE, v => (Kind => V_STACK, st_name => str,
+                               st_offset => offset));
                         BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);
                      else
                         error("defun", "Can't convert item into a parameter.");
@@ -255,15 +255,15 @@ package body BBS.lisp.evaluate.func is
                         else
                            str := BBS.lisp.symbols.get_name(el.sym);
                            msg("lambda", "Converting symbol to parameter");
-                           el := (kind => E_STACK, st_name => str,
-                               st_offset => offset);
+                           el := (kind => E_VALUE, v => (kind => V_STACK, st_name => str,
+                               st_offset => offset));
                            BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);
                         end if;
                      elsif (el.kind = E_VALUE) and then (el.v.kind = V_TEMPSYM) then
                         msg("lambda", "Converting tempsym to parameter");
                         str := el.v.tempsym;
-                        el := (kind => E_STACK, st_name => str,
-                               st_offset => offset);
+                        el := (kind => E_VALUE, v => (kind => V_STACK, st_name => str,
+                               st_offset => offset));
                         BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);
                      else
                         error("lambda", "Can't convert item into a parameter.");
@@ -386,7 +386,7 @@ package body BBS.lisp.evaluate.func is
          return (Kind => E_ERROR);
       end if;
       while rest > NIL_CONS loop
-         if cons_table(getList(name)).car.kind = E_STACK then
+         if (cons_table(getList(name)).car.kind = E_VALUE) and then (cons_table(getList(name)).car.v.kind = V_STACK) then
             temp_value := first_value(rest);
             if temp_value.kind = E_VALUE then
                param_value := temp_value.v;
@@ -399,7 +399,7 @@ package body BBS.lisp.evaluate.func is
             else
                param_value := (kind => V_NONE);
             end if;
-            BBS.lisp.global.stack.push(cons_table(getList(name)).car.st_name,
+            BBS.lisp.global.stack.push(cons_table(getList(name)).car.v.st_name,
                                        param_value, err);
             if err then
                error("function evaluation", "Error adding parameters to stack frame");

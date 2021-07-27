@@ -74,14 +74,14 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       elsif temp.kind = E_VALUE then
          if temp.v.kind = V_LAMBDA then
             return True;
-         end if;
-      elsif temp.kind = E_STACK then
-         val := BBS.lisp.global.stack.search_frames(temp.st_offset, temp.st_name);
-         if val.kind = V_LAMBDA then
-            return True;
-         end if;
-         if val.kind = V_SYMBOL then
-            return BBS.lisp.symbols.isFunction(val.sym);
+         elsif temp.v.kind = V_STACK then
+            val := BBS.lisp.global.stack.search_frames(temp.v.st_offset, temp.v.st_name);
+            if val.kind = V_LAMBDA then
+               return True;
+            end if;
+            if val.kind = V_SYMBOL then
+               return BBS.lisp.symbols.isFunction(val.sym);
+            end if;
          end if;
       end if;
       return False;
@@ -154,8 +154,8 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
             return BBS.lisp.symbols.get_value(sym);
          end if;
       end if;
-      if e.kind = E_STACK then
-         val := BBS.lisp.global.stack.search_frames(e.st_offset, e.st_name);
+      if (e.kind = E_VALUE) and then (e.v.kind = V_STACK) then
+         val := BBS.lisp.global.stack.search_frames(e.v.st_offset, e.v.st_name);
          return (kind => E_VALUE, v => val);
       end if;
       return e;

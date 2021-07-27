@@ -115,16 +115,20 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    --  returns a value of V_NONE.
    --
    function element_to_value(e : element_type) return value is
+      t : element_type;
    begin
       case e.kind is
          when E_ERROR =>
-            return (kind => V_NONE);
+            return (kind => V_ERROR);
          when E_SYMBOL =>
             return element_to_value(BBS.lisp.evaluate.indirect_elem(e));
-         when E_STACK =>
-            return element_to_value(BBS.lisp.evaluate.indirect_elem(e));
          when E_VALUE =>
-            return e.v;
+            t := BBS.lisp.evaluate.indirect_elem(e);
+            if t.kind = E_VALUE then
+               return t.v;
+            else
+               return element_to_value(BBS.lisp.evaluate.indirect_elem(t));
+            end if;
       end case;
    end;
    --
@@ -141,8 +145,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             print(e.v);
          when E_SYMBOL =>
             print(e.sym);
-         when E_STACK =>
-            print(e.st_name);
       end case;
       if nl then
          New_Line;
@@ -448,7 +450,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          item := BBS.lisp.global.stack.get_entry(sp, err);
          if item.kind = BBS.lisp.stack.ST_VALUE then
             BBS.lisp.strings.ref(item.st_name);
-            return (kind => E_STACK, st_name => item.st_name, st_offset => offset);
+            return (kind => E_VALUE, v => (kind => V_STACK, st_name => item.st_name, st_offset => offset));
          else
             error("find_variable", "Item on stack is of type " &
                     BBS.lisp.stack.stack_entry_type'Image(BBS.lisp.global.stack.get_entry(sp, err).kind));
@@ -564,8 +566,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       if first.kind = E_SYMBOL then
          sym := BBS.lisp.symbols.get_sym(first.sym);
          sym_flag := True;
-      elsif first.kind = E_STACK then
-         val := BBS.lisp.global.stack.search_frames(first.st_offset, first.st_name);
+      elsif (first.kind = E_VALUE) and then (first.v.kind = V_STACK) then
+         val := BBS.lisp.global.stack.search_frames(first.v.st_offset, first.v.st_name);
          if val.kind = V_SYMBOL then
             sym := BBS.lisp.symbols.get_sym(val.sym);
             sym_flag := True;
@@ -636,19 +638,19 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                new_line;
             end if;
             e := bbs.lisp.evaluate.func.eval_function(first.v.lam, rest);
-         else
-            BBS.lisp.memory.ref(s);
-            e := BBS.lisp.evaluate.makeList(s);
-         end if;
-      elsif first.kind = E_STACK then
-         val := BBS.lisp.global.stack.search_frames(first.st_offset, first.st_name);
-         if val.kind = V_LAMBDA then
-            if msg_flag then
-               Put("eval_dispatch: Evaluating lambda ");
-               print(val);
-               new_line;
+         elsif first.v.kind = V_STACK then
+            val := BBS.lisp.global.stack.search_frames(first.v.st_offset, first.v.st_name);
+            if val.kind = V_LAMBDA then
+               if msg_flag then
+                  Put("eval_dispatch: Evaluating lambda ");
+                  print(val);
+                  new_line;
+               end if;
+               e := bbs.lisp.evaluate.func.eval_function(val.lam, rest);
+            else
+               BBS.lisp.memory.ref(s);
+               e := BBS.lisp.evaluate.makeList(s);
             end if;
-            e := bbs.lisp.evaluate.func.eval_function(val.lam, rest);
          else
             BBS.lisp.memory.ref(s);
             e := BBS.lisp.evaluate.makeList(s);

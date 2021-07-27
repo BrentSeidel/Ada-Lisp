@@ -47,7 +47,6 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  variable, or nothing.
    --
    type ptr_type is (E_ERROR,
-                     E_STACK,
                      E_SYMBOL,
                      E_VALUE);
    --
@@ -136,9 +135,6 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
                null;
             when E_SYMBOL =>
                sym : symbol_ptr;
-            when E_STACK =>
-               st_name : string_index;
-               st_offset : Natural;
             when E_VALUE =>
                v : value;
          end case;
