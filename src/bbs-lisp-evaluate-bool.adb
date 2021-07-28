@@ -8,11 +8,11 @@ package body BBS.lisp.evaluate.bool is
    begin
       if s = NIL_CONS then
          error("eval_not", "Internal error.  Should have a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p1 := first_value(s1);
-      if p1.kind = E_ERROR then
+      if (p1.kind = E_VALUE) and then (p1.v.kind = V_ERROR) then
          error("eval_not", "Error reported evaluating parameter.");
          e := p1;
          return;
@@ -21,7 +21,7 @@ package body BBS.lisp.evaluate.bool is
          v := p1.v;
       else
          error("eval_not", "Parameter does not evaluate to a value");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       if v.kind = V_BOOLEAN then
@@ -30,7 +30,7 @@ package body BBS.lisp.evaluate.bool is
          e := (kind => E_VALUE, v => (kind => V_INTEGER, i => uint32_to_int32(not int32_to_uint32(v.i))));
       else
          error("eval_not", "Cannot perform NOT of parameter of type " & value_type'Image(v.kind));
-         e :=  (kind => E_ERROR);
+         e :=  make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -72,7 +72,7 @@ package body BBS.lisp.evaluate.bool is
          temp := first_value(ptr);
          if accumulate(temp, True) = V_ERROR then
             error("eval_and", "Error processing parameter.");
-            e := (kind => E_ERROR);
+            e := make_error(ERR_UNKNOWN);
             return;
          end if;
          if ptr > NIL_CONS then
@@ -81,7 +81,7 @@ package body BBS.lisp.evaluate.bool is
                   temp := first_value(ptr);
                   if accumulate(temp, False) = V_ERROR then
                      error("eval_and", "Error processing parameter.");
-                     e := (kind => E_ERROR);
+                     e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
                   --
@@ -98,7 +98,7 @@ package body BBS.lisp.evaluate.bool is
          end if;
       else
          error("eval_and", "Internal error.  Should have a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       if int_op then
@@ -146,7 +146,7 @@ package body BBS.lisp.evaluate.bool is
          temp := first_value(ptr);
          if accumulate(temp, True) = V_ERROR then
             error("eval_or", "Error processing parameter.");
-            e := (kind => E_ERROR);
+            e := make_error(ERR_UNKNOWN);
             return;
          end if;
          if ptr > NIL_CONS then
@@ -155,7 +155,7 @@ package body BBS.lisp.evaluate.bool is
                   temp := first_value(ptr);
                   if accumulate(temp, False) = V_ERROR then
                      error("eval_or", "Error processing parameter.");
-                     e := (kind => E_ERROR);
+                     e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
                   --
@@ -172,7 +172,7 @@ package body BBS.lisp.evaluate.bool is
          end if;
       else
          error("eval_or", "Internal error.  Should have a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       if int_op then

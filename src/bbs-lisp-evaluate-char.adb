@@ -11,11 +11,11 @@ package body BBS.lisp.evaluate.char is
    begin
       if t = NIL_CONS then
          error("char_int", "Internal error.  Should have a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p1 := first_value(t);
-      if p1.kind = E_ERROR then
+      if (p1.kind = E_VALUE) and then (p1.v.kind = V_ERROR) then
          error("char_int", "Error reported evaluating parameter.");
          e := p1;
          return;
@@ -24,14 +24,14 @@ package body BBS.lisp.evaluate.char is
          v := p1.v;
       else
          error("char_int", "Parameter does not evaluate to a value");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       if v.kind = V_CHARACTER then
          e := (kind => E_VALUE, v => (kind => V_INTEGER, i => Character'Pos(v.c)));
       else
          error("char_int", "Parameter must be of character type, not " & value_type'Image(v.kind));
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -44,11 +44,11 @@ package body BBS.lisp.evaluate.char is
    begin
       if t = NIL_CONS then
          error("int_char", "Internal error.  Should have a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p1 := first_value(t);
-      if p1.kind = E_ERROR then
+      if (p1.kind = E_VALUE) and then (p1.v.kind = V_ERROR) then
          error("int_char", "Error reported evaluating parameter.");
          e := p1;
          return;
@@ -57,7 +57,7 @@ package body BBS.lisp.evaluate.char is
          v := p1.v;
       else
          error("int_char", "Parameter does not evaluate to a value");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       if v.kind = V_INTEGER then
@@ -66,11 +66,11 @@ package body BBS.lisp.evaluate.char is
          else
             error("int_char", "Parameter must be in range 0-255.  Value was "
                   & Integer'Image(Integer(v.i)));
-            e := (Kind => E_ERROR);
+            e := make_error(ERR_UNKNOWN);
          end if;
       else
          error("int_char", "Parameter must be of integer type, not " & value_type'Image(v.kind));
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -83,11 +83,11 @@ package body BBS.lisp.evaluate.char is
    begin
       if t = NIL_CONS then
          error("char_upcase", "Internal error.  Should have a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p1 := first_value(t);
-      if p1.kind = E_ERROR then
+      if (p1.kind = E_VALUE) and then (p1.v.kind = V_ERROR) then
          error("char_upcase", "Error reported evaluating parameter.");
          e := p1;
          return;
@@ -96,7 +96,7 @@ package body BBS.lisp.evaluate.char is
          v := p1.v;
       else
          error("char_upcase", "Parameter does not evaluate to a value");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       if v.kind = V_CHARACTER then
@@ -104,7 +104,7 @@ package body BBS.lisp.evaluate.char is
                                         c => BBS.lisp.strings.To_Upper(v.c)));
       else
          error("char_upcase", "Parameter must be of character type, not " & value_type'Image(v.kind));
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -117,11 +117,11 @@ package body BBS.lisp.evaluate.char is
    begin
       if t = NIL_CONS then
          error("char_upcase", "Internal error.  Should have a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p1 := first_value(t);
-      if p1.kind = E_ERROR then
+      if (p1.kind = E_VALUE) and then (p1.v.kind = V_ERROR) then
          error("char_upcase", "Error reported evaluating parameter.");
          e := p1;
          return;
@@ -130,7 +130,7 @@ package body BBS.lisp.evaluate.char is
          v := p1.v;
       else
          error("char_upcase", "Parameter does not evaluate to a value");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       if v.kind = V_CHARACTER then
@@ -138,7 +138,7 @@ package body BBS.lisp.evaluate.char is
                                         c => BBS.lisp.strings.To_Lower(v.c)));
       else
          error("char_upcase", "Parameter must be of character type, not " & value_type'Image(v.kind));
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
 end;

@@ -13,10 +13,10 @@ package body BBS.lisp.evaluate.cond is
    begin
       if s = cons_index'First then
          error("eval_comp", "Internal error.  Should have a list.");
-         return (kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
       t1 := first_value(s1);
-      if t1.kind = E_ERROR then
+      if (t1.kind = E_VALUE) and then (t1.v.kind = V_ERROR) then
          error("eval_comp", "Error reported evaluating first parameter.");
          return t1;
       end if;
@@ -24,16 +24,16 @@ package body BBS.lisp.evaluate.cond is
          v1 := t1.v;
       else
          error("eval_comp", "First parameter does not evaluate to a value");
-         return (kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
       if s1 > NIL_CONS then
          t2 := first_value(s1);
       else
          error("eval_comp", "Cannot compare a single element.");
          BBS.lisp.memory.deref(t1);
-         return (kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
-      if t2.kind = E_ERROR then
+      if (t2.kind = E_VALUE) and then (t2.v.kind = V_ERROR) then
          error("eval_comp", "Error reported evaluating second parameter.");
          BBS.lisp.memory.deref(t1);
          return t2;
@@ -43,7 +43,7 @@ package body BBS.lisp.evaluate.cond is
       else
          error("eval_comp", "Second parameter does not evaluate to a value");
          BBS.lisp.memory.deref(t1);
-         return (kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
       --
       --  A value of V_NONE is equivalent to a boolean False.
@@ -152,10 +152,10 @@ package body BBS.lisp.evaluate.cond is
                return (kind => E_VALUE, v => (kind => V_BOOLEAN, b => s1 /= s2));
             when SYM_LT =>
                error("eval_comp", "Can only compare quoted symbols for equality.");
-               return (Kind => E_ERROR);
+               return make_error(ERR_UNKNOWN);
             when SYM_GT =>
                error("eval_comp", "Can only compare quoted symbols for equality.");
-               return (Kind => E_ERROR);
+               return make_error(ERR_UNKNOWN);
             end case;
          end;
       else
@@ -167,7 +167,7 @@ package body BBS.lisp.evaluate.cond is
          put_line(", second type is " & value_type'Image(v2.kind));
          BBS.lisp.memory.deref(v1);
          BBS.lisp.memory.deref(v2);
-         return (kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -210,11 +210,11 @@ package body BBS.lisp.evaluate.cond is
    begin
       if s = cons_index'First then
          error("eval_if", "Internal error.  Should have a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p1 := first_value(s1);
-      if p1.kind = E_ERROR then
+      if (p1.kind = E_VALUE) and then (p1.v.kind = V_ERROR) then
          error("eval_if", "Condition reported an error.");
          e := p1;
          return;
@@ -240,7 +240,7 @@ package body BBS.lisp.evaluate.cond is
       if isTrue(p1) then
          if isFunction(p2) then
             t := eval_dispatch(getList(p2));
-            if t.kind = E_ERROR then
+            if (t.kind = E_VALUE) and then (t.v.kind = V_ERROR) then
                error("eval_if", "Error in evaluating true branch");
             end if;
          else
@@ -249,7 +249,7 @@ package body BBS.lisp.evaluate.cond is
       else
          if isFunction(p3) then
             t := eval_dispatch(getList(p3));
-            if t.kind = E_ERROR then
+            if (t.kind = E_VALUE) and then (t.v.kind = V_ERROR) then
                error("eval_if", "Error in evaluating false branch");
             end if;
          else

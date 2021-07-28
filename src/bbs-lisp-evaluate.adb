@@ -104,7 +104,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
          else
             ret_val := indirect_elem(cons_table(statement).car);
          end if;
-         if ret_val.kind = E_ERROR then
+         if (ret_val.kind = E_VALUE) and then (ret_val.v.kind = V_ERROR) then
             error("block execution", "Operation returned an error");
             exit;
          end if;

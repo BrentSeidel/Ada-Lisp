@@ -12,11 +12,11 @@ package body BBS.lisp.evaluate.misc is
    begin
       if s = cons_index'First then
          error("msg", "Internal error.  Should have a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p1 := first_value(t);
-      if p1.kind = E_ERROR then
+      if (p1.kind = E_VALUE) and then (p1.v.kind = V_ERROR) then
          error("msg", "Error reported evaluating parameter.");
          e := p1;
          return;
@@ -31,7 +31,7 @@ package body BBS.lisp.evaluate.misc is
          e := NIL_ELEM;
       else
          error("msg", "Parameter must be of boolean type, not " & value_type'Image(v.kind));
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -62,18 +62,18 @@ package body BBS.lisp.evaluate.misc is
    begin
       if s = NIL_CONS then
          error("sleep", "Internal error.  Should have a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p1 := first_value(t);
-      if p1.kind = E_ERROR then
+      if (p1.kind = E_VALUE) and then (p1.v.kind = V_ERROR) then
          error("sleep", "Error reported evaluating parameter.");
          e := p1;
          return;
       end if;
       if p1.kind /= E_VALUE then
          error("sleep", "Parameter does not evaluate to a value");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       v := p1.v;
@@ -82,7 +82,7 @@ package body BBS.lisp.evaluate.misc is
          e := NIL_ELEM;
       else
          error("sleep", "Parameter must be of integer type, not " & value_type'Image(v.kind));
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --

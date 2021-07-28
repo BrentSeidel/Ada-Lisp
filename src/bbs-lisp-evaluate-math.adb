@@ -29,7 +29,7 @@ package body BBS.lisp.evaluate.math is
    begin
       if s = NIL_CONS then
          error("eval_math", "Internal error.  Should have a list.");
-         return (kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
       el := first_value(t);
       if el.kind = E_VALUE then
@@ -37,14 +37,14 @@ package body BBS.lisp.evaluate.math is
       else
          error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
          BBS.lisp.memory.deref(el);
-         return (kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
       if v.kind = V_INTEGER then
          accum := v.i;
       else
          error("eval_math", "Can't process value of type " & value_type'Image(v.kind));
          BBS.lisp.memory.deref(el);
-         return (kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
       bbs.lisp.memory.deref(el);
       while t > NIL_CONS loop
@@ -54,12 +54,12 @@ package body BBS.lisp.evaluate.math is
          else
             error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
             BBS.lisp.memory.deref(el);
-            return (kind => E_ERROR);
+            return make_error(ERR_UNKNOWN);
          end if;
          if v.kind /= V_INTEGER then
             error("eval_math", "Can't process value of type " & value_type'Image(v.kind));
             BBS.lisp.memory.deref(el);
-            return (kind => E_ERROR);
+            return make_error(ERR_UNKNOWN);
          end if;
          process_value(v.i, b);
          bbs.lisp.memory.deref(el);

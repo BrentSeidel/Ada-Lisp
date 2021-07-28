@@ -46,7 +46,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  can be a cons cell, a value, a symbol, a temporary symbol a stack
    --  variable, or nothing.
    --
-   type ptr_type is (E_ERROR,
+   type ptr_type is (--E_ERROR,
                      E_SYMBOL,
                      E_VALUE);
    --
@@ -75,6 +75,10 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  PH_EXECUTE     - Normal execution
    --
    type phase is (PH_QUERY, PH_PARSE_BEGIN, PH_PARSE_END, PH_EXECUTE);
+   --
+   --  Error codes.  These will be filled out later.
+   --
+   type error_code is (ERR_UNKNOWN, ERR_UNDEFINED);
    --
    --  Define the 32 bit signed and unsigned integer types along with unchecked
    --  conversions.  This is to support bitwise logical operations.
@@ -120,7 +124,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
             st_name : string_index;
             st_offset : Natural;
          when V_ERROR =>
-            null;
+            err : error_code;
          when V_NONE =>
             null;
          end case;
@@ -131,8 +135,8 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    type element_type(kind : ptr_type := E_VALUE) is
       record
          case kind is
-            when E_ERROR =>
-               null;
+--            when E_ERROR =>
+--               null;
             when E_SYMBOL =>
                sym : symbol_ptr;
             when E_VALUE =>
@@ -221,6 +225,10 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  returns a value of V_NONE.
    --
    function element_to_value(e : element_type) return value;
+   --
+   --  Create an error value with the specified error code
+   --
+   function make_error(err : error_code) return element_type;
    --
    --  Some useful constants
    --

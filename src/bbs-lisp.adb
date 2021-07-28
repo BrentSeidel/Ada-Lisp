@@ -37,14 +37,13 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       io_get_line := p_get_line;
       BBS.lisp.memory.reset_tables;
       parse_buff.init;
-      put_line("init: cons size is " & Integer'Image(cons'Size) & " bytes");
-      put_line("init: cons_table size is " & Integer'Image(cons_table'Size) & " bytes");
-      put_line("init: element size is " & Integer'Image(element_type'Size) & " bytes");
-      put_line("init: value size is " & Integer'Image(value'Size) & " bytes");
-      put_line("init: element size is " & Integer'Image(element_type'Size) & " bytes");
-      put_line("init: symbol size is " & Integer'Image(BBS.lisp.symbols.symbol'Size) & " bytes");
-      put_line("init: fixed symbol size is " & Integer'Image(BBS.lisp.symbols.fixed_symbol'Size) & " bytes");
-      put_line("init: symbol body size is " & Integer'Image(BBS.lisp.symbols.sym_body'Size) & " bytes");
+      put_line("init: cons size is " & Integer'Image(cons'Size/8) & " bytes");
+      put_line("init: cons_table size is " & Integer'Image(cons_table'Size/8) & " bytes");
+      put_line("init: element size is " & Integer'Image(element_type'Size/8) & " bytes");
+      put_line("init: value size is " & Integer'Image(value'Size/8) & " bytes");
+      put_line("init: symbol size is " & Integer'Image(BBS.lisp.symbols.symbol'Size/8) & " bytes");
+      put_line("init: fixed symbol size is " & Integer'Image(BBS.lisp.symbols.fixed_symbol'Size/8) & " bytes");
+      put_line("init: symbol body size is " & Integer'Image(BBS.lisp.symbols.sym_body'Size/8) & " bytes");
    end;
    --
    --  Replacements for Text_IO to make porting to embedded systems easier.
@@ -118,8 +117,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       t : element_type;
    begin
       case e.kind is
-         when E_ERROR =>
-            return (kind => V_ERROR);
          when E_SYMBOL =>
             return element_to_value(BBS.lisp.evaluate.indirect_elem(e));
          when E_VALUE =>
@@ -132,6 +129,13 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       end case;
    end;
    --
+   --  Create an error value with the specified error code
+   --
+   function make_error(err : error_code) return element_type is
+   begin
+      return (Kind => E_VALUE, v => (kind => V_ERROR, err => err));
+   end;
+   --
    --  Prints whatever is pointed to by an element pointer.  If d is true,
    --  the element will be dereffed after printing.  If nl is true, a new
    --  line will be printed at the end.
@@ -139,8 +143,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    procedure print(e : element_type; d : Boolean; nl : Boolean) is
    begin
       case e.kind is
-         when E_ERROR =>
-            put("ERROR");
          when E_VALUE =>
             print(e.v);
          when E_SYMBOL =>
@@ -210,7 +212,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          when V_STACK =>
             print(v.st_name);
          when V_ERROR =>
-            put("ERROR");
+            put("ERROR: " & error_code'Image(v.err));
          when V_NONE =>
             put(" Nil");
 --         when others =>
@@ -272,7 +274,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       while True loop
          BBS.lisp.evaluate.set_exit_block(0);
          e := read;
-         if e.kind /= E_ERROR then
+         if not ((e.kind = E_VALUE) and then (e.v.kind = V_ERROR)) then
             r := eval(e);
             if not first_char_flag then
                new_line;
@@ -480,7 +482,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          return (kind => E_VALUE, v=> (kind => V_TEMPSYM, tempsym => n));
       end if;
       error("find_variable", "Oddly, no option matched.");
-      return (kind => E_ERROR);
+      return make_error(ERR_UNKNOWN);
    end;
    --
    procedure add_builtin(n : String; f : execute_function) is

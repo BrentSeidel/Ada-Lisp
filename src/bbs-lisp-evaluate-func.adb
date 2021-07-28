@@ -52,7 +52,7 @@ package body BBS.lisp.evaluate.func is
                   symb := p3.sym;
                   if BBS.lisp.symbols.isFixed(symb) then
                      error("defun", "Can't assign a value to a builtin or special symbol.");
-                     e := (Kind => E_ERROR);
+                     e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
                elsif (p3.kind = E_VALUE) and then (p3.v.Kind = V_TEMPSYM) then
@@ -62,13 +62,13 @@ package body BBS.lisp.evaluate.func is
                      cons_table(getList(p2)).car := (Kind => E_SYMBOL, sym => symb);
                   else
                      error("defun", "Unable to add symbol.");
-                     e := (Kind => E_ERROR);
+                     e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
                else
                   error("defun", "First parameter is not a symbol or temporary symbol.");
                   Put_Line("Parameter type is " & ptr_type'Image(p3.Kind));
-                  e := (Kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                --
@@ -81,7 +81,7 @@ package body BBS.lisp.evaluate.func is
                   params := cons_table(temp).car;
                else
                   error("defun", "Improper parameters.");
-                  e := (Kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                temp := getList(params);
@@ -90,7 +90,7 @@ package body BBS.lisp.evaluate.func is
                   if isList(cons_table(temp).car) then
                      error("defun", "A parameter cannot be a list.");
                      BBS.lisp.memory.deref(cons_table(temp).car);
-                     cons_table(temp).car := (Kind => E_ERROR);
+                     cons_table(temp).car := make_error(ERR_UNKNOWN);
                      error_occured := True;
                   end if;
                   declare
@@ -101,7 +101,7 @@ package body BBS.lisp.evaluate.func is
                      if (el.Kind = E_SYMBOL) then
                         if BBS.lisp.symbols.isFixed(el.sym) or (el.sym.kind = ST_FIXED) then
                            error("defun", "Parameter can't be a builtin or special symbol.");
-                           cons_table(temp).car := (Kind => E_ERROR);
+                           cons_table(temp).car := make_error(ERR_UNKNOWN);
                            error_occured := True;
                         else
                            msg("defun", "Converting symbol to parameter.");
@@ -121,7 +121,7 @@ package body BBS.lisp.evaluate.func is
                         print(el, False, True);
                         Put_Line("Item is of kind " & ptr_type'Image(el.kind));
                         BBS.lisp.memory.deref(cons_table(temp).car);
-                        cons_table(temp).car := (Kind => E_ERROR);
+                        cons_table(temp).car := make_error(ERR_UNKNOWN);
                         error_occured := True;
                      end if;
                      offset := offset + 1;
@@ -136,8 +136,8 @@ package body BBS.lisp.evaluate.func is
             if error_occured then
                BBS.lisp.memory.deref(params);
                temp := getList(cons_table(getList(p2)).cdr);
-               cons_table(temp).car := (Kind => E_ERROR);
-               e := (Kind => E_ERROR);
+               cons_table(temp).car := make_error(ERR_UNKNOWN);
+               e := make_error(ERR_UNKNOWN);
             end if;
          when PH_PARSE_END =>
             BBS.lisp.global.stack.exit_frame;
@@ -147,7 +147,7 @@ package body BBS.lisp.evaluate.func is
          when PH_EXECUTE =>
             if s = NIL_CONS then
                error("defun", "No parameters given to defun.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             name := cons_table(s).car;
@@ -156,17 +156,17 @@ package body BBS.lisp.evaluate.func is
                params := cons_table(temp).car;
             else
                error("defun", "Improper parameters.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             if (name.kind /= E_SYMBOL) then
                error("defun", "Function name must be a symbol.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             if (not isList(params)) and (params /= NIL_ELEM) then
                error("defun", "Parameter list must be a list or NIL.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             --
@@ -229,7 +229,7 @@ package body BBS.lisp.evaluate.func is
                   params := cons_table(getList(params)).car;
                else
                   error("lambda", "Improper parameters.");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                temp := getList(params);
@@ -243,14 +243,14 @@ package body BBS.lisp.evaluate.func is
                      if isList(cons_table(temp).car) then
                         error("lambda", "A parameter cannot be a list.");
                         BBS.lisp.memory.deref(cons_table(temp).car);
-                        cons_table(temp).car := (Kind => E_ERROR);
+                        cons_table(temp).car := make_error(ERR_UNKNOWN);
                         error_occured := True;
                      end if;
                      el :=  cons_table(temp).car;
                      if (el.kind = E_SYMBOL) then
                         if BBS.lisp.symbols.isFixed(el.sym) or (el.sym.kind = ST_FIXED) then
                            error("lambda", "Parameter can't be a builtin or special symbol.");
-                           cons_table(temp).car := (Kind => E_ERROR);
+                           cons_table(temp).car := make_error(ERR_UNKNOWN);
                            error_occured := True;
                         else
                            str := BBS.lisp.symbols.get_name(el.sym);
@@ -270,7 +270,7 @@ package body BBS.lisp.evaluate.func is
                         print(el, False, True);
                         Put_Line("Item is of kind " & ptr_type'Image(el.kind));
                         BBS.lisp.memory.deref(cons_table(temp).car);
-                        cons_table(temp).car := (Kind => E_ERROR);
+                        cons_table(temp).car := make_error(ERR_UNKNOWN);
                         error_occured := True;
                      end if;
                      offset := offset + 1;
@@ -285,8 +285,8 @@ package body BBS.lisp.evaluate.func is
             if error_occured then
                BBS.lisp.memory.deref(params);
                temp := getList(cons_table(s).cdr);
-               cons_table(temp).car := (Kind => E_ERROR);
-               e := (Kind => E_ERROR);
+               cons_table(temp).car := make_error(ERR_UNKNOWN);
+               e := make_error(ERR_UNKNOWN);
             end if;
          when PH_PARSE_END =>
             BBS.lisp.global.stack.exit_frame;
@@ -296,7 +296,7 @@ package body BBS.lisp.evaluate.func is
          when PH_EXECUTE =>
             if s = NIL_CONS then
                error("lambda", "No parameters given to lambda.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             temp := getList(cons_table(s).car);
@@ -304,12 +304,12 @@ package body BBS.lisp.evaluate.func is
                params := makeList(temp);
             else
                error("defun", "Improper parameters.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             if (not isList(params)) and (params /= NIL_ELEM) then
                error("lambda", "Parameter list must be a list or NIL.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             --
@@ -333,7 +333,7 @@ package body BBS.lisp.evaluate.func is
    begin
       if s = NIL_CONS then
          error("eval_list", "No parameter given to eval");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       first_param := first_value(t);
@@ -373,7 +373,7 @@ package body BBS.lisp.evaluate.func is
       if supplied /= requested then
          error("function evaluation", "Parameter count mismatch. "  & Integer'Image(supplied)
               & " elements supplied, " & Integer'Image(requested) & " requested.");
-         return (kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
       --
       --  Assign parameters to values.
@@ -383,7 +383,7 @@ package body BBS.lisp.evaluate.func is
       BBS.lisp.global.stack.start_frame(err);
       if err then
          error("function evaluation", "Error building stack frame");
-         return (Kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
       while rest > NIL_CONS loop
          if (cons_table(getList(name)).car.kind = E_VALUE) and then (cons_table(getList(name)).car.v.kind = V_STACK) then
@@ -404,13 +404,13 @@ package body BBS.lisp.evaluate.func is
             if err then
                error("function evaluation", "Error adding parameters to stack frame");
                BBS.lisp.global.stack.exit_frame;
-               return (Kind => E_ERROR);
+               return make_error(ERR_UNKNOWN);
             end if;
             BBS.lisp.memory.deref(param_value);
          else
             error("function evaluation", "Something horrible happened, a parameter is not a parameter");
             BBS.lisp.global.stack.exit_frame;
-            return (kind => E_ERROR);
+            return make_error(ERR_UNKNOWN);
          end if;
          name  := cons_table(getList(name)).cdr;
       end loop;

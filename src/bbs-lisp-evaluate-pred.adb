@@ -15,7 +15,7 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = cons_index'First then
          error("atomp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := cons_table(s).car;
@@ -32,7 +32,7 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("characterp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
@@ -49,7 +49,7 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("compiled_function_p", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
@@ -68,7 +68,7 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("consp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := cons_table(s).car;
@@ -85,11 +85,11 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("errorp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
-      if p.kind = E_ERROR then
+      if (p.kind = E_VALUE) and then (p.v.kind = V_ERROR) then
          e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
          e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
@@ -102,7 +102,7 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("functionp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
@@ -130,7 +130,7 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("integerp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
@@ -146,7 +146,7 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("listp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := cons_table(s).car;
@@ -163,7 +163,7 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("nullp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
@@ -180,7 +180,7 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("numberp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
@@ -197,7 +197,7 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("simple_string_p", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
@@ -214,7 +214,7 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("stringp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
@@ -230,7 +230,7 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("symbolp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := cons_table(s).car;

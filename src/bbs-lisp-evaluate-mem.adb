@@ -49,7 +49,7 @@ package body BBS.lisp.evaluate.mem is
          value := addr.all;
          e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
       else
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -89,7 +89,7 @@ package body BBS.lisp.evaluate.mem is
          value := addr.all;
          e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
       else
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -129,7 +129,7 @@ package body BBS.lisp.evaluate.mem is
          value := addr.all;
          e := (kind => E_VALUE, v => (kind => V_INTEGER, i => uint32_to_int32(value)));
       else
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -191,7 +191,7 @@ package body BBS.lisp.evaluate.mem is
          addr.all := value;
          e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
       else
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -250,7 +250,7 @@ package body BBS.lisp.evaluate.mem is
          addr.all := value;
          e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
       else
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -309,7 +309,7 @@ package body BBS.lisp.evaluate.mem is
          addr.all := value;
          e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
       else
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --

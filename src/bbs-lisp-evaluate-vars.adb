@@ -35,7 +35,7 @@ package body BBS.lisp.evaluate.vars is
                   symb := p3.sym;
                   if BBS.lisp.symbols.isFixed(symb) then
                      error("setq", "Can't assign a value to a builtin or special symbol");
-                     e := (kind => E_ERROR);
+                     e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
                elsif (p3.kind = E_VALUE) and then (p3.v.kind = V_TEMPSYM) then
@@ -48,12 +48,12 @@ package body BBS.lisp.evaluate.vars is
                else
                   error("setq", "First parameter is not a symbol or temporary symbol.");
                   Put_Line("Parameter type is " & ptr_type'Image(p3.kind));
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
             else
                error("setq", "Something went horribly wrong and setq did not get a list");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
          when PH_PARSE_END =>
@@ -69,13 +69,13 @@ package body BBS.lisp.evaluate.vars is
                else
                   error("setq", "First parameter is not a symbol.");
                   Put_Line("Kind is " & ptr_type'Image(p1.kind));
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                if not stacked then
                   if BBS.lisp.symbols.isFixed(symb) then
                      error("setq", "Can't assign a value to a builtin or special symbol");
-                     e := (kind => E_ERROR);
+                     e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
                end if;
@@ -107,7 +107,7 @@ package body BBS.lisp.evaluate.vars is
                      end if;
                      if err then
                         error("setq", "Error occured setting stack variable");
-                        e := (Kind => E_ERROR);
+                        e := make_error(ERR_UNKNOWN);
                         return;
                      end if;
                   end if;
@@ -120,7 +120,7 @@ package body BBS.lisp.evaluate.vars is
                e := p2;
             else
                error("setq", "Not enough arguments.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
             end if;
             return;
       end case;
@@ -144,7 +144,7 @@ package body BBS.lisp.evaluate.vars is
             BBS.lisp.global.stack.start_frame(err);
             if err then
                error("let", "Error creating stack frame during parsing");
-               e := (Kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
             end if;
             if s > NIL_CONS then
                --
@@ -155,13 +155,13 @@ package body BBS.lisp.evaluate.vars is
                   locals := getList(cons_table(getList(list)).car);
                else
                   error("let", "Improper parameters.");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                if locals = NIL_CONS then
                   error("let", "Parameter list must be a list");
                   BBS.lisp.memory.deref(cons_table(getList(list)).car);
-                  cons_table(getList(list)).car := (Kind => E_ERROR);
+                  cons_table(getList(list)).car := make_error(ERR_UNKNOWN);
                   return;
                end if;
                base := locals;
@@ -194,7 +194,7 @@ package body BBS.lisp.evaluate.vars is
                         error("let", "Can't convert item into a local variable.");
                         print(el, False, True);
                         Put_Line("Item is of kind " & ptr_type'Image(el.kind));
-                        e := (kind => E_ERROR);
+                        e := make_error(ERR_UNKNOWN);
                         return;
                      end if;
                      el := (kind => E_VALUE, v => (kind => V_STACK, st_name => str,
@@ -204,8 +204,8 @@ package body BBS.lisp.evaluate.vars is
                         error("let", "Error building stack frame during parsing");
                         put_line("Local variable list removed");
                         BBS.lisp.memory.deref(base);
-                        e := (Kind => E_ERROR);
-                        cons_table(getList(list)).car := (Kind => E_ERROR);
+                        e := make_error(ERR_UNKNOWN);
+                        cons_table(getList(list)).car := make_error(ERR_UNKNOWN);
                         return;
                      end if;
                      offset := offset + 1;
@@ -219,7 +219,7 @@ package body BBS.lisp.evaluate.vars is
                end loop;
             else
                error("let", "Something went horribly wrong and local did not get a list");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
          when PH_PARSE_END =>
@@ -227,7 +227,7 @@ package body BBS.lisp.evaluate.vars is
          when PH_EXECUTE =>
             if s = NIL_CONS then
                error("let", "No parameters given.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             --
@@ -240,7 +240,7 @@ package body BBS.lisp.evaluate.vars is
             --
             if locals = NIL_CONS then
                error("let", "No list of local variables");
-               e := (Kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             BBS.lisp.global.stack.start_frame(err);
@@ -275,9 +275,9 @@ package body BBS.lisp.evaluate.vars is
                         local_val := (kind => V_LIST, l => getList(check));
                      elsif check.kind = E_VALUE then
                         local_val := check.v;
-                     elsif check.kind = E_ERROR then
+                     elsif (check.kind = E_VALUE) and then (check.v.kind = V_ERROR) then
                         error("let", "Error detected during parameter processing");
-                        e := (Kind => E_ERROR);
+                        e := make_error(ERR_UNKNOWN);
                         BBS.lisp.global.stack.exit_frame;
                         return;
                      end if;
@@ -289,7 +289,7 @@ package body BBS.lisp.evaluate.vars is
                      if err then
                         error("let", "Error building stack frame during execution");
                      BBS.lisp.global.stack.exit_frame;
-                     e := (kind => E_ERROR);
+                     e := make_error(ERR_UNKNOWN);
                      return;
                      end if;
                   else
@@ -298,7 +298,7 @@ package body BBS.lisp.evaluate.vars is
                      print(el, False, False);
                      Put_Line(", Item is of kind " & ptr_type'Image(el.kind));
                      BBS.lisp.global.stack.exit_frame;
-                     e := (kind => E_ERROR);
+                     e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
                   offset := offset + 1;
@@ -309,7 +309,7 @@ package body BBS.lisp.evaluate.vars is
             --  Now evaluate the statements in this context.
             --
             t := execute_block(list);
-            if t.kind = E_ERROR then
+            if (t.kind = E_VALUE) and then (t.v.kind = V_ERROR) then
                error("let", "Error occured evaluating statement");
             end if;
             BBS.lisp.global.stack.exit_frame;

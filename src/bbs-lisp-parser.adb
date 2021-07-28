@@ -50,7 +50,7 @@ package body BBS.lisp.parser is
          return True;
       end if;
       error("parse", "Error in parsing list.");
-      e := (kind => E_ERROR);
+      e := make_error(ERR_UNKNOWN);
       return False;
    end;
    --
@@ -201,7 +201,7 @@ package body BBS.lisp.parser is
                if parse_char(buff, char) then
                   e := (kind => E_VALUE, v => (kind => V_CHARACTER, c => char));
                else
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                end if;
                if cons_table(head).car = NIL_ELEM then
                   cons_table(head).car := e;
@@ -214,7 +214,7 @@ package body BBS.lisp.parser is
                end if;
             else
                error("list", "Unrecognized special form #" & buff.get_char);
-               e := (Kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                if cons_table(head).car = NIL_ELEM then
                   cons_table(head).car := e;
                else
@@ -363,7 +363,7 @@ package body BBS.lisp.parser is
             if get_symb(symb, test) then
                el := (Kind => E_VALUE, v => (kind => V_QSYMBOL, qsym => symb));
             else
-               el := (kind => E_ERROR);
+               el := make_error(ERR_UNKNOWN);
                error("parse symbol", "Unable to allocate symbol entry.");
             end if;
          end if;
@@ -372,7 +372,7 @@ package body BBS.lisp.parser is
       else
          error("parse symbol", "Unable to allocate string fragment.");
       end if;
-      return (kind => E_ERROR);
+      return make_error(ERR_UNKNOWN);
    end;
    --
    --  Parse an integer.

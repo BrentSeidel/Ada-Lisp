@@ -44,13 +44,13 @@ package body BBS.lisp.evaluate.symb is
       if not_initialized then
          if not init_syms then
             error("coerce", "Unable to initialize symbols");
-            e :=(kind => E_ERROR);
+            e := make_error(ERR_UNKNOWN);
             return;
          end if;
       end if;
       if s = NIL_CONS then
          error("coerce", "Internal error.  Should have a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       --
@@ -59,7 +59,7 @@ package body BBS.lisp.evaluate.symb is
       --  was not consistent with Common Lisp and has been changed.
       --
       t2 := first_value(s1);
-      if t2.kind = E_ERROR then
+      if (t2.kind = E_VALUE) and then (t2.v.kind = V_ERROR) then
          error("coerce", "Error reported evaluating second parameter.");
          e := t2;
          return;
@@ -69,14 +69,14 @@ package body BBS.lisp.evaluate.symb is
       else
          error("coerce", "Second parameter does not evaluate to a value");
          BBS.lisp.memory.deref(t2);
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       --
       --  Get second parameter
       --
       t1 := first_value(s1);
-      if t1.kind = E_ERROR then
+      if (t1.kind = E_VALUE) and then (t1.v.kind = V_ERROR) then
          error("coerce", "Error reported evaluating first parameter.");
          e := t1;
          return;
@@ -86,13 +86,13 @@ package body BBS.lisp.evaluate.symb is
       else
          error("coerce", "First parameter does not evaluate to a value.");
          BBS.lisp.memory.deref(t1);
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       if v1.kind /= V_QSYMBOL then
          error("coerce", "First parameter must be a quoted symbol.");
          BBS.lisp.memory.deref(t1);
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       --
@@ -106,7 +106,7 @@ package body BBS.lisp.evaluate.symb is
             error("coerce", "Unable to convert " & value_type'Image(v2.kind) &
                     " to character type.");
             BBS.lisp.memory.deref(t2);
-            e := (kind => E_ERROR);
+            e := make_error(ERR_UNKNOWN);
          end if;
          return;
       elsif v1.qsym = sym_int then
@@ -124,7 +124,7 @@ package body BBS.lisp.evaluate.symb is
             error("coerce", "Unable to convert " & value_type'Image(v2.kind) &
                     " to integer type.");
             BBS.lisp.memory.deref(t2);
-            e := (kind => E_ERROR);
+            e := make_error(ERR_UNKNOWN);
          end if;
          return;
       elsif v1.qsym = sym_bool then
@@ -142,7 +142,7 @@ package body BBS.lisp.evaluate.symb is
             error("coerce", "Unable to convert " & value_type'Image(v2.kind) &
                     " to boolean type.");
             BBS.lisp.memory.deref(t2);
-            e := (kind => E_ERROR);
+            e := make_error(ERR_UNKNOWN);
          end if;
          return;
       elsif v1.qsym = sym_str then
@@ -155,7 +155,7 @@ package body BBS.lisp.evaluate.symb is
                e := (kind => E_VALUE, v  => (kind => V_STRING, s => str));
             else
                error("coerce", "Unable to allocate string fragment.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
             end if;
          elsif v2.kind = V_BOOLEAN then
             --  boolean -> string
@@ -164,21 +164,21 @@ package body BBS.lisp.evaluate.symb is
                   e := (kind => E_VALUE, v  => (kind => V_STRING, s => str));
                else
                   error("coerce", "Unable to allocate string fragment.");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                end if;
             else
                if BBS.lisp.strings.str_to_lisp(str, "NIL") then
                   e := (kind => E_VALUE, v  => (kind => V_STRING, s => str));
                else
                   error("coerce", "Unable to allocate string fragment.");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                end if;
             end if;
          else
             error("coerce", "Unable to convert " & value_type'Image(v2.kind) &
                     " to string type.");
             BBS.lisp.memory.deref(t2);
-            e := (kind => E_ERROR);
+            e := make_error(ERR_UNKNOWN);
          end if;
          return;
       else
@@ -189,7 +189,7 @@ package body BBS.lisp.evaluate.symb is
 
       end if;
       BBS.lisp.memory.deref(t2);
-      e := (kind => E_ERROR);
+      e := make_error(ERR_UNKNOWN);
    end;
    --
    procedure concatenate(e : out element_type; s : cons_index) is
@@ -202,20 +202,20 @@ package body BBS.lisp.evaluate.symb is
       if not_initialized then
          if not init_syms then
             error("concatenate", "Unable to initialize symbols");
-            e :=(kind => E_ERROR);
+            e := make_error(ERR_UNKNOWN);
             return;
          end if;
       end if;
       if s = NIL_CONS then
          error("concatenate", "Internal error.  Should have a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       --
       --  Get first parameter
       --
       t1 := first_value(s1);
-      if t1.kind = E_ERROR then
+      if (t1.kind = E_VALUE) and then (t1.v.kind = V_ERROR) then
          error("concatenate", "Error reported evaluating first parameter.");
          e := t1;
          return;
@@ -225,13 +225,13 @@ package body BBS.lisp.evaluate.symb is
       else
          error("concatenate", "First parameter does not evaluate to a value.");
          BBS.lisp.memory.deref(t1);
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       if v1.kind /= V_QSYMBOL then
          error("concatenate", "First parameter must be a quoted symbol.");
          BBS.lisp.memory.deref(t1);
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       if (v1.qsym /= sym_str) and (v1.qsym /= sym_list) then
@@ -239,7 +239,7 @@ package body BBS.lisp.evaluate.symb is
          put("Unrecognized type: ");
          print(v1);
          new_line;
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       --
@@ -256,13 +256,13 @@ package body BBS.lisp.evaluate.symb is
             if not BBS.lisp.strings.alloc(str_head) then
                error("concatenate", "Unable to allocate string fragment.");
                BBS.lisp.memory.deref(t2);
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             dest_str := str_head;
             if s1 = NIL_CONS then
                error("concatenate", "Cannot concatenate a single element.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             while s1 > NIL_CONS loop
@@ -270,7 +270,7 @@ package body BBS.lisp.evaluate.symb is
                --  Second parameter - will probably move
                --
                t2 := first_value(s1);
-               if t2.kind = E_ERROR then
+               if (t2.kind = E_VALUE) and then (t2.v.kind = V_ERROR) then
                   error("concatenate", "Error reported evaluating second parameter.");
                   e := t2;
                   return;
@@ -280,20 +280,20 @@ package body BBS.lisp.evaluate.symb is
                else
                   error("concatenate", "Parameter does not evaluate to a value");
                   BBS.lisp.memory.deref(t2);
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                if v2.kind /= V_STRING then
                   error("concatenate", "Unable to concatenate " & value_type'Image(v2.kind) &
                           " to a string.");
                   BBS.lisp.memory.deref(t2);
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                if not BBS.lisp.strings.append(dest_str, v2.s) then
                   error("concatenate", "Unable to allocate string fragment");
                   BBS.lisp.strings.deref(str_head);
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                BBS.lisp.memory.deref(t2);
@@ -313,12 +313,12 @@ package body BBS.lisp.evaluate.symb is
          begin
             if s1 = NIL_CONS then
                error("concatenate", "Cannot concatenate a single element.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             while s1 > NIL_CONS loop
                t2 := first_value(s1);
-               if t2.kind = E_ERROR then
+               if (t2.kind = E_VALUE) and then (t2.v.kind = V_ERROR) then
                   error("concatenate", "Error reported evaluating additional parameters.");
                   e := t2;
                   return;
@@ -327,14 +327,14 @@ package body BBS.lisp.evaluate.symb is
                if src_cons = NIL_CONS then
                   error("concatenate", "Parameter does not evaluate to a list");
                   BBS.lisp.memory.deref(t2);
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                loop
                   if not BBS.lisp.memory.alloc(temp_cons) then
                      error("concatenate", "Unable to allocate cons cell.");
                      BBS.lisp.memory.deref(cons_head);
-                     e := (kind => E_ERROR);
+                     e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
                   if cons_head = NIL_CONS then

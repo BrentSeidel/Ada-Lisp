@@ -981,7 +981,7 @@ Testing a longer line that should be split across fragments.
   (verify-true (errorp (let 1)) "Value parameter to let")
   (verify-true (errorp (let (1) (print "Hello"))) "Value rather than a variable to let")
   (verify-true (errorp (let (#\error) (print "Hello"))) "Error parameter to let")
-  (verify-true (errorp (let ((a #\error)) (print "Hello"))) "Error value to let variable")
+  (verify-false (errorp (let ((a #\error)) (print "Hello"))) "Error value to let variable")
   (verify-true (errorp (let ((a 1)) (+ 1 #\error))) "Error in body of let")
 )
 (test-var-errors)

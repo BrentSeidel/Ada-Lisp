@@ -27,7 +27,7 @@ package body BBS.lisp.evaluate.loops is
          else
             temp := indirect_elem(cond);
          end if;
-         if temp.kind = E_ERROR then
+         if (temp.kind = E_VALUE) and then (temp.v.kind = V_ERROR) then
             error("dowhile", "Error occurred during evaluation of condition");
             e := temp;
             return;
@@ -39,7 +39,7 @@ package body BBS.lisp.evaluate.loops is
             --  Evaluate all of the items in the list.
             --
             t := execute_block(body_list);
-            if t.kind = E_ERROR then
+            if (t.kind = E_VALUE) and then (t.v.kind = V_ERROR) then
                error("dowhile", "Error occurred during evaluation of body");
                e := t;
                error_occured := True;
@@ -49,7 +49,7 @@ package body BBS.lisp.evaluate.loops is
                else
                   temp := indirect_elem(cond);
                end if;
-               if temp.kind = E_ERROR then
+               if (temp.kind = E_VALUE) and then (temp.v.kind = V_ERROR) then
                   error("dowhile", "Error occurred during evaluation of condition");
                   e := temp;
                   error_occured := True;
@@ -64,7 +64,7 @@ package body BBS.lisp.evaluate.loops is
          BBS.lisp.memory.deref(temp);
       else
          error("dowhile", "Must provide a condition and expressions.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       if not error_occured then
@@ -106,13 +106,13 @@ package body BBS.lisp.evaluate.loops is
                --
                if limits = NIL_CONS then
                   error("dotimes", "No parameters provided");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                limits := getList(cons_table(limits).car);
                if limits = NIL_CONS then
                   error("dotimes", "List not provided for limits.");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                var := cons_table(limits).car;
@@ -120,13 +120,13 @@ package body BBS.lisp.evaluate.loops is
                if isList(var) then
                   error("dotimes", "The loop variable cannot be a list.");
                   BBS.lisp.memory.deref(var);
-                  cons_table(limits).car := (Kind => E_ERROR);
-                  e := (kind => E_ERROR);
+                  cons_table(limits).car := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                if rest = NIL_CONS then
                   error("dotimes", "Loop limit not provided.");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                --
@@ -149,7 +149,7 @@ package body BBS.lisp.evaluate.loops is
                      str := var.v.st_name;
                   else
                      error("dotimes", "Can't convert item into a loop variable.");
-                     e := (kind => E_ERROR);
+                     e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
                   var := (kind => E_VALUE, v => (kind => V_STACK, st_name => str, st_offset => 1));
@@ -177,7 +177,7 @@ package body BBS.lisp.evaluate.loops is
                --
                if limits = NIL_CONS then
                   error("dotimes", "List not provided for limits.");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                var := cons_table(limits).car;
@@ -195,7 +195,7 @@ package body BBS.lisp.evaluate.loops is
                   end if;
                else
                   error("dotimes", "Loop limit not provided.");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
             end if;
@@ -212,17 +212,17 @@ package body BBS.lisp.evaluate.loops is
                      limit_value := Natural(limit.v.i);
                   else
                      error("dotimes", "Limit must not be negative.");
-                     e := (kind => E_ERROR);
+                     e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
                else
                   error("dotimes", "Limit is not an integer");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
             else
                error("dotimes", "Limit is not a value");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             --
@@ -239,7 +239,7 @@ package body BBS.lisp.evaluate.loops is
                BBS.lisp.global.stack.push(var.v.st_name, (kind => V_INTEGER, i => 0), err);
             else
                error("dotimes", "Loop counter is not a variable");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             --
@@ -259,7 +259,7 @@ package body BBS.lisp.evaluate.loops is
                --
                BBS.lisp.memory.deref(t);
                t := execute_block(body_list);
-               if t.kind = E_ERROR then
+               if (t.kind = E_VALUE) and then (t.v.kind = V_ERROR) then
                   error("dotimes", "Error occurred in body");
                   BBS.lisp.global.stack.exit_frame;
                   e := t;
@@ -279,7 +279,7 @@ package body BBS.lisp.evaluate.loops is
                t := eval_dispatch(getList(result));
             else
                t := indirect_elem(result);
-               if t.kind = E_ERROR then
+               if (t.kind = E_VALUE) and then (t.v.kind = V_ERROR) then
                   error("dotimes", "Error occurred in body");
                end if;
             end if;
@@ -320,13 +320,13 @@ package body BBS.lisp.evaluate.loops is
                --
                if limits = NIL_CONS then
                   error("dolist", "No parameters provided");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                limits := getList(cons_table(limits).car);
                if limits = NIL_CONS then
                   error("dolist", "List not provided for limits.");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                var := cons_table(limits).car;
@@ -334,13 +334,13 @@ package body BBS.lisp.evaluate.loops is
                if isList(var) then
                   error("dolist", "The loop variable cannot be a list.");
                   BBS.lisp.memory.deref(var);
-                  cons_table(limits).car := (Kind => E_ERROR);
-                  e := (kind => E_ERROR);
+                  cons_table(limits).car := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                if rest = NIL_CONS then
                   error("dolist", "Loop limit not provided.");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                --
@@ -363,7 +363,7 @@ package body BBS.lisp.evaluate.loops is
                      str := var.v.st_name;
                   else
                      error("dolist", "Can't convert item into a loop variable.");
-                     e := (kind => E_ERROR);
+                     e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
                   var := (kind => E_VALUE, v => (kind => V_STACK, st_name => str, st_offset => 1));
@@ -391,7 +391,7 @@ package body BBS.lisp.evaluate.loops is
                --
                if limits = NIL_CONS then
                   error("dolist", "List not provided for limits.");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
                var := cons_table(limits).car;
@@ -409,7 +409,7 @@ package body BBS.lisp.evaluate.loops is
                   end if;
                else
                   error("dolist", "Loop limit not provided.");
-                  e := (kind => E_ERROR);
+                  e := make_error(ERR_UNKNOWN);
                   return;
                end if;
             end if;
@@ -418,7 +418,7 @@ package body BBS.lisp.evaluate.loops is
             --
             if not isList(source_list) then
                error("dolist", "List not provided for iteration.");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             --
@@ -435,7 +435,7 @@ package body BBS.lisp.evaluate.loops is
                BBS.lisp.global.stack.push(var.v.st_name, (kind => V_INTEGER, i => 0), err);
             else
                error("dolist", "Loop counter is not a variable");
-               e := (kind => E_ERROR);
+               e := make_error(ERR_UNKNOWN);
                return;
             end if;
             --
@@ -455,7 +455,7 @@ package body BBS.lisp.evaluate.loops is
                --
                BBS.lisp.memory.deref(t);
                t := execute_block(body_list);
-               if t.kind = E_ERROR then
+               if (t.kind = E_VALUE) and then (t.v.kind = V_ERROR) then
                   error("dolist", "Error occurred in body");
                   BBS.lisp.global.stack.exit_frame;
                   e := t;
@@ -479,7 +479,7 @@ package body BBS.lisp.evaluate.loops is
                t := eval_dispatch(getList(result));
             else
                t := indirect_elem(result);
-               if t.kind = E_ERROR then
+               if (t.kind = E_VALUE) and then (t.v.kind = V_ERROR) then
                   error("dolist", "Error occurred in body");
                end if;
             end if;
