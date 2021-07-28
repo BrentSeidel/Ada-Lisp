@@ -37,13 +37,20 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       io_get_line := p_get_line;
       BBS.lisp.memory.reset_tables;
       parse_buff.init;
-      put_line("init: cons size is " & Integer'Image(cons'Size/8) & " bytes");
-      put_line("init: cons_table size is " & Integer'Image(cons_table'Size/8) & " bytes");
-      put_line("init: element size is " & Integer'Image(element_type'Size/8) & " bytes");
-      put_line("init: value size is " & Integer'Image(value'Size/8) & " bytes");
-      put_line("init: symbol size is " & Integer'Image(BBS.lisp.symbols.symbol'Size/8) & " bytes");
-      put_line("init: fixed symbol size is " & Integer'Image(BBS.lisp.symbols.fixed_symbol'Size/8) & " bytes");
-      put_line("init: symbol body size is " & Integer'Image(BBS.lisp.symbols.sym_body'Size/8) & " bytes");
+--      put_line("init: cons size is " & Integer'Image(cons'Size/8) & " bytes");
+--      put_line("init: cons_table size is " & Integer'Image(cons_table'Size/8) & " bytes");
+--      put_line("init: element size is " & Integer'Image(element_type'Size/8) & " bytes");
+--      put_line("init: value size is " & Integer'Image(value'Size/8) & " bytes");
+--      put_line("init: symbol size is " & Integer'Image(BBS.lisp.symbols.symbol'Size/8) & " bytes");
+--      put_line("init: fixed symbol size is " & Integer'Image(BBS.lisp.symbols.fixed_symbol'Size/8) & " bytes");
+--      put_line("init: symbol body size is " & Integer'Image(BBS.lisp.symbols.sym_body'Size/8) & " bytes");
+--  init: cons size is  36 bytes
+--  init: cons_table size is  18036 bytes
+--  init: element size is  16 bytes
+--  init: value size is  12 bytes
+--  init: symbol size is  32 bytes
+--  init: fixed symbol size is  40 bytes
+--  init: symbol body size is  24 bytes
    end;
    --
    --  Replacements for Text_IO to make porting to embedded systems easier.
@@ -97,8 +104,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       if BBS.lisp.evaluate.isList(e) then
          r := eval_dispatch(BBS.lisp.evaluate.getList(e));
          BBS.lisp.memory.deref(e);
-      elsif e.kind = E_SYMBOL then
-         sym := e.sym;
+      elsif (e.kind = E_VALUE) and then (e.v.kind = V_SYMBOL) then
+         sym := e.v.sym;
          if BBS.lisp.symbols.get_type(sym) = SY_VARIABLE then
             r := BBS.lisp.symbols.get_value(sym);
          else
@@ -117,8 +124,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       t : element_type;
    begin
       case e.kind is
-         when E_SYMBOL =>
-            return element_to_value(BBS.lisp.evaluate.indirect_elem(e));
+         when E_EMPTY =>
+            return (kind => V_NONE);
          when E_VALUE =>
             t := BBS.lisp.evaluate.indirect_elem(e);
             if t.kind = E_VALUE then
@@ -143,10 +150,10 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    procedure print(e : element_type; d : Boolean; nl : Boolean) is
    begin
       case e.kind is
+         when E_EMPTY =>
+            put("<nothing>");
          when E_VALUE =>
             print(e.v);
-         when E_SYMBOL =>
-            print(e.sym);
       end case;
       if nl then
          New_Line;
@@ -420,7 +427,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          if BBS.lisp.symbols.get_type(fsym) = SY_VARIABLE then
             return BBS.lisp.symbols.get_value(fsym);
          else
-            return (Kind => E_SYMBOL, sym => fsym);
+            return (kind => E_VALUE, v => (Kind => V_SYMBOL, sym => fsym));
          end if;
       end if;
       --
@@ -441,7 +448,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       end loop;
       if found then
          if (symb.kind = SY_BUILTIN) or (symb.kind = SY_SPECIAL) then
-            return (kind => E_SYMBOL, sym => (kind => ST_DYNAMIC, d => temp));
+            return (kind => E_VALUE, v => (kind => V_SYMBOL, sym => (kind => ST_DYNAMIC, d => temp)));
          end if;
       end if;
       --
@@ -464,7 +471,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       --
       if found then
          if (symb.kind = SY_VARIABLE) or (symb.kind = SY_EMPTY) then
-            return (kind => E_SYMBOL, sym => (kind => ST_DYNAMIC, d => temp));
+            return (kind => E_VALUE, v => (kind => V_SYMBOL, sym => (kind => ST_DYNAMIC, d => temp)));
          end if;
       end if;
       --
@@ -475,7 +482,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          if available then
             BBS.lisp.strings.ref(n);
             BBS.lisp.symbols.add_sym(free, (ref => 1, name => n, b => (kind => SY_EMPTY)));
-            return (kind => E_SYMBOL, sym => free);
+            return (kind => E_VALUE, v => (kind => V_SYMBOL, sym => free));
          end if;
       else
          BBS.lisp.strings.ref(n);
@@ -565,8 +572,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       rest : constant cons_index := BBS.lisp.evaluate.getList(cons_table(s).cdr);
       val : value;
    begin
-      if first.kind = E_SYMBOL then
-         sym := BBS.lisp.symbols.get_sym(first.sym);
+      if (first.kind = E_VALUE) and then (first.v.kind = V_SYMBOL) then
+         sym := BBS.lisp.symbols.get_sym(first.v.sym);
          sym_flag := True;
       elsif (first.kind = E_VALUE) and then (first.v.kind = V_STACK) then
          val := BBS.lisp.global.stack.search_frames(first.v.st_offset, first.v.st_name);
@@ -580,10 +587,10 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             when SY_BUILTIN =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating builtin ");
-                  if first.sym.kind = ST_FIXED then
-                     put(BBS.lisp.symbols.get_name(first.sym).all);
+                  if first.v.sym.kind = ST_FIXED then
+                     put(BBS.lisp.symbols.get_name(first.v.sym).all);
                   else
-                     Print(BBS.lisp.symbols.get_name(first.sym));
+                     Print(BBS.lisp.symbols.get_name(first.v.sym));
                   end if;
                   New_Line;
                end if;
@@ -591,10 +598,10 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             when SY_SPECIAL =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating special ");
-                  if first.sym.kind = ST_FIXED then
-                     put(BBS.lisp.symbols.get_name(first.sym).all);
+                  if first.v.sym.kind = ST_FIXED then
+                     put(BBS.lisp.symbols.get_name(first.v.sym).all);
                   else
-                     Print(BBS.lisp.symbols.get_name(first.sym));
+                     Print(BBS.lisp.symbols.get_name(first.v.sym));
                   end if;
                   New_Line;
                end if;
@@ -602,10 +609,10 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             when SY_VARIABLE =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating variable ");
-                  if first.sym.kind = ST_FIXED then
-                     put(BBS.lisp.symbols.get_name(first.sym).all);
+                  if first.v.sym.kind = ST_FIXED then
+                     put(BBS.lisp.symbols.get_name(first.v.sym).all);
                   else
-                     Print(BBS.lisp.symbols.get_name(first.sym));
+                     Print(BBS.lisp.symbols.get_name(first.v.sym));
                   end if;
                   new_line;
                end if;
@@ -623,10 +630,10 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             when others =>
                if msg_flag then
                   Put("eval_dispatch: Evaluating unknown ");
-                  if first.sym.kind = ST_FIXED then
-                     put(BBS.lisp.symbols.get_name(first.sym).all);
+                  if first.v.sym.kind = ST_FIXED then
+                     put(BBS.lisp.symbols.get_name(first.v.sym).all);
                   else
-                     Print(BBS.lisp.symbols.get_name(first.sym));
+                     Print(BBS.lisp.symbols.get_name(first.v.sym));
                   end if;
                   new_line;
                end if;

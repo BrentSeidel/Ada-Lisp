@@ -53,8 +53,8 @@ package body BBS.lisp.evaluate.pred is
          return;
       end if;
       p := first_value(t);
-      if p.kind = E_SYMBOL then
-         if BBS.lisp.symbols.isFixed(p.sym) then
+      if (p.kind = E_VALUE) and then (p.v.kind = V_SYMBOL) then
+         if BBS.lisp.symbols.isFixed(p.v.sym) then
             e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
             return;
          end if;
@@ -106,8 +106,8 @@ package body BBS.lisp.evaluate.pred is
          return;
       end if;
       p := first_value(t);
-      if p.kind = E_SYMBOL then
-         if BBS.lisp.symbols.isFunction(p.sym) then
+      if (p.kind = E_VALUE) and then (p.v.kind = V_SYMBOL) then
+         if BBS.lisp.symbols.isFunction(p.v.sym) then
             e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
             BBS.lisp.memory.deref(p);
             return;
@@ -234,7 +234,7 @@ package body BBS.lisp.evaluate.pred is
          return;
       end if;
       p := cons_table(s).car;
-      if p.kind = E_SYMBOL then
+      if (p.kind = E_VALUE) and then (p.v.kind = V_SYMBOL) then
          e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
       else
          e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));

@@ -47,7 +47,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  variable, or nothing.
    --
    type ptr_type is (--E_ERROR,
-                     E_SYMBOL,
+                     E_EMPTY,
                      E_VALUE);
    --
    --  This indicates what kind of data is in a value.  These are the allowed
@@ -135,10 +135,8 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    type element_type(kind : ptr_type := E_VALUE) is
       record
          case kind is
---            when E_ERROR =>
---               null;
-            when E_SYMBOL =>
-               sym : symbol_ptr;
+            when E_EMPTY =>
+               null;
             when E_VALUE =>
                v : value;
          end case;

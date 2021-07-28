@@ -47,11 +47,11 @@ package body BBS.lisp.utilities is
          var_name : string_index;  --  Name of potential replacement
          flag : Boolean := False;  --  Was it a tempsym?
       begin
-         if e.kind = E_SYMBOL then
-            if e.sym.kind = ST_FIXED then
+         if (e.kind = E_VALUE) and then (e.v.kind = V_SYMBOL) then
+            if e.v.sym.kind = ST_FIXED then
                return False;
             end if;
-            name := BBS.lisp.symbols.get_name(e.sym);
+            name := BBS.lisp.symbols.get_name(e.v.sym);
          elsif (e.kind = E_VALUE) and then (e.v.kind = V_TEMPSYM) then
             name := e.v.tempsym;
             flag := True;

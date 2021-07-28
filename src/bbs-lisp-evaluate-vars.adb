@@ -31,8 +31,8 @@ package body BBS.lisp.evaluate.vars is
                p1 := cons_table(s).car;  --  Should be symbol for setq
                p2 := cons_table(s).cdr;
                p3 := cons_table(getList(p2)).car; --  Should be a symbol or tempsym
-               if p3.kind = E_SYMBOL then
-                  symb := p3.sym;
+               if (p3.kind = E_VALUE) and then (p3.v.kind = V_SYMBOL) then
+                  symb := p3.v.sym;
                   if BBS.lisp.symbols.isFixed(symb) then
                      error("setq", "Can't assign a value to a builtin or special symbol");
                      e := make_error(ERR_UNKNOWN);
@@ -62,8 +62,8 @@ package body BBS.lisp.evaluate.vars is
             msg("setq", "Called during execute phase.");
             if s > NIL_CONS then
                p1 := cons_table(s).car;  --  Should be symbol name
-               if p1.kind = E_SYMBOL then
-                  symb := p1.sym;
+               if (p1.kind = E_VALUE) and then (p1.v.kind = V_SYMBOL) then
+                  symb := p1.v.sym;
                elsif (p1.kind = E_VALUE) and then (p1.v.kind = V_STACK) then
                   stacked := True;
                else
@@ -181,8 +181,8 @@ package body BBS.lisp.evaluate.vars is
                      else
                         el := cons_table(locals).car;
                      end if;
-                     if (el.kind = E_SYMBOL) and then (el.sym.kind = ST_DYNAMIC) then
-                        str := BBS.lisp.symbols.get_name(el.sym);
+                     if (el.kind = E_VALUE) and then ((el.v.kind = V_SYMBOL) and then (el.v.sym.kind = ST_DYNAMIC)) then
+                        str := BBS.lisp.symbols.get_name(el.v.sym);
                         msg("let", "Converting symbol to local variable");
                      elsif (el.kind = E_VALUE) and then (el.v.kind = V_TEMPSYM) then
                         str := el.v.tempsym;

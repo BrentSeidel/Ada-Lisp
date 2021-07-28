@@ -4,7 +4,7 @@ package BBS.lisp.info is
    --  the test coverage script.  It should not be edited by hand.
    --
    name           : constant String  := "Tiny Lisp";
-   timestamp      : constant String  := "Wed Jul 28 14:02:26 MST 2021";
+   timestamp      : constant String  := "Wed Jul 28 15:14:50 MST 2021";
    build_date     : constant String  := "2021-Jul-28 (master)";
    version_string : constant String  := "V00.02+";
    version_date   : constant Integer := 20210728;  -- yyyymmdd

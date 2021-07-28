@@ -138,9 +138,9 @@ package body BBS.lisp.evaluate.loops is
                declare
                   str : string_index;
                begin
-                  if (var.kind = E_SYMBOL) and then (var.sym.kind = ST_DYNAMIC) then
+                  if (var.kind = E_VALUE) and then (var.v.kind = V_SYMBOL) and then (var.v.sym.kind = ST_DYNAMIC) then
                      msg("dotimes", "Converting symbol to loop variable");
-                     str := BBS.lisp.symbols.get_name(var.sym);
+                     str := BBS.lisp.symbols.get_name(var.v.sym);
                   elsif (var.kind = E_VALUE) and then (var.v.kind = V_TEMPSYM) then
                      msg("dotimes", "Converting tempsym to loop variable");
                      str := var.v.tempsym;
@@ -352,9 +352,9 @@ package body BBS.lisp.evaluate.loops is
                declare
                   str : string_index;
                begin
-                  if (var.kind = E_SYMBOL) and then (var.sym.kind = ST_DYNAMIC) then
+                  if (var.kind = E_VALUE) and then (var.v.kind = V_SYMBOL) and then (var.v.sym.kind = ST_DYNAMIC) then
                      msg("dolist", "Converting symbol to loop variable");
-                     str := BBS.lisp.symbols.get_name(var.sym);
+                     str := BBS.lisp.symbols.get_name(var.v.sym);
                   elsif (var.kind = E_VALUE) and then (var.v.kind = V_TEMPSYM) then
                      msg("dolist", "Converting tempsym to loop variable");
                      str := var.v.tempsym;
