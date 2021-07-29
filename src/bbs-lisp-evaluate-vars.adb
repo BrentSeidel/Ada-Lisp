@@ -253,7 +253,7 @@ package body BBS.lisp.evaluate.vars is
                   temp_list : cons_index;
                   check : element_type;
                   offset : Natural := 1;
-                  local_val : element_type := (kind => V_BOOLEAN, b => False);
+                  local_val : element_type := ELEM_F;
                begin
                   if isList(cons_table(locals).car) then
                      temp_list := getList(cons_table(locals).car);

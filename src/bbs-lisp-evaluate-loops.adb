@@ -443,7 +443,7 @@ package body BBS.lisp.evaluate.loops is
                BBS.lisp.global.stack.set_entry(BBS.lisp.global.stack.get_fp + 1,
                                         (kind => BBS.lisp.stack.ST_VALUE,
                                          st_name => var.st_name, st_value =>
-                                           element_to_value(cons_table(limit_value).car)), err);
+                                           BBS.lisp.evaluate.indirect_elem(cons_table(limit_value).car)), err);
                --
                --  Evaluate all of the items in the body list.
                --

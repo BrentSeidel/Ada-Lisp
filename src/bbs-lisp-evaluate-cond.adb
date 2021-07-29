@@ -34,10 +34,10 @@ package body BBS.lisp.evaluate.cond is
       --  A value of V_NONE is equivalent to a boolean False.
       --
       if t1.kind = V_NONE then
-         t1 := (kind => V_BOOLEAN, b => False);
+         t1 := ELEM_F;
       end if;
       if t2.kind = V_NONE then
-         t2 := (kind => V_BOOLEAN, b => False);
+         t2 := ELEM_F;
       end if;
       --
       --  Integer comparison

@@ -29,6 +29,10 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    type string_index is range -1 .. max_string;
    type fsymb_index is new Positive;
    type symbol_table is (ST_NULL, ST_FIXED, ST_DYNAMIC);
+   --
+   --  Pointer to a symbol.  This needs to be able to distinguish between symbols
+   --  that are in the fixed table and the dynamic table.
+   --
    type symbol_ptr(kind : symbol_table := ST_NULL) is
       record
          case kind is
@@ -198,11 +202,6 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
      with Global => (Input => (cons_table),
                      output => output_stream);
    --
-   --  Converts an element to a value.  Any element that cannot be converted
-   --  returns a value of V_NONE.
-   --
-   function element_to_value(e : element_type) return element_type;
-   --
    --  Create an error value with the specified error code
    --
    function make_error(err : error_code) return element_type;
@@ -213,6 +212,8 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    NIL_CONS : constant cons_index := cons_index'First;
    NIL_STR  : constant string_index := string_index'First;
    NIL_SYM  : constant symbol_ptr := (kind => ST_NULL);
+   ELEM_T   : constant element_type := (kind => V_BOOLEAN, b => True);
+   ELEM_F   : constant element_type := (kind => V_BOOLEAN, b => False);
    --
    --  Define some enumerations
    --

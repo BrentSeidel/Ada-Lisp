@@ -11,19 +11,13 @@ package body BBS.lisp.evaluate.pred is
    --  These return true of false depending on the type of data passed.
    --
    procedure atomp(e : out element_type; s : cons_index) is
-      p : element_type;
    begin
       if s = cons_index'First then
          error("atomp", "Internal error, not passed a list.");
          e := make_error(ERR_UNKNOWN);
          return;
       end if;
-      p := cons_table(s).car;
-      if not isList(p) then
-         e := (kind => V_BOOLEAN, b => True);
-      else
-         e := (kind => V_BOOLEAN, b => False);
-      end if;
+      e := (Kind => V_BOOLEAN, b => not isList(cons_table(s).car));
    end;
    --
    procedure characterp(e : out element_type; s : cons_index) is
@@ -36,11 +30,7 @@ package body BBS.lisp.evaluate.pred is
          return;
       end if;
       p := first_value(t);
-      if p.kind = V_CHARACTER then
-         e := (kind => V_BOOLEAN, b => True);
-      else
-         e := (kind => V_BOOLEAN, b => False);
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_CHARACTER);
    end;
    --
    procedure compiled_function_p(e : out element_type; s : cons_index) is
@@ -55,28 +45,22 @@ package body BBS.lisp.evaluate.pred is
       p := first_value(t);
       if p.kind = V_SYMBOL then
          if BBS.lisp.symbols.isFixed(p.sym) then
-            e := (kind => V_BOOLEAN, b => True);
+            e := ELEM_T;
             return;
          end if;
       end if;
       BBS.lisp.memory.deref(p);
-      e := (kind => V_BOOLEAN, b => False);
+      e := ELEM_F;
    end;
    --
    procedure consp(e : out element_type; s : cons_index) is
-      p : element_type;
    begin
       if s = NIL_CONS then
          error("consp", "Internal error, not passed a list.");
          e := make_error(ERR_UNKNOWN);
          return;
       end if;
-      p := cons_table(s).car;
-      if isList(p) then
-         e := (kind => V_BOOLEAN, b => True);
-      else
-         e := (kind => V_BOOLEAN, b => False);
-      end if;
+      e := (Kind => V_BOOLEAN, b => isList(cons_table(s).car));
    end;
    --
    procedure errorp(e : out element_type; s : cons_index) is
@@ -89,11 +73,7 @@ package body BBS.lisp.evaluate.pred is
          return;
       end if;
       p := first_value(t);
-      if p.kind = V_ERROR then
-         e := (kind => V_BOOLEAN, b => True);
-      else
-         e := (kind => V_BOOLEAN, b => False);
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_ERROR);
    end;
    --
    procedure functionp(e : out element_type; s : cons_index)is
@@ -108,18 +88,18 @@ package body BBS.lisp.evaluate.pred is
       p := first_value(t);
       if p.kind = V_SYMBOL then
          if BBS.lisp.symbols.isFunction(p.sym) then
-            e := (kind => V_BOOLEAN, b => True);
+            e := ELEM_T;
             BBS.lisp.memory.deref(p);
             return;
          end if;
       end if;
       if p.kind = V_LAMBDA then
-         e := (kind => V_BOOLEAN, b => True);
+         e := ELEM_T;
          BBS.lisp.memory.deref(p);
          return;
       end if;
       BBS.lisp.memory.deref(p);
-      e := (kind => V_BOOLEAN, b => False);
+      e := ELEM_F;
    end;
    --
    procedure integerp(e : out element_type; s : cons_index) is
@@ -132,11 +112,7 @@ package body BBS.lisp.evaluate.pred is
          return;
       end if;
       p := first_value(t);
-      if p.kind = V_INTEGER then
-         e := (kind => V_BOOLEAN, b => True);
-      else
-         e := (kind => V_BOOLEAN, b => False);
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_INTEGER);
    end;
    --
    procedure listp(e : out element_type; s : cons_index) is
@@ -148,11 +124,7 @@ package body BBS.lisp.evaluate.pred is
          return;
       end if;
       p := cons_table(s).car;
-      if isList(p) or (p = NIL_ELEM) then
-         e := (kind => V_BOOLEAN, b => True);
-      else
-         e := (kind => V_BOOLEAN, b => False);
-      end if;
+      e := (Kind => V_BOOLEAN, b => isList(p) or (p = NIL_ELEM));
    end;
    --
    procedure nullp(e : out element_type; s : cons_index) is
@@ -165,11 +137,7 @@ package body BBS.lisp.evaluate.pred is
          return;
       end if;
       p := first_value(t);
-      if p = NIL_ELEM then
-         e := (kind => V_BOOLEAN, b => True);
-      else
-         e := (kind => V_BOOLEAN, b => False);
-      end if;
+      e := (Kind => V_BOOLEAN, b => p = NIL_ELEM);
    end;
    --
    procedure numberp(e : out element_type; s : cons_index) is
@@ -182,11 +150,7 @@ package body BBS.lisp.evaluate.pred is
          return;
       end if;
       p := first_value(t);
-      if p.kind = V_INTEGER then
-         e := (kind => V_BOOLEAN, b => True);
-      else
-         e := (kind => V_BOOLEAN, b => False);
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_INTEGER);
    end;
    --
    procedure simple_string_p(e : out element_type; s : cons_index) is
@@ -199,11 +163,7 @@ package body BBS.lisp.evaluate.pred is
          return;
       end if;
       p := first_value(t);
-      if p.kind = V_STRING then
-         e := (kind => V_BOOLEAN, b => True);
-      else
-         e := (kind => V_BOOLEAN, b => False);
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_STRING);
    end;
    --
    procedure stringp(e : out element_type; s : cons_index) is
@@ -216,11 +176,7 @@ package body BBS.lisp.evaluate.pred is
          return;
       end if;
       p := first_value(t);
-      if p.kind = V_STRING then
-         e := (kind => V_BOOLEAN, b => True);
-      else
-         e := (kind => V_BOOLEAN, b => False);
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_STRING);
    end;
    --
    procedure symbolp(e : out element_type; s : cons_index) is
@@ -232,11 +188,7 @@ package body BBS.lisp.evaluate.pred is
          return;
       end if;
       p := cons_table(s).car;
-      if p.kind = V_SYMBOL then
-         e := (kind => V_BOOLEAN, b => True);
-      else
-         e := (kind => V_BOOLEAN, b => False);
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_SYMBOL);
    end;
    --
    --  These always return false as the data types are not implemented.  There's
@@ -246,7 +198,7 @@ package body BBS.lisp.evaluate.pred is
    procedure return_false(e : out element_type; s : cons_index) is
       pragma Unreferenced (s);
    begin
-      e := (kind => V_BOOLEAN, b => False);
+      e := ELEM_F;
    end;
    --
 --   procedure arrayp(e : out element_type; s : cons_index);

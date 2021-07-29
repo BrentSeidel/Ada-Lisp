@@ -115,11 +115,7 @@ package body BBS.lisp.evaluate.symb is
             e := t2;
          elsif t2.kind = V_INTEGER then
             --  integer -> boolean (0 -> NIL, /= 0 -> T)
-            if t2.i = 0 then
-               e := (kind => V_BOOLEAN, b => False);
-            else
-               e := (kind => V_BOOLEAN, b => True);
-            end if;
+            e := (kind => V_BOOLEAN, b => t2.i /= 0);
          else
             error("coerce", "Unable to convert " & value_type'Image(t2.kind) &
                     " to boolean type.");
