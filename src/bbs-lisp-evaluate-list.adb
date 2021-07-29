@@ -15,13 +15,13 @@ package body BBS.lisp.evaluate.list is
          return;
       end if;
       p1 := first_value(s1);
-      if (p1.kind = E_VALUE) and then (p1.v.kind = V_ERROR) then
+      if p1.kind = V_ERROR then
          error("cons", "Error reported evaluating first parameter.");
          e := p1;
          return;
       end if;
       p2 := first_value(s1);
-      if (p2.kind = E_VALUE) and then (p2.v.kind = V_ERROR) then
+      if p2.kind = V_ERROR then
          error("cons", "Error reported evaluating second parameter.");
          e := p2;
          return;
@@ -31,7 +31,7 @@ package body BBS.lisp.evaluate.list is
          cons_table(s1).cdr := p2;
          BBS.lisp.memory.ref(p1);
          BBS.lisp.memory.ref(p2);
-         e := (kind => E_VALUE, v => (kind => V_LIST, l => s1));
+         e := (kind => V_LIST, l => s1);
       else
          error("cons", "Unable to allocate cons cell");
          e := make_error(ERR_UNKNOWN);
@@ -97,7 +97,7 @@ package body BBS.lisp.evaluate.list is
       if s > NIL_CONS then
          if BBS.lisp.memory.alloc(s1) then
             first := first_value(rest);
-            if (first.kind = E_VALUE) and then (first.v.kind = V_ERROR) then
+            if first.kind = V_ERROR then
                error("list", "Parameter returned an error");
                e := first;
                return;
@@ -118,13 +118,13 @@ package body BBS.lisp.evaluate.list is
       while rest > NIL_CONS loop
          if BBS.lisp.memory.alloc(s1) then
             first := first_value(rest);
-            if (first.kind = E_VALUE) and then (first.v.kind = V_ERROR) then
+            if first.kind = V_ERROR then
                BBS.lisp.memory.deref(head);
                error("list", "Parameter returned an error");
                e := first;
                return;
             end if;
-            cons_table(tail).cdr := (kind => E_VALUE, v => (kind => V_LIST, l => s1));
+            cons_table(tail).cdr := (kind => V_LIST, l => s1);
             tail := s1;
             BBS.lisp.memory.ref(first);
             cons_table(s1).car := first;
@@ -135,7 +135,7 @@ package body BBS.lisp.evaluate.list is
             return;
          end if;
       end loop;
-      e := (kind => E_VALUE, v => (kind => V_LIST, l => head));
+      e := (kind => V_LIST, l => head);
    end;
    --
    --  Append one list to another.  Not yet implemented.

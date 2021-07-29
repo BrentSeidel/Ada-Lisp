@@ -163,7 +163,7 @@ package body BBS.lisp.parser is
          elsif BBS.lisp.utilities.isDigit(test_char) or
            ((test_char = '-') and buff.is_next_digit) then
             int(buff, value);
-            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+            e := (kind => V_INTEGER, i => value);
             if cons_table(head).car = NIL_ELEM then
                cons_table(head).car := e;
             else
@@ -184,7 +184,7 @@ package body BBS.lisp.parser is
                --  Hexidecimal number
                --
                hex(buff, value);
-               e := (kind => E_VALUE, v => (kind => V_INTEGER, i => value));
+               e := (kind => V_INTEGER, i => value);
                if cons_table(head).car = NIL_ELEM then
                   cons_table(head).car := e;
                else
@@ -199,7 +199,7 @@ package body BBS.lisp.parser is
                --  Character literal
                --
                if parse_char(buff, char) then
-                  e := (kind => E_VALUE, v => (kind => V_CHARACTER, c => char));
+                  e := (kind => V_CHARACTER, c => char);
                else
                   e := make_error(ERR_UNKNOWN);
                end if;
@@ -231,7 +231,7 @@ package body BBS.lisp.parser is
          --
          elsif test_char = '"' then
             if parse_str(buff, str) then
-               e := (kind => E_VALUE, v => (kind => V_STRING, s => str));
+               e := (kind => V_STRING, s => str);
                if cons_table(head).car = NIL_ELEM then
                   cons_table(head).car := e;
                else
@@ -274,28 +274,22 @@ package body BBS.lisp.parser is
                   return False;
                end if;
             end if;
-            if (e.kind = E_VALUE) and then ((e.v.kind = V_SYMBOL) and not (qtemp or qfixed)) then
-               if (BBS.lisp.symbols.get_type(e.v.sym) = SY_SPECIAL) and (item = 0) then
+            if (e.kind = V_SYMBOL) and not (qtemp or qfixed) then
+               if (BBS.lisp.symbols.get_type(e.sym) = SY_SPECIAL) and (item = 0) then
                   special_flag := True;
-                  special_ptr := e.v.sym;
+                  special_ptr := e.sym;
                   special_symb := BBS.lisp.symbols.get_sym(special_ptr);
                   special_symb.s.all(e, head, PH_QUERY);
-                  if e.kind = E_VALUE then
-                     if e.v.kind = V_INTEGER then
-                        if e.v.i >= 0 then
-                           item_count := Natural(e.v.i);
-                        else
-                           error("list", "Query returned value less than 0");
-                           BBS.lisp.memory.deref(head);
-                           return False;
-                        end if;
+                  if e.kind = V_INTEGER then
+                     if e.i >= 0 then
+                        item_count := Natural(e.i);
                      else
-                        error("list", "Query did not return an integer");
+                        error("list", "Query returned value less than 0");
                         BBS.lisp.memory.deref(head);
                         return False;
                      end if;
                   else
-                     error("list", "Query did not return a value");
+                     error("list", "Query did not return an integer");
                      BBS.lisp.memory.deref(head);
                      return False;
                   end if;
@@ -361,7 +355,7 @@ package body BBS.lisp.parser is
             el := find_variable(test, False);
          else
             if get_symb(symb, test) then
-               el := (Kind => E_VALUE, v => (kind => V_QSYMBOL, qsym => symb));
+               el := (kind => V_QSYMBOL, qsym => symb);
             else
                el := make_error(ERR_UNKNOWN);
                error("parse symbol", "Unable to allocate symbol entry.");

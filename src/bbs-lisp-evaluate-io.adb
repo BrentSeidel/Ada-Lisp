@@ -48,7 +48,7 @@ package body BBS.lisp.evaluate.io is
                return;
             end if;
          end loop;
-      e := (kind => E_VALUE, v => (kind => V_STRING, s => first));
+      e := (kind => V_STRING, s => first);
       else
          e := NIL_ELEM;
       end if;
@@ -59,18 +59,10 @@ package body BBS.lisp.evaluate.io is
    procedure read_expr(e : out element_type; s : cons_index) is
       t   : cons_index := s;
       car : element_type;
-      v   : value;
    begin
       if s > NIL_CONS then
          car := first_value(t);
-         if car.kind = E_VALUE then
-            v := car.v;
-         else
-            error("read_expr", "Must have a value parameter");
-            e := make_error(ERR_UNKNOWN);
-            return;
-         end if;
-         if v.kind /= V_STRING then
+         if car.kind /= V_STRING then
             error("read_expr", "Must have a string parameter");
             e := make_error(ERR_UNKNOWN);
             return;
@@ -83,7 +75,7 @@ package body BBS.lisp.evaluate.io is
       --
       --  Now we have a string parameter, parse it.
       --
-      str.init(v.s);
+      str.init(car.s);
       if not BBS.lisp.parser.parse(str'Access, e) then
          error("read_expr", "Parsing failed");
          BBS.lisp.memory.deref(e);

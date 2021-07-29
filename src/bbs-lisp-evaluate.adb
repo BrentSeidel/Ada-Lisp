@@ -15,11 +15,8 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
            and (cons_table(getList(e)).cdr = NIL_ELEM) then
             return False;
          end if;
-      elsif e.kind = E_VALUE then
-         if e.v.kind = V_BOOLEAN  then
-            return e.v.b;
-         end if;
-         return True;
+      elsif e.kind = V_BOOLEAN  then
+         return e.b;
       end if;
       return True;
    end;
@@ -29,12 +26,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function isList(e : element_type) return Boolean is
    begin
-      if e.kind = E_VALUE then
-         if e.v.kind = V_LIST then
-            return True;
-         end if;
-      end if;
-      return False;
+      return e.kind = V_LIST;
    end;
    --
    --  If e is list type, return the index of the head of the list, otherwise
@@ -42,8 +34,8 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function getList(e : element_type) return cons_index is
    begin
-      if e.kind = E_VALUE and then e.v.kind = V_LIST then
-         return e.v.l;
+      if e.kind = V_LIST then
+         return e.l;
       end if;
       return NIL_CONS;
    end;
@@ -52,7 +44,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function makeList(s : cons_index) return element_type is
    begin
-      return (Kind => E_VALUE, v => (kind => V_LIST, l => s));
+      return (kind => V_LIST, l => s);
    end;
    --
    --  This checks to see if the element represents a function call.  The element
@@ -61,7 +53,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    function isFunction(e : element_type) return Boolean is
       temp : element_type;
       list : cons_index;
-      val : value;
+      val  : element_type;
    begin
       list := getList(e);
       if list > NIL_CONS then
@@ -69,21 +61,17 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       else
          temp := e;
       end if;
---      if temp.kind = E_SYMBOL then
---         return BBS.lisp.symbols.isFunction(temp.sym);
-      if temp.kind = E_VALUE then
-         if temp.v.kind = V_SYMBOL then
-            return BBS.lisp.symbols.isFunction(temp.v.sym);
-         elsif temp.v.kind = V_LAMBDA then
+      if temp.kind = V_SYMBOL then
+         return BBS.lisp.symbols.isFunction(temp.sym);
+      elsif temp.kind = V_LAMBDA then
+         return True;
+      elsif temp.kind = V_STACK then
+         val := BBS.lisp.global.stack.search_frames(temp.st_offset, temp.st_name);
+         if val.kind = V_LAMBDA then
             return True;
-         elsif temp.v.kind = V_STACK then
-            val := BBS.lisp.global.stack.search_frames(temp.v.st_offset, temp.v.st_name);
-            if val.kind = V_LAMBDA then
-               return True;
-            end if;
-            if val.kind = V_SYMBOL then
-               return BBS.lisp.symbols.isFunction(val.sym);
-            end if;
+         end if;
+         if val.kind = V_SYMBOL then
+            return BBS.lisp.symbols.isFunction(val.sym);
          end if;
       end if;
       return False;
@@ -106,7 +94,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
          else
             ret_val := indirect_elem(cons_table(statement).car);
          end if;
-         if (ret_val.kind = E_VALUE) and then (ret_val.v.kind = V_ERROR) then
+         if ret_val.kind = V_ERROR then
             error("block execution", "Operation returned an error");
             exit;
          end if;
@@ -148,17 +136,17 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function indirect_elem(e : element_type) return element_type is
       sym : symbol_ptr;
-      val : value;
+      val : element_type;
    begin
-      if (e.kind = E_VALUE) and then (e.v.kind = V_SYMBOL) then
-         sym := e.v.sym;
+      if e.kind = V_SYMBOL then
+         sym := e.sym;
          if BBS.lisp.symbols.get_type(sym) = SY_VARIABLE then
             return BBS.lisp.symbols.get_value(sym);
          end if;
       end if;
-      if (e.kind = E_VALUE) and then (e.v.kind = V_STACK) then
-         val := BBS.lisp.global.stack.search_frames(e.v.st_offset, e.v.st_name);
-         return (kind => E_VALUE, v => val);
+      if e.kind = V_STACK then
+         val := BBS.lisp.global.stack.search_frames(e.st_offset, e.st_name);
+         return val;
       end if;
       return e;
    end;

@@ -81,7 +81,6 @@ package BBS.lisp.symbols is
    --
    function get_list(s : symbol_ptr) return cons_index
      with pre => (get_type(s) = SY_VARIABLE);
---     with pre => (get_type(s) = SY_LAMBDA);
    --
    --  Get a symbol's name (there are two different routines because the name is
    --  stored differently between fixed and dynamic symbols.
@@ -258,7 +257,7 @@ private
       (name => LIST'Access,                b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.list.list'Access)),
       (name => LISTP'Access,               b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.listp'Access)),
       (name => MSG'Access,                 b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.misc.msg'Access)),
-      (name => LISP_F'Access,              b => (Kind => SY_VARIABLE, pv => (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False)))),
+      (name => LISP_F'Access,              b => (Kind => SY_VARIABLE, pv => (kind => V_BOOLEAN, b => False))),
       (name => EVAL_NOT'Access,            b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.bool.eval_not'Access)),
       (name => NULLP'Access,               b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.nullp'Access)),
       (name => NUMBERP'Access,             b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.numberp'Access)),
@@ -289,7 +288,7 @@ private
       (name => STRINGP'Access,             b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.stringp'Access)),
       (name => SUBSEQ'Access,              b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.str.subseq'Access)),
       (name => SYMBOLP'Access,             b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.symbolp'Access)),
-      (name => LISP_T'Access,              b => (Kind => SY_VARIABLE, pv => (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True)))),
+      (name => LISP_T'Access,              b => (Kind => SY_VARIABLE, pv => (kind => V_BOOLEAN, b => True))),
       (name => TERPRI'Access,              b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.io.terpri'Access)),
       (name => VECTORP'Access,             b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.return_false'Access))
      );

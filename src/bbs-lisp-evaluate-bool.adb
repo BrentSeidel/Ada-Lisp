@@ -4,7 +4,6 @@ package body BBS.lisp.evaluate.bool is
    procedure eval_not(e : out element_type; s : cons_index) is
       p1 : element_type; --  Parameter
       s1 : cons_index := s;
-      v : value;
    begin
       if s = NIL_CONS then
          error("eval_not", "Internal error.  Should have a list.");
@@ -12,24 +11,17 @@ package body BBS.lisp.evaluate.bool is
          return;
       end if;
       p1 := first_value(s1);
-      if (p1.kind = E_VALUE) and then (p1.v.kind = V_ERROR) then
+      if p1.kind = V_ERROR then
          error("eval_not", "Error reported evaluating parameter.");
          e := p1;
          return;
       end if;
-      if p1.kind = E_VALUE then
-         v := p1.v;
+      if p1.kind = V_BOOLEAN then
+         e := (kind => V_BOOLEAN, b => not p1.b);
+      elsif p1.kind = V_INTEGER then
+         e := (kind => V_INTEGER, i => uint32_to_int32(not int32_to_uint32(p1.i)));
       else
-         error("eval_not", "Parameter does not evaluate to a value");
-         e := make_error(ERR_UNKNOWN);
-         return;
-      end if;
-      if v.kind = V_BOOLEAN then
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => not v.b));
-      elsif v.kind = V_INTEGER then
-         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => uint32_to_int32(not int32_to_uint32(v.i))));
-      else
-         error("eval_not", "Cannot perform NOT of parameter of type " & value_type'Image(v.kind));
+         error("eval_not", "Cannot perform NOT of parameter of type " & value_type'Image(p1.kind));
          e :=  make_error(ERR_UNKNOWN);
       end if;
    end;
@@ -42,24 +34,16 @@ package body BBS.lisp.evaluate.bool is
       temp : element_type;
 
       function accumulate(t : element_type; first : Boolean) return value_type is
-         v : value;
       begin
-         if t.kind = E_VALUE then
-            v := t.v;
-         else
-            error("eval_and", "Can't process element " & ptr_type'Image(temp.kind));
-            BBS.lisp.memory.deref(temp);
-            return V_ERROR;
-         end if;
-         if (v.kind = V_INTEGER and first) or (v.kind = V_INTEGER and int_op) then
+         if (t.kind = V_INTEGER and first) or (t.kind = V_INTEGER and int_op) then
             accum_i := uint32_to_int32(int32_to_uint32(accum_i) and
-                                                        int32_to_uint32(v.i));
+                                                        int32_to_uint32(t.i));
             int_op := True;
-         elsif (v.kind = V_BOOLEAN and first) or (v.kind = V_BOOLEAN and not int_op) then
-            accum_b := accum_b and v.b;
+         elsif (t.kind = V_BOOLEAN and first) or (t.kind = V_BOOLEAN and not int_op) then
+            accum_b := accum_b and t.b;
             int_op := False;
          else
-            error("eval_and", "Can't process " & value_type'Image(v.kind));
+            error("eval_and", "Can't process " & value_type'Image(t.kind));
             BBS.lisp.memory.deref(temp);
             return V_ERROR;
          end if;
@@ -102,9 +86,9 @@ package body BBS.lisp.evaluate.bool is
          return;
       end if;
       if int_op then
-         e := (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum_i));
+         e := (kind => V_INTEGER, i => accum_i);
       else
-         e := (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => accum_b));
+         e := (kind => V_BOOLEAN, b => accum_b);
       end if;
    end;
    --
@@ -116,24 +100,16 @@ package body BBS.lisp.evaluate.bool is
       temp : element_type;
 
       function accumulate(t : element_type; first : Boolean) return value_type is
-         v : value;
       begin
-         if t.kind = E_VALUE then
-            v := t.v;
-         else
-            error("eval_or", "Can't process element " & ptr_type'Image(temp.kind));
-            BBS.lisp.memory.deref(temp);
-            return V_ERROR;
-         end if;
-         if (v.kind = V_INTEGER and first) or (v.kind = V_INTEGER and int_op) then
+         if (t.kind = V_INTEGER and first) or (t.kind = V_INTEGER and int_op) then
             accum_i := uint32_to_int32(int32_to_uint32(accum_i) or
-                                                        int32_to_uint32(v.i));
+                                                        int32_to_uint32(t.i));
             int_op := True;
-         elsif (v.kind = V_BOOLEAN and first) or (v.kind = V_BOOLEAN and not int_op) then
-            accum_b := accum_b or v.b;
+         elsif (t.kind = V_BOOLEAN and first) or (t.kind = V_BOOLEAN and not int_op) then
+            accum_b := accum_b or t.b;
             int_op := False;
          else
-            error("eval_or", "Can't process " & value_type'Image(v.kind));
+            error("eval_or", "Can't process " & value_type'Image(t.kind));
             BBS.lisp.memory.deref(temp);
             return V_ERROR;
          end if;
@@ -176,9 +152,9 @@ package body BBS.lisp.evaluate.bool is
          return;
       end if;
       if int_op then
-         e := (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum_i));
+         e := (kind => V_INTEGER, i => accum_i);
       else
-         e := (Kind => E_VALUE, v => (kind => V_BOOLEAN, b => accum_b));
+         e := (kind => V_BOOLEAN, b => accum_b);
       end if;
    end;
    --

@@ -31,7 +31,7 @@ package body BBS.lisp.evaluate.func is
       --
       case p is
          when PH_QUERY =>
-            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 4));
+            e := (kind => V_INTEGER, i => 4);
             return;
             --
             --  First identify the name, parameter list, and body.  Then perform
@@ -48,18 +48,18 @@ package body BBS.lisp.evaluate.func is
                --
                --  Process the function name
                --
-               if (p3.kind = E_VALUE) and then (p3.v.Kind = V_SYMBOL) then
-                  symb := p3.v.sym;
+               if p3.Kind = V_SYMBOL then
+                  symb := p3.sym;
                   if BBS.lisp.symbols.isFixed(symb) then
                      error("defun", "Can't assign a value to a builtin or special symbol.");
                      e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
-               elsif (p3.kind = E_VALUE) and then (p3.v.Kind = V_TEMPSYM) then
-                  flag := get_symb(symb, p3.v.tempsym);
+               elsif p3.Kind = V_TEMPSYM then
+                  flag := get_symb(symb, p3.tempsym);
                   if flag then
-                     BBS.lisp.strings.ref(p3.v.tempsym);
-                     cons_table(getList(p2)).car := (Kind => E_VALUE, v => (kind => V_SYMBOL, sym => symb));
+                     BBS.lisp.strings.ref(p3.tempsym);
+                     cons_table(getList(p2)).car := (kind => V_SYMBOL, sym => symb);
                   else
                      error("defun", "Unable to add symbol.");
                      e := make_error(ERR_UNKNOWN);
@@ -67,7 +67,7 @@ package body BBS.lisp.evaluate.func is
                   end if;
                else
                   error("defun", "First parameter is not a symbol or temporary symbol.");
-                  Put_Line("Parameter type is " & ptr_type'Image(p3.Kind));
+                  Put_Line("Parameter type is " & value_type'Image(p3.Kind));
                   e := make_error(ERR_UNKNOWN);
                   return;
                end if;
@@ -98,28 +98,28 @@ package body BBS.lisp.evaluate.func is
                      str : string_index;
                      offset : Natural := 1;
                   begin
-                     if (el.kind = E_VALUE) and then (el.v.Kind = V_SYMBOL) then
-                        if BBS.lisp.symbols.isFixed(el.v.sym) or (el.v.sym.kind = ST_FIXED) then
+                     if el.Kind = V_SYMBOL then
+                        if BBS.lisp.symbols.isFixed(el.sym) or (el.sym.kind = ST_FIXED) then
                            error("defun", "Parameter can't be a builtin or special symbol.");
                            cons_table(temp).car := make_error(ERR_UNKNOWN);
                            error_occured := True;
                         else
                            msg("defun", "Converting symbol to parameter.");
-                           str := BBS.lisp.symbols.get_name(el.v.sym);
-                           el := (kind => E_VALUE, v => (Kind => V_STACK, st_name => str,
-                               st_offset => offset));
+                           str := BBS.lisp.symbols.get_name(el.sym);
+                           el := (Kind => V_STACK, st_name => str,
+                               st_offset => offset);
                            BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);
                         end if;
-                     elsif (el.kind = E_VALUE) and then (el.v.kind = V_TEMPSYM) then
+                     elsif el.kind = V_TEMPSYM then
                         msg("defun", "Converting tempsym to parameter.");
-                        str := el.v.tempsym;
-                        el := (kind => E_VALUE, v => (Kind => V_STACK, st_name => str,
-                               st_offset => offset));
+                        str := el.tempsym;
+                        el := (Kind => V_STACK, st_name => str,
+                               st_offset => offset);
                         BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);
                      else
                         error("defun", "Can't convert item into a parameter.");
                         print(el, False, True);
-                        Put_Line("Item is of kind " & ptr_type'Image(el.kind));
+                        Put_Line("Item is of kind " & value_type'Image(el.kind));
                         BBS.lisp.memory.deref(cons_table(temp).car);
                         cons_table(temp).car := make_error(ERR_UNKNOWN);
                         error_occured := True;
@@ -159,7 +159,7 @@ package body BBS.lisp.evaluate.func is
                e := make_error(ERR_UNKNOWN);
                return;
             end if;
-            if not ((name.kind = E_VALUE) and then (name.v.kind = V_SYMBOL)) then
+            if name.kind /= V_SYMBOL then
                error("defun", "Function name must be a symbol.");
                e := make_error(ERR_UNKNOWN);
                return;
@@ -173,7 +173,7 @@ package body BBS.lisp.evaluate.func is
             --  To get to this point, all checks have passed, so attach the
             --  parameter list and body to the symbol.
             --
-            symb := name.v.sym;
+            symb := name.sym;
             --
             --  If something else was attached to the symbol, deref it.
             --
@@ -183,9 +183,8 @@ package body BBS.lisp.evaluate.func is
             temp := getList(cons_table(s).cdr);
             cons_table(s).cdr := NIL_ELEM;
             BBS.lisp.symbols.set_sym(symb, (kind => SY_VARIABLE,
-                                            pv => (kind => E_VALUE,
-                                                   v => (kind => V_LAMBDA,
-                                                         lam => temp))));
+                                            pv => (kind => V_LAMBDA,
+                                                         lam => temp)));
       end case;
       e := NIL_ELEM;
    end;
@@ -210,7 +209,7 @@ package body BBS.lisp.evaluate.func is
       --
       case p is
          when PH_QUERY =>
-            e := (kind => E_VALUE, v => (kind => V_INTEGER, i => 2));
+            e := (kind => V_INTEGER, i => 2);
             return;
             --
             --  First identify the name, parameter list, and body.  Then perform
@@ -247,28 +246,27 @@ package body BBS.lisp.evaluate.func is
                         error_occured := True;
                      end if;
                      el :=  cons_table(temp).car;
-                     if (el.kind = E_VALUE) and then (el.v.kind = V_SYMBOL) then
-                        if BBS.lisp.symbols.isFixed(el.v.sym) or (el.v.sym.kind = ST_FIXED) then
+                     if el.kind = V_SYMBOL then
+                        if BBS.lisp.symbols.isFixed(el.sym) or (el.sym.kind = ST_FIXED) then
                            error("lambda", "Parameter can't be a builtin or special symbol.");
                            cons_table(temp).car := make_error(ERR_UNKNOWN);
                            error_occured := True;
                         else
-                           str := BBS.lisp.symbols.get_name(el.v.sym);
+                           str := BBS.lisp.symbols.get_name(el.sym);
                            msg("lambda", "Converting symbol to parameter");
-                           el := (kind => E_VALUE, v => (kind => V_STACK, st_name => str,
-                               st_offset => offset));
+                           el := (kind => V_STACK, st_name => str,
+                               st_offset => offset);
                            BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);
                         end if;
-                     elsif (el.kind = E_VALUE) and then (el.v.kind = V_TEMPSYM) then
+                     elsif el.kind = V_TEMPSYM then
                         msg("lambda", "Converting tempsym to parameter");
-                        str := el.v.tempsym;
-                        el := (kind => E_VALUE, v => (kind => V_STACK, st_name => str,
-                               st_offset => offset));
+                        str := el.tempsym;
+                        el := (kind => V_STACK, st_name => str, st_offset => offset);
                         BBS.lisp.global.stack.push(str, (kind => V_NONE), error_occured);
                      else
                         error("lambda", "Can't convert item into a parameter.");
                         print(el, False, True);
-                        Put_Line("Item is of kind " & ptr_type'Image(el.kind));
+                        Put_Line("Item is of kind " & value_type'Image(el.kind));
                         BBS.lisp.memory.deref(cons_table(temp).car);
                         cons_table(temp).car := make_error(ERR_UNKNOWN);
                         error_occured := True;
@@ -317,7 +315,7 @@ package body BBS.lisp.evaluate.func is
             --  parameter list and body.
             --
             BBS.lisp.memory.ref(s);
-            e := (kind => E_VALUE, v => (kind => V_LAMBDA, lam => s));
+            e := (kind => V_LAMBDA, lam => s);
             return;
       end case;
       e := NIL_ELEM;
@@ -351,7 +349,6 @@ package body BBS.lisp.evaluate.func is
    function eval_function(s : cons_index; e : cons_index) return element_type is
       params : element_type ;
       func_body : element_type;
-      param_value : value := (kind => V_NONE);
       temp_value : element_type;
       rest : cons_index;
       name : element_type;
@@ -386,27 +383,16 @@ package body BBS.lisp.evaluate.func is
          return make_error(ERR_UNKNOWN);
       end if;
       while rest > NIL_CONS loop
-         if (cons_table(getList(name)).car.kind = E_VALUE) and then (cons_table(getList(name)).car.v.kind = V_STACK) then
+         if cons_table(getList(name)).car.kind = V_STACK then
             temp_value := first_value(rest);
-            if temp_value.kind = E_VALUE then
-               param_value := temp_value.v;
-            elsif (temp_value.kind = E_VALUE) and then (temp_value.v.kind = V_SYMBOL) then
-               param_value := (kind => V_SYMBOL, sym => temp_value.v.sym);
-            elsif isList(temp_value) then
-               param_value := (kind => V_LIST, l => getList(temp_value));
-            elsif temp_value = NIL_ELEM then
-               param_value := (kind => V_BOOLEAN, b => False);
-            else
-               param_value := (kind => V_NONE);
-            end if;
-            BBS.lisp.global.stack.push(cons_table(getList(name)).car.v.st_name,
-                                       param_value, err);
+            BBS.lisp.global.stack.push(cons_table(getList(name)).car.st_name,
+                                       temp_value, err);
             if err then
                error("function evaluation", "Error adding parameters to stack frame");
                BBS.lisp.global.stack.exit_frame;
                return make_error(ERR_UNKNOWN);
             end if;
-            BBS.lisp.memory.deref(param_value);
+            BBS.lisp.memory.deref(temp_value);
          else
             error("function evaluation", "Something horrible happened, a parameter is not a parameter");
             BBS.lisp.global.stack.exit_frame;

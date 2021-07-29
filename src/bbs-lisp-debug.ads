@@ -9,6 +9,4 @@ package BBS.lisp.debug is
      with Global => (Input => (cons_table));
    procedure dump(s : symbol_ptr)
      with Global => (Input => (cons_table));
-   procedure dump(v : value)
-     with Global => (Input => (cons_table));
 end;

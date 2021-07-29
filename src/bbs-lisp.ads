@@ -41,16 +41,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
          end case;
       end record;
    --
-   --
-   --  This indicates what type of an object an element_type is pointing to.  It
-   --  can be a cons cell, a value, a symbol, a temporary symbol a stack
-   --  variable, or nothing.
-   --
-   type ptr_type is (--E_ERROR,
-                     E_EMPTY,
-                     E_VALUE);
-   --
-   --  This indicates what kind of data is in a value.  These are the allowed
+   --  This indicates what kind of data is in an element.  These are the allowed
    --  data types.
    --
    type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
@@ -99,7 +90,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --
    --  Define the contents of records.
    --
-   type value(kind : value_type := V_INTEGER) is
+   type element_type(kind : value_type := V_INTEGER) is
       record
          case kind is
          when V_INTEGER =>
@@ -127,18 +118,6 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
             err : error_code;
          when V_NONE =>
             null;
-         end case;
-      end record;
-   --
-   --  An element_type can contain a value or point to a cons cell.
-   --
-   type element_type(kind : ptr_type := E_VALUE) is
-      record
-         case kind is
-            when E_EMPTY =>
-               null;
-            when E_VALUE =>
-               v : value;
          end case;
       end record;
    --
@@ -222,7 +201,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  Converts an element to a value.  Any element that cannot be converted
    --  returns a value of V_NONE.
    --
-   function element_to_value(e : element_type) return value;
+   function element_to_value(e : element_type) return element_type;
    --
    --  Create an error value with the specified error code
    --
@@ -230,7 +209,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --
    --  Some useful constants
    --
-   NIL_ELEM : constant element_type := (Kind => E_VALUE, v => (kind => V_NONE));
+   NIL_ELEM : constant element_type := (kind => V_NONE);
    NIL_CONS : constant cons_index := cons_index'First;
    NIL_STR  : constant string_index := string_index'First;
    NIL_SYM  : constant symbol_ptr := (kind => ST_NULL);
@@ -281,7 +260,6 @@ private
    --
    procedure print(s : cons_index)
      with Global => (Input => (cons_table));
-   procedure print(v : value);
    procedure print(s : string_index);
    procedure print(s : symbol_ptr);
    --

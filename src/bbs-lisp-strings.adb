@@ -458,7 +458,7 @@ package body BBS.lisp.strings is
          end loop;
          source := string_table(source).next;
       end loop;
-      return (kind => E_VALUE, v => (kind => V_STRING, s => head));
+      return (kind => V_STRING, s => head);
    end;
    --
    --  Functions for character positions.

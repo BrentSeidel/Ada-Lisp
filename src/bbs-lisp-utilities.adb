@@ -47,19 +47,19 @@ package body BBS.lisp.utilities is
          var_name : string_index;  --  Name of potential replacement
          flag : Boolean := False;  --  Was it a tempsym?
       begin
-         if (e.kind = E_VALUE) and then (e.v.kind = V_SYMBOL) then
-            if e.v.sym.kind = ST_FIXED then
+         if e.kind = V_SYMBOL then
+            if e.sym.kind = ST_FIXED then
                return False;
             end if;
-            name := BBS.lisp.symbols.get_name(e.v.sym);
-         elsif (e.kind = E_VALUE) and then (e.v.kind = V_TEMPSYM) then
-            name := e.v.tempsym;
+            name := BBS.lisp.symbols.get_name(e.sym);
+         elsif e.kind = V_TEMPSYM then
+            name := e.tempsym;
             flag := True;
          else
             return False;
          end if;
-         if (var.kind = E_VALUE) and then (var.v.kind = V_STACK) then
-            var_name := var.v.st_name;
+         if var.kind = V_STACK then
+            var_name := var.st_name;
          else
             error("replace_syms.process_element", "Improper element in library");
          end if;

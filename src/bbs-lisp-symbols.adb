@@ -27,17 +27,13 @@ package body BBS.lisp.symbols is
    function isFunction(s : symbol_ptr) return Boolean is
       t : constant symbol_type := get_type(s);
       e : element_type;
-      v : value;
    begin
       if (t = SY_BUILTIN) or (t = SY_SPECIAL) then
          return True;
       end if;
       if t = SY_VARIABLE then
          e := get_value(s);
-         if e.kind = E_VALUE then
-            v := e.v;
-            return v.kind = V_LAMBDA;
-         end if;
+         return e.kind = V_LAMBDA;
       end if;
       return False;
    end;
@@ -58,17 +54,13 @@ package body BBS.lisp.symbols is
    function get_list(s : symbol_ptr) return cons_index is
       b : constant sym_body := get_sym(s);
       e : element_type;
-      v : value;
    begin
       if b.Kind = SY_VARIABLE then
          e := get_value(s);
-         if e.kind = E_VALUE then
-            v := e.v;
-            if v.kind = V_LAMBDA then
-               return v.lam;
-            elsif v.kind = V_LIST then
-               return v.l;
-            end if;
+         if e.kind = V_LAMBDA then
+            return e.lam;
+         elsif e.kind = V_LIST then
+            return e.l;
          end if;
       end if;
       return NIL_CONS;

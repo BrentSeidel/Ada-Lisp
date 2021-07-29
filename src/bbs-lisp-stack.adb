@@ -15,7 +15,7 @@ package body BBS.lisp.stack is
    --  from the stack as part of the exit_frame.
    --
    --
-   procedure push(self : in out lisp_stack; name : string_index; val : value; err : out Boolean) is
+   procedure push(self : in out lisp_stack; name : string_index; val : element_type; err : out Boolean) is
    begin
       if not self.isFull then
          BBS.lisp.strings.ref(name);
@@ -111,7 +111,7 @@ package body BBS.lisp.stack is
    --
    --  Sets the value of an entry on the stack
    --
-   procedure set_value(self : in out lisp_stack; e : Natural; v : value; err : out Boolean) is
+   procedure set_value(self : in out lisp_stack; e : Natural; v : element_type; err : out Boolean) is
    begin
       if e <= self.sp then
          if self.stack(e).kind = ST_VALUE then
@@ -175,7 +175,7 @@ package body BBS.lisp.stack is
    --  found, the value is returned.  If not found, a value of none is returned.
    --
    --
-   function search_frames(self : lisp_stack; offset : Natural; name : string_index) return value is
+   function search_frames(self : lisp_stack; offset : Natural; name : string_index) return element_type is
       frame : Natural := self.fp;
       test : stack_entry;
       test_name : string_index;
