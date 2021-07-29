@@ -422,7 +422,7 @@ package body BBS.lisp.strings is
    begin
       if not alloc(head) then
          error("string copy", "Unable to allocate string fragment.");
-         return (kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
       new_frag := head;
       string_table(new_frag).len := string_table(source).len;
@@ -441,7 +441,7 @@ package body BBS.lisp.strings is
          if not alloc(temp) then
             error("string copy", "Unable to allocate string fragment.");
             deref(head);
-            return (kind => E_ERROR);
+            return make_error(ERR_UNKNOWN);
          end if;
          string_table(new_frag).next := temp;
          new_frag := temp;
@@ -458,7 +458,7 @@ package body BBS.lisp.strings is
          end loop;
          source := string_table(source).next;
       end loop;
-      return (kind => E_VALUE, v => (kind => V_STRING, s => head));
+      return (kind => V_STRING, s => head);
    end;
    --
    --  Functions for character positions.

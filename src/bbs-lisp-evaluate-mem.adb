@@ -28,18 +28,12 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Check if the first value is an integer element.
       --
-      if param.kind = E_VALUE then
-         if param.v.kind = V_INTEGER then
-            addr1 := intermediate(int32_to_uint32(param.v.i));
-            addr := intermediate_to_p_uint8(addr1);
-         else
-            ok := False;
-            error("peek8", "Address must be integer.");
-         end if;
+      if param.kind = V_INTEGER then
+         addr1 := intermediate(int32_to_uint32(param.i));
+         addr := intermediate_to_p_uint8(addr1);
       else
          ok := False;
-         error("peek8", "Address must be an element.");
-         print(param, False, True);
+         error("peek8", "Address must be integer.");
       end if;
       --
       --  If the parameter is an integer and in range, then read the memory
@@ -47,9 +41,9 @@ package body BBS.lisp.evaluate.mem is
       --
       if ok then
          value := addr.all;
-         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
+         e := (kind => V_INTEGER, i => int32(value));
       else
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -68,18 +62,12 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Check if the first value is an integer element.
       --
-      if param.kind = E_VALUE then
-         if param.v.kind = V_INTEGER then
-            addr1 := intermediate(int32_to_uint32(param.v.i));
-            addr := intermediate_to_p_uint16(addr1);
-         else
-            ok := False;
-            error("peek16", "Address must be integer.");
-         end if;
+      if param.kind = V_INTEGER then
+         addr1 := intermediate(int32_to_uint32(param.i));
+         addr := intermediate_to_p_uint16(addr1);
       else
          ok := False;
-         error("peek16", "Address must be an element.");
-         print(param, False, True);
+         error("peek16", "Address must be integer.");
       end if;
       --
       --  If the parameter is an integer and in range, then read the memory
@@ -87,9 +75,9 @@ package body BBS.lisp.evaluate.mem is
       --
       if ok then
          value := addr.all;
-         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
+         e := (kind => V_INTEGER, i => int32(value));
       else
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -108,18 +96,12 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Check if the first value is an integer element.
       --
-      if param.kind = E_VALUE then
-         if param.v.kind = V_INTEGER then
-            addr1 := intermediate(int32_to_uint32(param.v.i));
-            addr := intermediate_to_p_uint32(addr1);
-         else
-            ok := False;
-            error("peek32", "Address must be integer.");
-         end if;
+      if param.kind = V_INTEGER then
+         addr1 := intermediate(int32_to_uint32(param.i));
+         addr := intermediate_to_p_uint32(addr1);
       else
          ok := False;
-         error("peek32", "Address must be an element.");
-         print(param, False, True);
+         error("peek32", "Address must be integer.");
       end if;
       --
       --  If the parameter is an integer and in range, then read the memory
@@ -127,9 +109,9 @@ package body BBS.lisp.evaluate.mem is
       --
       if ok then
          value := addr.all;
-         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => uint32_to_int32(value)));
+         e := (kind => V_INTEGER, i => uint32_to_int32(value));
       else
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -151,18 +133,12 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Check if the first value is an integer element.
       --
-      if param.kind = E_VALUE then
-         if param.v.kind = V_INTEGER then
-            addr1 := intermediate(int32_to_uint32(param.v.i));
-            addr := intermediate_to_p_uint8(addr1);
-         else
-            ok := False;
-            error("poke8", "Address must be integer.");
-         end if;
+      if param.kind = V_INTEGER then
+         addr1 := intermediate(int32_to_uint32(param.i));
+         addr := intermediate_to_p_uint8(addr1);
       else
          ok := False;
-         error("poke8", "Address must be an element.");
-         print(param, False, True);
+         error("poke8", "Address must be integer.");
       end if;
       --
       --  Get the second parameter (value)
@@ -171,17 +147,11 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Check if the first value is an integer element.
       --
-      if param.kind = E_VALUE then
-         if param.v.kind = V_INTEGER then
-            value := uint8(int32_to_uint32(param.v.i) and 16#FF#);
-         else
-            ok := False;
-            error("poke8", "Value must be integer.");
-         end if;
+      if param.kind = V_INTEGER then
+         value := uint8(int32_to_uint32(param.i) and 16#FF#);
       else
          ok := False;
-         error("poke8", "Value must be an element.");
-         print(param, False, True);
+         error("poke8", "Value must be integer.");
       end if;
       --
       --  If the parameter is an integer and in range, then write to the memory
@@ -189,9 +159,9 @@ package body BBS.lisp.evaluate.mem is
       --
       if ok then
          addr.all := value;
-         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
+         e := (kind => V_INTEGER, i => int32(value));
       else
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -210,18 +180,12 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Check if the first value is an integer element.
       --
-      if param.kind = E_VALUE then
-         if param.v.kind = V_INTEGER then
-            addr1 := intermediate(int32_to_uint32(param.v.i));
-            addr := intermediate_to_p_uint16(addr1);
-         else
-            ok := False;
-            error("poke16", "Address must be integer.");
-         end if;
+      if param.kind = V_INTEGER then
+         addr1 := intermediate(int32_to_uint32(param.i));
+         addr := intermediate_to_p_uint16(addr1);
       else
          ok := False;
-         error("poke16", "Address must be an element.");
-         print(param, False, True);
+         error("poke16", "Address must be integer.");
       end if;
       --
       --  Get the second parameter (value)
@@ -230,17 +194,11 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Check if the first value is an integer element.
       --
-      if param.kind = E_VALUE then
-         if param.v.kind = V_INTEGER then
-            value := uint16(int32_to_uint32(param.v.i) and 16#FFFF#);
-         else
-            ok := False;
-            error("poke16", "Value must be integer.");
-         end if;
+      if param.kind = V_INTEGER then
+         value := uint16(int32_to_uint32(param.i) and 16#FFFF#);
       else
          ok := False;
-         error("poke16", "Value must be an element.");
-         print(param, False, True);
+         error("poke16", "Value must be integer.");
       end if;
       --
       --  If the parameter is an integer and in range, then write to the memory
@@ -248,9 +206,9 @@ package body BBS.lisp.evaluate.mem is
       --
       if ok then
          addr.all := value;
-         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
+         e := (kind => V_INTEGER, i => int32(value));
       else
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --
@@ -269,18 +227,12 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Check if the first value is an integer element.
       --
-      if param.kind = E_VALUE then
-         if param.v.kind = V_INTEGER then
-            addr1 := intermediate(int32_to_uint32(param.v.i));
-            addr := intermediate_to_p_uint32(addr1);
-         else
-            ok := False;
-            error("poke32", "Address must be integer.");
-         end if;
+      if param.kind = V_INTEGER then
+         addr1 := intermediate(int32_to_uint32(param.i));
+         addr := intermediate_to_p_uint32(addr1);
       else
          ok := False;
-         error("poke32", "Address must be an element.");
-         print(param, False, True);
+         error("poke32", "Address must be integer.");
       end if;
       --
       --  Get the second parameter (value)
@@ -289,17 +241,11 @@ package body BBS.lisp.evaluate.mem is
       --
       --  Check if the first value is an integer element.
       --
-      if param.kind = E_VALUE then
-         if param.v.kind = V_INTEGER then
-            value := int32_to_uint32(param.v.i);
-         else
-            ok := False;
-            error("poke32", "Value must be integer.");
-         end if;
+      if param.kind = V_INTEGER then
+         value := int32_to_uint32(param.i);
       else
          ok := False;
-         error("poke32", "Value must be an element.");
-         print(param, False, True);
+         error("poke32", "Value must be integer.");
       end if;
       --
       --  If the parameter is an integer and in range, then write to the memory
@@ -307,9 +253,9 @@ package body BBS.lisp.evaluate.mem is
       --
       if ok then
          addr.all := value;
-         e := (kind => E_VALUE, v => (kind => V_INTEGER, i => int32(value)));
+         e := (kind => V_INTEGER, i => int32(value));
       else
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
       end if;
    end;
    --

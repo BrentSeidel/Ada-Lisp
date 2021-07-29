@@ -29,6 +29,10 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    type string_index is range -1 .. max_string;
    type fsymb_index is new Positive;
    type symbol_table is (ST_NULL, ST_FIXED, ST_DYNAMIC);
+   --
+   --  Pointer to a symbol.  This needs to be able to distinguish between symbols
+   --  that are in the fixed table and the dynamic table.
+   --
    type symbol_ptr(kind : symbol_table := ST_NULL) is
       record
          case kind is
@@ -41,24 +45,17 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
          end case;
       end record;
    --
-   --
-   --  This indicates what type of an object an element_type is pointing to.  It
-   --  can be a cons cell, a value, a symbol, a temporary symbol a stack
-   --  variable, or nothing.
-   --
-   type ptr_type is (E_ERROR, E_NIL, E_STACK, E_SYMBOL, E_TEMPSYM, E_VALUE);
-   --
-   --  This indicates what kind of data is in a value.  These are the allowed
+   --  This indicates what kind of data is in an element.  These are the allowed
    --  data types.
    --
    type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
-                       V_LAMBDA, V_SYMBOL, V_QSYMBOL, V_NONE);
+                       V_LAMBDA, V_TEMPSYM, V_SYMBOL, V_QSYMBOL, V_STACK, V_ERROR,
+                       V_NONE);
    --
    --  This indicates what kind of data is in a symbol.
    --
    type symbol_type is (SY_SPECIAL,  -- A special form that need support during parsing
                         SY_BUILTIN,  -- A normal builtin function
-                        SY_LAMBDA,   -- A user defined function
                         SY_VARIABLE, -- A value, not a function
                         SY_EMPTY);   -- No contents
 
@@ -73,6 +70,10 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  PH_EXECUTE     - Normal execution
    --
    type phase is (PH_QUERY, PH_PARSE_BEGIN, PH_PARSE_END, PH_EXECUTE);
+   --
+   --  Error codes.  These will be filled out later.
+   --
+   type error_code is (ERR_UNKNOWN, ERR_UNDEFINED);
    --
    --  Define the 32 bit signed and unsigned integer types along with unchecked
    --  conversions.  This is to support bitwise logical operations.
@@ -93,7 +94,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --
    --  Define the contents of records.
    --
-   type value(kind : value_type := V_INTEGER) is
+   type element_type(kind : value_type := V_INTEGER) is
       record
          case kind is
          when V_INTEGER =>
@@ -108,33 +109,19 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
             l : cons_index;
          when V_LAMBDA =>
             lam : cons_index;
+         when V_TEMPSYM =>
+            tempsym : string_index;
          when V_SYMBOL =>
             sym : symbol_ptr;
          when V_QSYMBOL =>
             qsym : symbol_ptr;
+         when V_STACK =>
+            st_name : string_index;
+            st_offset : Natural;
+         when V_ERROR =>
+            err : error_code;
          when V_NONE =>
             null;
-         end case;
-      end record;
-   --
-   --  An element_type can contain a value or point to a cons cell.
-   --
-   type element_type(kind : ptr_type := E_NIL) is
-      record
-         case kind is
-            when E_ERROR =>
-               null;
-            when E_NIL =>
-               null;
-            when E_TEMPSYM =>
-               tempsym : string_index;
-            when E_SYMBOL =>
-               sym : symbol_ptr;
-            when E_STACK =>
-               st_name : string_index;
-               st_offset : Natural;
-            when E_VALUE =>
-               v : value;
          end case;
       end record;
    --
@@ -215,17 +202,18 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
      with Global => (Input => (cons_table),
                      output => output_stream);
    --
-   --  Converts an element to a value.  Any element that cannot be converted
-   --  returns a value of V_NONE.
+   --  Create an error value with the specified error code
    --
-   function element_to_value(e : element_type) return value;
+   function make_error(err : error_code) return element_type;
    --
    --  Some useful constants
    --
-   NIL_ELEM : constant element_type := (Kind => E_NIL);
+   NIL_ELEM : constant element_type := (kind => V_NONE);
    NIL_CONS : constant cons_index := cons_index'First;
    NIL_STR  : constant string_index := string_index'First;
    NIL_SYM  : constant symbol_ptr := (kind => ST_NULL);
+   ELEM_T   : constant element_type := (kind => V_BOOLEAN, b => True);
+   ELEM_F   : constant element_type := (kind => V_BOOLEAN, b => False);
    --
    --  Define some enumerations
    --
@@ -273,7 +261,6 @@ private
    --
    procedure print(s : cons_index)
      with Global => (Input => (cons_table));
-   procedure print(v : value);
    procedure print(s : string_index);
    procedure print(s : symbol_ptr);
    --

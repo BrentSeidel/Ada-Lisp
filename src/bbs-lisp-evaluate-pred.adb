@@ -4,25 +4,20 @@
 --  and some of them will return constant values because Tiny-Lisp doesn't
 --  implement some things.
 --
+with BBS.lisp.memory;
 with BBS.lisp.symbols;
 package body BBS.lisp.evaluate.pred is
    --
    --  These return true of false depending on the type of data passed.
    --
    procedure atomp(e : out element_type; s : cons_index) is
-      p : element_type;
    begin
       if s = cons_index'First then
          error("atomp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
-      p := cons_table(s).car;
-      if not isList(p) then
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-      else
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-      end if;
+      e := (Kind => V_BOOLEAN, b => not isList(cons_table(s).car));
    end;
    --
    procedure characterp(e : out element_type; s : cons_index) is
@@ -31,15 +26,11 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("characterp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
-      if (p.kind = E_VALUE) and then (p.v.kind = V_CHARACTER) then
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-      else
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_CHARACTER);
    end;
    --
    procedure compiled_function_p(e : out element_type; s : cons_index) is
@@ -48,33 +39,28 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("compiled_function_p", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
-      if p.kind = E_SYMBOL then
+      if p.kind = V_SYMBOL then
          if BBS.lisp.symbols.isFixed(p.sym) then
-            e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+            e := ELEM_T;
             return;
          end if;
       end if;
-      e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+      BBS.lisp.memory.deref(p);
+      e := ELEM_F;
    end;
    --
    procedure consp(e : out element_type; s : cons_index) is
-      p : element_type;
    begin
       if s = NIL_CONS then
          error("consp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
-      p := cons_table(s).car;
-      if isList(p) then
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-      else
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-      end if;
+      e := (Kind => V_BOOLEAN, b => isList(cons_table(s).car));
    end;
    --
    procedure errorp(e : out element_type; s : cons_index) is
@@ -83,15 +69,11 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("errorp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
-      if p.kind = E_ERROR then
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-      else
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_ERROR);
    end;
    --
    procedure functionp(e : out element_type; s : cons_index)is
@@ -100,23 +82,24 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("functionp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
-      if p.kind = E_SYMBOL then
+      if p.kind = V_SYMBOL then
          if BBS.lisp.symbols.isFunction(p.sym) then
-            e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
+            e := ELEM_T;
+            BBS.lisp.memory.deref(p);
             return;
          end if;
       end if;
-      if p.kind = E_VALUE then
-         if p.v.kind = V_LAMBDA then
-            e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-            return;
-         end if;
+      if p.kind = V_LAMBDA then
+         e := ELEM_T;
+         BBS.lisp.memory.deref(p);
+         return;
       end if;
-      e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+      BBS.lisp.memory.deref(p);
+      e := ELEM_F;
    end;
    --
    procedure integerp(e : out element_type; s : cons_index) is
@@ -125,15 +108,11 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("integerp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
-      if (p.kind = E_VALUE) and then (p.v.kind = V_INTEGER) then
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-      else
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_INTEGER);
    end;
    --
    procedure listp(e : out element_type; s : cons_index) is
@@ -141,15 +120,11 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("listp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := cons_table(s).car;
-      if isList(p) or (p = NIL_ELEM) then
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-      else
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-      end if;
+      e := (Kind => V_BOOLEAN, b => isList(p) or (p = NIL_ELEM));
    end;
    --
    procedure nullp(e : out element_type; s : cons_index) is
@@ -158,15 +133,11 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("nullp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
-      if p = NIL_ELEM then
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-      else
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-      end if;
+      e := (Kind => V_BOOLEAN, b => p = NIL_ELEM);
    end;
    --
    procedure numberp(e : out element_type; s : cons_index) is
@@ -175,15 +146,11 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("numberp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
-      if (p.kind = E_VALUE) and then (p.v.kind = V_INTEGER) then
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-      else
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_INTEGER);
    end;
    --
    procedure simple_string_p(e : out element_type; s : cons_index) is
@@ -192,15 +159,11 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("simple_string_p", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
-      if (p.kind = E_VALUE) and then (p.v.kind = V_STRING) then
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-      else
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_STRING);
    end;
    --
    procedure stringp(e : out element_type; s : cons_index) is
@@ -209,15 +172,11 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("stringp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := first_value(t);
-      if (p.kind = E_VALUE) and then (p.v.kind = V_STRING) then
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-      else
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_STRING);
    end;
    --
    procedure symbolp(e : out element_type; s : cons_index) is
@@ -225,15 +184,11 @@ package body BBS.lisp.evaluate.pred is
    begin
       if s = NIL_CONS then
          error("symbolp", "Internal error, not passed a list.");
-         e := (kind => E_ERROR);
+         e := make_error(ERR_UNKNOWN);
          return;
       end if;
       p := cons_table(s).car;
-      if p.kind = E_SYMBOL then
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => True));
-      else
-         e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
-      end if;
+      e := (Kind => V_BOOLEAN, b => p.kind = V_SYMBOL);
    end;
    --
    --  These always return false as the data types are not implemented.  There's
@@ -243,7 +198,7 @@ package body BBS.lisp.evaluate.pred is
    procedure return_false(e : out element_type; s : cons_index) is
       pragma Unreferenced (s);
    begin
-      e := (kind => E_VALUE, v => (kind => V_BOOLEAN, b => False));
+      e := ELEM_F;
    end;
    --
 --   procedure arrayp(e : out element_type; s : cons_index);

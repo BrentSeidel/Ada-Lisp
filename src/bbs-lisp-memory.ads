@@ -34,7 +34,6 @@ package BBS.lisp.memory is
      post => (if count_free_cons = 0 then alloc'Result = False
                 else alloc'Result = True);
    -- should really be (In_Out => const_table);
-   -- should really be (In_Out => pvt_string_table);
    --
    --  Increment the reference count of various items.  This is typically done
    --  when an additional index to the item is created.
@@ -44,8 +43,6 @@ package BBS.lisp.memory is
      post => (cons_table(s).ref = cons_table(s).ref'Old + 1),
      Global => (in_out => cons_table);
    procedure ref(e : element_type)
-     with Global => (In_Out => (cons_table));
-   procedure ref(v : value)
      with Global => (In_Out => (cons_table));
    --
    --  Decrement the reference count for various items.  This is done when the
@@ -57,8 +54,6 @@ package BBS.lisp.memory is
      with post => (cons_table(s).ref = cons_table(s).ref'Old - 1),
      Global => (in_out => cons_table);
    procedure deref(e : element_type)
-     with Global => (In_Out => (cons_table));
-   procedure deref(v : value)
      with Global => (In_Out => (cons_table));
    --
 end;

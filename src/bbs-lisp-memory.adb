@@ -22,8 +22,8 @@ package body BBS.lisp.memory is
    begin
       for i in cons_table'Range loop
          cons_table(i).ref := FREE_CONS;
-         cons_table(i).car := (Kind => E_NIL);
-         cons_table(i).cdr := (Kind => E_NIL);
+         cons_table(i).car := NIL_ELEM;
+         cons_table(i).cdr := NIL_ELEM;
       end loop;
       BBS.lisp.symbols.reset_symbol_table;
       BBS.lisp.strings.reset_string_table;
@@ -38,8 +38,8 @@ package body BBS.lisp.memory is
          if cons_table(i).ref = FREE_CONS then
             s := i;
             cons_table(i).ref := FREE_CONS + 1;
-            cons_table(i).car := (Kind => E_NIL);
-            cons_table(i).cdr := (Kind => E_NIL);
+            cons_table(i).car := NIL_ELEM;
+            cons_table(i).cdr := NIL_ELEM;
             return True;
          end if;
       end loop;
@@ -61,27 +61,12 @@ package body BBS.lisp.memory is
    --
    procedure ref(e : element_type) is
    begin
-      if e.kind = E_VALUE then
-         if e.v.kind = V_STRING then
-            BBS.lisp.strings.ref(e.v.s);
-         elsif e.v.kind = V_LIST then
-            ref(e.v.l);
-         elsif e.v.kind = V_LAMBDA then
-            ref(e.v.lam);
-         end if;
-      end if;
-   end;
-   --
-   --  Increments the reference count of a value, if applicable.
-   --
-   procedure ref(v : value) is
-   begin
-      if v.kind = V_STRING then
-         BBS.lisp.strings.ref(v.s);
-      elsif v.kind = V_LIST then
-         ref(v.l);
-      elsif v.kind = V_LAMBDA then
-         ref(v.lam);
+      if e.kind = V_STRING then
+         BBS.lisp.strings.ref(e.s);
+      elsif e.kind = V_LIST then
+         ref(e.l);
+      elsif e.kind = V_LAMBDA then
+         ref(e.lam);
       end if;
    end;
    --
@@ -115,23 +100,14 @@ package body BBS.lisp.memory is
    --
    procedure deref(e : element_type) is
    begin
-      if e.kind = E_VALUE then
-         deref(e.v);
-      elsif e.kind = E_STACK then
+      if e.kind = V_STRING then
+         BBS.lisp.strings.deref(e.s);
+      elsif e.kind = V_LIST then
+         deref(e.l);
+      elsif e.kind = V_LAMBDA then
+         deref(e.lam);
+      elsif e.kind = V_STACK then
          BBS.lisp.strings.deref(e.st_name);
-      end if;
-   end;
-   --
-   --  Decrements the reference count of the item pointed to by a value.
-   --
-   procedure deref(v : value) is
-   begin
-      if v.kind = V_STRING then
-         BBS.lisp.strings.deref(v.s);
-      elsif v.kind = V_LIST then
-         deref(v.l);
-      elsif v.kind = V_LAMBDA then
-         deref(v.lam);
       end if;
    end;
    --

@@ -8,18 +8,15 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function isTrue(e : element_type) return Boolean is
    begin
-      if e.kind = E_NIL then
+      if e = NIL_ELEM then
          return False;
       elsif isList(e) then
-         if (cons_table(getList(e)).car.kind = E_NIL)
-           and (cons_table(getList(e)).cdr.kind = E_NIL) then
+         if (cons_table(getList(e)).car = NIL_ELEM)
+           and (cons_table(getList(e)).cdr = NIL_ELEM) then
             return False;
          end if;
-      elsif e.kind = E_VALUE then
-         if e.v.kind = V_BOOLEAN  then
-            return e.v.b;
-         end if;
-         return True;
+      elsif e.kind = V_BOOLEAN  then
+         return e.b;
       end if;
       return True;
    end;
@@ -29,12 +26,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function isList(e : element_type) return Boolean is
    begin
-      if e.kind = E_VALUE then
-         if e.v.kind = V_LIST then
-            return True;
-         end if;
-      end if;
-      return False;
+      return e.kind = V_LIST;
    end;
    --
    --  If e is list type, return the index of the head of the list, otherwise
@@ -42,8 +34,8 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function getList(e : element_type) return cons_index is
    begin
-      if e.kind = E_VALUE and then e.v.kind = V_LIST then
-         return e.v.l;
+      if e.kind = V_LIST then
+         return e.l;
       end if;
       return NIL_CONS;
    end;
@@ -52,7 +44,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function makeList(s : cons_index) return element_type is
    begin
-      return (Kind => E_VALUE, v => (kind => V_LIST, l => s));
+      return (kind => V_LIST, l => s);
    end;
    --
    --  This checks to see if the element represents a function call.  The element
@@ -61,7 +53,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    function isFunction(e : element_type) return Boolean is
       temp : element_type;
       list : cons_index;
-      val : value;
+      val  : element_type;
    begin
       list := getList(e);
       if list > NIL_CONS then
@@ -69,13 +61,11 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       else
          temp := e;
       end if;
-      if temp.kind = E_SYMBOL then
+      if temp.kind = V_SYMBOL then
          return BBS.lisp.symbols.isFunction(temp.sym);
-      elsif temp.kind = E_VALUE then
-         if temp.v.kind = V_LAMBDA then
-            return True;
-         end if;
-      elsif temp.kind = E_STACK then
+      elsif temp.kind = V_LAMBDA then
+         return True;
+      elsif temp.kind = V_STACK then
          val := BBS.lisp.global.stack.search_frames(temp.st_offset, temp.st_name);
          if val.kind = V_LAMBDA then
             return True;
@@ -104,7 +94,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
          else
             ret_val := indirect_elem(cons_table(statement).car);
          end if;
-         if ret_val.kind = E_ERROR then
+         if ret_val.kind = V_ERROR then
             error("block execution", "Operation returned an error");
             exit;
          end if;
@@ -146,17 +136,17 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    function indirect_elem(e : element_type) return element_type is
       sym : symbol_ptr;
-      val : value;
+      val : element_type;
    begin
-      if e.kind = E_SYMBOL then
+      if e.kind = V_SYMBOL then
          sym := e.sym;
          if BBS.lisp.symbols.get_type(sym) = SY_VARIABLE then
             return BBS.lisp.symbols.get_value(sym);
          end if;
       end if;
-      if e.kind = E_STACK then
+      if e.kind = V_STACK then
          val := BBS.lisp.global.stack.search_frames(e.st_offset, e.st_name);
-         return (kind => E_VALUE, v => val);
+         return val;
       end if;
       return e;
    end;
@@ -174,7 +164,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       else
          first := cons_table(s).car;
          s := getList(cons_table(s).cdr);
-         if first.kind = E_NIL then
+         if first = NIL_ELEM then
             null;
          elsif isList(first) then
             if isFunction(first) then

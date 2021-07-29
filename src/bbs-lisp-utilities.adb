@@ -19,7 +19,7 @@ package body BBS.lisp.utilities is
          last := t;
          t := BBS.lisp.evaluate.getList(cons_table(t).cdr);
       end loop;
-      if cons_table(last).cdr.kind /= E_NIL then
+      if cons_table(last).cdr /= NIL_ELEM then
          c := c + 1;
       end if;
       return c;
@@ -47,18 +47,18 @@ package body BBS.lisp.utilities is
          var_name : string_index;  --  Name of potential replacement
          flag : Boolean := False;  --  Was it a tempsym?
       begin
-         if e.kind = E_SYMBOL then
+         if e.kind = V_SYMBOL then
             if e.sym.kind = ST_FIXED then
                return False;
             end if;
             name := BBS.lisp.symbols.get_name(e.sym);
-         elsif e.kind = E_TEMPSYM then
+         elsif e.kind = V_TEMPSYM then
             name := e.tempsym;
             flag := True;
          else
             return False;
          end if;
-         if var.kind = E_STACK then
+         if var.kind = V_STACK then
             var_name := var.st_name;
          else
             error("replace_syms.process_element", "Improper element in library");

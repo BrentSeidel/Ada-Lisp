@@ -17,7 +17,7 @@ package BBS.lisp.stack is
                next : Natural;
             when ST_VALUE =>
                st_name : string_index;
-               st_value : value;
+               st_value : element_type;
          end case;
       end record;
    --
@@ -29,7 +29,7 @@ package BBS.lisp.stack is
    --
    --  Adding and removing items from the stack
    --
-   procedure push(self : in out lisp_stack; name : string_index; val : value; err : out Boolean);
+   procedure push(self : in out lisp_stack; name : string_index; val : element_type; err : out Boolean);
    --
    --  Operations for stack frames.  The usage is as follows:
    --  1) Call start_frame before pushing items onto the stack that should be
@@ -60,7 +60,7 @@ package BBS.lisp.stack is
    --  look backwards through the stack frames for a match to the name.  If
    --  found, the value is returned.  If not found, an empty value is returned.
    --
-   function search_frames(self : lisp_stack; offset : Natural; name : string_index) return value;
+   function search_frames(self : lisp_stack; offset : Natural; name : string_index) return element_type;
    --
    --  Search stack for the variable.  The frame offset and name are used to
    --  look backwards through the stack frames for a match to the name.  If
@@ -82,7 +82,7 @@ package BBS.lisp.stack is
    --
    --  Sets the value of an entry on the stack
    --
-   procedure set_value(self : in out lisp_stack; e : Natural; v : value; err : out Boolean);
+   procedure set_value(self : in out lisp_stack; e : Natural; v : element_type; err : out Boolean);
    --
    --  Gets an entry from the stack
    --

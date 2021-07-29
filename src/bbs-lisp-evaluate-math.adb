@@ -7,7 +7,6 @@ package body BBS.lisp.evaluate.math is
    function eval_math(s : cons_index; b : mathops) return element_type is
       t : cons_index := s;
       accum : int32 := 0;
-      v : value;
       el: element_type;
       --
       --  Subfunction to do the actual evaluation.
@@ -29,42 +28,28 @@ package body BBS.lisp.evaluate.math is
    begin
       if s = NIL_CONS then
          error("eval_math", "Internal error.  Should have a list.");
-         return (kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
       el := first_value(t);
-      if el.kind = E_VALUE then
-         v := el.v;
+      if el.kind = V_INTEGER then
+         accum := el.i;
       else
-         error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
+         error("eval_math", "Can't process value of type " & value_type'Image(el.kind));
          BBS.lisp.memory.deref(el);
-         return (kind => E_ERROR);
-      end if;
-      if v.kind = V_INTEGER then
-         accum := v.i;
-      else
-         error("eval_math", "Can't process value of type " & value_type'Image(v.kind));
-         BBS.lisp.memory.deref(el);
-         return (kind => E_ERROR);
+         return make_error(ERR_UNKNOWN);
       end if;
       bbs.lisp.memory.deref(el);
       while t > NIL_CONS loop
          el := first_value(t);
-         if el.kind = E_VALUE then
-            v := el.v;
-         else
-            error("eval_math", "Can't process element " & ptr_type'Image(el.kind));
+         if el.kind /= V_INTEGER then
+            error("eval_math", "Can't process value of type " & value_type'Image(el.kind));
             BBS.lisp.memory.deref(el);
-            return (kind => E_ERROR);
+            return make_error(ERR_UNKNOWN);
          end if;
-         if v.kind /= V_INTEGER then
-            error("eval_math", "Can't process value of type " & value_type'Image(v.kind));
-            BBS.lisp.memory.deref(el);
-            return (kind => E_ERROR);
-         end if;
-         process_value(v.i, b);
+         process_value(el.i, b);
          bbs.lisp.memory.deref(el);
       end loop;
-      return (Kind => E_VALUE, v => (kind => V_INTEGER, i => accum));
+      return (kind => V_INTEGER, i => accum);
    end;
    --
    --

@@ -112,8 +112,7 @@
   (verify-false (= "AAAAAAAAAAAAAAAA" "AAAAAAAAAAAAAAAAA") "not AAAAAAAAAAAAAAAA = AAAAAAAAAAAAAAAAA")
   (verify-true (< "AAAAAAAAAAAAAAAA" "AAAAAAAAAAAAAAAAA") "AAAAAAAAAAAAAAAA < AAAAAAAAAAAAAAAAA")
   (verify-false (> "AAAAAAAAAAAAAAAA" "AAAAAAAAAAAAAAAAA") "not AAAAAAAAAAAAAAAA > AAAAAAAAAAAAAAAAA")
-  (verify-true (/= "AAAAAAAAAAAAAAAA" "AAAAAAAAAAAAAAAAA") "AAAAAAAAAAAAAAAA /= AAAAAAAAAAAAAAAAA")
-)
+  (verify-true (/= "AAAAAAAAAAAAAAAA" "AAAAAAAAAAAAAAAAA") "AAAAAAAAAAAAAAAA /= AAAAAAAAAAAAAAAAA"))
 (test-str-cmp)
 (setq test-str-cmp 0)
 ;
@@ -170,7 +169,6 @@
   (verify-equal -8 (/ -24 3) "Div mixed")
   (verify-equal 8 (/ -24 -3) "Div negative")
   (verify-equal 4 (/ 24 5) "Div inexact"))
-;
 (test-basic-math)
 (setq test-basic-math 0)
 ;
@@ -293,8 +291,7 @@
     (setq accum 0)
     (dowhile count (if (= accum 5) (setq count NIL)) (setq accum (+ accum 1)))
     (verify-equal 6 accum "Accumulator is 6")
-    (verify-equal NIL count "Count is set to NIL")
-))
+    (verify-equal NIL count "Count is set to NIL")))
 (test-block)
 (setq test-block 0)
 ;
@@ -320,8 +317,7 @@
   (verify-equal #xE 14 "Digit E")
   (verify-equal #xF 15 "Digit F")
   (verify-equal #xFF 255 "Hex FF")
-  (verify-equal #x1000 4096 "Hex 1000")
-)
+  (verify-equal #x1000 4096 "Hex 1000"))
 (test-hex)
 (setq test-hex 0)
 ;
@@ -985,7 +981,7 @@ Testing a longer line that should be split across fragments.
   (verify-true (errorp (let 1)) "Value parameter to let")
   (verify-true (errorp (let (1) (print "Hello"))) "Value rather than a variable to let")
   (verify-true (errorp (let (#\error) (print "Hello"))) "Error parameter to let")
-  (verify-true (errorp (let ((a #\error)) (print "Hello"))) "Error value to let variable")
+  (verify-false (errorp (let ((a #\error)) (print "Hello"))) "Error value to let variable")
   (verify-true (errorp (let ((a 1)) (+ 1 #\error))) "Error in body of let")
 )
 (test-var-errors)

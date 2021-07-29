@@ -1741,7 +1741,7 @@ This is compatible with \cl, except that no error is thrown with extra parameter
 Processing consists of four phases.
 
 \subsection{Read}
-Text is read from the input stream and passed to the parser.
+Text is read from the input stream and passed to the parser.  Currently two input streams are supported.  The first is from standard input - usually the keyboard.  This is the default.  The second is from a \tl{} string.  This is used by the \operation{(read ...)} operation.
 
 \subsection{Parse}
 The parse phase examines the text and converts it into the internal representation of a list.  If the list is not complete (parentheses are unbalanced), more text is requested until the list can be completed.  Parsing of sub-lists is done by recursively calling the parser.
@@ -1777,17 +1777,30 @@ This package contains child packages for evaluating the \tl{} operations as well
   \item \package{BBS.lisp.evaluate.vars} - Contains operations relating to variables.
 \end{itemize}
 
+\subsubsection{\package{BBS.lisp.global}}
+This package contains the stack.  It may be deleted at some point and the actual stack moved back into \package{BBS.lisp.stack}.
+
+\subsubsection{\package{BBS.lisp.info}}
+This is an auto-generated package that contains some constants that can be used to identify the version and build date.
+
 \subsubsection{\package{BBS.lisp.memory}}
 This package contains the memory manager.  This is mainly allocating items and incrementing and decrementing the reference count.
 
 \subsubsection{\package{BBS.lisp.parser}}
-This package contains the parser.
+This package contains the parser.  The two input streams are provided by the following child packages:
+\begin{itemize}
+  \item \package{BBS.lisp.parser.stdio} - Provides the primary keyboard input method.
+  \item \package{BBS.lisp.parser.string} - Provides an input method to read from \tl{} \datatype{strings}.
+\end{itemize}
 
 \subsubsection{\package{BBS.lisp.stack}}
 This package contains the stack and functions for accessing the stack.
 
 \subsubsection{\package{BBS.lisp.strings}}
 This package contains some utility functions for strings.
+
+\subsubsection{\package{BBS.lisp.symbols}}
+This package contains definitions for symbols and functions for operating on them.  The fixed symbol array is also defined here.
 
 \subsubsection{\package{BBS.lisp.utilities}}
 This package contains some general utility functions.
@@ -1799,64 +1812,97 @@ Most of the data structures are defined in the \package{BBS.lisp} package, excep
 The main arrays have size limits and data types defined for accessing them.  These may change if the \keyword{bbs.lisp} package gets turned into a generic package.  Should that happen The four constants will be the generic parameters.  This will make adjusting the size of the structures a little easier when embedding.
 \lstset{language=Ada}
 \begin{lstlisting}
-   max_cons : constant Integer := 300;
-   max_symb : constant Integer := 200;
-   max_string : constant Integer := 500;
+   max_cons : constant Integer := 500;
+   max_symb : constant Integer := 250;
+   max_string : constant Integer := 450;
    max_stack : constant Integer := 100;
    --
    type cons_index is range -1 .. max_cons;
    type symb_index is range -1 .. max_symb;
    type string_index is range -1 .. max_string;
-   type stack_index is range -1 .. max_stack;
+   type fsymb_index is new Positive;
 \end{lstlisting}
+
 The arrays are defined from \constant{\ldots{}\_index'First + 1} to \constant{\ldots\_index'Last}.  The value \constant{\ldots\_index'First} is used to represent an invalid or null index.  The following constants are defined for this:
 \begin{lstlisting}
    NIL_CONS : constant cons_index := cons_index'First;
    NIL_STR : constant string_index := string_index'First;
-   NIL_SYM : constant symb_index := symb_index'First;
 \end{lstlisting}
 
+Since symbols can be found in either the static or dynamic symbol tables, the symbol pointer needs to indicate which to use.  It is defined as follows:
+\begin{lstlisting}
+   type symbol_table is (ST_NULL, ST_FIXED, ST_DYNAMIC);
+   --
+   --  Pointer to a symbol.  This needs to be able to distinguish between symbols
+   --  that are in the fixed table and the dynamic table.
+   --
+   type symbol_ptr(kind : symbol_table := ST_NULL) is
+      record
+         case kind is
+            when ST_NULL =>
+               null;
+            when ST_FIXED =>
+               f : fsymb_index;
+            when ST_DYNAMIC =>
+               d : symb_index;
+         end case;
+      end record;
+\end{lstlisting}
 
 \subsection{Elements}
 The basic data type is the element.  It is defined as follows:
 \lstset{language=Ada}
 \begin{lstlisting}
-   type ptr_type is (E_CONS, E_ERROR, E_NIL, E_STACK, E_SYMBOL,
-                     E_TEMPSYM, E_VALUE);
-   type element_type(kind : ptr_type := E_NIL) is
+   type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN, V_LIST,
+                       V_LAMBDA, V_TEMPSYM, V_SYMBOL, V_QSYMBOL, V_STACK,
+                       V_ERROR, V_NONE);
+   type element_type(kind : value_type := V_INTEGER) is
       record
          case kind is
-            when E_CONS =>
-               ps : cons_index;
-            when E_ERROR =>
-               null;
-            when E_NIL =>
-               null;
-            when E_TEMPSYM =>
-               tempsym : string_index;
-            when E_SYMBOL =>
-               sym : symb_index;
-            when E_STACK =>
-               st_name : string_index;
-               st_offset : stack_index;
-            when E_VALUE =>
-               v : value;
+         when V_INTEGER =>
+            i : int32;
+         when V_CHARACTER =>
+            c : Character;
+         when V_STRING =>
+            s : string_index;
+         when V_BOOLEAN =>
+            b : Boolean;
+         when V_LIST =>
+            l : cons_index;
+         when V_LAMBDA =>
+            lam : cons_index;
+         when V_TEMPSYM =>
+            tempsym : string_index;
+         when V_SYMBOL =>
+            sym : symbol_ptr;
+         when V_QSYMBOL =>
+            qsym : symbol_ptr;
+         when V_STACK =>
+            st_name : string_index;
+            st_offset : Natural;
+         when V_ERROR =>
+            err : error_code;
+         when V_NONE =>
+            null;
          end case;
       end record;
 \end{lstlisting}
 
 The different types of elements are:
 \begin{description}
-  \item[E\_CONS] Contains an index into the array of cons cells as described in section \ref{sec:Cons}.  This may eventually go away.
-  \item[E\_ERROR]  This indicates that some operation has encountered an error of some sort.
-  \item[E\_NIL] This represents an empty element.
-  \item[E\_TEMPSYM] This contains an index into the \emph{string} table for representing a temporary symbol name.  This is used during parsing to represent an item where the type has not yet been determined.  It should never appear once parsing is complete.
-  \item[E\_STACK] This represents a stack variable.  It contains an index into the \emph{string} table for the variable's name and a stack frame offset.
-  \item[E\_SYMBOL] This contains an index into the \emph{symbol} table thus representing a symbol as described in section \ref{sec:Symbols}.
-  \item[E\_VALUE] This represents a value as described in section \ref{sec:Values}.  It can contain any of the defined data types.  Note that for \constant{V\_STRING} or \constant{V\_LIST} data types, the value actually contains an index into the \emph{string} or \emph{cons} array.
+  \item[V\_BOOLEAN] Contains a \datatype{boolean} value of either \constant{False} or \constant{True}.
+  \item[V\_CHARACTER] Contains an ASCII \datatype{character} value.
+  \item[V\_ERROR] This indicates that some operation has encountered an error of some sort.
+  \item[V\_INTEGER] This is the basic numeric type and contains a 32 bit \datatype{integer}.
+  \item[V\_LAMBDA] This is a special form of list that represents executable code.  It is an index into the array of \datatype{cons} cells as described in section \ref{sec:Cons}
+  \item[V\_LIST] Contains an index into the array of \datatype{cons} cells as described in section \ref{sec:Cons}.
+  \item[V\_NONE] This represents an empty element.
+  \item[V\_QSYMBOL] This represents a quoted \datatype{symbol}.  It is being used for its name rather than its value.
+  \item[V\_STACK] This represents a stack variable.  It contains an index into the \datatype{string} table for the variable's name and a stack frame offset.
+  \item[V\_STRING] This contains an index into the \datatype{string} table and represents a \tl{} \datatype{string}.
+  \item[V\_SYMBOL] This contains an index into the \datatype{symbol} table thus representing a symbol as described in section \ref{sec:Symbols}.
+  \item[V\_TEMPSYM] This contains an index into the \datatype{string} table for representing a temporary symbol name.  This is used during parsing to represent an item where the type has not yet been determined.  It should never appear once parsing is complete.
 \end{description}
-
-There is a bit of ambiguity right now about lists.  Since recursively defined records aren't possible, elements of type  \constant{E\_STACK} can't contain an \datatype{element\_type}.  So in order for them to be able to have lists, the \datatype{value} type also contains a list pointer.  This means that right now, an \datatype{element\_type} can point to a list either directly by having a kind of \constant{E\_CONS}, or by having a kind that contains a \datatype{value} with a kind of \constant{V\_LIST}.  This really should be fixed at some point.  On the other hand, one could make the distinction that the kind \constant{E\_CONS} represents a list that can be evaluated, while a \datatype{value} of kind \constant{V\_LIST} is just data.
 
 \subsection{Cons}
 \label{sec:Cons}
@@ -1918,51 +1964,6 @@ The phases are:
   \item[PH\_EXECUTE] This is the call for execution where the function performs its normal operation.
 \end{description}
 
-\subsection{Values}
-\label{sec:Values}
-The value type represent a (surprise) value.  It can be either an atomic type such as integer or boolean, or a more complex type such as a list or a string.  
-\begin{lstlisting}
-   type value_type is (V_INTEGER, V_STRING, V_CHARACTER, V_BOOLEAN,
-                      V_LIST,  V_LAMBDA, V_SYMBOL, V_QSYMBOL, V_NONE);
-   type int32 is range -(2**31) .. 2**31 - 1
-     with Size => 32;
-   type value(kind : value_type := V_INTEGER) is
-      record
-         case kind is
-         when V_INTEGER =>
-            i : int32;
-         when V_CHARACTER =>
-            c : Character;
-         when V_STRING =>
-            s : string_index;
-         when V_BOOLEAN =>
-            b : Boolean;
-         when V_LIST =>
-            l : cons_index;
-         when V_LAMBDA =>
-            lam : cons_index;
-         when V_SYMBOL =>
-            sym : symb_index;
-         when V_QSYMBOL =>
-            qsym : symb_index;
-         when V_NONE =>
-            null;
-         end case;
-      end record;
-\end{lstlisting}
-
-The data types available are:
-\begin{description}
-  \item[V\_INTEGER] is the basic integer numeric type.  It is defined as a 32 bit signed integer.  Basic math operations can be performed on it and integers can be compared.
-  \item[V\_STRING] is the string type.  These are unbounded strings.  The value structure contains an index into the string fragment array.  Details of strings are described in section \ref{sec:strings}.
-  \item[V\_CHARACTER] will represent a character data type when implemented.  It is currently not implemented.
-  \item[V\_BOOLEAN] is a boolean data type that can represent false or true.  Comparison operations return boolean values and certain functions expect boolean values.
-  \item[V\_LIST] is a list data type.  It is approximately equal to an element type of \constant{E\_CONS} (see section \ref{sec:Cons}).  The value structure contains an index into the cons cell array.
-  \item[V\_LAMBDA] is a list data type that is used to represent a user defined function.  It is approximately equivalent to the symbol type of \constant{SY\_LAMBDA}, except that it can be assigned to stack variables.
-  \item[V\_QSYMBOL] is a quoted symbol.
-  \item[V\_SYMBOL] is a symbol.  This is currently not used and may be deleted.
-\end{description}
-
 \subsection{Strings}
 \label{sec:strings}
 Strings are stored as a set of string fragments in a linked list.  Thus, the length of a string is limited only by the number of fragments available.  Strings are defined as:
@@ -2000,7 +2001,17 @@ A stack is defined for storing function parameters and local variables.  The fun
          end case;
       end record;
 \end{lstlisting}
-Each stack entry can be empty, a stack frame boundary, or a variable.  Stack variables have a name and a value.
+Each stack entry can be empty, a stack frame boundary, or a variable.  Stack variables have a name and a value.  The stack itself is defined as a tagged record as follows:
+\begin{lstlisting}
+   type lisp_stack_array is array (Natural range <>) of stack_entry;
+   type lisp_stack(size : Natural) is tagged record
+      sp : Natural;  -- Stack pointer
+      fp : Natural;  -- Frame pointer
+      fc : Natural;  -- Frame counter
+      stack : lisp_stack_array (0 .. size);
+   end record;
+\end{lstlisting}
+Currently, only one stack is defined in \package{BBS.lisp.globals}.
 
 \subsection{Global Data}
 The various data arrays are defined as follows.
