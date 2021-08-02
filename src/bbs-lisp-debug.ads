@@ -3,10 +3,7 @@
 --  operations, these won't be used and these package can be deleted.
 --
 package BBS.lisp.debug is
-   procedure dump(e : element_type)
-     with Global => (Input => (cons_table));
-   procedure dump(s : cons_index)
-     with Global => (Input => (cons_table));
-   procedure dump(s : symbol_ptr)
-     with Global => (Input => (cons_table));
+   procedure dump(e : element_type);
+   procedure dump(s : cons_index);
+   procedure dump(s : symbol_ptr);
 end;

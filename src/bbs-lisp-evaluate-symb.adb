@@ -1,3 +1,4 @@
+with BBS.lisp.conses;
 with BBS.lisp.memory;
 with BBS.lisp.strings;
 package body BBS.lisp.evaluate.symb is
@@ -288,9 +289,9 @@ package body BBS.lisp.evaluate.symb is
                   return;
                end if;
                loop
-                  if not BBS.lisp.memory.alloc(temp_cons) then
+                  if not BBS.lisp.conses.alloc(temp_cons) then
                      error("concatenate", "Unable to allocate cons cell.");
-                     BBS.lisp.memory.deref(cons_head);
+                     BBS.lisp.conses.deref(cons_head);
                      e := make_error(ERR_UNKNOWN);
                      return;
                   end if;
@@ -298,12 +299,12 @@ package body BBS.lisp.evaluate.symb is
                      cons_head := temp_cons;
                      dest_cons := temp_cons;
                   else
-                     cons_table(dest_cons).cdr := (kind => V_LIST, l => temp_cons);
+                     BBS.lisp.conses.set_cdr(dest_cons, (kind => V_LIST, l => temp_cons));
                      dest_cons := temp_cons;
                   end if;
-                  cons_table(dest_cons).car := cons_table(src_cons).car;
-                  BBS.lisp.memory.ref(cons_table(dest_cons).car);
-                  src_cons := getList(cons_table(src_cons).cdr);
+                  BBS.lisp.conses.set_car(dest_cons, BBS.lisp.conses.get_car(src_cons));
+                  BBS.lisp.memory.ref(BBS.lisp.conses.get_car(dest_cons));
+                  src_cons := getList(BBS.lisp.conses.get_cdr(src_cons));
                   if src_cons = NIL_CONS then
                      exit;
                   end if;

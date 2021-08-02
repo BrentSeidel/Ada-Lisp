@@ -1,3 +1,5 @@
+with BBS.lisp.conses;
+use type BBS.lisp.conses.cons_ref_count;
 with BBS.lisp.evaluate;
 with BBS.lisp.evaluate.func;
 with BBS.lisp.global;
@@ -194,16 +196,17 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          return;
       end if;
       while list > NIL_CONS loop
-         if BBS.lisp.evaluate.isList(cons_table(list).car) then
-            print(BBS.lisp.evaluate.getList(cons_table(list).car));
+         if BBS.lisp.evaluate.isList(BBS.lisp.conses.get_car(list)) then
+            print(BBS.lisp.evaluate.getList(BBS.lisp.conses.get_car(list)));
          else
-            print(cons_table(list).car, False, False);
+            print(BBS.lisp.conses.get_car(list), False, False);
          end if;
-         if not BBS.lisp.evaluate.isList(cons_table(list).cdr) and (cons_table(list).cdr /= NIL_ELEM) then
+         if not BBS.lisp.evaluate.isList(BBS.lisp.conses.get_cdr(list))
+           and (BBS.lisp.conses.get_cdr(list) /= NIL_ELEM) then
             put(" . ");
-            print(cons_table(list).cdr, False, False);
+            print(BBS.lisp.conses.get_cdr(list), False, False);
          end if;
-         list := BBS.lisp.evaluate.getList(cons_table(list).cdr);
+         list := BBS.lisp.evaluate.getList(BBS.lisp.conses.get_cdr(list));
       end loop;
       put(")");
    end;
@@ -281,12 +284,12 @@ with Refined_State => (pvt_exit_flag => exit_flag,
    procedure dump_cons is
    begin
       for i in cons_index'First + 1 .. cons_index'Last loop
-         if cons_table(i).ref > 0 then
+         if BBS.lisp.conses.get_ref(i) > 0 then
             Put("Cons " & Integer'Image(Integer(i)) & " ref count " &
-                  Integer'Image(Integer(cons_table(i).ref)) & " contains: <");
-            print(cons_table(i).car, False, False);
+                  Integer'Image(Integer(BBS.lisp.conses.get_ref(i))) & " contains: <");
+            print(BBS.lisp.conses.get_car(i), False, False);
             Put(" . ");
-            print(cons_table(i).cdr, False, False);
+            print(BBS.lisp.conses.get_cdr(i), False, False);
             Put_Line(">");
          end if;
       end loop;
@@ -499,10 +502,10 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       t : cons_index;
       flag : Boolean;
    begin
-      flag := bbs.lisp.memory.alloc(t);
+      flag := BBS.lisp.conses.alloc(t);
       if flag then
-         cons_table(t).car := e;
-         cons_table(t).cdr := NIL_ELEM;
+         BBS.lisp.conses.set_car(t, e);
+         BBS.lisp.conses.set_cdr(t, NIL_ELEM);
       end if;
       s := t;
       return flag;
@@ -515,13 +518,13 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       t : cons_index;
    begin
       t := s1;
-      while cons_table(t).cdr /= NIL_ELEM loop
-         t := BBS.lisp.evaluate.getList(cons_table(t).cdr);
+      while BBS.lisp.conses.get_cdr(t) /= NIL_ELEM loop
+         t := BBS.lisp.evaluate.getList(BBS.lisp.conses.get_cdr(t));
          if t = NIL_CONS then
             return False;
          end if;
       end loop;
-      cons_table(t).cdr := BBS.lisp.evaluate.makeList(s2);
+      BBS.lisp.conses.set_cdr(t, BBS.lisp.evaluate.makeList(s2));
       return True;
    end;
    --
@@ -549,8 +552,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       sym : BBS.lisp.symbols.sym_body;
       sym_flag : Boolean := False;
       e : element_type := NIL_ELEM;
-      first : constant element_type := cons_table(s).car;
-      rest : constant cons_index := BBS.lisp.evaluate.getList(cons_table(s).cdr);
+      first : constant element_type := BBS.lisp.conses.get_car(s);
+      rest : constant cons_index := BBS.lisp.evaluate.getList(BBS.lisp.conses.get_cdr(s));
       val : element_type;
    begin
       if first.kind = V_SYMBOL then
@@ -637,7 +640,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             end if;
             e := bbs.lisp.evaluate.func.eval_function(val.lam, rest);
          else
-            BBS.lisp.memory.ref(s);
+            BBS.lisp.conses.ref(s);
             e := BBS.lisp.evaluate.makeList(s);
          end if;
       elsif BBS.lisp.evaluate.isList(first) then
@@ -653,7 +656,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
             print(first, False, True);
             new_line;
          end if;
-         BBS.lisp.memory.ref(s);
+         BBS.lisp.conses.ref(s);
          e := BBS.lisp.evaluate.makeList(s);
       end if;
       if msg_flag then

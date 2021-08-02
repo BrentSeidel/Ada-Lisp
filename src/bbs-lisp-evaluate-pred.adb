@@ -4,6 +4,7 @@
 --  and some of them will return constant values because Tiny-Lisp doesn't
 --  implement some things.
 --
+with BBS.lisp.conses;
 with BBS.lisp.memory;
 with BBS.lisp.symbols;
 package body BBS.lisp.evaluate.pred is
@@ -17,7 +18,7 @@ package body BBS.lisp.evaluate.pred is
          e := make_error(ERR_UNKNOWN);
          return;
       end if;
-      e := (Kind => V_BOOLEAN, b => not isList(cons_table(s).car));
+      e := (Kind => V_BOOLEAN, b => not isList(BBS.lisp.conses.get_car(s)));
    end;
    --
    procedure characterp(e : out element_type; s : cons_index) is
@@ -60,7 +61,7 @@ package body BBS.lisp.evaluate.pred is
          e := make_error(ERR_UNKNOWN);
          return;
       end if;
-      e := (Kind => V_BOOLEAN, b => isList(cons_table(s).car));
+      e := (Kind => V_BOOLEAN, b => isList(BBS.lisp.conses.get_car(s)));
    end;
    --
    procedure errorp(e : out element_type; s : cons_index) is
@@ -123,7 +124,7 @@ package body BBS.lisp.evaluate.pred is
          e := make_error(ERR_UNKNOWN);
          return;
       end if;
-      p := cons_table(s).car;
+      p := BBS.lisp.conses.get_car(s);
       e := (Kind => V_BOOLEAN, b => isList(p) or (p = NIL_ELEM));
    end;
    --
@@ -167,7 +168,7 @@ package body BBS.lisp.evaluate.pred is
    end;
    --
    procedure stringp(e : out element_type; s : cons_index) is
-      t  : cons_index := s;
+      t : cons_index := s;
       p : element_type;
    begin
       if s = NIL_CONS then
@@ -187,7 +188,7 @@ package body BBS.lisp.evaluate.pred is
          e := make_error(ERR_UNKNOWN);
          return;
       end if;
-      p := cons_table(s).car;
+      p := BBS.lisp.conses.get_car(s);
       e := (Kind => V_BOOLEAN, b => p.kind = V_SYMBOL);
    end;
    --

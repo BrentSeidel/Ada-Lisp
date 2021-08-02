@@ -1,3 +1,4 @@
+with BBS.lisp.conses;
 with BBS.lisp.memory;
 with BBS.lisp.strings;
 package body BBS.lisp.evaluate.cond is
@@ -205,15 +206,15 @@ package body BBS.lisp.evaluate.cond is
          return;
       end if;
       if s1 > NIL_CONS then
-         p2 := cons_table(s1).car;
-         if isList(cons_table(s1).cdr) then
-            s1 := getList(cons_table(s1).cdr);
-            p3 := cons_table(s1).car;
+         p2 := BBS.lisp.conses.get_car(s1);
+         if isList(BBS.lisp.conses.get_cdr(s1)) then
+            s1 := getList((BBS.lisp.conses.get_cdr(s1)));
+            p3 := BBS.lisp.conses.get_car(s1);
          else
-            p3 := cons_table(s1).cdr;
+            p3 := BBS.lisp.conses.get_cdr(s1);
          end if;
       else
-         p2 := cons_table(s).cdr;
+         p2 := BBS.lisp.conses.get_cdr(s);
          p3 := NIL_ELEM;
       end if;
       --

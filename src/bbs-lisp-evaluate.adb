@@ -1,3 +1,4 @@
+with BBS.lisp.conses;
 with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.symbols;
@@ -11,8 +12,8 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       if e = NIL_ELEM then
          return False;
       elsif isList(e) then
-         if (cons_table(getList(e)).car = NIL_ELEM)
-           and (cons_table(getList(e)).cdr = NIL_ELEM) then
+         if (BBS.lisp.conses.get_car(getList(e)) = NIL_ELEM)
+           and (BBS.lisp.conses.get_cdr(getList(e)) = NIL_ELEM) then
             return False;
          end if;
       elsif e.kind = V_BOOLEAN  then
@@ -57,7 +58,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    begin
       list := getList(e);
       if list > NIL_CONS then
-         temp := cons_table(list).car;
+         temp := BBS.lisp.conses.get_car(list);
       else
          temp := e;
       end if;
@@ -89,10 +90,10 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       ret_val := NIL_ELEM;
       while statement > NIL_CONS loop
          BBS.lisp.memory.deref(ret_val);
-         if isList(cons_table(statement).car) then
-            ret_val := eval_dispatch(getList(cons_table(statement).car));
+         if isList(BBS.lisp.conses.get_car(statement)) then
+            ret_val := eval_dispatch(getList(BBS.lisp.conses.get_car(statement)));
          else
-            ret_val := indirect_elem(cons_table(statement).car);
+            ret_val := indirect_elem(BBS.lisp.conses.get_car(statement));
          end if;
          if ret_val.kind = V_ERROR then
             error("block execution", "Operation returned an error");
@@ -101,7 +102,7 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
          if exit_block > 0 then
             exit;
          end if;
-         statement := getList(cons_table(statement).cdr);
+         statement := getList(BBS.lisp.conses.get_cdr(statement));
       end loop;
       return ret_val;
    end;
@@ -162,8 +163,8 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
       if s = NIL_CONS then
          return NIL_ELEM;
       else
-         first := cons_table(s).car;
-         s := getList(cons_table(s).cdr);
+         first := BBS.lisp.conses.get_car(s);
+         s := getList(BBS.lisp.conses.get_cdr(s));
          if first = NIL_ELEM then
             null;
          elsif isList(first) then

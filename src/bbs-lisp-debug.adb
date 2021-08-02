@@ -1,3 +1,4 @@
+with BBS.lisp.conses;
 with BBS.lisp.evaluate;
 with BBS.lisp.strings;
 with BBS.lisp.symbols;
@@ -21,7 +22,7 @@ package body BBS.lisp.debug is
                put(" NIL");
             end if;
          when V_LIST =>
-            put(" LIST: Ref: " & cons_ref_count'Image(cons_table(e.l).ref) & " Value: ");
+            put(" LIST: Ref: " & BBS.lisp.conses.cons_ref_count'Image(BBS.lisp.conses.get_ref(e.l)) & " Value: ");
             print(e.l);
          when others =>
             Put("<Unknown value kind " & value_type'Image(e.kind) & ">");
@@ -34,10 +35,10 @@ package body BBS.lisp.debug is
    begin
       Put("(");
       while temp > NIL_CONS loop
-         if BBS.lisp.evaluate.isList(cons_table(temp).car) then
-            dump(BBS.lisp.evaluate.getList(cons_table(temp).car));
+         if BBS.lisp.evaluate.isList(BBS.lisp.conses.get_car(temp)) then
+            dump(BBS.lisp.evaluate.getList(BBS.lisp.conses.get_car(temp)));
          end if;
-         temp := BBS.lisp.evaluate.getList(cons_table(temp).cdr);
+         temp := BBS.lisp.evaluate.getList(BBS.lisp.conses.get_cdr(temp));
       end loop;
       put(")");
    end;

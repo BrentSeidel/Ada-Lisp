@@ -21,16 +21,12 @@ private package BBS.lisp.parser is
    --
    --  The main parser function.  Returns True if parsing is successful.
    --
-   function parse(buff : parser_ptr; e : out element_type) return Boolean
-     with Global => (Input => (cons_table));
-   -- should be (In_Out => (cons_table, pvt_string_table)
+   function parse(buff : parser_ptr; e : out element_type) return Boolean;
 private
    --
    --  Utilities to assist in parsing
    --
-   function append_to_list(head : cons_index; e : element_type) return Boolean
-     with Global => (Input => cons_table);
-   -- should be (In_Out => cons_table)
+   function append_to_list(head : cons_index; e : element_type) return Boolean;
    --
    --  Subfunction for parsing lists.  If the buffer ends before the end of the
    --  list is reached, more input is read and the parsing continues.
@@ -40,9 +36,7 @@ private
    --
    function list(buff : parser_ptr; s_expr : out cons_index;
                  qfixed : Boolean; base : Boolean)
-                 return Boolean
-     with Global => (Input => (cons_table));
-   -- should be (In_Out => (cons_table)
+                 return Boolean;
    --
    --  Subfunction for parsing symbols or temp symbols.  A is an atom that points
    --  to either the symbol or temp symbol.  Returns false if the symbol or temp

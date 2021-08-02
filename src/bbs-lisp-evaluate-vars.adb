@@ -1,3 +1,4 @@
+with BBS.lisp.conses;
 with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.strings;
@@ -28,9 +29,9 @@ package body BBS.lisp.evaluate.vars is
          when PH_PARSE_BEGIN =>
             msg("setq", "Called during parse begin phase.");
             if s > cons_index'First then
-               p1 := cons_table(s).car;  --  Should be symbol for setq
-               p2 := cons_table(s).cdr;
-               p3 := cons_table(getList(p2)).car; --  Should be a symbol or tempsym
+               p1 := BBS.lisp.conses.get_car(s);  --  Should be symbol for setq
+               p2 := BBS.lisp.conses.get_cdr(s);
+               p3 := BBS.lisp.conses.get_car(getList(p2)); --  Should be a symbol or tempsym
                if p3.kind = V_SYMBOL then
                   symb := p3.sym;
                   if BBS.lisp.symbols.isFixed(symb) then
@@ -42,7 +43,7 @@ package body BBS.lisp.evaluate.vars is
                   str := p3.tempsym;
                   p3 := find_variable(str, True);
                   BBS.lisp.strings.deref(str);
-                  cons_table(getList(p2)).car := p3;
+                  BBS.lisp.conses.set_car(getList(p2), p3);
                elsif p3.kind = V_STACK then
                   null;
                else
@@ -61,7 +62,7 @@ package body BBS.lisp.evaluate.vars is
          when PH_EXECUTE =>
             msg("setq", "Called during execute phase.");
             if s > NIL_CONS then
-               p1 := cons_table(s).car;  --  Should be symbol name
+               p1 := BBS.lisp.conses.get_car(s);  --  Should be symbol name
                if p1.kind = V_SYMBOL then
                   symb := p1.sym;
                elsif p1.kind = V_STACK then
@@ -86,11 +87,11 @@ package body BBS.lisp.evaluate.vars is
                --
                --  Now determine what value to attach to the symbol.
                --
-               if isList(cons_table(s).cdr) then
-                  temp := getList(cons_table(s).cdr);
+               if isList(BBS.lisp.conses.get_cdr(s)) then
+                  temp := getList(BBS.lisp.conses.get_cdr(s));
                   p2 := first_value(temp);
                else
-                  p2 := cons_table(s).cdr;
+                  p2 := BBS.lisp.conses.get_cdr(s);
                end if;
                BBS.lisp.memory.ref(p2);
                   --
@@ -150,9 +151,9 @@ package body BBS.lisp.evaluate.vars is
                --
                --  First process the list of local variables
                --
-               list := cons_table(s).cdr;  --  Should be local variable list.
+               list := BBS.lisp.conses.get_cdr(s);  --  Should be local variable list.
                if isList(list) then
-                  locals := getList(cons_table(getList(list)).car);
+                  locals := getList(BBS.lisp.conses.get_car(getList(list)));
                else
                   error("let", "Improper parameters.");
                   e := make_error(ERR_UNKNOWN);
@@ -160,8 +161,8 @@ package body BBS.lisp.evaluate.vars is
                end if;
                if locals = NIL_CONS then
                   error("let", "Parameter list must be a list");
-                  BBS.lisp.memory.deref(cons_table(getList(list)).car);
-                  cons_table(getList(list)).car := make_error(ERR_UNKNOWN);
+                  BBS.lisp.memory.deref(BBS.lisp.conses.get_car(getList(list)));
+                  BBS.lisp.conses.set_car(getList(list), make_error(ERR_UNKNOWN));
                   return;
                end if;
                base := locals;
@@ -176,10 +177,10 @@ package body BBS.lisp.evaluate.vars is
                      str : string_index;
                      offset : Natural := 1;
                   begin
-                     if isList(cons_table(locals).car) then
-                        el := cons_table(getList(cons_table(locals).car)).car;
+                     if isList(BBS.lisp.conses.get_car(locals)) then
+                        el := BBS.lisp.conses.get_car(getList(BBS.lisp.conses.get_car(locals)));
                      else
-                        el := cons_table(locals).car;
+                        el := BBS.lisp.conses.get_car(locals);
                      end if;
                      if (el.kind = V_SYMBOL) and then (el.sym.kind = ST_DYNAMIC) then
                         str := BBS.lisp.symbols.get_name(el.sym);
@@ -202,19 +203,19 @@ package body BBS.lisp.evaluate.vars is
                      if err then
                         error("let", "Error building stack frame during parsing");
                         put_line("Local variable list removed");
-                        BBS.lisp.memory.deref(base);
+                        BBS.lisp.conses.deref(base);
                         e := make_error(ERR_UNKNOWN);
-                        cons_table(getList(list)).car := make_error(ERR_UNKNOWN);
+                        BBS.lisp.conses.set_car(getList(list), make_error(ERR_UNKNOWN));
                         return;
                      end if;
                      offset := offset + 1;
-                     if isList(cons_table(locals).car) then
-                        cons_table(getList(cons_table(locals).car)).car := el;
+                     if isList(BBS.lisp.conses.get_car(locals)) then
+                        BBS.lisp.conses.set_car(getList(BBS.lisp.conses.get_car(locals)), el);
                      else
-                        cons_table(locals).car := el;
+                        BBS.lisp.conses.set_car(locals, el);
                      end if;
                   end;
-                  locals := getList(cons_table(locals).cdr);
+                  locals := getList(BBS.lisp.conses.get_cdr(locals));
                end loop;
             else
                error("let", "Something went horribly wrong and local did not get a list");
@@ -232,8 +233,8 @@ package body BBS.lisp.evaluate.vars is
             --
             --  First process the list of local variables
             --
-            locals := getList(cons_table(s).car);  --  Should be parameter list.
-            list := cons_table(s).cdr;
+            locals := getList(BBS.lisp.conses.get_car(s));  --  Should be parameter list.
+            list := BBS.lisp.conses.get_cdr(s);
             --
             --  Next process the parameter list.
             --
@@ -255,15 +256,15 @@ package body BBS.lisp.evaluate.vars is
                   offset : Natural := 1;
                   local_val : element_type := ELEM_F;
                begin
-                  if isList(cons_table(locals).car) then
-                     temp_list := getList(cons_table(locals).car);
-                     el := cons_table(temp_list).car;
+                  if isList(BBS.lisp.conses.get_car(locals)) then
+                     temp_list := getList(BBS.lisp.conses.get_car(locals));
+                     el := BBS.lisp.conses.get_car(temp_list);
                      --
                      -- Check if there is a value
                      --
-                     check := cons_table(temp_list).cdr;
+                     check := BBS.lisp.conses.get_cdr(temp_list);
                      if isList(check) then
-                        check := cons_table(getList(check)).car;
+                        check := BBS.lisp.conses.get_car(getList(check));
                      end if;
                      if isList(check) then
                         check := eval_dispatch(getList(check));
@@ -276,7 +277,7 @@ package body BBS.lisp.evaluate.vars is
                         local_val := check;
                      end if;
                   else
-                     el := cons_table(locals).car;
+                     el := BBS.lisp.conses.get_car(locals);
                   end if;
                   if el.kind = V_STACK then
                      BBS.lisp.global.stack.push(el.st_name, local_val, err);
@@ -297,7 +298,7 @@ package body BBS.lisp.evaluate.vars is
                   end if;
                   offset := offset + 1;
                end;
-               locals := getList(cons_table(locals).cdr);
+               locals := getList(BBS.lisp.conses.get_cdr(locals));
             end loop;
             --
             --  Now evaluate the statements in this context.

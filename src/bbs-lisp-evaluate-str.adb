@@ -1,3 +1,4 @@
+with BBS.lisp.conses;
 with BBS.lisp.memory;
 with BBS.lisp.strings;
 package body BBS.lisp.evaluate.str is
@@ -36,9 +37,9 @@ package body BBS.lisp.evaluate.str is
       while t > NIL_CONS loop
          c := c + 1;
          last := t;
-         t := getList(cons_table(t).cdr);
+         t := getList(BBS.lisp.conses.get_cdr(t));
       end loop;
-      if cons_table(last).cdr /= NIL_ELEM then
+      if BBS.lisp.conses.get_cdr(last) /= NIL_ELEM then
          c := c + 1;
       end if;
       return c;

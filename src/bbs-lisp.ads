@@ -5,7 +5,7 @@
 --  help test and explore the device without having to constantly edit, build,'
 --  and load the Ada program.
 --
---  Basic lisp operations will be supported.  In addition, predefined functions
+--  Basic lisp operations are be supported.  In addition, predefined functions
 --  can be added to directly interface with the hardware.  Since each board is
 --  different, these will have to be customized for each target.
 --
@@ -19,10 +19,10 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --
    --  Sizes for the global data structures.  These can be adjusted as needed.
    --
-   max_cons : constant Integer := 500;
-   max_symb : constant Integer := 250;
+   max_cons   : constant Integer := 500;
+   max_symb   : constant Integer := 250;
    max_string : constant Integer := 450;
-   max_stack : constant Integer := 100;
+   max_stack  : constant Integer := 100;
    --
    type cons_index is range -1 .. max_cons;
    type symb_index is range -1 .. max_symb;
@@ -87,14 +87,10 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    function int32_to_uint32 is
       new Ada.Unchecked_Conversion(source => int32, target => uint32);
    --
-   --  Types for cons reference counts
+   --  Define the contents of the element.  This is the basic data element.  It
+   --  can store scalar values or pointers to other data structures.
    --
-   type cons_ref_count is new Natural;
-   FREE_CONS : constant cons_ref_count := cons_ref_count'First;
-   --
-   --  Define the contents of records.
-   --
-   type element_type(kind : value_type := V_INTEGER) is
+   type element_type(kind : value_type := V_NONE) is
       record
          case kind is
          when V_INTEGER =>
@@ -125,16 +121,6 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
          end case;
       end record;
    --
-   --  A cons cell contains two element_type pointers that can point to either
-   --  an atom or another cons cell.
-   --
-   type cons is
-      record
-         ref : cons_ref_count;
-         car : element_type;
-         cdr : element_type;
-      end record;
-   --
    --  Define function types for Ada.Text_IO replacements.
    --
    type t_put_line is access procedure(s : String);
@@ -149,26 +135,18 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --
    type special_function is access procedure(e : out element_type; s : cons_index; p : phase);
    --
-   --  The main data tables for various kinds of data.
-   --
-   --  Since this interpreter is designed to be used on embedded computers with
-   --  no operating system and possibly no dynamic memory allocation, The
-   --  statically allocated data structures are defined here.
-   --
-   cons_table : array (cons_index'First + 1 .. cons_index'Last) of cons;
-   --
    --  Do initialization and define text I/O routines
    --
    procedure init(p_put_line : t_put_line; p_put : t_put_line;
                   p_new_line : t_newline; p_get_line : t_get_line)
-     with Global => (Output => (cons_table, input_stream, pvt_first_char_flag));
+     with Global => (Output => (input_stream, pvt_first_char_flag));
    --
    --  The read procedure/function reads the complete text of an s-expression
    --  from some input device.  The string is then parsed into a binary form
    --  that can be evaluated.
    --
    function read return Element_Type
-     with Global => (Input => (input_stream, cons_table));
+     with Global => (Input => (input_stream));
    --
    --  This procedure evaluates a binary s-expression and returns the resuls.
    --
@@ -199,8 +177,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
      with Global => (Input => pvt_msg_flag,
                      output => output_stream);
    procedure print(e : element_type; d : Boolean; nl : Boolean)
-     with Global => (Input => (cons_table),
-                     output => output_stream);
+     with Global => (output => output_stream);
    --
    --  Create an error value with the specified error code
    --
@@ -259,17 +236,14 @@ private
    --
    --  These procedures print various types of objects.
    --
-   procedure print(s : cons_index)
-     with Global => (Input => (cons_table));
+   procedure print(s : cons_index);
    procedure print(s : string_index);
    procedure print(s : symbol_ptr);
    --
    --  For debugging, dump the various tables
    --
-   procedure dump_cons
-     with Global => (Input => (cons_table));
-   procedure dump_symbols
-     with Global => (Input => (cons_table));
+   procedure dump_cons;
+   procedure dump_symbols;
    procedure dump_strings;
    procedure dump_sym_ptr(s : symbol_ptr);
    --
@@ -324,12 +298,8 @@ private
    --
    --  Utility functions for manipulating lists
    --
-   function elem_to_cons(s : out cons_index; e : element_type) return Boolean
-     with Global => (Input => cons_table);
-   -- Should be (In_Out => cons_table)
-   function append(s1 : cons_index; s2 : cons_index) return Boolean
-     with Global => (Input => cons_table);
-   -- Should be (In_Out => cons_table)
+   function elem_to_cons(s : out cons_index; e : element_type) return Boolean;
+   function append(s1 : cons_index; s2 : cons_index) return Boolean;
    --
    --  Function for dispatching the various functions for evaluation.
    --

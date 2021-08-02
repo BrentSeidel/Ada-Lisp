@@ -7,12 +7,10 @@ with Abstract_State =>  pvt_exit_block is
    --
    --  Various utility functions
    --
-   function isTrue(e : element_type) return Boolean
-     with Global => (Input => cons_table);
+   function isTrue(e : element_type) return Boolean;
    function isList(e : element_type) return Boolean
      with Global => Null;
-   function isFunction(e : element_type) return Boolean
-     with Global => (Input => cons_table);
+   function isFunction(e : element_type) return Boolean;
    function getList(e : element_type) return cons_index
      with post => (if not isList(e) then getList'Result = NIL_CONS else
                        getList'Result in cons_index'Range),
@@ -24,11 +22,9 @@ with Abstract_State =>  pvt_exit_block is
    --  statement executed.
    --
    function execute_block(e : element_type) return element_type
-     with Global => (input => (cons_table,
-                               pvt_exit_flag, pvt_break_flag, pvt_msg_flag,
+     with Global => (input => (pvt_exit_flag, pvt_break_flag, pvt_msg_flag,
                                pvt_exit_block, pvt_first_char_flag));
-   --  should be (In_Out => (cons_table, pvt_string_table,
-   --                        pvt_exit_flag, pvt_break_flag, pvt_msg_flag,
+   --  should be (In_Out => (pvt_exit_flag, pvt_break_flag, pvt_msg_flag,
    --                        pvt_exit_loop, pvt_first_char_flag)
    --
    --  The following function examines an atom.  If the atom is some sort of
