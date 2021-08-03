@@ -11,25 +11,16 @@ package body BBS.lisp.evaluate.cond is
       t2 : element_type;
    begin
       if s = cons_index'First then
-         error("eval_comp", "Internal error.  Should have a list.");
-         return make_error(ERR_UNKNOWN);
+         error("eval_comp", "No parameters provided.");
+         return make_error(ERR_NOPARAM);
       end if;
       t1 := first_value(s1);
-      if t1.kind = V_ERROR then
-         error("eval_comp", "Error reported evaluating first parameter.");
-         return t1;
-      end if;
       if s1 > NIL_CONS then
          t2 := first_value(s1);
       else
          error("eval_comp", "Cannot compare a single element.");
          BBS.lisp.memory.deref(t1);
-         return make_error(ERR_UNKNOWN);
-      end if;
-      if t2.kind = V_ERROR then
-         error("eval_comp", "Error reported evaluating second parameter.");
-         BBS.lisp.memory.deref(t1);
-         return t2;
+         return make_error(ERR_FEWPARAM);
       end if;
       --
       --  A value of V_NONE is equivalent to a boolean False.
@@ -137,13 +128,26 @@ package body BBS.lisp.evaluate.cond is
             when SYM_NE =>
                return (kind => V_BOOLEAN, b => s1 /= s2);
             when SYM_LT =>
-               error("eval_comp", "Can only compare quoted symbols for equality.");
-               return make_error(ERR_UNKNOWN);
+               error("eval_comp", "Can only compare symbols for equality.");
+               return make_error(ERR_WRONGTYPE);
             when SYM_GT =>
-               error("eval_comp", "Can only compare quoted symbols for equality.");
-               return make_error(ERR_UNKNOWN);
+               error("eval_comp", "Can only compare symbols for equality.");
+               return make_error(ERR_WRONGTYPE);
             end case;
          end;
+         --
+         --  Compare errors for equality.
+         --
+      elsif (t1.kind = V_ERROR) and (t2.kind = V_ERROR) then
+         case b is
+            when SYM_EQ =>
+               return (kind => V_BOOLEAN, b => t1.err = t2.err);
+            when SYM_NE =>
+               return (kind => V_BOOLEAN, b => t1.err /= t2.err);
+            when others =>
+               error("eval_comp", "Can only compare errors for equality.");
+               return make_error(ERR_WRONGTYPE);
+         end case;
       else
          --
          --  Other comparisons are not supported.
@@ -153,7 +157,7 @@ package body BBS.lisp.evaluate.cond is
          put_line(", second type is " & value_type'Image(t2.kind));
          BBS.lisp.memory.deref(t1);
          BBS.lisp.memory.deref(t2);
-         return make_error(ERR_UNKNOWN);
+         return make_error(ERR_WRONGTYPE);
       end if;
    end;
    --
@@ -195,8 +199,8 @@ package body BBS.lisp.evaluate.cond is
       p3 : element_type; --  False expression
    begin
       if s = cons_index'First then
-         error("eval_if", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("eval_if", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(s1);

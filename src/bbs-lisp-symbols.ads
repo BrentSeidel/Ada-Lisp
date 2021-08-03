@@ -159,6 +159,17 @@ private
    DOWHILE             : aliased constant String := "DOWHILE";
    DUMP                : aliased constant String := "DUMP";
    ERRORP              : aliased constant String := "ERRORP";
+   E_ALLOCCONS         : aliased constant String := "ERR_ALLOCCONS";
+   E_ALLOCSYM          : aliased constant String := "ERR_ALLOCSYM";
+   E_FEWPARAM          : aliased constant String := "ERR_FEWPARAM";
+   E_FIXSYM            : aliased constant String := "ERR_FIXSYM";
+   E_NOPARAM           : aliased constant String := "ERR_NOPARAM";
+   E_NOTSYM            : aliased constant String := "ERR_NOTSYM";
+   E_PARSESPEC         : aliased constant String := "ERR_PARSESPEC";
+   E_RANGE             : aliased constant String := "ERR_RANGE";
+   E_STACK             : aliased constant String := "ERR_STACK";
+   E_UNKNOWN           : aliased constant String := "ERR_UNKNOWN";
+   E_WRONGTYPE         : aliased constant String := "ERR_WRONGTYPE";
    EVAL                : aliased constant String := "EVAL";
    EXIT_LISP           : aliased constant String := "EXIT";
    FLOATP              : aliased constant String := "FLOATP";
@@ -243,6 +254,17 @@ private
       (name => DOTIMES'Access,             b => (Kind => SY_SPECIAL, s => BBS.lisp.evaluate.loops.dotimes'Access)),
       (name => DOWHILE'Access,             b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.loops.dowhile'Access)),
       (name => DUMP'Access,                b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.misc.dump'Access)),
+      (name => E_ALLOCCONS'Access,         b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_ALLOCCONS))),
+      (name => E_ALLOCSYM'Access,          b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_ALLOCSYM))),
+      (name => E_FEWPARAM'Access,          b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_FEWPARAM))),
+      (name => E_FIXSYM'Access,            b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_FIXSYM))),
+      (name => E_NOPARAM'Access,           b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_NOPARAM))),
+      (name => E_NOTSYM'Access,            b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_NOTSYM))),
+      (name => E_PARSESPEC'Access,         b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_PARSESPEC))),
+      (name => E_RANGE'Access,             b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_RANGE))),
+      (name => E_STACK'Access,             b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_STACK))),
+      (name => E_UNKNOWN'Access,           b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_UNKNOWN))),
+      (name => E_WRONGTYPE'Access,         b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_WRONGTYPE))),
       (name => ERRORP'Access,              b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.errorp'Access)),
       (name => EVAL'Access,                b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.func.eval_list'Access)),
       (name => EXIT_LISP'Access,           b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.misc.quit'Access)),

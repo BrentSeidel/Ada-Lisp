@@ -73,7 +73,18 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --
    --  Error codes.  These will be filled out later.
    --
-   type error_code is (ERR_UNKNOWN, ERR_UNDEFINED);
+   type error_code is  (ERR_ALLOCCONS,  --  Unable to allocate a cons
+                        ERR_ALLOCSYM,   --  Unable to allocate a symbol
+                        ERR_FEWPARAM,   --  Too few parameters
+                        ERR_FIXSYM,     --  Attempt to change a fixed symbol
+                        ERR_NOPARAM,    --  No parameters passed when required
+                        ERR_NOTSYM,     --  Symbol needed, but not provided
+                        ERR_PARSESPEC,  --  Error during parsing of special function
+                        ERR_RANGE,      --  Parameter value is out of range
+                        ERR_STACK,      --  Stack function reported an error
+                        ERR_UNKNOWN,    --  Unknown error code
+                        ERR_WRONGTYPE,  --  Wrong data type for parameter
+                        ERR_UNDEFINED);
    --
    --  Define the 32 bit signed and unsigned integer types along with unchecked
    --  conversions.  This is to support bitwise logical operations.

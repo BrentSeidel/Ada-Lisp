@@ -546,7 +546,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 This operation compares two values of the same type for equality.
 \subsection{Common Lisp Compatibility}
-This operation works on \datatype{integers}, \datatype{booleans}, \datatype{strings}, and quoted \datatype{symbols}.
+This operation works on \datatype{integers}, \datatype{booleans}, \datatype{strings}, \datatype{symbols}, quoted \datatype{symbols}, and \datatype{errors}.  For comparison purposes, \datatype{symbols} and quoted \datatype{symbols} are considered to be the same type.
 
 \section{/=}
 Not-equals
@@ -562,7 +562,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 This operation compares two values of the same type for not equality.
 \subsection{Common Lisp Compatibility}
-This operation works on \datatype{integers}, \datatype{booleans}, \datatype{strings}, and quoted \datatype{symbols}.
+This operation works on \datatype{integers}, \datatype{booleans}, \datatype{strings}, \datatype{symbols}, quoted \datatype{symbols}, and \datatype{errors}.  For comparison purposes, \datatype{symbols} and quoted \datatype{symbols} are considered to be the same type.
 
 \section{$<$}
 Less Than
@@ -997,7 +997,7 @@ A boolean.
 \end{lstlisting}
 Returns the value \constant{NIL}.
 \subsection{Description}
-If the parameter represents an error condition, return \constant{T}, otherwise return \constant{NIL}.  This offers \tl{} programs a rudimentary way to check for errors.
+If the parameter represents an error condition, return \constant{T}, otherwise return \constant{NIL}.  Effectively, this swallows an error condition and returns a boolean.  This offers \tl{} programs a rudimentary way to check for errors.
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.  \cl{} provides more comprehensive error handling, signaling, and trapping.
 

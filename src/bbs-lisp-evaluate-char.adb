@@ -9,8 +9,8 @@ package body BBS.lisp.evaluate.char is
       p1 : element_type; --  Parameter
    begin
       if t = NIL_CONS then
-         error("char_int", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("char_int", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(t);
@@ -23,7 +23,7 @@ package body BBS.lisp.evaluate.char is
          e := (kind => V_INTEGER, i => Character'Pos(p1.c));
       else
          error("char_int", "Parameter must be of character type, not " & value_type'Image(p1.kind));
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
       end if;
    end;
    --
@@ -34,8 +34,8 @@ package body BBS.lisp.evaluate.char is
       p1 : element_type; --  Parameter
    begin
       if t = NIL_CONS then
-         error("int_char", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("int_char", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(t);
@@ -50,11 +50,11 @@ package body BBS.lisp.evaluate.char is
          else
             error("int_char", "Parameter must be in range 0-255.  Value was "
                   & Integer'Image(Integer(p1.i)));
-            e := make_error(ERR_UNKNOWN);
+            e := make_error(ERR_RANGE);
          end if;
       else
          error("int_char", "Parameter must be of integer type, not " & value_type'Image(p1.kind));
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
       end if;
    end;
    --
@@ -65,8 +65,8 @@ package body BBS.lisp.evaluate.char is
       p1 : element_type; --  Parameter
    begin
       if t = NIL_CONS then
-         error("char_upcase", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("char_upcase", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(t);
@@ -79,7 +79,7 @@ package body BBS.lisp.evaluate.char is
          e := (kind => V_CHARACTER, c => BBS.lisp.strings.To_Upper(p1.c));
       else
          error("char_upcase", "Parameter must be of character type, not " & value_type'Image(p1.kind));
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
       end if;
    end;
    --
@@ -90,8 +90,8 @@ package body BBS.lisp.evaluate.char is
       p1 : element_type; --  Parameter
    begin
       if t = NIL_CONS then
-         error("char_upcase", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("char_upcase", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(t);
@@ -104,7 +104,7 @@ package body BBS.lisp.evaluate.char is
          e := (kind => V_CHARACTER, c => BBS.lisp.strings.To_Lower(p1.c));
       else
          error("char_upcase", "Parameter must be of character type, not " & value_type'Image(p1.kind));
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
       end if;
    end;
 end;
