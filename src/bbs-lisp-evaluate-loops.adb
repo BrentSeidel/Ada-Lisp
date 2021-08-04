@@ -234,7 +234,7 @@ package body BBS.lisp.evaluate.loops is
                BBS.lisp.global.stack.push(var.st_name, (kind => V_INTEGER, i => 0), err);
             else
                error("dotimes", "Loop counter is not a variable");
-               e := make_error(ERR_UNKNOWN);
+               e := make_error(ERR_WRONGTYPE);
                return;
             end if;
             --

@@ -160,11 +160,15 @@ private
    DUMP                : aliased constant String := "DUMP";
    ERRORP              : aliased constant String := "ERRORP";
    E_ALLOCCONS         : aliased constant String := "ERR_ALLOCCONS";
+   E_ALLOCSTR          : aliased constant String := "ERR_ALLOCSTR";
    E_ALLOCSYM          : aliased constant String := "ERR_ALLOCSYM";
    E_FEWPARAM          : aliased constant String := "ERR_FEWPARAM";
    E_FIXSYM            : aliased constant String := "ERR_FIXSYM";
    E_NOPARAM           : aliased constant String := "ERR_NOPARAM";
    E_NOTSYM            : aliased constant String := "ERR_NOTSYM";
+   E_PARSE             : aliased constant String := "ERR_PARSE";
+   E_PARSECHAR         : aliased constant String := "ERR_PARSECHAR";
+   E_PARSELIST         : aliased constant String := "ERR_PARSELIST";
    E_PARSESPEC         : aliased constant String := "ERR_PARSESPEC";
    E_RANGE             : aliased constant String := "ERR_RANGE";
    E_STACK             : aliased constant String := "ERR_STACK";
@@ -255,11 +259,15 @@ private
       (name => DOWHILE'Access,             b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.loops.dowhile'Access)),
       (name => DUMP'Access,                b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.misc.dump'Access)),
       (name => E_ALLOCCONS'Access,         b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_ALLOCCONS))),
+      (name => E_ALLOCSTR'Access,          b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_ALLOCSTR))),
       (name => E_ALLOCSYM'Access,          b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_ALLOCSYM))),
       (name => E_FEWPARAM'Access,          b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_FEWPARAM))),
       (name => E_FIXSYM'Access,            b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_FIXSYM))),
       (name => E_NOPARAM'Access,           b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_NOPARAM))),
       (name => E_NOTSYM'Access,            b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_NOTSYM))),
+      (name => E_PARSE'Access,             b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_PARSE))),
+      (name => E_PARSECHAR'Access,         b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_PARSECHAR))),
+      (name => E_PARSELIST'Access,         b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_PARSELIST))),
       (name => E_PARSESPEC'Access,         b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_PARSESPEC))),
       (name => E_RANGE'Access,             b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_RANGE))),
       (name => E_STACK'Access,             b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_STACK))),

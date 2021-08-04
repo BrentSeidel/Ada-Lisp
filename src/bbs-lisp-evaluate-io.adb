@@ -79,7 +79,7 @@ package body BBS.lisp.evaluate.io is
       if not BBS.lisp.parser.parse(str'Access, e) then
          error("read_expr", "Parsing failed");
          BBS.lisp.memory.deref(e);
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_PARSE);
       end if;
    end;
    --

@@ -473,7 +473,7 @@ with Refined_State => (pvt_exit_flag => exit_flag,
          return (kind => V_TEMPSYM, tempsym => n);
       end if;
       error("find_variable", "Oddly, no option matched.");
-      return make_error(ERR_UNKNOWN);
+      return make_error(ERR_WRONGTYPE);
    end;
    --
    procedure add_builtin(n : String; f : execute_function) is
