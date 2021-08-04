@@ -27,8 +27,8 @@ package body BBS.lisp.evaluate.math is
 
    begin
       if s = NIL_CONS then
-         error("eval_math", "Internal error.  Should have a list.");
-         return make_error(ERR_UNKNOWN);
+         error("eval_math", "No parameters provided.");
+         return make_error(ERR_NOPARAM);
       end if;
       el := first_value(t);
       if el.kind = V_INTEGER then
@@ -36,7 +36,7 @@ package body BBS.lisp.evaluate.math is
       else
          error("eval_math", "Can't process value of type " & value_type'Image(el.kind));
          BBS.lisp.memory.deref(el);
-         return make_error(ERR_UNKNOWN);
+         return make_error(ERR_WRONGTYPE);
       end if;
       bbs.lisp.memory.deref(el);
       while t > NIL_CONS loop
@@ -44,7 +44,7 @@ package body BBS.lisp.evaluate.math is
          if el.kind /= V_INTEGER then
             error("eval_math", "Can't process value of type " & value_type'Image(el.kind));
             BBS.lisp.memory.deref(el);
-            return make_error(ERR_UNKNOWN);
+            return make_error(ERR_WRONGTYPE);
          end if;
          process_value(el.i, b);
          bbs.lisp.memory.deref(el);

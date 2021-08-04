@@ -11,8 +11,8 @@ package body BBS.lisp.evaluate.list is
       p2 : element_type;  --  Second parameter
    begin
       if s = NIL_CONS then
-         error("cons", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("cons", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(s1);
@@ -35,7 +35,7 @@ package body BBS.lisp.evaluate.list is
          e := (kind => V_LIST, l => s1);
       else
          error("cons", "Unable to allocate cons cell");
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_ALLOCCONS);
       end if;
    end;
    --
@@ -109,7 +109,7 @@ package body BBS.lisp.evaluate.list is
             tail := s1;
          else
             error("list", "Unable to allocate initial cons cell.");
-            e := make_error(ERR_UNKNOWN);
+            e := make_error(ERR_ALLOCCONS);
             return;
          end if;
       else
@@ -132,7 +132,7 @@ package body BBS.lisp.evaluate.list is
          else
             BBS.lisp.conses.deref(head);
             error("list", "Unable to allocate cons cell");
-            e := make_error(ERR_UNKNOWN);
+            e := make_error(ERR_ALLOCCONS);
             return;
          end if;
       end loop;
