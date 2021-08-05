@@ -73,11 +73,13 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --
    --  Error codes.  These will be filled out later.
    --
-   type error_code is  (ERR_ALLOCCONS,   --  Unable to allocate a cons
+   type error_code is  (ERR_ADDON,       --  An error specific to an addon
+                        ERR_ALLOCCONS,   --  Unable to allocate a cons
                         ERR_ALLOCSTR,    --  Unable to allocate a string
                         ERR_ALLOCSYM,    --  Unable to allocate a symbol
                         ERR_FEWPARAM,    --  Too few parameters
                         ERR_FIXSYM,      --  Attempt to change a fixed symbol
+                        ERR_HARDWARE,    --  A hardware related error
                         ERR_NOPARAM,     --  No parameters passed when required
                         ERR_NOTSYM,      --  Symbol needed, but not provided
                         ERR_PARSE,       --  General parse failure

@@ -178,7 +178,7 @@ package body BBS.lisp.evaluate.loops is
                --
                if limits = NIL_CONS then
                   error("dotimes", "List not provided for limits.");
-                  e := make_error(ERR_NOPARAM);
+                  e := make_error(ERR_FEWPARAM);
                   return;
                end if;
                var := BBS.lisp.conses.get_car(limits);
@@ -199,6 +199,10 @@ package body BBS.lisp.evaluate.loops is
                   e := make_error(ERR_FEWPARAM);
                   return;
                end if;
+            else
+               error("dotimes", "List not provided for limits.");
+               e := make_error(ERR_NOPARAM);
+               return;
             end if;
             --
             --  Next determine what the loop limit is
@@ -407,6 +411,10 @@ package body BBS.lisp.evaluate.loops is
                   e := make_error(ERR_FEWPARAM);
                   return;
                end if;
+            else
+               error("dolist", "List not provided for limits.");
+               e := make_error(ERR_NOPARAM);
+               return;
             end if;
             --
             --  Next determine what the loop limit is

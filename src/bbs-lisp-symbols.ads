@@ -159,11 +159,13 @@ private
    DOWHILE             : aliased constant String := "DOWHILE";
    DUMP                : aliased constant String := "DUMP";
    ERRORP              : aliased constant String := "ERRORP";
+   E_ADDON             : aliased constant String := "ERR_ADDON";
    E_ALLOCCONS         : aliased constant String := "ERR_ALLOCCONS";
    E_ALLOCSTR          : aliased constant String := "ERR_ALLOCSTR";
    E_ALLOCSYM          : aliased constant String := "ERR_ALLOCSYM";
    E_FEWPARAM          : aliased constant String := "ERR_FEWPARAM";
    E_FIXSYM            : aliased constant String := "ERR_FIXSYM";
+   E_HARDWARE          : aliased constant String := "ERR_HARDWARE";
    E_NOPARAM           : aliased constant String := "ERR_NOPARAM";
    E_NOTSYM            : aliased constant String := "ERR_NOTSYM";
    E_PARSE             : aliased constant String := "ERR_PARSE";
@@ -258,11 +260,13 @@ private
       (name => DOTIMES'Access,             b => (Kind => SY_SPECIAL, s => BBS.lisp.evaluate.loops.dotimes'Access)),
       (name => DOWHILE'Access,             b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.loops.dowhile'Access)),
       (name => DUMP'Access,                b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.misc.dump'Access)),
+      (name => E_ADDON'Access,             b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_ADDON))),
       (name => E_ALLOCCONS'Access,         b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_ALLOCCONS))),
       (name => E_ALLOCSTR'Access,          b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_ALLOCSTR))),
       (name => E_ALLOCSYM'Access,          b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_ALLOCSYM))),
       (name => E_FEWPARAM'Access,          b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_FEWPARAM))),
       (name => E_FIXSYM'Access,            b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_FIXSYM))),
+      (name => E_HARDWARE'Access,          b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_HARDWARE))),
       (name => E_NOPARAM'Access,           b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_NOPARAM))),
       (name => E_NOTSYM'Access,            b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_NOTSYM))),
       (name => E_PARSE'Access,             b => (kind => SY_VARIABLE, pv => (Kind => V_ERROR, err => ERR_PARSE))),

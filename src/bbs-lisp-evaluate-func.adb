@@ -188,9 +188,6 @@ package body BBS.lisp.evaluate.func is
             end if;
             temp := getList(BBS.lisp.conses.get_cdr(s));
             BBS.lisp.conses.set_cdr(s, NIL_ELEM);
-            put_line("defun: Preparing to assign value to symbol");
-            print(symb);
-            new_line;
             BBS.lisp.symbols.set_sym(symb, (kind => SY_VARIABLE,
                                             pv => (kind => V_LAMBDA,
                                                          lam => temp)));

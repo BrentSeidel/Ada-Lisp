@@ -37,65 +37,48 @@
 ;
 ;  Print summary results
 ;
-;(defun summary ()
-;  (print "Test cases passed: " *PASS-COUNT*)
-;  (terpri)
-;  (print "Test cases failed: " *FAIL-COUNT*)
-;  (terpri)
-;  (print "Total test cases:  " (+ *PASS-COUNT* *FAIL-COUNT*)))
+(defun summary ()
+  (print "Test cases passed: " *PASS-COUNT*)
+  (terpri)
+  (print "Test cases failed: " *FAIL-COUNT*)
+  (terpri)
+  (print "Total test cases:  " (+ *PASS-COUNT* *FAIL-COUNT*)))
 ;--------------------------------------------
 ;
-;  Test predicates
+;  Test error conditions.  There are lots so they will be broken down into smaller
+;  groups.
 ;
-(print "===> Testing predicates")
+;
+;
+(print "===> Testing stack overflow")
 (terpri)
-(defun test-pred ()
-  (verify-false (arrayp (1 3 4)) "arrayp is always false")
-  (verify-false (bit-vector-p (1 2 3)) "bit-vector-p is always false")
-  (verify-false (complexp 1) "complexp is always false")
-  (verify-false (floatp (/ 1 3)) "floatp is always false")
-  (verify-false (vectorp (1 2 3)) "vectorp is always false")
-  (verify-false (rationalp (/ 2 5)) "rationalp is always false")
-  (verify-false (realp (/ 5 2)) "realp is always false")
-  (verify-false (simple-vector-p (1 2 3)) "simple-vector-p is always false")
-  (verify-false (simple-bit-vector-p #x0F0F0F0F) "simple-bit-vector-p is always false")
-  (verify-false (packagep "main") "packagep is always false")
-  (verify-false (vectorp (1 2 3)) "vectorp is always false")
-  (verify-true (atomp 1) "atomp is true for atoms")
-  (verify-false (atomp (1)) "atomp is false for non-atoms")
-  (verify-true (characterp #\A) "characterp is true for characters")
-  (verify-false (characterp 1) "characterp is false for non-characters")
-  (verify-true (compiled-function-p print) "compiled-function-p is true for builtins")
-  (verify-false (compiled-function-p test-pred) "compiled-function-p is false for non-builtins")
-  (verify-true (consp (1 2 3)) "consp is true for lists")
-  (verify-false (consp 1) "consp is false for non-lists")
-  (verify-false (errorp 1) "errorp is false for normal conditions")
-  (verify-true (errorp (+ 1 "a")) "errorp is true for error conditions")
-  (verify-true (functionp test-pred) "functionp is true for user defined functions")
-  (verify-true (functionp functionp) "functionp is true for builtin functions")
-  (verify-true (functionp setq) "functionp is true for special functions")
-  (verify-true (functionp (lambda (a b) (+ a b))) "functionp is true for lambda functions")
-  (verify-false (functionp 1) "functionp is false for non-functions")
-  (verify-true (integerp 3) "integerp is true for integers")
-  (verify-false (integerp #\A) "integerp is false for non-integers")
-  (verify-true (listp (2 4 6)) "listp is true for lists")
-  (verify-false (listp "Hello") "listp is false for non-lists")
-  (verify-true (numberp 10) "numberp is true for numbers")
-  (verify-false (numberp #\B) "numberp is false for non-numbers")
-  (verify-true (null ()) "null is true for nulls")
-  (verify-false (null 1) "null is false for non-nulls")
-  (verify-true (simple-string-p "Hello") "simple-string-p is true for strings")
-  (verify-false (simple-string-p 2) "simple-string-p is false for non-strings")
-  (verify-true (stringp "Hello") "stringp is true for strings")
-  (verify-false (stringp #\C) "stringp is false for non-strings")
-  (verify-true (symbolp car) "symbolp is true for symbols")
-  (verify-false (symbolp #\@) "symbolp is false for non-symbol"))
-(test-pred)
-;(dump)
-(setq test-pred 0)
-;(dump)
+(defun test-stack-ovr (a) (print "A is " a) (terpri) (test-stack-ovr (+ 1 a)))
+(verify-equal ERR_STACK (test-stack-ovr 1) "Recursive function stack overflow error")
+(defun test-stack-ovr (a) (let (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10) (print "A is " a) (terpri) (test-stack-ovr (+ 1 a))))
+(verify-equal ERR_STACK (test-stack-ovr 1) "Recursive function with locals stack overflow error")
+(verify-equal ERR_WRONGTYPE (let (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14
+  A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32
+  A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 A46 A47 A48 A49 A50
+  A51 A52 A53 A54 A55 A56 A57 A58 A59 A60 A61 A62 A63 A64 A65 A66 A67 A68
+  A69 A70 A71 A72 A73 A74 A75 A76 A77 A78 A79 A80 A81 A82 A83 A84 A85 A86
+  A87 A88 A89 A90 A91 A92 A93 A94 A95 A96 A97 A98 A99 A100)
+  (print "So many local variables") (terpri)) "Too many local variables")
+(defun test-lambda (a b)
+  (verify-equal a (b 1 2 3 4 5 6 7 8 9
+  10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33
+  34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57
+  58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81
+  82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100) "Testing lambda"))
+(verify-equal ERR_WRONGTYPE (test-lambda T (lambda (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14
+  A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32
+  A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 A46 A47 A48 A49 A50
+  A51 A52 A53 A54 A55 A56 A57 A58 A59 A60 A61 A62 A63 A64 A65 A66 A67 A68
+  A69 A70 A71 A72 A73 A74 A75 A76 A77 A78 A79 A80 A81 A82 A83 A84 A85 A86
+  A87 A88 A89 A90 A91 A92 A93 A94 A95 A96 A97 A98 A99 A100)
+  (print "So many parameters") (terpri))) "Lambda variables")
 ;
 ;--------------------------------------------
 (print "===> Testing complete")
 (terpri)
+(summary)
 (exit)
