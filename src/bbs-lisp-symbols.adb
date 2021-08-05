@@ -19,7 +19,7 @@ package body BBS.lisp.symbols is
    function isFixed(s : symbol_ptr) return Boolean is
       t : constant symbol_type := get_type(s);
    begin
-      return (t = SY_BUILTIN) or (t = SY_SPECIAL);
+      return (t = SY_BUILTIN) or (t = SY_SPECIAL) or (s.kind = ST_FIXED);
    end;
    --
    --  Check if symbol is a function (builtin, special, or user defined function)

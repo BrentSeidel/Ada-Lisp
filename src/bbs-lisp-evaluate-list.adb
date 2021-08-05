@@ -1,3 +1,4 @@
+with BBS.lisp.conses;
 with BBS.lisp.memory;
 package body BBS.lisp.evaluate.list is
 
@@ -10,8 +11,8 @@ package body BBS.lisp.evaluate.list is
       p2 : element_type;  --  Second parameter
    begin
       if s = NIL_CONS then
-         error("cons", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("cons", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(s1);
@@ -26,15 +27,15 @@ package body BBS.lisp.evaluate.list is
          e := p2;
          return;
       end if;
-      if BBS.lisp.memory.alloc(s1) then
-         cons_table(s1).car := p1;
-         cons_table(s1).cdr := p2;
+      if BBS.lisp.conses.alloc(s1) then
+         BBS.lisp.conses.set_car(s1, p1);
+         BBS.lisp.conses.set_cdr(s1, p2);
          BBS.lisp.memory.ref(p1);
          BBS.lisp.memory.ref(p2);
          e := (kind => V_LIST, l => s1);
       else
          error("cons", "Unable to allocate cons cell");
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_ALLOCCONS);
       end if;
    end;
    --
@@ -49,7 +50,7 @@ package body BBS.lisp.evaluate.list is
       first := first_value(rest);
       s1 := getList(first);
       if s1 > NIL_CONS then
-         temp := cons_table(s1).car;
+         temp := BBS.lisp.conses.get_car(s1);
          BBS.lisp.memory.ref(temp);
          e := temp;
       else
@@ -68,7 +69,7 @@ package body BBS.lisp.evaluate.list is
       first := first_value(rest);
       s1 := getList(first);
       if s1 > NIL_CONS then
-         temp := cons_table(s1).cdr;
+         temp := BBS.lisp.conses.get_cdr(s1);
          BBS.lisp.memory.ref(temp);
          e := temp;
       else
@@ -80,7 +81,7 @@ package body BBS.lisp.evaluate.list is
    --
    procedure quote(e : out element_type; s : cons_index) is
    begin
-      bbs.lisp.memory.ref(s);
+      bbs.lisp.conses.ref(s);
       e := makeList(s);
    end;
    --
@@ -95,7 +96,7 @@ package body BBS.lisp.evaluate.list is
       s1 : cons_index;
    begin
       if s > NIL_CONS then
-         if BBS.lisp.memory.alloc(s1) then
+         if BBS.lisp.conses.alloc(s1) then
             first := first_value(rest);
             if first.kind = V_ERROR then
                error("list", "Parameter returned an error");
@@ -103,12 +104,12 @@ package body BBS.lisp.evaluate.list is
                return;
             end if;
             BBS.lisp.memory.ref(first);
-            cons_table(s1).car := first;
+            BBS.lisp.conses.set_car(s1, first);
             head := s1;
             tail := s1;
          else
             error("list", "Unable to allocate initial cons cell.");
-            e := make_error(ERR_UNKNOWN);
+            e := make_error(ERR_ALLOCCONS);
             return;
          end if;
       else
@@ -116,22 +117,22 @@ package body BBS.lisp.evaluate.list is
          return;
       end if;
       while rest > NIL_CONS loop
-         if BBS.lisp.memory.alloc(s1) then
+         if BBS.lisp.conses.alloc(s1) then
             first := first_value(rest);
             if first.kind = V_ERROR then
-               BBS.lisp.memory.deref(head);
+               BBS.lisp.conses.deref(head);
                error("list", "Parameter returned an error");
                e := first;
                return;
             end if;
-            cons_table(tail).cdr := (kind => V_LIST, l => s1);
+            BBS.lisp.conses.set_cdr(tail, (kind => V_LIST, l => s1));
             tail := s1;
             BBS.lisp.memory.ref(first);
-            cons_table(s1).car := first;
+            BBS.lisp.conses.set_car(s1, first);
          else
-            BBS.lisp.memory.deref(head);
+            BBS.lisp.conses.deref(head);
             error("list", "Unable to allocate cons cell");
-            e := make_error(ERR_UNKNOWN);
+            e := make_error(ERR_ALLOCCONS);
             return;
          end if;
       end loop;

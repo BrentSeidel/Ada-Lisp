@@ -4,6 +4,7 @@
 --  and some of them will return constant values because Tiny-Lisp doesn't
 --  implement some things.
 --
+with BBS.lisp.conses;
 with BBS.lisp.memory;
 with BBS.lisp.symbols;
 package body BBS.lisp.evaluate.pred is
@@ -12,12 +13,12 @@ package body BBS.lisp.evaluate.pred is
    --
    procedure atomp(e : out element_type; s : cons_index) is
    begin
-      if s = cons_index'First then
-         error("atomp", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+      if s = NIL_CONS then
+         error("atomp", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
-      e := (Kind => V_BOOLEAN, b => not isList(cons_table(s).car));
+      e := (Kind => V_BOOLEAN, b => not isList(BBS.lisp.conses.get_car(s)));
    end;
    --
    procedure characterp(e : out element_type; s : cons_index) is
@@ -25,8 +26,8 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if s = NIL_CONS then
-         error("characterp", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("characterp", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p := first_value(t);
@@ -38,8 +39,8 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if s = NIL_CONS then
-         error("compiled_function_p", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("compiled_function_p", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p := first_value(t);
@@ -56,11 +57,11 @@ package body BBS.lisp.evaluate.pred is
    procedure consp(e : out element_type; s : cons_index) is
    begin
       if s = NIL_CONS then
-         error("consp", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("consp", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
-      e := (Kind => V_BOOLEAN, b => isList(cons_table(s).car));
+      e := (Kind => V_BOOLEAN, b => isList(BBS.lisp.conses.get_car(s)));
    end;
    --
    procedure errorp(e : out element_type; s : cons_index) is
@@ -68,8 +69,8 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if s = NIL_CONS then
-         error("errorp", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("errorp", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p := first_value(t);
@@ -81,8 +82,8 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if s = NIL_CONS then
-         error("functionp", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("functionp", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p := first_value(t);
@@ -107,8 +108,8 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if s = NIL_CONS then
-         error("integerp", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("integerp", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p := first_value(t);
@@ -119,11 +120,11 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if s = NIL_CONS then
-         error("listp", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("listp", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
-      p := cons_table(s).car;
+      p := BBS.lisp.conses.get_car(s);
       e := (Kind => V_BOOLEAN, b => isList(p) or (p = NIL_ELEM));
    end;
    --
@@ -132,8 +133,8 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if s = NIL_CONS then
-         error("nullp", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("nullp", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p := first_value(t);
@@ -145,8 +146,8 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if s = NIL_CONS then
-         error("numberp", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("numberp", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p := first_value(t);
@@ -158,8 +159,8 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if s = NIL_CONS then
-         error("simple_string_p", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("simple_string_p", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p := first_value(t);
@@ -167,12 +168,12 @@ package body BBS.lisp.evaluate.pred is
    end;
    --
    procedure stringp(e : out element_type; s : cons_index) is
-      t  : cons_index := s;
+      t : cons_index := s;
       p : element_type;
    begin
       if s = NIL_CONS then
-         error("stringp", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("stringp", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p := first_value(t);
@@ -183,11 +184,11 @@ package body BBS.lisp.evaluate.pred is
       p : element_type;
    begin
       if s = NIL_CONS then
-         error("symbolp", "Internal error, not passed a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("symbolp", "No parameter provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
-      p := cons_table(s).car;
+      p := BBS.lisp.conses.get_car(s);
       e := (Kind => V_BOOLEAN, b => p.kind = V_SYMBOL);
    end;
    --

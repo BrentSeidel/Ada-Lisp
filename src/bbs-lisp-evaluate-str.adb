@@ -1,3 +1,4 @@
+with BBS.lisp.conses;
 with BBS.lisp.memory;
 with BBS.lisp.strings;
 package body BBS.lisp.evaluate.str is
@@ -10,8 +11,8 @@ package body BBS.lisp.evaluate.str is
       p1 : element_type; --  Parameter
    begin
       if s = NIL_CONS then
-         error("length", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("length", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(t);
@@ -36,9 +37,9 @@ package body BBS.lisp.evaluate.str is
       while t > NIL_CONS loop
          c := c + 1;
          last := t;
-         t := getList(cons_table(t).cdr);
+         t := getList(BBS.lisp.conses.get_cdr(t));
       end loop;
-      if cons_table(last).cdr /= NIL_ELEM then
+      if BBS.lisp.conses.get_cdr(last) /= NIL_ELEM then
          c := c + 1;
       end if;
       return c;
@@ -55,8 +56,8 @@ package body BBS.lisp.evaluate.str is
       index : Integer;
    begin
       if s = NIL_CONS then
-         error("char", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("char", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       --
@@ -66,27 +67,27 @@ package body BBS.lisp.evaluate.str is
       if p1.kind /= V_STRING then
          error("char", "First parameter should be a string, not "
                & value_type'Image(p1.kind));
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
          return;
       end if;
       p2 := first_value(t);
       if p2.kind /= V_INTEGER then
          error("char", "Second parameter should be an integer, not "
                & value_type'Image(p2.kind));
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
          return;
       end if;
       str := p1.s;
       index := Integer(p2.i) + 1;
       if index < 1 then
          error("char", "Index out of range");
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_RANGE);
          return;
       end if;
       BBS.lisp.strings.cannonicalize(str, index);
       if str = NIL_STR then
          error("char", "Index out of range");
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_RANGE);
          return;
       end if;
       e := (kind => V_CHARACTER, c => BBS.lisp.strings.get_char_at(str, index));
@@ -99,15 +100,15 @@ package body BBS.lisp.evaluate.str is
       p1 : element_type; --  Parameter
    begin
       if s = NIL_CONS then
-         error("length", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("length", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(t);
       if p1.kind /= V_STRING then
          error("parse-integer", "Parameter must be a string, not " &
                  value_type'Image(p1.kind));
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
          return;
       end if;
       --
@@ -129,8 +130,8 @@ package body BBS.lisp.evaluate.str is
       head : string_index;
    begin
       if s = NIL_CONS then
-         error("subseq", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("subseq", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       --
@@ -145,7 +146,7 @@ package body BBS.lisp.evaluate.str is
       if p1.kind /= V_STRING then
          error("subseq", "First parameter is not a string");
          BBS.lisp.memory.deref(p1);
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
          return;
       end if;
       source := p1.s;
@@ -162,7 +163,7 @@ package body BBS.lisp.evaluate.str is
       if p2.kind /= V_INTEGER then
          error("subseq", "Second parameter is not an integer");
          BBS.lisp.memory.deref(p1);
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
          return;
       end if;
       start := Integer(p2.i) + 1;
@@ -180,14 +181,14 @@ package body BBS.lisp.evaluate.str is
          if p3.kind /= V_INTEGER then
             error("subseq", "Third parameter is not an integer");
             BBS.lisp.memory.deref(p1);
-            e := make_error(ERR_UNKNOWN);
+            e := make_error(ERR_WRONGTYPE);
             return;
          end if;
          stop := Integer(p3.i);
          if stop < start then
             error("subseq", "Ending character must be greater than starting character.");
             BBS.lisp.memory.deref(p1);
-            e := make_error(ERR_UNKNOWN);
+            e := make_error(ERR_RANGE);
             return;
          end if;
          stop := stop - start + 1;  -- Convert last character position to length.
@@ -197,7 +198,7 @@ package body BBS.lisp.evaluate.str is
       if start < 1 then
          error("subseq", "Starting character must not be less than 0.");
          BBS.lisp.memory.deref(p1);
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_RANGE);
          return;
       end if;
       --
@@ -206,7 +207,7 @@ package body BBS.lisp.evaluate.str is
       BBS.lisp.strings.cannonicalize(source, start);
       if source = NIL_STR then
          error("subseq", "Index out of range");
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_RANGE);
          return;
       end if;
       --
@@ -216,7 +217,7 @@ package body BBS.lisp.evaluate.str is
       head := BBS.lisp.strings.substring(source, start, stop);
       BBS.lisp.memory.deref(p1);
       if head = NIL_STR then
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_ALLOCSTR);
       else
          e := (kind => V_STRING, s => head);
       end if;
@@ -230,8 +231,8 @@ package body BBS.lisp.evaluate.str is
       p1 : element_type; --  Parameter
    begin
       if s = NIL_CONS then
-         error("string_upcase", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("string_upcase", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(t);
@@ -243,7 +244,7 @@ package body BBS.lisp.evaluate.str is
       if p1.kind /= V_STRING then
          error("string_upcase", "Parameter must be of string type, not " & value_type'Image(p1.kind));
          BBS.lisp.memory.deref(p1);
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
          return;
       end if;
       --
@@ -266,8 +267,8 @@ package body BBS.lisp.evaluate.str is
       p1 : element_type; --  Parameter
    begin
       if s = NIL_CONS then
-         error("string_downcase", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("string_downcase", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(t);
@@ -279,7 +280,7 @@ package body BBS.lisp.evaluate.str is
       if p1.kind /= V_STRING then
          error("string_downcase", "Parameter must be of string type, not " & value_type'Image(p1.kind));
          BBS.lisp.memory.deref(p1);
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
          return;
       end if;
       --

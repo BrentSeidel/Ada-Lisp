@@ -64,12 +64,12 @@ package body BBS.lisp.evaluate.io is
          car := first_value(t);
          if car.kind /= V_STRING then
             error("read_expr", "Must have a string parameter");
-            e := make_error(ERR_UNKNOWN);
+            e := make_error(ERR_WRONGTYPE);
             return;
          end if;
       else
          error("read_expr", "Must have a parameter");
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       --
@@ -79,7 +79,7 @@ package body BBS.lisp.evaluate.io is
       if not BBS.lisp.parser.parse(str'Access, e) then
          error("read_expr", "Parsing failed");
          BBS.lisp.memory.deref(e);
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_PARSE);
       end if;
    end;
    --

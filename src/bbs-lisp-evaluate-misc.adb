@@ -10,8 +10,8 @@ package body BBS.lisp.evaluate.misc is
       p1 : element_type; --  Parameter
    begin
       if s = cons_index'First then
-         error("msg", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("msg", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(t);
@@ -25,7 +25,7 @@ package body BBS.lisp.evaluate.misc is
          e := NIL_ELEM;
       else
          error("msg", "Parameter must be of boolean type, not " & value_type'Image(p1.kind));
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
       end if;
    end;
    --
@@ -54,8 +54,8 @@ package body BBS.lisp.evaluate.misc is
       p1 : element_type; --  Parameter
    begin
       if s = NIL_CONS then
-         error("sleep", "Internal error.  Should have a list.");
-         e := make_error(ERR_UNKNOWN);
+         error("sleep", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(t);
@@ -69,7 +69,7 @@ package body BBS.lisp.evaluate.misc is
          e := NIL_ELEM;
       else
          error("sleep", "Parameter must be of integer type, not " & value_type'Image(p1.kind));
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_WRONGTYPE);
       end if;
    end;
    --

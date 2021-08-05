@@ -1,6 +1,5 @@
-with BBS.lisp;
+with BBS.lisp.conses;
 with BBS.lisp.evaluate;
-with BBS.lisp.memory;
 with BBS.lisp.strings;
 with BBS.lisp.symbols;
 with BBS.lisp.utilities;
@@ -17,16 +16,16 @@ package body BBS.lisp.parser is
             error("append_to_list", "Unable to append to list");
             put("  Element: ");
             print(e, False, True);
-            BBS.lisp.memory.deref(current);
-            BBS.lisp.memory.deref(head);
+            BBS.lisp.conses.deref(current);
+            BBS.lisp.conses.deref(head);
             return False;
          end if;
       else
          error("append_to_list", "Unable to convert element to cons");
          put("  Element: ");
          print(e, False, True);
-         BBS.lisp.memory.deref(current);
-         BBS.lisp.memory.deref(head);
+         BBS.lisp.conses.deref(current);
+         BBS.lisp.conses.deref(head);
          return False;
       end if;
       return True;
@@ -43,14 +42,14 @@ package body BBS.lisp.parser is
       if list(buff, head, qtemp, True) then
          e := NIL_ELEM;
          if head /= NIL_CONS then
-            e := cons_table(head).car;
-            cons_table(head).car := NIL_ELEM;
-            BBS.lisp.memory.deref(head);
+            e := BBS.lisp.conses.get_car(head);
+            BBS.lisp.conses.set_car(head, NIL_ELEM);
+            BBS.lisp.conses.deref(head);
          end if;
          return True;
       end if;
       error("parse", "Error in parsing list.");
-      e := make_error(ERR_UNKNOWN);
+      e := make_error(ERR_PARSECHAR);
       return False;
    end;
    --
@@ -80,8 +79,8 @@ package body BBS.lisp.parser is
       qtemp : Boolean := False;  --  Flag for quoting items
    begin
       s_expr := NIL_CONS;
-      if not BBS.lisp.memory.alloc(head) then
-         error("list", "Unable to allocate cons for head");
+      if not BBS.lisp.conses.alloc(head) then
+         error("parse list", "Unable to allocate cons for head");
          return False;
       end if;
       while (not list_end) loop
@@ -96,7 +95,7 @@ package body BBS.lisp.parser is
                if begin_called then
                   special_symb.s.all(e, head, PH_PARSE_END);
                else
-                  error("list", "Internal error, parse end attempted to be called before parse begin");
+                  error("parse list", "Internal error, parse end attempted to be called before parse begin");
                   put("Probably missing parameters to operation ");
                   if special_ptr.kind = ST_FIXED then
                      put(BBS.lisp.symbols.get_name(special_ptr).all);
@@ -122,37 +121,37 @@ package body BBS.lisp.parser is
                buff.next_char;
                if list(buff, current, qfixed or qtemp, False) then
                   buff.next_char;
-                  if (cons_table(current).car = NIL_ELEM) and (cons_table(current).cdr = NIL_ELEM) then
-                     BBS.lisp.memory.deref(current);
+                  if (BBS.lisp.conses.get_car(current) = NIL_ELEM) and (BBS.lisp.conses.get_cdr(current) = NIL_ELEM) then
+                     BBS.lisp.conses.deref(current);
                      if not append_to_list(head, NIL_ELEM) then
-                        error("list", "Failure appending NIL_ELEM to list");
-                        BBS.lisp.memory.deref(head);
+                        error("parse list", "Failure appending NIL_ELEM to list");
+                        BBS.lisp.conses.deref(head);
                         return False;
                      end if;
                   else
-                     if cons_table(head).car = NIL_ELEM then
-                        cons_table(head).car := BBS.lisp.evaluate.makeList(current);
+                     if BBS.lisp.conses.get_car(head) = NIL_ELEM then
+                        BBS.lisp.conses.set_car(head, BBS.lisp.evaluate.makeList(current));
                      else
-                        if BBS.lisp.memory.alloc(temp) then
-                           cons_table(temp).car := BBS.lisp.evaluate.makeList(current);
+                        if BBS.lisp.conses.alloc(temp) then
+                           BBS.lisp.conses.set_car(temp, BBS.lisp.evaluate.makeList(current));
                            if not append(head, temp) then
-                              error("list", "Unable to append to list");
-                              BBS.lisp.memory.deref(current);
-                              BBS.lisp.memory.deref(head);
+                              error("parse list", "Unable to append to list");
+                              BBS.lisp.conses.deref(current);
+                              BBS.lisp.conses.deref(head);
                               return False;
                            end if;
                         else
-                           error("list", "Unable to convert element to cons");
-                           BBS.lisp.memory.deref(current);
-                           BBS.lisp.memory.deref(head);
+                           error("parse list", "Unable to convert element to cons");
+                           BBS.lisp.conses.deref(current);
+                           BBS.lisp.conses.deref(head);
                            return False;
                         end if;
                      end if;
                   end if;
                else
                   buff.next_char;
-                  error ("list", "Error parsing list");
-                  BBS.lisp.memory.deref(head);
+                  error ("parse list", "Error parsing list");
+                  BBS.lisp.conses.deref(head);
                   return False;
                end if;
             end;
@@ -164,12 +163,12 @@ package body BBS.lisp.parser is
            ((test_char = '-') and buff.is_next_digit) then
             int(buff, value);
             e := (kind => V_INTEGER, i => value);
-            if cons_table(head).car = NIL_ELEM then
-               cons_table(head).car := e;
+            if BBS.lisp.conses.get_car(head) = NIL_ELEM then
+               BBS.lisp.conses.set_car(head, e);
             else
                if not append_to_list(head, e) then
-                  error("list", "Failed appending decimal integer to list");
-                  BBS.lisp.memory.deref(head);
+                  error("parse list", "Failed appending decimal integer to list");
+                  BBS.lisp.conses.deref(head);
                   return False;
                end if;
             end if;
@@ -185,12 +184,12 @@ package body BBS.lisp.parser is
                --
                hex(buff, value);
                e := (kind => V_INTEGER, i => value);
-               if cons_table(head).car = NIL_ELEM then
-                  cons_table(head).car := e;
+               if BBS.lisp.conses.get_car(head) = NIL_ELEM then
+                  BBS.lisp.conses.set_car(head, e);
                else
                   if not append_to_list(head, e) then
-                     error("list", "Failed appending hexidecimal integer to list");
-                     BBS.lisp.memory.deref(head);
+                     error("parse list", "Failed appending hexidecimal integer to list");
+                     BBS.lisp.conses.deref(head);
                      return False;
                   end if;
                end if;
@@ -201,26 +200,26 @@ package body BBS.lisp.parser is
                if parse_char(buff, char) then
                   e := (kind => V_CHARACTER, c => char);
                else
-                  e := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_PARSECHAR);
                end if;
-               if cons_table(head).car = NIL_ELEM then
-                  cons_table(head).car := e;
+               if BBS.lisp.conses.get_car(head) = NIL_ELEM then
+                  BBS.lisp.conses.set_car(head, e);
                else
                   if not append_to_list(head, e) then
-                     error("list", "Failed appending character to list");
-                     BBS.lisp.memory.deref(head);
+                     error("parse list", "Failed appending character to list");
+                     BBS.lisp.conses.deref(head);
                      return False;
                   end if;
                end if;
             else
-               error("list", "Unrecognized special form #" & buff.get_char);
-               e := make_error(ERR_UNKNOWN);
-               if cons_table(head).car = NIL_ELEM then
-                  cons_table(head).car := e;
+               error("parse list", "Unrecognized special form #" & buff.get_char);
+               e := make_error(ERR_PARSECHAR);
+               if BBS.lisp.conses.get_car(head) = NIL_ELEM then
+                  BBS.lisp.conses.set_car(head, e);
                else
                   if not append_to_list(head, e) then
-                     error("list", "Failed appending error to list");
-                     BBS.lisp.memory.deref(head);
+                     error("parse list", "Failed appending error to list");
+                     BBS.lisp.conses.deref(head);
                      return False;
                   end if;
                end if;
@@ -232,17 +231,17 @@ package body BBS.lisp.parser is
          elsif test_char = '"' then
             if parse_str(buff, str) then
                e := (kind => V_STRING, s => str);
-               if cons_table(head).car = NIL_ELEM then
-                  cons_table(head).car := e;
+               if BBS.lisp.conses.get_car(head) = NIL_ELEM then
+                  BBS.lisp.conses.set_car(head, e);
                else
                   if not append_to_list(head, e) then
-                     error("list", "Failed appending string to list");
+                     error("parse list", "Failed appending string to list");
                      return False;
                   end if;
                end if;
             else
-               error("list", "Could not allocate string fragment.");
-               BBS.lisp.memory.deref(head);
+               error("parse list", "Could not allocate string fragment.");
+               BBS.lisp.conses.deref(head);
                return False;
             end if;
             qtemp := False;
@@ -263,14 +262,14 @@ package body BBS.lisp.parser is
          --
          else
             e := symb(buff, qfixed or qtemp);
-            if cons_table(head).car = NIL_ELEM then
-               cons_table(head).car := e;
+            if BBS.lisp.conses.get_car(head) = NIL_ELEM then
+               BBS.lisp.conses.set_car(head, e);
             else
                if not append_to_list(head, e) then
-                  error("list", "Failed appending symbol to list");
+                  error("parse list", "Failed appending symbol to list");
                   put("  Element: ");
                   print(e, False, True);
-                  BBS.lisp.memory.deref(head);
+                  BBS.lisp.conses.deref(head);
                   return False;
                end if;
             end if;
@@ -284,13 +283,13 @@ package body BBS.lisp.parser is
                      if e.i >= 0 then
                         item_count := Natural(e.i);
                      else
-                        error("list", "Query returned value less than 0");
-                        BBS.lisp.memory.deref(head);
+                        error("parse list", "Query returned value less than 0");
+                        BBS.lisp.conses.deref(head);
                         return False;
                      end if;
                   else
-                     error("list", "Query did not return an integer");
-                     BBS.lisp.memory.deref(head);
+                     error("parse list", "Query did not return an integer");
+                     BBS.lisp.conses.deref(head);
                      return False;
                   end if;
                end if;
@@ -307,7 +306,7 @@ package body BBS.lisp.parser is
          end if;
          if buff.is_end and (not list_end) then
             if not buff.request_more then
-               BBS.lisp.memory.deref(head);
+               BBS.lisp.conses.deref(head);
                return False;
                end if;
          end if;
@@ -357,7 +356,7 @@ package body BBS.lisp.parser is
             if get_symb(symb, test) then
                el := (kind => V_QSYMBOL, qsym => symb);
             else
-               el := make_error(ERR_UNKNOWN);
+               el := make_error(ERR_ALLOCSYM);
                error("parse symbol", "Unable to allocate symbol entry.");
             end if;
          end if;
@@ -366,7 +365,7 @@ package body BBS.lisp.parser is
       else
          error("parse symbol", "Unable to allocate string fragment.");
       end if;
-      return make_error(ERR_UNKNOWN);
+      return make_error(ERR_ALLOCSTR);
    end;
    --
    --  Parse an integer.

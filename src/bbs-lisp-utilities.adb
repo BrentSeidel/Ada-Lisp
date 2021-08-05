@@ -1,3 +1,4 @@
+with BBS.lisp.conses;
 with BBS.lisp.evaluate;
 with BBS.lisp.memory;
 with BBS.lisp.strings;
@@ -17,9 +18,9 @@ package body BBS.lisp.utilities is
       while t > NIL_CONS loop
          c := c + 1;
          last := t;
-         t := BBS.lisp.evaluate.getList(cons_table(t).cdr);
+         t := BBS.lisp.evaluate.getList(BBS.lisp.conses.get_cdr(t));
       end loop;
-      if cons_table(last).cdr /= NIL_ELEM then
+      if BBS.lisp.conses.get_cdr(last) /= NIL_ELEM then
          c := c + 1;
       end if;
       return c;
@@ -75,27 +76,27 @@ package body BBS.lisp.utilities is
       --
    begin
       loop
-         if BBS.lisp.evaluate.isList(cons_table(temp).car) then
-            count := count + replace_sym(BBS.lisp.evaluate.getList(cons_table(temp).car), var);
+         if BBS.lisp.evaluate.isList(BBS.lisp.conses.get_car(temp)) then
+            count := count + replace_sym(BBS.lisp.evaluate.getList(BBS.lisp.conses.get_car(temp)), var);
          else
-            if process_element(cons_table(temp).car, var, new_elem) then
-               BBS.lisp.memory.deref(cons_table(temp).car);
-               cons_table(temp).car := new_elem;
-               BBS.lisp.memory.ref(cons_table(temp).car);
+            if process_element(BBS.lisp.conses.get_car(temp), var, new_elem) then
+               BBS.lisp.memory.deref(BBS.lisp.conses.get_car(temp));
+               BBS.lisp.conses.set_car(temp, new_elem);
+               BBS.lisp.memory.ref(BBS.lisp.conses.get_car(temp));
                count := count + 1;
             end if;
          end if;
-         exit when not BBS.lisp.evaluate.isList(cons_table(temp).cdr);
-         temp := BBS.lisp.evaluate.getList(cons_table(temp).cdr);
+         exit when not BBS.lisp.evaluate.isList(BBS.lisp.conses.get_cdr(temp));
+         temp := BBS.lisp.evaluate.getList(BBS.lisp.conses.get_cdr(temp));
       end loop;
          --
          --  Process the last element, it it exists in a CDR
          --
-      if not BBS.lisp.evaluate.isList(cons_table(temp).cdr) then
-         if process_element(cons_table(temp).cdr, var, new_elem) then
-            BBS.lisp.memory.deref(cons_table(temp).cdr);
-            cons_table(temp).cdr := new_elem;
-            BBS.lisp.memory.ref(cons_table(temp).cdr);
+      if not BBS.lisp.evaluate.isList(BBS.lisp.conses.get_cdr(temp)) then
+         if process_element(BBS.lisp.conses.get_cdr(temp), var, new_elem) then
+            BBS.lisp.memory.deref(BBS.lisp.conses.get_cdr(temp));
+            BBS.lisp.conses.set_cdr(temp, new_elem);
+            BBS.lisp.memory.ref(BBS.lisp.conses.get_cdr(temp));
             count := count + 1;
          end if;
       end if;

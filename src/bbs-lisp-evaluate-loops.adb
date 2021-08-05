@@ -1,3 +1,4 @@
+with BBS.lisp.conses;
 with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.stack;
@@ -17,8 +18,8 @@ package body BBS.lisp.evaluate.loops is
       error_occured : Boolean := False;
    begin
       if s > NIL_CONS then
-         cond := cons_table(s).car;
-         body_list := cons_table(s).cdr;
+         cond := BBS.lisp.conses.get_car(s);
+         body_list := BBS.lisp.conses.get_cdr(s);
          --
          --  Loop while the conditions is true.
          --
@@ -64,7 +65,7 @@ package body BBS.lisp.evaluate.loops is
          BBS.lisp.memory.deref(temp);
       else
          error("dowhile", "Must provide a condition and expressions.");
-         e := make_error(ERR_UNKNOWN);
+         e := make_error(ERR_NOPARAM);
          return;
       end if;
       if not error_occured then
@@ -100,33 +101,33 @@ package body BBS.lisp.evaluate.loops is
          when PH_PARSE_BEGIN =>
             BBS.lisp.global.stack.start_frame(err);
             if s > NIL_CONS then
-               limits := getList(cons_table(s).cdr);
+               limits := getList(BBS.lisp.conses.get_cdr(s));
                --
                --  Extract local variable, limit, and optional result
                --
                if limits = NIL_CONS then
                   error("dotimes", "No parameters provided");
-                  e := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_NOPARAM);
                   return;
                end if;
-               limits := getList(cons_table(limits).car);
+               limits := getList(BBS.lisp.conses.get_car(limits));
                if limits = NIL_CONS then
                   error("dotimes", "List not provided for limits.");
-                  e := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_FEWPARAM);
                   return;
                end if;
-               var := cons_table(limits).car;
-               rest := getList(cons_table(limits).cdr);
+               var := BBS.lisp.conses.get_car(limits);
+               rest := getList(BBS.lisp.conses.get_cdr(limits));
                if isList(var) then
                   error("dotimes", "The loop variable cannot be a list.");
                   BBS.lisp.memory.deref(var);
-                  cons_table(limits).car := make_error(ERR_UNKNOWN);
-                  e := make_error(ERR_UNKNOWN);
+                  BBS.lisp.conses.set_car(limits, make_error(ERR_WRONGTYPE));
+                  e := make_error(ERR_WRONGTYPE);
                   return;
                end if;
                if rest = NIL_CONS then
                   error("dotimes", "Loop limit not provided.");
-                  e := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_FEWPARAM);
                   return;
                end if;
                --
@@ -149,7 +150,7 @@ package body BBS.lisp.evaluate.loops is
                      str := var.st_name;
                   else
                      error("dotimes", "Can't convert item into a loop variable.");
-                     e := make_error(ERR_UNKNOWN);
+                     e := make_error(ERR_WRONGTYPE);
                      return;
                   end if;
                   var := (kind => V_STACK, st_name => str, st_offset => 1);
@@ -159,7 +160,7 @@ package body BBS.lisp.evaluate.loops is
                --  Var has been converted to a local variable.  Now put it back into
                --  the list.
                --
-               cons_table(limits).car := var;
+               BBS.lisp.conses.set_car(limits, var);
             end if;
             e := NIL_ELEM;
          when PH_PARSE_END =>
@@ -170,34 +171,38 @@ package body BBS.lisp.evaluate.loops is
             --  EXECUTE Phase
             --
             if s > NIL_CONS then
-               limits := getList(cons_table(s).car);
-               body_list := cons_table(s).cdr;
+               limits := getList(BBS.lisp.conses.get_car(s));
+               body_list := BBS.lisp.conses.get_cdr(s);
                --
                --  Extract local variable, limit, and optional result
                --
                if limits = NIL_CONS then
                   error("dotimes", "List not provided for limits.");
-                  e := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_FEWPARAM);
                   return;
                end if;
-               var := cons_table(limits).car;
-               rest := getList(cons_table(limits).cdr);
+               var := BBS.lisp.conses.get_car(limits);
+               rest := getList(BBS.lisp.conses.get_cdr(limits));
                if rest > NIL_CONS then
-                  limit := cons_table(rest).car;
+                  limit := BBS.lisp.conses.get_car(rest);
                   if isList(limit) then
                      limit := eval_dispatch(getList(limit));
                   else
                      limit := indirect_elem(limit);
                   end if;
-                  result := cons_table(rest).cdr;
+                  result := BBS.lisp.conses.get_cdr(rest);
                   if isList(result) then
-                     result := cons_table(getList(result)).car;
+                     result := BBS.lisp.conses.get_car(getList(result));
                   end if;
                else
                   error("dotimes", "Loop limit not provided.");
-                  e := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_FEWPARAM);
                   return;
                end if;
+            else
+               error("dotimes", "List not provided for limits.");
+               e := make_error(ERR_NOPARAM);
+               return;
             end if;
             --
             --  Next determine what the loop limit is
@@ -211,12 +216,12 @@ package body BBS.lisp.evaluate.loops is
                   limit_value := Natural(limit.i);
                else
                   error("dotimes", "Limit must not be negative.");
-                  e := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_RANGE);
                   return;
                end if;
             else
                error("dotimes", "Limit is not an integer");
-               e := make_error(ERR_UNKNOWN);
+               e := make_error(ERR_WRONGTYPE);
                return;
             end if;
             --
@@ -233,7 +238,7 @@ package body BBS.lisp.evaluate.loops is
                BBS.lisp.global.stack.push(var.st_name, (kind => V_INTEGER, i => 0), err);
             else
                error("dotimes", "Loop counter is not a variable");
-               e := make_error(ERR_UNKNOWN);
+               e := make_error(ERR_WRONGTYPE);
                return;
             end if;
             --
@@ -308,33 +313,33 @@ package body BBS.lisp.evaluate.loops is
          when PH_PARSE_BEGIN =>
             BBS.lisp.global.stack.start_frame(err);
             if s > NIL_CONS then
-               limits := getList(cons_table(s).cdr);
+               limits := getList(BBS.lisp.conses.get_cdr(s));
                --
                --  Extract local variable, limit, and optional result
                --
                if limits = NIL_CONS then
                   error("dolist", "No parameters provided");
-                  e := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_NOPARAM);
                   return;
                end if;
-               limits := getList(cons_table(limits).car);
+               limits := getList(BBS.lisp.conses.get_car(limits));
                if limits = NIL_CONS then
                   error("dolist", "List not provided for limits.");
-                  e := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_FEWPARAM);
                   return;
                end if;
-               var := cons_table(limits).car;
-               rest := getList(cons_table(limits).cdr);
+               var := BBS.lisp.conses.get_car(limits);
+               rest := getList(BBS.lisp.conses.get_cdr(limits));
                if isList(var) then
                   error("dolist", "The loop variable cannot be a list.");
                   BBS.lisp.memory.deref(var);
-                  cons_table(limits).car := make_error(ERR_UNKNOWN);
-                  e := make_error(ERR_UNKNOWN);
+                  BBS.lisp.conses.set_car(limits, make_error(ERR_WRONGTYPE));
+                  e := make_error(ERR_WRONGTYPE);
                   return;
                end if;
                if rest = NIL_CONS then
                   error("dolist", "Loop limit not provided.");
-                  e := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_FEWPARAM);
                   return;
                end if;
                --
@@ -357,7 +362,7 @@ package body BBS.lisp.evaluate.loops is
                      str := var.st_name;
                   else
                      error("dolist", "Can't convert item into a loop variable.");
-                     e := make_error(ERR_UNKNOWN);
+                     e := make_error(ERR_WRONGTYPE);
                      return;
                   end if;
                   var := (kind => V_STACK, st_name => str, st_offset => 1);
@@ -367,7 +372,7 @@ package body BBS.lisp.evaluate.loops is
                --  Var has been converted to a local variable.  Now put it back into
                --  the list.
                --
-               cons_table(limits).car := var;
+               BBS.lisp.conses.set_car(limits, var);
             end if;
             e := NIL_ELEM;
          when PH_PARSE_END =>
@@ -378,41 +383,45 @@ package body BBS.lisp.evaluate.loops is
             --  EXECUTE Phase
             --
             if s > NIL_CONS then
-               limits := getList(cons_table(s).car);
-               body_list := cons_table(s).cdr;
+               limits := getList(BBS.lisp.conses.get_car(s));
+               body_list := BBS.lisp.conses.get_cdr(s);
                --
                --  Extract local variable, limit, and optional result
                --
                if limits = NIL_CONS then
                   error("dolist", "List not provided for limits.");
-                  e := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_FEWPARAM);
                   return;
                end if;
-               var := cons_table(limits).car;
-               rest := getList(cons_table(limits).cdr);
+               var := BBS.lisp.conses.get_car(limits);
+               rest := getList(BBS.lisp.conses.get_cdr(limits));
                if rest > NIL_CONS then
-                  source_list := cons_table(rest).car;
+                  source_list := BBS.lisp.conses.get_car(rest);
                   if isList(source_list) then
                      source_list := eval_dispatch(getList(source_list));
                   else
                      source_list := indirect_elem(source_list);
                   end if;
-                  result := cons_table(rest).cdr;
+                  result := BBS.lisp.conses.get_cdr(rest);
                   if isList(result) then
-                     result := cons_table(getList(result)).car;
+                     result := BBS.lisp.conses.get_car(getList(result));
                   end if;
                else
                   error("dolist", "Loop limit not provided.");
-                  e := make_error(ERR_UNKNOWN);
+                  e := make_error(ERR_FEWPARAM);
                   return;
                end if;
+            else
+               error("dolist", "List not provided for limits.");
+               e := make_error(ERR_NOPARAM);
+               return;
             end if;
             --
             --  Next determine what the loop limit is
             --
             if not isList(source_list) then
                error("dolist", "List not provided for iteration.");
-               e := make_error(ERR_UNKNOWN);
+               e := make_error(ERR_FEWPARAM);
                return;
             end if;
             --
@@ -429,7 +438,7 @@ package body BBS.lisp.evaluate.loops is
                BBS.lisp.global.stack.push(var.st_name, (kind => V_INTEGER, i => 0), err);
             else
                error("dolist", "Loop counter is not a variable");
-               e := make_error(ERR_UNKNOWN);
+               e := make_error(ERR_WRONGTYPE);
                return;
             end if;
             --
@@ -443,7 +452,7 @@ package body BBS.lisp.evaluate.loops is
                BBS.lisp.global.stack.set_entry(BBS.lisp.global.stack.get_fp + 1,
                                         (kind => BBS.lisp.stack.ST_VALUE,
                                          st_name => var.st_name, st_value =>
-                                           BBS.lisp.evaluate.indirect_elem(cons_table(limit_value).car)), err);
+                                           BBS.lisp.evaluate.indirect_elem(BBS.lisp.conses.get_car(limit_value))), err);
                --
                --  Evaluate all of the items in the body list.
                --
@@ -462,7 +471,7 @@ package body BBS.lisp.evaluate.loops is
                --
                --  Point to next element in the source list
                --
-               limit_value := getList(cons_table(limit_value).cdr);
+               limit_value := getList(BBS.lisp.conses.get_cdr(limit_value));
             end loop;
             BBS.lisp.memory.deref(t);
             --

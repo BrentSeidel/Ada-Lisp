@@ -13,6 +13,7 @@
 \usepackage{fancybox}
 
 \usepackage{url}
+\usepackage{multicol}
 %
 % Rules to allow import of graphics files in EPS format
 %
@@ -26,7 +27,7 @@
 %
 %  Define Tiny Lisp based on Common Lisp
 %
-\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{atomp, bit-vector-p, car, cdr, char-downcase, char-code, char-upcase, compiled-function-p, dowhile, dump, exit, fresh-line, if, code-char, lambda, msg, nullp, parse-integer, peek8, peek16, peek32, poke8, poke16, poke32, quote, read-line, reset, setq, simple-bit-vector-p, simple-string-p, simple-vector-p, string-downcase, string-upcase}}
+\lstdefinelanguage[Tiny]{Lisp}[]{Lisp}{morekeywords=[13]{atomp, bit-vector-p, car, cdr, char-downcase, char-code, char-upcase, compiled-function-p, dowhile, dump, exit, fresh-line, if, code-char, lambda, msg, nullp, parse-integer, peek8, peek16, peek32, poke8, poke16, poke32, progn, quote, read-line, reset, setq, simple-bit-vector-p, simple-string-p, simple-vector-p, string-downcase, string-upcase}}
 %
 % Macro definitions
 %
@@ -93,6 +94,105 @@ If a list isn't closed (number of open parentheses matches the number of close p
 
 \section{Optimization}
 None.  Some could possibly be added, but right now the focus has been on getting things to work correctly.
+
+\section{Reserved Tokens}
+The following tokens are defined as fixed symbols by \tl{} and cannot be redefined.
+\begin{multicols}{4}
+  \keyword{+}\\
+  \keyword{-}\\
+  \keyword{*}\\
+  \keyword{/}\\
+  \keyword{=}\\
+  \keyword{/=}\\
+  \keyword{$<$}\\
+  \keyword{$>$}\\
+  \keyword{AND}\\
+  \keyword{ARRAYP}\\
+  \keyword{ATOMP}\\
+  \keyword{BIT-VECTOR-P}\\
+  \keyword{CAR}\\
+  \keyword{CDR}\\
+  \keyword{CHAR}\\
+  \keyword{CHAR-CODE}\\
+  \keyword{CHAR-DOWNCASE}\\
+  \keyword{CHAR-UPCASE}\\
+  \keyword{CHARACTERP}\\
+  \keyword{CODE-CHAR}\\
+  \keyword{COERCE}\\
+  \keyword{COMPILED-FUNCTION-P}\\
+  \keyword{COMPLEXP}\\
+  \keyword{CONCATENATE}\\
+  \keyword{CONS}\\
+  \keyword{CONSP}\\
+  \keyword{DEFUN}\\
+  \keyword{DOLIST}\\
+  \keyword{DOTIMES}\\
+  \keyword{DOWHILE}\\
+  \keyword{DUMP}\\
+  \keyword{ERRORP}\\
+  \keyword{ERR\_ADDON}\\
+  \keyword{ERR\_ALLOCCONS}\\
+  \keyword{ERR\_ALLOCSTR}\\
+  \keyword{ERR\_ALLOCSYM}\\
+  \keyword{ERR\_FEWPARAM}\\
+  \keyword{ERR\_FIXSYM}\\
+  \keyword{ERR\_HARDWARE}\\
+  \keyword{ERR\_NOPARAM}\\
+  \keyword{ERR\_NOTSYM}\\
+  \keyword{ERR\_PARSE}\\
+  \keyword{ERR\_PARSECHAR}\\
+  \keyword{ERR\_PARSELIST}\\
+  \keyword{ERR\_PARSESPEC}\\
+  \keyword{ERR\_RANGE}\\
+  \keyword{ERR\_STACK}\\
+  \keyword{ERR\_UNKNOWN}\\
+  \keyword{ERR\_WRONGTYPE}\\
+  \keyword{EVAL}\\
+  \keyword{EXIT}\\
+  \keyword{FLOATP}\\
+  \keyword{FRESH-LINE}\\
+  \keyword{FUNCTIONP}\\
+  \keyword{IF}\\
+  \keyword{INTEGERP}\\
+  \keyword{LAMBDA}\\
+  \keyword{LENGTH}\\
+  \keyword{LET}\\
+  \keyword{LIST}\\
+  \keyword{LISTP}\\
+  \keyword{MSG}\\
+  \keyword{NOT}\\
+  \keyword{NULL}\\
+  \keyword{NUMBERP}\\
+  \keyword{OR}\\
+  \keyword{PACKAGEP}\\
+  \keyword{PARSE-INTEGER}\\
+  \keyword{PEEK8}\\
+  \keyword{PEEK16}\\
+  \keyword{PEEK32}\\
+  \keyword{POKE8}\\
+  \keyword{POKE16}\\
+  \keyword{POKE32}\\
+  \keyword{PRINT}\\
+  \keyword{PROGN}\\
+  \keyword{RATIONALP}\\
+  \keyword{READ}\\
+  \keyword{READ-LINE}\\
+  \keyword{REALP}\\
+  \keyword{RETURN}\\
+  \keyword{SETQ}\\
+  \keyword{SIMPLE-BIT-VECTOR-P}\\
+  \keyword{SIMPLE-STRING-P}\\
+  \keyword{SIMPLE-VECTOR-P}\\
+  \keyword{SLEEP}\\
+  \keyword{STRING-DOWNCASE}\\
+  \keyword{STRING-UPCASE}\\
+  \keyword{STRINGP}\\
+  \keyword{SUBSEQ}\\
+  \keyword{SYMBOLP}\\
+  \keyword{T}\\
+  \keyword{TERPRI}\\
+  \keyword{VECTORP}\\
+\end{multicols}
 
 \section{Syntax}
 
@@ -450,7 +550,54 @@ The Boolean values \constant{NIL} and \constant{T} correspond to \constant{True}
 The list is the basic complex data type.  A list element has two slots (historically called \constant{car} and \constant{cdr}).  Typically the \constant{car} slot contains a data value and the \constant{cdr} slot contains a pointer to the next list element.  The end of a list is indicated by a \constant{NIL} value in the \constant{cdr} slot.
 
 \subsection{Error}
-There is currently only one possible \datatype{error} value.  This is used to signal that some sort of error has occurred.  It is expected that this will eventually be expanded to include a code to help identify what sort of error occurred.
+The defined \datatype{error} values listed in Table \ref{tbl:Error}.  The error codes are defined as symbols and can be used in comparison operations as follows:
+\begin{lstlisting}
+(if (= ERR_NOPARAM (cons))
+  (progn (print "No parameter provided to cons") (terpri)))
+\end{lstlisting}
+
+\begin{table}
+  \centering
+  \caption{Currently defined \datatype{error} codes}
+  \label{tbl:Error}
+  \begin{tabular}{ l | p{12cm}}
+    \hline
+    \constant{ERR\_ADDON} & An error specific to an addon.  This is not generated for the core \tl{} language.  It is reserved for extensions.\\
+    \hline
+    \constant{ERR\_ALLOCCONS} & Unable to allocate a cons.\\
+    \hline
+    \constant{ERR\_ALLOCSTR} & Unable to allocate a string.\\
+    \hline
+    \constant{ERR\_ALLOCSYM} & Unable to allocate a symbol.\\
+    \hline
+    \constant{ERR\_FEWPARAM} & Too few parameters have been provided for an operation.\\
+    \hline
+    \constant{ERR\_FIXSYM} & Attempt to change a fixed symbol.\\
+    \hline
+    \constant{ERR\_HARDWARE} & A hardware related error.  This code is reserved for extension operations that interface with hardware.\\
+    \hline
+    \constant{ERR\_NOPARAM} & No parameters provided for an operation when required.\\
+    \hline
+    \constant{ERR\_NOTSYM} &  Symbol needed, but not provided.\\
+    \hline
+    \constant{ERR\_PARSE} & General parse failure.\\
+    \hline
+    \constant{ERR\_PARSECHAR} & Error during parsing of character.\\
+    \hline
+    \constant{ERR\_PARSELIST} & Error during parsing of list.\\
+    \hline
+    \constant{ERR\_PARSESPEC} & Error during parsing of special function.\\
+    \hline
+    \constant{ERR\_RANGE} & Parameter value is out of range.\\
+    \hline
+    \constant{ERR\_STACK} & Stack function reported an error.\\
+    \hline
+    \constant{ERR\_UNKNOWN} & Unknown error code.\\
+    \hline
+    \constant{ERR\_WRONGTYPE} & Wrong data type for parameter.\\
+    \hline
+  \end{tabular}
+\end{table}
 
 %----------------------------------------------------------
 \chapter{Operation Reference}
@@ -546,7 +693,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 This operation compares two values of the same type for equality.
 \subsection{Common Lisp Compatibility}
-This operation works on \datatype{integers}, \datatype{booleans}, \datatype{strings}, and quoted \datatype{symbols}.
+This operation works on \datatype{integers}, \datatype{booleans}, \datatype{strings}, \datatype{symbols}, quoted \datatype{symbols}, and \datatype{errors}.  For comparison purposes, \datatype{symbols} and quoted \datatype{symbols} are considered to be the same type.
 
 \section{/=}
 Not-equals
@@ -562,7 +709,7 @@ Returns the value \constant{NIL}.
 \subsection{Description}
 This operation compares two values of the same type for not equality.
 \subsection{Common Lisp Compatibility}
-This operation works on \datatype{integers}, \datatype{booleans}, \datatype{strings}, and quoted \datatype{symbols}.
+This operation works on \datatype{integers}, \datatype{booleans}, \datatype{strings}, \datatype{symbols}, quoted \datatype{symbols}, and \datatype{errors}.  For comparison purposes, \datatype{symbols} and quoted \datatype{symbols} are considered to be the same type.
 
 \section{$<$}
 Less Than
@@ -997,7 +1144,7 @@ A boolean.
 \end{lstlisting}
 Returns the value \constant{NIL}.
 \subsection{Description}
-If the parameter represents an error condition, return \constant{T}, otherwise return \constant{NIL}.  This offers \tl{} programs a rudimentary way to check for errors.
+If the parameter represents an error condition, return \constant{T}, otherwise return \constant{NIL}.  Effectively, this swallows an error condition and returns a boolean.  This offers \tl{} programs a rudimentary way to check for errors.
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.  \cl{} provides more comprehensive error handling, signaling, and trapping.
 
