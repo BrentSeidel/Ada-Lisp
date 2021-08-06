@@ -1,3 +1,4 @@
+with BBS.lisp.evaluate;
 with BBS.lisp.memory;
 package body BBS.lisp.conses is
    --
@@ -85,26 +86,31 @@ package body BBS.lisp.conses is
    --  Decrements the reference count of a cons cell.
    --
    procedure deref(s : cons_index) is
+      l : cons_index := s;
+      e : element_type;
    begin
-      if s > NIL_CONS then
-         msg("deref cons", "Dereffing cons at " & cons_index'Image(s) &
-            " Ref count was " & Integer'Image(Integer(cons_table(s).ref)));
-         if cons_table(s).ref > FREE_CONS then
-            cons_table(s).ref := cons_table(s).ref - 1;
+      while l > NIL_CONS loop
+         msg("deref cons", "Dereffing cons at " & cons_index'Image(l) &
+            " Ref count was " & Integer'Image(Integer(cons_table(l).ref)));
+         if cons_table(l).ref > FREE_CONS then
+            cons_table(l).ref := cons_table(l).ref - 1;
          else
             error("deref cons", "Attempt to deref an unreffed cons at index "
-               & cons_index'Image(s));
+               & cons_index'Image(l));
          end if;
          --
          --  If the reference count goes to zero, deref the things that the cons
          --  points to.
          --
-         if cons_table(s).ref = FREE_CONS then
-            BBS.lisp.memory.deref(cons_table(s).car);
-            BBS.lisp.memory.deref(cons_table(s).cdr);
-            cons_table(s).car := NIL_ELEM;
-            cons_table(s).cdr := NIL_ELEM;
+         if cons_table(l).ref = FREE_CONS then
+            BBS.lisp.memory.deref(cons_table(l).car);
+            e := cons_table(l).cdr;
+            cons_table(l).car := NIL_ELEM;
+            cons_table(l).cdr := NIL_ELEM;
+            l := BBS.lisp.evaluate.getList(e);
+         else
+            l := NIL_CONS;
          end if;
-      end if;
+      end loop;
    end;
 end;
