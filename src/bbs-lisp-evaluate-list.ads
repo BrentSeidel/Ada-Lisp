@@ -22,6 +22,14 @@ package BBS.lisp.evaluate.list is
    --
    procedure list(e : out element_type; s : cons_index);
    --
+   --  Replace the CAR of a list with a value
+   --
+   procedure rplaca(e : out element_type; s : cons_index);
+   --
+   --  Replace the CDR of a list with a value
+   --
+   procedure rplacd(e : out element_type; s : cons_index);
+   --
    --  Append one list to another (currently unimplemented).
    --
 --   procedure append(e : out element_type; s : cons_index);

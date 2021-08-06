@@ -211,6 +211,8 @@ private
    READ_LINE           : aliased constant String := "READ-LINE";
    REALP               : aliased constant String := "REALP";
    RETURN_FROM         : aliased constant String := "RETURN";
+   RPLACA              : aliased constant String := "RPLACA";
+   RPLACD              : aliased constant String := "RPLACD";
    SETQ                : aliased constant String := "SETQ";
    SIMPLE_BIT_VECTOR_P : aliased constant String := "SIMPLE-BIT-VECTOR-P";
    SIMPLE_STRING_P     : aliased constant String := "SIMPLE-STRING-P";
@@ -314,6 +316,8 @@ private
       (name => READ_LINE'Access,           b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.io.read_line'Access)),
       (name => REALP'Access,               b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.return_false'Access)),
       (name => RETURN_FROM'Access,         b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.loops.return_from'Access)),
+      (name => RPLACA'Access,              b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.list.rplaca'Access)),
+      (name => RPLACD'Access,              b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.list.rplacd'Access)),
       (name => SETQ'Access,                b => (Kind => SY_SPECIAL, s => BBS.lisp.evaluate.vars.setq'Access)),
       (name => SIMPLE_BIT_VECTOR_P'Access, b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.return_false'Access)),
       (name => SIMPLE_STRING_P'Access,     b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.simple_string_p'Access)),

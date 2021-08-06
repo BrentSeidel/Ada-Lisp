@@ -179,6 +179,8 @@ The following tokens are defined as fixed symbols by \tl{} and cannot be redefin
   \keyword{READ-LINE}\\
   \keyword{REALP}\\
   \keyword{RETURN}\\
+  \keyword{RPLACA}\\
+  \keyword{RPLACD}\\
   \keyword{SETQ}\\
   \keyword{SIMPLE-BIT-VECTOR-P}\\
   \keyword{SIMPLE-STRING-P}\\
@@ -1688,6 +1690,40 @@ The specified value.
 Prints the string ``Hello world!'' and returns the value 5.  The \operation{(+ 1 3)} operation is not evaluated.
 \subsection{Description}
 This is used to provide an early exit from a block.  A common use would be to exit a loop if a certain condition is met.  Internally, a block is defined as any operation that calls the \function{execute\_block} function.  It may be possible in the future to do an equivalent of the \keyword{return-from} operation to exit multiple nested blocks, but \tl{} doesn't support named blocks so any implementation would likely not be compatible with \cl.
+\subsection{Common Lisp Compatibility}
+This is basically compatible with \cl.
+
+\section{rplaca}
+Replaces the \operation{car} of a \datatype{cons} cell with the specified value.
+\subsection{Inputs}
+A list and a value of any type.
+\subsection{Output}
+The list modified with the specific value.
+\subsection{Example}
+\begin{lstlisting}
+(setq a (1 2 3 4 5))
+(rplaca a "Hello")
+\end{lstlisting}
+Returns the list ``("Hello" 2 3 4 5)'' and modifies the list ``a''.
+\subsection{Description}
+This is used to modify a \datatype{cons} cell.  The \keyword{car} slot is changed to contain the new value and the updated \datatype{cons} cell returned.
+\subsection{Common Lisp Compatibility}
+This is basically compatible with \cl.
+
+\section{rplacd}
+Replaces the \operation{cdr} of a \datatype{cons} cell with the specified value.
+\subsection{Inputs}
+A list and a value of any type.
+\subsection{Output}
+The list modified with the specific value.
+\subsection{Example}
+\begin{lstlisting}
+(setq a (1 2 3 4 5))
+(rplacd a (6 7))
+\end{lstlisting}
+Returns the list ``(1 6 7)'' and modifies the list ``a''.
+\subsection{Description}
+This is used to modify a \datatype{cons} cell.  The \keyword{cdr} slot is changed to contain the new value and the updated \datatype{cons} cell returned.
 \subsection{Common Lisp Compatibility}
 This is basically compatible with \cl.
 

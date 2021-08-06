@@ -45,37 +45,39 @@
   (print "Total test cases:  " (+ *PASS-COUNT* *FAIL-COUNT*)))
 ;--------------------------------------------
 ;
-;  Test error conditions.  There are lots so they will be broken down into smaller
-;  groups.
+;  Test list operations.  Since list comparisons aren't currently supported,
+;  these aren't quite as nice as they might be.
 ;
-;
-;
-(print "===> Testing stack overflow")
+(print "===> Testing list operations")
 (terpri)
-(defun test-stack-ovr (a) (print "A is " a) (terpri) (test-stack-ovr (+ 1 a)))
-(verify-equal ERR_STACK (test-stack-ovr 1) "Recursive function stack overflow error")
-(defun test-stack-ovr (a) (let (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10) (print "A is " a) (terpri) (test-stack-ovr (+ 1 a))))
-(verify-equal ERR_STACK (test-stack-ovr 1) "Recursive function with locals stack overflow error")
-(verify-equal ERR_WRONGTYPE (let (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14
-  A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32
-  A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 A46 A47 A48 A49 A50
-  A51 A52 A53 A54 A55 A56 A57 A58 A59 A60 A61 A62 A63 A64 A65 A66 A67 A68
-  A69 A70 A71 A72 A73 A74 A75 A76 A77 A78 A79 A80 A81 A82 A83 A84 A85 A86
-  A87 A88 A89 A90 A91 A92 A93 A94 A95 A96 A97 A98 A99 A100)
-  (print "So many local variables") (terpri)) "Too many local variables")
-(defun test-lambda (a b)
-  (verify-equal a (b 1 2 3 4 5 6 7 8 9
-  10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33
-  34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57
-  58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81
-  82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100) "Testing lambda"))
-(verify-equal ERR_WRONGTYPE (test-lambda T (lambda (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14
-  A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32
-  A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 A46 A47 A48 A49 A50
-  A51 A52 A53 A54 A55 A56 A57 A58 A59 A60 A61 A62 A63 A64 A65 A66 A67 A68
-  A69 A70 A71 A72 A73 A74 A75 A76 A77 A78 A79 A80 A81 A82 A83 A84 A85 A86
-  A87 A88 A89 A90 A91 A92 A93 A94 A95 A96 A97 A98 A99 A100)
-  (print "So many parameters") (terpri))) "Lambda variables")
+(defun test-list ()
+  (verify-equal 3 (length (1 2 3)) "Length of a raw list")
+  (verify-equal 4 (length (quote "a" "B" 3 4)) "Length of a quoted list")
+  (verify-equal 5 (car (5 1 2 3 4)) "CAR of a list")
+  (verify-equal 4 (length (cdr (5 6 7 8 9))) "Length of CDR")
+  (verify-equal 2 (length (cons (2 3 4) 1)) "CONS of elements")
+  (verify-equal 4 (length (cons 1 (2 3 4))) "CONS of elements")
+  (verify-equal 1 (car (cons 1 (2 3 4))) "CAR of a CONS")
+  (verify-equal 2 (car (cdr (1 2 3 4))) "CAR of a CDR of a list")
+  (verify-equal 5 (car 5) "CAR of a single value")
+  (verify-equal NIL (car) "CAR of nothing is nothing")
+  (verify-equal NIL (cdr) "CDR of nothing is nothing")
+  (varify-equal NIL (cdr 1) "CDR of a value is nothing")
+  (verify-equal ERR_NOPARAM (cons) "No parameter to CONS")
+  (verify-equal ERR_PARSECHAR (cons #\error 1) "CONS error in first parameter")
+  (verify-equal ERR_PARSECHAR (cons 1 #\error) "CONS error in second parameter")
+  (verify-equal ERR_PARSECHAR (list #\error 1 2 3) "LIST error in first parameter")
+  (verify-equal ERR_PARSECHAR (list 1 2 #\error 3) "LIST error in later parameter")
+  (verify-equal NIL (list) "LIST with no parameters is nothing")
+  (verify-equal 5 (car (rplaca (1 2 3 4) 5)) "Replace CAR of first element in list")
+  (verify-equal 2 (car (cdr (rplaca (1 2 3 4) 5))) "Replace CAR of first element in list (rest of list)")
+  (verify-equal 6 (car (cdr (rplacd (1 2 3 4) (6 7)))) "Replace CDR of first element in list (rest of list)")
+  (verify-equal ERR_NOPARAM (rplaca) "RPLACA with no parameters")
+  (verify-equal ERR_WRONGTYPE (rplaca 1 1) "RPLACA needs a list")
+  (verify-equal ERR_NOPARAM (rplacd) "RPLACD with no parameters")
+  (verify-equal ERR_WRONGTYPE (rplacd 1 1) "RPLACD needs a list"))
+(test-list)
+(setq test-list 0)
 ;
 ;--------------------------------------------
 (print "===> Testing complete")

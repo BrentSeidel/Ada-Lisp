@@ -139,6 +139,62 @@ package body BBS.lisp.evaluate.list is
       e := (kind => V_LIST, l => head);
    end;
    --
+   --  Replace the CAR of a list with a value
+   --
+   procedure rplaca(e : out element_type; s : cons_index) is
+      rest : cons_index := s;
+      first : element_type;
+      second : element_type;
+      s1 : cons_index;
+   begin
+      if s = NIL_CONS then
+         error("rplaca", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
+         return;
+      end if;
+      first := first_value(rest);
+      if not isList(first) then
+         error("rplaca", "Must have a list to modify");
+         e := make_error(ERR_WRONGTYPE);
+         return;
+      end if;
+      second := first_value(rest);
+      s1 := getList(first);
+      if s1 > NIL_CONS then
+         BBS.lisp.memory.deref(BBS.lisp.conses.get_car(s1));
+         BBS.lisp.conses.set_car(s1, second);
+      end if;
+      e := first;
+   end;
+   --
+   --  Replace the CDR of a list with a value
+   --
+   procedure rplacd(e : out element_type; s : cons_index) is
+      rest : cons_index := s;
+      first : element_type;
+      second : element_type;
+      s1 : cons_index;
+   begin
+      if s = NIL_CONS then
+         error("rplacd", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
+         return;
+      end if;
+      first := first_value(rest);
+      if not isList(first) then
+         error("rplacd", "Must have a list to modify");
+         e := make_error(ERR_WRONGTYPE);
+         return;
+      end if;
+      second := first_value(rest);
+      s1 := getList(first);
+      if s1 > NIL_CONS then
+         BBS.lisp.memory.deref(BBS.lisp.conses.get_cdr(s1));
+         BBS.lisp.conses.set_cdr(s1, second);
+      end if;
+      e := first;
+   end;
+   --
    --  Append one list to another.  Not yet implemented.
    --
 --   procedure append(e : out element_type; s : cons_index) is
