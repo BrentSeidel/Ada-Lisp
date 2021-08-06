@@ -64,12 +64,10 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    --  used to allow a function to be able to build stack frames so that parsing
    --  of nested functions can properly identify parameters or local variables.
    --
-   --  PH_QUERY       - Ask the routine when it wants to be called again.
-   --  PH_PARSE_BEGIN - At desired point in parsing.
-   --  PH_PARSE_END   - At the end of parsing.
-   --  PH_EXECUTE     - Normal execution
-   --
-   type phase is (PH_QUERY, PH_PARSE_BEGIN, PH_PARSE_END, PH_EXECUTE);
+   type phase is (PH_QUERY,        --  Ask the routine when it wants to be called again.
+                  PH_PARSE_BEGIN,  --  At desired point in parsing.
+                  PH_PARSE_END,    --  At the end of parsing.
+                  PH_EXECUTE);     --  Normal execution
    --
    --  Error codes.  These will be filled out later.
    --
@@ -80,6 +78,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
                         ERR_FEWPARAM,    --  Too few parameters
                         ERR_FIXSYM,      --  Attempt to change a fixed symbol
                         ERR_HARDWARE,    --  A hardware related error
+                        ERR_NONE,        --  No error has occured
                         ERR_NOPARAM,     --  No parameters passed when required
                         ERR_NOTSYM,      --  Symbol needed, but not provided
                         ERR_PARSE,       --  General parse failure

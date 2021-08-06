@@ -576,6 +576,8 @@ The defined \datatype{error} values listed in Table \ref{tbl:Error}.  The error 
     \hline
     \constant{ERR\_HARDWARE} & A hardware related error.  This code is reserved for extension operations that interface with hardware.\\
     \hline
+    \constant{ERR\_NONE} & Indicates that no error has occurred.  This is not used in the core \tl{}, but there may be some add-on routines that need a way to indicate success.\\
+    \hline
     \constant{ERR\_NOPARAM} & No parameters provided for an operation when required.\\
     \hline
     \constant{ERR\_NOTSYM} &  Symbol needed, but not provided.\\
@@ -592,7 +594,7 @@ The defined \datatype{error} values listed in Table \ref{tbl:Error}.  The error 
     \hline
     \constant{ERR\_STACK} & Stack function reported an error.\\
     \hline
-    \constant{ERR\_UNKNOWN} & Unknown error code.\\
+    \constant{ERR\_UNKNOWN} & Unknown error code.  Where possible, a more specific error code should be used.\\
     \hline
     \constant{ERR\_WRONGTYPE} & Wrong data type for parameter.\\
     \hline
