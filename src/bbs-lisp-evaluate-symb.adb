@@ -264,10 +264,10 @@ package body BBS.lisp.evaluate.symb is
          -- Concatinate lists
          --
          declare
-            cons_head : cons_index := NIL_CONS;
-            dest_cons : cons_index := NIL_CONS;
-            temp_cons : cons_index := NIL_CONS;
-            src_cons : cons_index := NIL_CONS;
+            cons_head : cons_index := NIL_CONS;  --  Head of list being built
+            dest_cons : cons_index := NIL_CONS;  --  Current element in list being built
+            temp_cons : cons_index := NIL_CONS;  --  New cons cell to add to list
+            src_cons : cons_index := NIL_CONS;   --  Source list to copy from
          begin
             if s1 = NIL_CONS then
                error("concatenate", "Cannot concatenate a single element.");
@@ -279,12 +279,14 @@ package body BBS.lisp.evaluate.symb is
                if t2.kind = V_ERROR then
                   error("concatenate", "Error reported evaluating additional parameters.");
                   e := t2;
+                  BBS.lisp.conses.deref(cons_head);
                   return;
                end if;
                src_cons := getList(t2);
                if src_cons = NIL_CONS then
                   error("concatenate", "Parameter does not evaluate to a list");
                   BBS.lisp.memory.deref(t2);
+                  BBS.lisp.conses.deref(cons_head);
                   e := make_error(ERR_WRONGTYPE);
                   return;
                end if;
@@ -292,6 +294,7 @@ package body BBS.lisp.evaluate.symb is
                   if not BBS.lisp.conses.alloc(temp_cons) then
                      error("concatenate", "Unable to allocate cons cell.");
                      BBS.lisp.conses.deref(cons_head);
+                     BBS.lisp.conses.deref(src_cons);
                      e := make_error(ERR_ALLOCCONS);
                      return;
                   end if;
@@ -299,11 +302,17 @@ package body BBS.lisp.evaluate.symb is
                      cons_head := temp_cons;
                      dest_cons := temp_cons;
                   else
+                     --
+                     --  Point end of list to new cons cell and update end of list.
+                     --
                      BBS.lisp.conses.set_cdr(dest_cons, (kind => V_LIST, l => temp_cons));
                      dest_cons := temp_cons;
                   end if;
+                  --
+                  --  Copy the value from the source list and move to the next
+                  --  element in the source.
+                  --
                   BBS.lisp.conses.set_car(dest_cons, BBS.lisp.conses.get_car(src_cons));
-                  BBS.lisp.memory.ref(BBS.lisp.conses.get_car(dest_cons));
                   src_cons := getList(BBS.lisp.conses.get_cdr(src_cons));
                   if src_cons = NIL_CONS then
                      exit;
