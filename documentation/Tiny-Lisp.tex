@@ -1011,6 +1011,32 @@ Concatenates either string or lists.  The first parameter is a symbol that speci
 \subsection{Common Lisp Compatibility}
 This is probably a subset of the \cl{} function.  Normal cases will operate the same, but error handling is different.
 
+\section{cond}
+Evaluates the first list that starts with a \constant{T} condition.
+\subsection{Inputs}
+A list of lists.
+\subsection{Output}
+The result of the evaluated list or an error if no list matches.
+\subsection{Example}
+\begin{lstlisting}
+(cond
+  ((= 1 2)
+    (print "This should never print.")
+    (terpri))
+  ((= 2 2)
+    (print "This should get printed")
+    (+ 2 3)
+    (terpri))
+  (T
+    (print "This doesn't get printed since the previous condition was true")
+    (terpri)))
+\end{lstlisting}
+Returns the \datatype{integer} 5.
+\subsection{Description}
+This is similar to an if-then-elsif chain in other programming languages.  It is passed a list of lists.  Each list is examined sequentially.  If the first item in the list evaluates to \constant{T}, then the rest of the list is evaluated in an implicit \operation{progn} block.  Once the first list is evaluated, \operation{cond} exits and returns the result of that evaluation.  Errors are returned if no list gets evaluated or if an element is encountered that is not a list.
+\subsection{Common Lisp Compatibility}
+This is similar to \cl{}.
+
 \section{cons}
 Combines elements into a list.
 \subsection{Inputs}
@@ -1021,7 +1047,7 @@ A list consisting of the provided inputs.
 \begin{lstlisting}
 (cons 1 2)
 \end{lstlisting}
-Returns the list (1 . 2).
+Returns the \datatype{list} (1 . 2).
 \subsection{Description}
 The \function{cons} operation creates a \constant{cons} cell and sets the \constant{car} field to the first parameter and the \constant{cdr} to the second parameter..
 \subsection{Common Lisp Compatibility}

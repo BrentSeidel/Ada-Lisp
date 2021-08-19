@@ -354,7 +354,7 @@ package body BBS.lisp.evaluate.func is
    --
    function eval_function(s : cons_index; e : cons_index) return element_type is
       params : element_type ;
-      func_body : element_type;
+      func_body : cons_index;
       temp_value : element_type;
       rest : cons_index;
       name : element_type;
@@ -364,7 +364,7 @@ package body BBS.lisp.evaluate.func is
       err : Boolean := False;
    begin
       params := BBS.lisp.conses.get_car(s);
-      func_body := BBS.lisp.conses.get_cdr(s);
+      func_body := getList(BBS.lisp.conses.get_cdr(s));
       supplied := bbs.lisp.utilities.count(e);
       if isList(params) then
          requested := bbs.lisp.utilities.count(getList(params));

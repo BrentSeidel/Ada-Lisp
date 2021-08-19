@@ -151,6 +151,7 @@ private
    COMPILED_FUNCTION_P : aliased constant String := "COMPILED-FUNCTION-P";
    COMPLEXP            : aliased constant String := "COMPLEXP";
    CONCATENATE         : aliased constant String := "CONCATENATE";
+   COND                : aliased constant String := "COND";
    CONS                : aliased constant String := "CONS";
    CONSP               : aliased constant String := "CONSP";
    DEFUN               : aliased constant String := "DEFUN";
@@ -256,6 +257,7 @@ private
       (name => COMPILED_FUNCTION_P'Access, b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.compiled_function_p'Access)),
       (name => COMPLEXP'Access,            b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.return_false'Access)),
       (name => CONCATENATE'Access,         b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.symb.concatenate'Access)),
+      (name => COND'Access,                b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.cond.eval_cond'Access)),
       (name => CONS'Access,                b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.list.cons'Access)),
       (name => CONSP'Access,               b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.consp'Access)),
       (name => DEFUN'Access,               b => (Kind => SY_SPECIAL, s => BBS.lisp.evaluate.func.defun'Access)),

@@ -80,8 +80,8 @@ with Refined_State =>  (pvt_exit_block => exit_block) is
    --
    --  Evaluate a list of statements.
    --
-   function execute_block(e : element_type) return element_type is
-      statement : cons_index := getList(e);
+   function execute_block(s : cons_index) return element_type is
+      statement : cons_index := s;
       ret_val   : element_type;
    begin
       --

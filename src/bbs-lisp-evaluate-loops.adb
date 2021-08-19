@@ -12,14 +12,14 @@ package body BBS.lisp.evaluate.loops is
    --
    procedure dowhile(e : out element_type; s : cons_index) is
       cond : element_type; --  Condition to evaluate
-      body_list : element_type; --  List of operations to execute
+      body_list : cons_index; --  List of operations to execute
       t : element_type := NIL_ELEM;
       temp : element_type;
       error_occured : Boolean := False;
    begin
       if s > NIL_CONS then
          cond := BBS.lisp.conses.get_car(s);
-         body_list := BBS.lisp.conses.get_cdr(s);
+         body_list := getList(BBS.lisp.conses.get_cdr(s));
          --
          --  Loop while the conditions is true.
          --
@@ -84,7 +84,7 @@ package body BBS.lisp.evaluate.loops is
    --
    procedure dotimes(e : out element_type; s : cons_index; p : phase) is
       limits : cons_index; --  Loop parameters to evaluate
-      body_list : element_type; --  List of operations to execute
+      body_list : cons_index; --  List of operations to execute
       result : element_type := NIL_ELEM;
       var : element_type := NIL_ELEM;
       rest : cons_index := NIL_CONS;
@@ -172,7 +172,7 @@ package body BBS.lisp.evaluate.loops is
             --
             if s > NIL_CONS then
                limits := getList(BBS.lisp.conses.get_car(s));
-               body_list := BBS.lisp.conses.get_cdr(s);
+               body_list := getList(BBS.lisp.conses.get_cdr(s));
                --
                --  Extract local variable, limit, and optional result
                --
@@ -227,8 +227,8 @@ package body BBS.lisp.evaluate.loops is
             --
             --  Find the index variable name in the body and convert all occurences.
             --
-            if isList(body_list) then
-               dummy := BBS.lisp.utilities.replace_sym(getList(body_list), var);
+            if body_list /= NIL_CONS then
+               dummy := BBS.lisp.utilities.replace_sym(body_list, var);
             end if;
             --
             --  Build the stack frame
@@ -297,7 +297,7 @@ package body BBS.lisp.evaluate.loops is
    --
    procedure dolist(e : out element_type; s : cons_index; p : phase) is
       limits : cons_index; --  Loop parameters to evaluate
-      body_list : element_type; --  List of operations to execute
+      body_list : cons_index; --  List of operations to execute
       result : element_type := NIL_ELEM;
       var : element_type := NIL_ELEM;
       rest : cons_index := NIL_CONS;
@@ -384,7 +384,7 @@ package body BBS.lisp.evaluate.loops is
             --
             if s > NIL_CONS then
                limits := getList(BBS.lisp.conses.get_car(s));
-               body_list := BBS.lisp.conses.get_cdr(s);
+               body_list := getList(BBS.lisp.conses.get_cdr(s));
                --
                --  Extract local variable, limit, and optional result
                --
@@ -427,8 +427,8 @@ package body BBS.lisp.evaluate.loops is
             --
             --  Find the index variable name in the body and convert all occurences.
             --
-            if isList(body_list) then
-               dummy := BBS.lisp.utilities.replace_sym(getList(body_list), var);
+            if body_list /= NIL_CONS then
+               dummy := BBS.lisp.utilities.replace_sym(body_list, var);
             end if;
             --
             --  Build the stack frame
@@ -494,7 +494,7 @@ package body BBS.lisp.evaluate.loops is
    --
    procedure progn(e : out element_type; s : cons_index) is
    begin
-      e := execute_block(makeList(s));
+      e := execute_block(s);
    end;
    --
    --  Breaks out of a loop (or other exclosing block) and returns a value
