@@ -26,4 +26,8 @@ package BBS.lisp.evaluate.cond is
    --  Perform an IF operation.
    --
    procedure eval_if(e : out element_type; s : cons_index);
+   --
+   --  Perform a COND operation.
+   --
+   procedure eval_cond(e : out element_type; s : cons_index);
 end;

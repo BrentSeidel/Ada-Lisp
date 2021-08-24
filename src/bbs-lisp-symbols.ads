@@ -151,6 +151,7 @@ private
    COMPILED_FUNCTION_P : aliased constant String := "COMPILED-FUNCTION-P";
    COMPLEXP            : aliased constant String := "COMPLEXP";
    CONCATENATE         : aliased constant String := "CONCATENATE";
+   COND                : aliased constant String := "COND";
    CONS                : aliased constant String := "CONS";
    CONSP               : aliased constant String := "CONSP";
    DEFUN               : aliased constant String := "DEFUN";
@@ -159,24 +160,24 @@ private
    DOWHILE             : aliased constant String := "DOWHILE";
    DUMP                : aliased constant String := "DUMP";
    ERRORP              : aliased constant String := "ERRORP";
-   E_ADDON             : aliased constant String := "ERR_ADDON";
-   E_ALLOCCONS         : aliased constant String := "ERR_ALLOCCONS";
-   E_ALLOCSTR          : aliased constant String := "ERR_ALLOCSTR";
-   E_ALLOCSYM          : aliased constant String := "ERR_ALLOCSYM";
-   E_FEWPARAM          : aliased constant String := "ERR_FEWPARAM";
-   E_FIXSYM            : aliased constant String := "ERR_FIXSYM";
-   E_HARDWARE          : aliased constant String := "ERR_HARDWARE";
-   E_NONE              : aliased constant String := "ERR_NONE";
-   E_NOPARAM           : aliased constant String := "ERR_NOPARAM";
-   E_NOTSYM            : aliased constant String := "ERR_NOTSYM";
-   E_PARSE             : aliased constant String := "ERR_PARSE";
-   E_PARSECHAR         : aliased constant String := "ERR_PARSECHAR";
-   E_PARSELIST         : aliased constant String := "ERR_PARSELIST";
-   E_PARSESPEC         : aliased constant String := "ERR_PARSESPEC";
-   E_RANGE             : aliased constant String := "ERR_RANGE";
-   E_STACK             : aliased constant String := "ERR_STACK";
-   E_UNKNOWN           : aliased constant String := "ERR_UNKNOWN";
-   E_WRONGTYPE         : aliased constant String := "ERR_WRONGTYPE";
+   E_ADDON             : aliased constant String := error_code'Image(ERR_ADDON);
+   E_ALLOCCONS         : aliased constant String := error_code'Image(ERR_ALLOCCONS);
+   E_ALLOCSTR          : aliased constant String := error_code'Image(ERR_ALLOCSTR);
+   E_ALLOCSYM          : aliased constant String := error_code'Image(ERR_ALLOCSYM);
+   E_FEWPARAM          : aliased constant String := error_code'Image(ERR_FEWPARAM);
+   E_FIXSYM            : aliased constant String := error_code'Image(ERR_FIXSYM);
+   E_HARDWARE          : aliased constant String := error_code'Image(ERR_HARDWARE);
+   E_NONE              : aliased constant String := error_code'Image(ERR_NONE);
+   E_NOPARAM           : aliased constant String := error_code'Image(ERR_NOPARAM);
+   E_NOTSYM            : aliased constant String := error_code'Image(ERR_NOTSYM);
+   E_PARSE             : aliased constant String := error_code'Image(ERR_PARSE);
+   E_PARSECHAR         : aliased constant String := error_code'Image(ERR_PARSECHAR);
+   E_PARSELIST         : aliased constant String := error_code'Image(ERR_PARSELIST);
+   E_PARSESPEC         : aliased constant String := error_code'Image(ERR_PARSESPEC);
+   E_RANGE             : aliased constant String := error_code'Image(ERR_RANGE);
+   E_STACK             : aliased constant String := error_code'Image(ERR_STACK);
+   E_UNKNOWN           : aliased constant String := error_code'Image(ERR_UNKNOWN);
+   E_WRONGTYPE         : aliased constant String := error_code'Image(ERR_WRONGTYPE);
    EVAL                : aliased constant String := "EVAL";
    EXIT_LISP           : aliased constant String := "EXIT";
    FLOATP              : aliased constant String := "FLOATP";
@@ -256,6 +257,7 @@ private
       (name => COMPILED_FUNCTION_P'Access, b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.compiled_function_p'Access)),
       (name => COMPLEXP'Access,            b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.return_false'Access)),
       (name => CONCATENATE'Access,         b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.symb.concatenate'Access)),
+      (name => COND'Access,                b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.cond.eval_cond'Access)),
       (name => CONS'Access,                b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.list.cons'Access)),
       (name => CONSP'Access,               b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.consp'Access)),
       (name => DEFUN'Access,               b => (Kind => SY_SPECIAL, s => BBS.lisp.evaluate.func.defun'Access)),

@@ -198,14 +198,14 @@ package body BBS.lisp.evaluate.cond is
       p2 : element_type; --  True expression
       p3 : element_type; --  False expression
    begin
-      if s = cons_index'First then
-         error("eval_if", "No parameters provided.");
+      if s = NIL_CONS then
+         error("if", "No parameters provided.");
          e := make_error(ERR_NOPARAM);
          return;
       end if;
       p1 := first_value(s1);
       if p1.kind = V_ERROR then
-         error("eval_if", "Condition reported an error.");
+         error("if", "Condition reported an error.");
          e := p1;
          return;
       end if;
@@ -231,7 +231,7 @@ package body BBS.lisp.evaluate.cond is
          if isFunction(p2) then
             t := eval_dispatch(getList(p2));
             if t.kind = V_ERROR then
-               error("eval_if", "Error in evaluating true branch");
+               error("if", "Error in evaluating true branch");
             end if;
          else
             t := indirect_elem(p2);
@@ -240,7 +240,7 @@ package body BBS.lisp.evaluate.cond is
          if isFunction(p3) then
             t := eval_dispatch(getList(p3));
             if t.kind = V_ERROR then
-               error("eval_if", "Error in evaluating false branch");
+               error("if", "Error in evaluating false branch");
             end if;
          else
             t := indirect_elem(p3);
@@ -248,5 +248,57 @@ package body BBS.lisp.evaluate.cond is
       end if;
       BBS.lisp.memory.deref(p1);
       e := t;
+   end;
+   --
+   --  Perform a COND operation.
+   --
+   procedure eval_cond(e : out element_type; s : cons_index) is
+      s1 : cons_index := s;  -- Walks through the parameter list
+      s2 : cons_index;   --  Walks through each candidate
+      p1 : element_type := NIL_ELEM; --  Candidate
+      test : element_type;  -- Condition value
+   begin
+      if s = NIL_CONS then
+         error("cond", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
+         return;
+      end if;
+      --
+      --  Loop for each element of parameter list
+      --
+      loop
+         BBS.lisp.memory.deref(p1);
+         p1 := first_value(s1);  -- Get the next candidate
+         if p1.kind = V_ERROR then
+            error("cond", "Candidate reported an error.");
+            e := p1;
+            return;
+         end if;
+         s2 := getList(p1);  -- Check if it is a list
+         if s2 = NIL_CONS then
+            error("cond", "Each candidate branch must be a list.");
+            e := make_error(ERR_WRONGTYPE);
+            BBS.lisp.memory.deref(p1);
+            return;
+         end if;
+         test := first_value(s2);  -- Check if the condition is true
+         if test.kind = V_ERROR then
+            error("cond", "Condition reported an error.");
+            e := test;
+            return;
+         end if;
+         if isTrue(test) then
+            e := execute_block(s2);
+            BBS.lisp.memory.deref(test);
+            BBS.lisp.memory.deref(p1);
+            return;
+         end if;
+         if s1 = NIL_CONS then
+            error("cond", "No matching candidate found.");
+            e := make_error(ERR_FEWPARAM);
+            BBS.lisp.memory.deref(p1);
+            return;
+         end if;
+      end loop;
    end;
 end;

@@ -21,7 +21,7 @@ with Abstract_State =>  pvt_exit_block is
    --  Execute the statements in a block and return the value of the last
    --  statement executed.
    --
-   function execute_block(e : element_type) return element_type
+   function execute_block(s : cons_index) return element_type
      with Global => (input => (pvt_exit_flag, pvt_break_flag, pvt_msg_flag,
                                pvt_exit_block, pvt_first_char_flag));
    --  should be (In_Out => (pvt_exit_flag, pvt_break_flag, pvt_msg_flag,

@@ -172,6 +172,52 @@
 (test-basic-math)
 (setq test-basic-math 0)
 ;
+;  Test the condition operation.
+;
+(print "===> Testing cond operations")
+(terpri)
+(defun test-cond ()
+  (verify-equal ERR_NOPARAM (cond) "No parameters to cond")
+  (verify-equal ERR_FEWPARAM
+    (cond
+      ((= 1 2) (+ 1 2))
+      ((= 2 3) (+ 2 3))
+      ((= 3 4) (+ 3 4)))
+    "No condition branch matches")
+  (verify-equal ERR_WRONGTYPE
+    (cond
+      ((= 1 2) (+ 1 2))
+      5
+      ((= 3 4) (+ 3 4)))
+    "Non-list element encountered")
+  (verify-equal ERR_HARDWARE
+    (cond
+      ((= 1 2) (+ 1 2))
+      ERR_HARDWARE
+      ((= 3 4) (+ 3 4)))
+    "Error evaluating candidate encountered")
+  (verify-equal ERR_HARDWARE
+    (cond
+      ((= 1 2) (+ 1 2))
+      (ERR_HARDWARE (+ 2 3))
+      ((= 3 4) (+ 3 4)))
+    "Error evaluating condition encountered")
+  (verify-equal 5
+    (cond
+      ((= 1 2) (+ 1 2))
+      ((= 3 3) (+ 1 2) (+ 2 3))
+      ((= 3 4) (+ 3 4)))
+    "One item matches")
+  (verify-equal 5
+    (cond
+      ((= 1 2) (+ 1 2))
+      ((= 3 3) (+ 2 3))
+      ((= 4 4) (+ 3 4)))
+    "Two items match, only first is evaluated")
+)
+(test-cond)
+(setq test-cond 0)
+;
 ;  Test symbols/global variables with setq
 ;
 (print "===> Testing symbols/globals")

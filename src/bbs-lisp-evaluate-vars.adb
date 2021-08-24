@@ -131,7 +131,7 @@ package body BBS.lisp.evaluate.vars is
    procedure local(e : out element_type; s : cons_index; p : phase) is
       locals : cons_index;
       base : cons_index;
-      list : element_type;
+      list : cons_index;
       t : element_type := NIL_ELEM;
       err : Boolean;
    begin
@@ -152,9 +152,9 @@ package body BBS.lisp.evaluate.vars is
             --
             --  First process the list of local variables
             --
-            list := BBS.lisp.conses.get_cdr(s);  --  Should be local variable list.
-            if isList(list) then
-               locals := getList(BBS.lisp.conses.get_car(getList(list)));
+            list := getList(BBS.lisp.conses.get_cdr(s));  --  Should be local variable list.
+            if list /= NIL_CONS then
+               locals := getList(BBS.lisp.conses.get_car(list));
             else
                error("let", "Improper parameters.");
                e := make_error(ERR_WRONGTYPE);
@@ -162,8 +162,8 @@ package body BBS.lisp.evaluate.vars is
             end if;
             if locals = NIL_CONS then
                error("let", "Parameter list must be a list");
-               BBS.lisp.memory.deref(BBS.lisp.conses.get_car(getList(list)));
-               BBS.lisp.conses.set_car(getList(list), make_error(ERR_WRONGTYPE));
+               BBS.lisp.memory.deref(BBS.lisp.conses.get_car(list));
+               BBS.lisp.conses.set_car(list, make_error(ERR_WRONGTYPE));
                e := make_error(ERR_WRONGTYPE);
                return;
             end if;
@@ -207,7 +207,7 @@ package body BBS.lisp.evaluate.vars is
                      put_line("Local variable list removed");
                      BBS.lisp.conses.deref(base);
                      e := make_error(ERR_STACK);
-                     BBS.lisp.conses.set_car(getList(list), make_error(ERR_STACK));
+                     BBS.lisp.conses.set_car(list, make_error(ERR_STACK));
                      return;
                   end if;
                   offset := offset + 1;
@@ -231,7 +231,7 @@ package body BBS.lisp.evaluate.vars is
             --  First process the list of local variables
             --
             locals := getList(BBS.lisp.conses.get_car(s));  --  Should be parameter list.
-            list := BBS.lisp.conses.get_cdr(s);
+            list := getList(BBS.lisp.conses.get_cdr(s));
             --
             --  Next process the parameter list.
             --
