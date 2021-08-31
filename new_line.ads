@@ -7,5 +7,6 @@
 --  Ada.Text_IO new_line with the default value.
 --
 package new_line is
+   pragma Elaborate_Body;
    procedure new_line;
 end new_line;

@@ -2,9 +2,82 @@ with BBS.lisp.conses;
 with BBS.lisp.global;
 with BBS.lisp.memory;
 with BBS.lisp.stack;
+with BBS.lisp.strings;
 with BBS.lisp.symbols;
-with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.loops is
+   --
+   --  The following routine supports parameters and local variables.
+   --  It scans through the passed s expression (recursively, if necessary) and
+   --  when it finds a symbol, it looks at the passed in parameter or local
+   --  variable.  If the name matches, it replaces the symbol with a pointer to
+   --  the parameter or local variable and updates the ref count.  The return
+   --  value is the number of replacements made.
+   --
+   --  Perform the replacement for a single symbol/variable.  Searches the list
+   --  s and any symbols or tempsyms whose name matches that of var are replaced
+   --  by var.  This means that stack variables will shadow symbols.
+   --
+   procedure replace_sym(s : cons_index; var : element_type) is
+      temp : cons_index := s;
+      new_elem : element_type;
+
+      function process_element(e : element_type; var : element_type;
+                            replace : out element_type) return Boolean is
+         name : string_index;      --  Name of item to potentially replace
+         var_name : string_index;  --  Name of potential replacement
+         flag : Boolean := False;  --  Was it a tempsym?
+      begin
+         if e.kind = V_SYMBOL then
+            if e.sym.kind = ST_FIXED then
+               return False;
+            end if;
+            name := BBS.lisp.symbols.get_name(e.sym);
+         elsif e.kind = V_TEMPSYM then
+            name := e.tempsym;
+            flag := True;
+         else
+            return False;
+         end if;
+         if var.kind = V_STACK then
+            var_name := var.st_name;
+         else
+            error("replace_syms.process_element", "Improper element in library");
+         end if;
+         if bbs.lisp.strings.compare(name, var_name) = CMP_EQ then
+            if flag then
+               BBS.lisp.strings.deref(name);
+            end if;
+            replace := var;
+            return True;
+         end if;
+         return False;
+      end;
+      --
+   begin
+      loop
+         if BBS.lisp.evaluate.isList(BBS.lisp.conses.get_car(temp)) then
+            replace_sym(BBS.lisp.evaluate.getList(BBS.lisp.conses.get_car(temp)), var);
+         else
+            if process_element(BBS.lisp.conses.get_car(temp), var, new_elem) then
+               BBS.lisp.memory.deref(BBS.lisp.conses.get_car(temp));
+               BBS.lisp.conses.set_car(temp, new_elem);
+               BBS.lisp.memory.ref(BBS.lisp.conses.get_car(temp));
+            end if;
+         end if;
+         exit when not BBS.lisp.evaluate.isList(BBS.lisp.conses.get_cdr(temp));
+         temp := BBS.lisp.evaluate.getList(BBS.lisp.conses.get_cdr(temp));
+      end loop;
+         --
+         --  Process the last element, it it exists in a CDR
+         --
+      if not BBS.lisp.evaluate.isList(BBS.lisp.conses.get_cdr(temp)) then
+         if process_element(BBS.lisp.conses.get_cdr(temp), var, new_elem) then
+            BBS.lisp.memory.deref(BBS.lisp.conses.get_cdr(temp));
+            BBS.lisp.conses.set_cdr(temp, new_elem);
+            BBS.lisp.memory.ref(BBS.lisp.conses.get_cdr(temp));
+         end if;
+      end if;
+   end;
    --
    --  Evaluates a dowhile command.  The first item is the condition.  If the
    --  condition evaluates to true, the rest of the items in the list are
@@ -91,7 +164,6 @@ package body BBS.lisp.evaluate.loops is
       limit : element_type := NIL_ELEM;
       limit_value : Natural := 0;
       s1 : cons_index;
-      dummy : Natural;
       t : element_type := NIL_ELEM;
       err : Boolean;
    begin
@@ -228,7 +300,7 @@ package body BBS.lisp.evaluate.loops is
             --  Find the index variable name in the body and convert all occurences.
             --
             if body_list /= NIL_CONS then
-               dummy := BBS.lisp.utilities.replace_sym(body_list, var);
+               replace_sym(body_list, var);
             end if;
             --
             --  Build the stack frame
@@ -303,7 +375,6 @@ package body BBS.lisp.evaluate.loops is
       rest : cons_index := NIL_CONS;
       source_list : element_type := NIL_ELEM;
       limit_value : cons_index := NIL_CONS;
-      dummy : Natural;
       t : element_type := NIL_ELEM;
       err : Boolean;
    begin
@@ -428,7 +499,7 @@ package body BBS.lisp.evaluate.loops is
             --  Find the index variable name in the body and convert all occurences.
             --
             if body_list /= NIL_CONS then
-               dummy := BBS.lisp.utilities.replace_sym(body_list, var);
+               replace_sym(body_list, var);
             end if;
             --
             --  Build the stack frame

@@ -2,6 +2,7 @@
 --  This package contains the various Lisp math functions.
 --
 package BBS.lisp.evaluate.math is
+   pragma Elaborate_Body;
    --
    --  Perform addition
    --

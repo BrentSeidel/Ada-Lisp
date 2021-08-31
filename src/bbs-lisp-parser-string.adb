@@ -1,4 +1,3 @@
-with BBS.lisp.utilities;
 package body BBS.lisp.parser.string is
    --
    --  Initialize the buffer object
@@ -32,7 +31,7 @@ package body BBS.lisp.parser.string is
    --
    function is_next_digit(self : parser_string) return Boolean is
    begin
-      return BBS.lisp.utilities.isDigit(BBS.lisp.strings.get_next_char(self.s));
+      return isDigit(BBS.lisp.strings.get_next_char(self.s));
    end;
    --
    --  Gets the character selected by ptr.

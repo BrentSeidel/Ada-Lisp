@@ -4,6 +4,7 @@
 --
 with BBS.lisp.strings;
 package BBS.lisp.parser.string is
+   pragma Elaborate_Body;
    --
    --  This object contains the following data:
    --    base    - Pointer to the first fragment of the string (may not be needed)

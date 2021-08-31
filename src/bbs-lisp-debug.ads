@@ -3,6 +3,8 @@
 --  operations, these won't be used and these package can be deleted.
 --
 package BBS.lisp.debug is
+   pragma Elaborate_Body;
+
    procedure dump(e : element_type);
    procedure dump(s : cons_index);
    procedure dump(s : symbol_ptr);

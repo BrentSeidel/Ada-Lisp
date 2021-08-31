@@ -2,7 +2,6 @@ with BBS.lisp.conses;
 with BBS.lisp.evaluate;
 with BBS.lisp.strings;
 with BBS.lisp.symbols;
-with BBS.lisp.utilities;
 package body BBS.lisp.parser is
    --
    --  Append an element to a list.  Return true for success or false for failure.
@@ -159,7 +158,7 @@ package body BBS.lisp.parser is
          --
          --  Check for the start of an integer atom
          --
-         elsif BBS.lisp.utilities.isDigit(test_char) or
+         elsif isDigit(test_char) or
            ((test_char = '-') and buff.is_next_digit) then
             int(buff, value);
             e := (kind => V_INTEGER, i => value);
@@ -378,7 +377,7 @@ package body BBS.lisp.parser is
          neg := true;
          buff.next_char;
       end if;
-      while BBS.lisp.utilities.isDigit(buff.get_char) and buff.not_end loop
+      while isDigit(buff.get_char) and buff.not_end loop
          accumulate := accumulate*10 + int32'Value(" " & buff.get_char);
          buff.next_char;
       end loop;
@@ -395,8 +394,8 @@ package body BBS.lisp.parser is
       accumulate : uint32 := 0;
    begin
       buff.next_char;
-      while BBS.lisp.utilities.isHex(buff.get_char) and buff.not_end loop
-         accumulate := accumulate*16 + BBS.lisp.utilities.hexDigit(buff.get_char);
+      while isHex(buff.get_char) and buff.not_end loop
+         accumulate := accumulate*16 + hexDigit(buff.get_char);
          buff.next_char;
       end loop;
       value := uint32_to_int32(accumulate);
@@ -443,9 +442,9 @@ package body BBS.lisp.parser is
       buff.next_char;
       c := buff.get_char;
       buff.next_char;
-      if BBS.lisp.utilities.isAlpha(c) then
+      if isAlpha(c) then
          temp(index) := BBS.lisp.strings.To_Upper(c);
-         while BBS.lisp.utilities.isAlpha(buff.get_char) and buff.not_end and index < 10 loop
+         while isAlpha(buff.get_char) and buff.not_end and index < 10 loop
             index := index + 1;
             temp(index) := BBS.lisp.strings.To_Upper(buff.get_char);
             buff.next_char;
@@ -476,6 +475,48 @@ package body BBS.lisp.parser is
          end if;
       end if;
       return True;
+   end;
+   --
+   --  Return the hexidecimal digit
+   --
+   function hexDigit(c : Character) return uint32 is
+   begin
+      case c is
+         when '0' =>
+            return 0;
+         when '1' =>
+            return 1;
+         when '2' =>
+            return 2;
+         when '3' =>
+            return 3;
+         when '4' =>
+            return 4;
+         when '5' =>
+            return 5;
+         when '6' =>
+            return 6;
+         when '7' =>
+            return 7;
+         when '8' =>
+            return 8;
+         when '9' =>
+            return 9;
+         when 'A' | 'a' =>
+            return 10;
+         when 'B' | 'b' =>
+            return 11;
+         when 'C' | 'c' =>
+            return 12;
+         when 'D' | 'd' =>
+            return 13;
+         when 'E' | 'e' =>
+            return 14;
+         when 'F' | 'f' =>
+            return 15;
+         when others =>
+            return 0;
+      end case;
    end;
    --
 end;

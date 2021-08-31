@@ -2,6 +2,7 @@
 --  This package contains functions relating to processing strings.
 --
 package BBS.lisp.evaluate.str is
+   pragma Elaborate_Body;
    --
    --  Return the length of a string or list.  Atoms will get a value of 1.
    --  A NIL pointer returns a length of 0.

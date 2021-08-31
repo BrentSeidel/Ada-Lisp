@@ -2,6 +2,7 @@
 --  This package contains operations for the character data type.
 --
 package BBS.lisp.evaluate.char is
+   pragma Elaborate_Body;
    --
    --  Given a character, return the integer code for the character.  Typically
    --  the ASCII value.

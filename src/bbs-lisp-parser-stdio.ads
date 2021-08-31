@@ -2,8 +2,8 @@
 --  This package contains data and routines for providing data to the parser
 --  routines.  This is done to allow the parser to be decoupled from I/O.
 --
-with BBS.lisp.utilities;
 package bbs.lisp.parser.stdio is
+   pragma Elaborate_Body;
    --
    --  This object contains the following data:
    --    buff - The buffer containing the characters
@@ -27,7 +27,7 @@ package bbs.lisp.parser.stdio is
    --
    overriding
    function is_next_digit(self : parser_stdio) return Boolean is ((self.ptr <= self.last)
-                                                                  and then (BBS.lisp.utilities.isDigit(self.buff(self.ptr + 1))));
+                                                                  and then (isDigit(self.buff(self.ptr + 1))));
    --
    --  Increment ptr to point to the next character
    --

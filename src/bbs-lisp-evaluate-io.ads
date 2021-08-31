@@ -2,6 +2,7 @@
 --  This package contains the console I/O routines.  They are fairly basic.
 --
 package BBS.lisp.evaluate.io is
+   pragma Elaborate_Body;
    --
    --  Print a list of items.
    --

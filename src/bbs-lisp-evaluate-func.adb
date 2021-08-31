@@ -4,7 +4,6 @@ with BBS.lisp.memory;
 with BBS.lisp.stack;
 with BBS.lisp.strings;
 with BBS.lisp.symbols;
-with BBS.lisp.utilities;
 package body BBS.lisp.evaluate.func is
    --
    --  Defines a function.  The command is (defun name (parameters) body).
@@ -344,6 +343,27 @@ package body BBS.lisp.evaluate.func is
       e := eval(first_param);
    end;
    --
+   --  Count the number of elements in a list.
+   --
+   function count(s : cons_index) return Integer is
+      t : cons_index := s;
+      last : cons_index;
+      c : Integer := 0;
+   begin
+      if s = NIL_CONS then
+         return 0;
+      end if;
+      while t > NIL_CONS loop
+         c := c + 1;
+         last := t;
+         t := BBS.lisp.evaluate.getList(BBS.lisp.conses.get_cdr(t));
+      end loop;
+      if BBS.lisp.conses.get_cdr(last) /= NIL_ELEM then
+         c := c + 1;
+      end if;
+      return c;
+   end;
+   --
    --  Functions for evaluating lisp functions.
    --    s points to the function definition
    --    e points to the parameters being passed to the function
@@ -365,9 +385,9 @@ package body BBS.lisp.evaluate.func is
    begin
       params := BBS.lisp.conses.get_car(s);
       func_body := getList(BBS.lisp.conses.get_cdr(s));
-      supplied := bbs.lisp.utilities.count(e);
+      supplied := count(e);
       if isList(params) then
-         requested := bbs.lisp.utilities.count(getList(params));
+         requested := count(getList(params));
       elsif params = NIL_ELEM then
          requested := 0;
       else

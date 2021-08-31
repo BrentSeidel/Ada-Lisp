@@ -6,6 +6,7 @@
 package BBS.lisp.evaluate.mem
   with SPARK_Mode => Off
 is
+   pragma Elaborate_Body;
    --
    --  Since this package explicitly access arbitrary memory locations for read
    --  and write, there is no way that this can be proved, so we just turn SPARK

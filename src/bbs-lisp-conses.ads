@@ -3,6 +3,7 @@
 --  tiny lisp interpreter.
 --
 package BBS.lisp.conses is
+   pragma Elaborate_Body;
    --
    --  Types for cons reference counts
    --
@@ -23,18 +24,21 @@ package BBS.lisp.conses is
    --
    function get_car(s : cons_index) return element_type
      with pre => (s > NIL_CONS);
+   pragma Pure_Function(get_car);
    --
    procedure set_car(s : cons_index; e : element_type)
      with pre => (s > NIL_CONS);
    --
    function get_cdr(s : cons_index) return element_type
      with pre => (s > NIL_CONS);
+   pragma Pure_Function(get_cdr);
    --
    procedure set_cdr(s : cons_index; e : element_type)
      with pre => (s > NIL_CONS);
    --
    function get_ref(s : cons_index) return cons_ref_count
      with pre => (s > NIL_CONS);
+   pragma Pure_Function(get_ref);
    --  ------------------------------------------------------------------------
    --  Memory management
    --
