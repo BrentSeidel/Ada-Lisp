@@ -1,5 +1,5 @@
 package BBS.lisp.evaluate.list is
-
+   pragma Elaborate_Body;
    --
    --  Create a list out of two elements.
    --

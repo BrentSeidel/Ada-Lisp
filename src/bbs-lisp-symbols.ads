@@ -17,6 +17,7 @@ with BBS.lisp.evaluate.str;
 with BBS.lisp.evaluate.symb;
 with BBS.lisp.evaluate.vars;
 package BBS.lisp.symbols is
+   pragma Elaborate_Body;
    --
    --  All symbols have the same body, so to be consistent we define it here.
    --

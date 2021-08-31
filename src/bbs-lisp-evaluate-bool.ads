@@ -1,4 +1,9 @@
+--
+--  This package contains operations that use either boolean types or bits of
+--  integers.
+--
 package BBS.lisp.evaluate.bool is
+   pragma Elaborate_Body;
    --
    --  Perform a logical NOT operation.
    --

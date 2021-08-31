@@ -1,4 +1,4 @@
-with BBS.lisp.utilities;
+with BBS.lisp.parser;
 package body BBS.lisp.strings is
    --
    --  Procedure to print a string
@@ -523,7 +523,7 @@ package body BBS.lisp.strings is
             neg := true;
             ptr := ptr + 1;
          end if;
-         while BBS.lisp.utilities.isDigit(string_table(str).str(ptr))
+         while BBS.lisp.parser.isDigit(string_table(str).str(ptr))
            and (ptr <= string_table(str).len) loop
             accumulate := accumulate*10 + int32'Value(" " & string_table(str).str(ptr));
             ptr := ptr + 1;

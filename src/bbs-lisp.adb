@@ -4,7 +4,6 @@ with BBS.lisp.evaluate;
 with BBS.lisp.evaluate.func;
 with BBS.lisp.global;
 with BBS.lisp.memory;
-with BBS.lisp.parser;
 with BBS.lisp.parser.stdio;
 with BBS.lisp.stack;
 use type BBS.lisp.stack.stack_entry_type;

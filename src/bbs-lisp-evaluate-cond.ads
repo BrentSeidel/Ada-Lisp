@@ -2,6 +2,7 @@
 --  This package contains the Lisp comparison and condition functions
 --
 package BBS.lisp.evaluate.cond is
+   pragma Elaborate_Body;
    --
    --  Helper function for comparisons
    --

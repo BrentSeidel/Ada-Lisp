@@ -1,4 +1,5 @@
 package BBS.lisp.evaluate.misc is
+   pragma Elaborate_Body;
    --
    --  Functions for evaluating the various builtin functions.
    --

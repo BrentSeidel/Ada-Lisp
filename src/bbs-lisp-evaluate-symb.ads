@@ -1,4 +1,5 @@
 package BBS.lisp.evaluate.symb is
+   pragma Elaborate_Body;
    --
    --  Coerces an object of one type to another type.  Available coercions are:
    --    character -> string

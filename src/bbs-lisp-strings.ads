@@ -3,6 +3,7 @@
 --  lisp strings.
 --
 package BBS.lisp.strings is
+   pragma Elaborate_Body;
    --
    --  Types for string reference counts
    --

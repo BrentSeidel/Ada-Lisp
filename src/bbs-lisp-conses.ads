@@ -3,6 +3,7 @@
 --  tiny lisp interpreter.
 --
 package BBS.lisp.conses is
+   pragma Elaborate_Body;
    --
    --  Types for cons reference counts
    --

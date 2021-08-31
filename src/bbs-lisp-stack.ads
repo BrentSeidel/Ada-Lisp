@@ -3,6 +3,7 @@
 --  the Lisp interpreter.
 --
 package BBS.lisp.stack is
+   pragma Elaborate_Body;
    --
    --  Data types for the stack
    --
