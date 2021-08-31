@@ -54,11 +54,13 @@ package BBS.lisp.strings is
    --
    function To_Upper(c : Character) return Character
      with Global => Null;
+   pragma Pure_Function(To_Upper);
    --
    --  Convert a character to lower-case
    --
    function To_Lower(c : Character) return Character
      with Global => Null;
+   pragma Pure_Function(To_Lower);
    --
    --  Copy helper function
    --

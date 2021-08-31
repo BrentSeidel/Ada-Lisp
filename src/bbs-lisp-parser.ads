@@ -30,30 +30,34 @@ private package BBS.lisp.parser is
    function isWhitespace(c : Character) return Boolean is
      ((c = ' ') or (c = Character'Val(10)) or (c = Character'Val(13)) or
           c = Character'Val(9))
-     with Global => Null;
+       with Global => Null;
+   pragma Pure_Function(isWhitespace);
    --
    --  Is character a decimal digit?
    --
    function isDigit(c : Character) return Boolean is (c >= '0' and c <= '9')
      with Global => Null;
+   pragma Pure_Function(isDigit);
    --
    --  Is character an alphabetic character
    --
-   function isAlpha(c : Character) return Boolean is ((c >= 'A' and c <= 'Z')
-                                                      or (c >= 'a' and c <= 'z'))
+   function isAlpha(c : Character) return Boolean is
+     ((c >= 'A' and c <= 'Z') or (c >= 'a' and c <= 'z'))
      with Global => Null;
+   pragma Pure_Function(isAlpha);
    --
    -- Is character a hexidecimal digit?
    --
-   function isHex(c : Character) return Boolean is ((c >= '0' and c <= '9')
-                                                    or (c >= 'A' and c <= 'F')
-                                                    or (c >= 'a' and c <= 'f'))
+   function isHex(c : Character) return Boolean is
+     ((c >= '0' and c <= '9') or (c >= 'A' and c <= 'F') or (c >= 'a' and c <= 'f'))
      with Global => Null;
+   pragma Pure_Function(isHex);
    --
    --  Return the hexidecimal digit
    --
    function hexDigit(c : Character) return uint32
      with Global => Null;
+   pragma Pure_Function(hexDigit);
 private
    --
    --  Utilities to assist in parsing
