@@ -163,7 +163,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    function read return Element_Type
      with Global => (Input => (input_stream));
    --
-   --  This procedure evaluates a binary s-expression and returns the resuls.
+   --  This procedure evaluates a binary s-expression and returns the results.
    --
    function eval(e : element_type) return element_type;
    --
