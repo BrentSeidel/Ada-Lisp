@@ -151,7 +151,7 @@ package body BBS.lisp.strings is
       return int32(count);
    end;
    --
-   --  Converts a fixed length Ada string to a Lisp string.  Returns false if
+   --  Converts a fixed length Ada string to a Lisp string.  Returns False if
    --  the Lisp string cannot be allocated.
    --
    function str_to_lisp(s : out string_index; str : String) return Boolean is
@@ -184,6 +184,33 @@ package body BBS.lisp.strings is
       end if;
       s := NIL_STR;
       return False;
+   end;
+   --
+   --  Converts a Lisp string to a fixed length Ada string.  Returns False if
+   --  the conversion fails.
+   --
+   --  This would be a good places to used unbounded_string, but it may
+   --  not be available on some of the targets, so we need to determine
+   --  the length of the Lisp string and declare an Ada string of the
+   --  appropriate size.
+   --
+   function lisp_to_str(s : string_index) return String is
+      len : Integer := Integer(length(s));
+   begin
+      declare
+         str : String(1 .. len);
+         next : string_index := s;
+         offset : Integer := 0;
+      begin
+         while next > NIL_STR loop
+            for ptr in 1 .. string_table(next).len loop
+               str(ptr + offset) := string_table(next).str(ptr);
+            end loop;
+            offset := offset + string_table(next).len;
+            next := string_table(next).next;
+         end loop;
+         return str;
+      end;
    end;
    --
    --  Functions to append to an existing string.

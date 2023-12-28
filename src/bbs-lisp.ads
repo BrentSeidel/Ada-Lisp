@@ -320,5 +320,4 @@ private
    --
    function eval_dispatch(s : cons_index) return element_type;
 
-
 end BBS.lisp;

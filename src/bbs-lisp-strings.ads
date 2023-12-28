@@ -36,6 +36,10 @@ package BBS.lisp.strings is
    function str_to_lisp(s : out string_index; str : String) return Boolean;
    -- Should really be (In_Out => pvt_string_table);
    --
+   --  Converts a Lisp string to a fixed length Ada string.
+   --
+   function lisp_to_str(s : string_index) return String;
+   --
    --  Functions to append to an existing string.  Returns False if an error
    --  occurs.
    --

@@ -38,15 +38,8 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       io_get_line := p_get_line;
       BBS.lisp.memory.reset_tables;
       parse_buff.init;
---      put_line("init: cons size is " & Integer'Image(cons'Size/8) & " bytes");
---      put_line("init: cons_table size is " & Integer'Image(cons_table'Size/8) & " bytes");
---      put_line("init: element size is " & Integer'Image(element_type'Size/8) & " bytes");
---      put_line("init: symbol size is " & Integer'Image(BBS.lisp.symbols.symbol'Size/8) & " bytes");
---      put_line("init: fixed symbol size is " & Integer'Image(BBS.lisp.symbols.fixed_symbol'Size/8) & " bytes");
---      put_line("init: symbol body size is " & Integer'Image(BBS.lisp.symbols.sym_body'Size/8) & " bytes");
       --
       --  Before element/value merge
-      --
       --  init: cons size is  36 bytes
       --  init: cons_table size is  18036 bytes
       --  init: element size is  16 bytes
@@ -55,7 +48,6 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       --  init: symbol body size is  24 bytes
       --
       --  After element/value merge
-      --
       --  init: cons size is  28 bytes
       --  init: cons_table size is  14028 bytes
       --  init: element size is  12 bytes
