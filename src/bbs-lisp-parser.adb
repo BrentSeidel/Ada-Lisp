@@ -307,7 +307,7 @@ package body BBS.lisp.parser is
             if not buff.request_more then
                BBS.lisp.conses.deref(head);
                return False;
-               end if;
+            end if;
          end if;
          --
          --  For special functions, call the function after the first parameter

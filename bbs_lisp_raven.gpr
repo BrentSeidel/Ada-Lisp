@@ -1,4 +1,4 @@
-with "../BBS-Ada/bbs_raven.gpr";
+with "../BBS-Ada/bbs.gpr";
 
 library project Bbs_Lisp_raven is
 
