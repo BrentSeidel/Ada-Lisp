@@ -255,6 +255,12 @@ private
    procedure print(s : string_index);
    procedure print(s : symbol_ptr);
    --
+   --  Print byte, word, and long unsigned values in hexidecimal
+   --
+   function toHexb(value : int32) return String;
+   function toHexw(value : int32) return String;
+   function toHexl(value : int32) return String;
+   --
    --  For debugging, dump the various tables
    --
    procedure dump_cons;

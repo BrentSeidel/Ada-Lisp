@@ -54,7 +54,7 @@
 \frontmatter
 \maketitle
 \begin{center}
-This document is \copyright 2021 Brent Seidel.  All rights reserved.
+This document is \copyright 2024 Brent Seidel.  All rights reserved.
 
 \paragraph{}Note that this is a draft version and not the final version for publication.
 \end{center}
@@ -66,7 +66,7 @@ This document is \copyright 2021 Brent Seidel.  All rights reserved.
 This document provides a definition of a \tl\ interpreter written in Ada.  Without such a definition, it is difficult to determine if the language is actually doing what it should be doing.  This makes debugging more complicated.
 
 \section{What is This?}
-This is a \tl\ interpreter written in Ada.  It is designed to proved a language that can be embedded into other programs, including running on embedded systems without an operating system.  As a result, effort has been made to remove dependencies on Ada packages that may not be available.  A primary example is \package{Ada.Text\_IO}.  Another feature that may be missing is dynamic memory allocation.
+This is a \tl\ interpreter written in Ada.  It is designed to provide a language that can be embedded into other programs, including running on embedded systems without an operating system.  As a result, effort has been made to remove dependencies on Ada packages that may not be available.  A primary example is \package{Ada.Text\_IO}.  Another feature that may be missing is dynamic memory allocation.
 
 \section{Why is This?}
 As a young lad, I learned to program on 8-bit computers with minimal BASIC interpreters and 4-16K of RAM.  With these simple systems, one had a hope of being able to understand the complete system at a fairly low level.  Now, one can buy small computers like the Arduino Due with 32-bit processors, 96K of RAM, and 512K of flash memory (I'm ignoring systems like the Raspberry PI as they are full up Linux computer and thus are more complicated).  This seemed like a reasonable platform for recreating the early experience.
@@ -173,6 +173,7 @@ The following tokens are defined as fixed symbols by \tl{} and cannot be redefin
   \keyword{POKE16}\\
   \keyword{POKE32}\\
   \keyword{PRINT}\\
+  \keyword{PRINT-HEX}\\
   \keyword{PROGN}\\
   \keyword{RATIONALP}\\
   \keyword{READ}\\
@@ -1601,6 +1602,22 @@ Returns the value \constant{NIL}.  ``Hello world!'' is sent to the output stream
 This loops through the provided parameters and prints each one with no newline or space between and no trailing newline.  Note that if a newline is contained in one of the items printed, the internal flag \keyword{first\_char\_flag} is not set.  This may cause \keyword{fresh-line} to output an unneeded newline.
 \subsection{Common Lisp Compatibility}
 The output is not preceded by a newline and followed by a space.  The optional \keyword{output-stream} parameter is not available as there is only one output stream.  Multiple parameters are permitted.  And, there is no implicit binding of parameters to values.
+
+\section{print-hex}
+Prints numbers in unsigned hexadecimal notation.
+\subsection{Inputs}
+One or two parameters.  The first is the number to print.  The second is the size (1=byte, 2=word, anything else is long).  If the second is omitted, a size of long is assumed.
+\subsection{Output}
+\constant{NIL}.
+\subsection{Example}
+\begin{lstlisting}
+(print-hex 1023 1)
+\end{lstlisting}
+Returns the value \constant{NIL}.  ``FF'' is sent to the output stream.
+\subsection{Description}
+The number is internally converted to an unsigned integer and truncated to the specified size.  If no size is specified, long is used.  The number is then printed to the output stream as a hexadecimal number with leading zeros appropriate for the size.
+\subsection{Common Lisp Compatibility}
+This operation does not exist in \cl.  It was added for convenience when working with embedded systems.
 
 \section{progn}
 Collects operations into a block.

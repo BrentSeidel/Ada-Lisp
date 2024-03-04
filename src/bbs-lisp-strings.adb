@@ -195,7 +195,7 @@ package body BBS.lisp.strings is
    --  appropriate size.
    --
    function lisp_to_str(s : string_index) return String is
-      len : Integer := Integer(length(s));
+      len : constant Integer := Integer(length(s));
    begin
       declare
          str : String(1 .. len);

@@ -22,6 +22,53 @@ package body BBS.lisp.evaluate.io is
       e := NIL_ELEM;
    end;
    --
+   --  Print an integer in hexidecimal format.  Sizes are byte, word, and long.
+   --  Usage: (print-hex <number> <size>)
+   --  size = 1 for byte
+   --  size = 2 for word
+   --  size = 3 or others for long
+   --
+   procedure print_hex(e : out element_type; s : cons_index) is
+      t : cons_index := s;
+      el : element_type;
+      number : int32;
+      size : int32 := 3;
+   begin
+      if s = NIL_CONS then
+         error("print_hex", "No parameters provided.");
+         e := make_error(ERR_NOPARAM);
+         return;
+      end if;
+      el := first_value(t);
+      if el.kind = V_INTEGER then
+         number := el.i;
+      else
+         error("print_hex", "Can't process value of type " & value_type'Image(el.kind));
+         BBS.lisp.memory.deref(el);
+         e := make_error(ERR_WRONGTYPE);
+         return;
+      end if;
+      el := first_value(t);
+      if el.kind = V_INTEGER then
+         if (el.i = 1) or (el.i = 2) then
+            size := el.i;
+         else
+            size := 3;
+         end if;
+      else
+         size := 3;
+      end if;
+      case size is
+         when 1 =>  --  Byte
+            put(toHexb(number));
+         when 2 =>  --  Word
+            put(toHexw(number));
+         when others =>  --  Long
+            put(toHexl(number));
+      end case;
+      e := NIL_ELEM;
+   end;
+   --
    procedure fresh_line(e : out element_type; s : cons_index) is
       pragma Unreferenced (s);
    begin

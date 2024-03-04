@@ -206,6 +206,7 @@ private
    POKE16              : aliased constant String := "POKE16";
    POKE32              : aliased constant String := "POKE32";
    PRINT               : aliased constant String := "PRINT";
+   PRINT_HEX           : aliased constant String := "PRINT-HEX";
    PROGN               : aliased constant String := "PROGN";
    QUOTE               : aliased constant String := "QUOTE";
    RATIONALP           : aliased constant String := "RATIONALP";
@@ -312,6 +313,7 @@ private
       (name => POKE16'Access,              b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.mem.poke16'Access)),
       (name => POKE32'Access,              b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.mem.poke32'Access)),
       (name => PRINT'Access,               b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.io.print'Access)),
+      (name => PRINT_HEX'Access,           b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.io.print_hex'Access)),
       (name => PROGN'Access,               b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.loops.progn'Access)),
       (name => QUOTE'Access,               b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.list.quote'Access)),
       (name => RATIONALP'Access,           b => (Kind => SY_BUILTIN, f => BBS.lisp.evaluate.pred.return_false'Access)),

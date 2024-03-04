@@ -9,6 +9,11 @@ package BBS.lisp.evaluate.io is
    procedure print(e : out element_type; s : cons_index)
      with post => (e = NIL_ELEM);
    --
+   --  Print an integer in hexidecimal format.  Sizes are byte, word, and long.
+   --
+   procedure print_hex(e : out element_type; s : cons_index)
+     with post => (e = NIL_ELEM);
+   --
    --  Print a new line if not already at the beginning of a line.
    --
    procedure fresh_line(e : out element_type; s : cons_index)

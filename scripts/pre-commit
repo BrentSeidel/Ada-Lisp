@@ -4,7 +4,7 @@
 #
 echo "Building software"
 scripts/make_info
-if gprbuild lispq.gpr
+if alr build
 then
   echo "Build succeeded"
 else

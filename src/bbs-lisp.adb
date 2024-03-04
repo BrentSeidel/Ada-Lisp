@@ -221,6 +221,38 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       BBS.lisp.strings.print(s);
    end;
    --
+   --  Print byte, word, and long unsigned values in hexidecimal
+   --
+   hex_digit : constant String := "0123456789ABCDEF";
+   --
+   function toHexb(value : int32) return String is
+      t : constant uint32 := (int32_to_uint32(value) and 16#FF#);
+   begin
+      return hex_digit(Integer(t/16#10#) + 1) & hex_digit(Integer(t and 16#0F#) + 1);
+   end;
+   --
+   function toHexw(value : int32) return String is
+      t : constant uint32 := (int32_to_uint32(value) and 16#FFFF#);
+   begin
+      return hex_digit(Integer(t/16#1000#) + 1) &
+        hex_digit(Integer((t/16#100#) and 16#0F#) + 1) &
+        hex_digit(Integer((t/16#10#) and 16#0F#) + 1) &
+        hex_digit(Integer(t and 16#0F#) + 1);
+   end;
+   --
+   function toHexl(value : int32) return String is
+      t : constant uint32 := int32_to_uint32(value);
+   begin
+      return hex_digit(Integer((t/16#1000_0000#) and 16#0F#) + 1) &
+        hex_digit(Integer((t/16#0100_0000#) and 16#0F#) + 1) &
+        hex_digit(Integer((t/16#0010_0000#) and 16#0F#) + 1) &
+        hex_digit(Integer((t/16#0001_0000#) and 16#0F#) + 1) &
+        hex_digit(Integer((t/16#0000_1000#) and 16#0F#) + 1) &
+        hex_digit(Integer((t/16#0000_0100#) and 16#0F#) + 1) &
+        hex_digit(Integer((t/16#0000_0010#) and 16#0F#) + 1) &
+        hex_digit(Integer(t and 16#0F#) + 1);
+   end;
+   --
    --  Dump a symbol pointer.
    --
    procedure dump_sym_ptr(s : symbol_ptr) is
