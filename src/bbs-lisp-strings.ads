@@ -154,8 +154,8 @@ package BBS.lisp.strings is
    --  Allocate a string
    --
    function alloc(s : out string_index) return Boolean
-     with post => (if count_free_str = 0 then alloc'Result = False
-                else alloc'Result = True);
+     with post => (if count_free_str'Old = 0 then alloc'Result = False
+                else alloc'Result);
    -- should really be (In_Out => pvt_string_table);
    --
    --  Increase the reference count of a string

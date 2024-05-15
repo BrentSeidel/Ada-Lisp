@@ -13,7 +13,7 @@ with Abstract_State =>  pvt_exit_block is
    function isFunction(e : element_type) return Boolean;
    function getList(e : element_type) return cons_index
      with post => (if not isList(e) then getList'Result = NIL_CONS else
-                       getList'Result in cons_index'Range),
+                       getList'Result'Valid),
        global => Null;
    function makeList(s : cons_index) return element_type
      with Global => Null;

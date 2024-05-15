@@ -1,0 +1,8 @@
+name = "tinylisp"
+description = "Tiny Lisp interpreter"
+version = "0.1.0-dev"
+
+project-files = ["bbs_lisp.gpr", "lispq.gpr"]
+authors = ["Brent Seidel"]
+maintainers = ["Brent Seidel <brentseidel@mac.com>"]
+maintainers-logins = ["BrentSeidel"]

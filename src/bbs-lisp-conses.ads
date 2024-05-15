@@ -58,8 +58,8 @@ package BBS.lisp.conses is
    --  and the output value should be ignored.
    --
    function alloc(s : out cons_index) return Boolean
-     with post => (if count_free_cons = 0 then alloc'Result = False
-                else alloc'Result = True);
+     with post => (if count_free_cons'Old = 0 then alloc'Result = False
+                else alloc'Result);
    --
    --  Increment the reference count a cons cell  This is typically done
    --  when an additional index to the item is created.
