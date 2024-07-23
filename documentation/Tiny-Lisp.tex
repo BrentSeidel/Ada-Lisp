@@ -1,19 +1,28 @@
 \documentclass[10pt, openany]{book}
-
+%
+%  Packages to use
+%
 \usepackage{fancyhdr}
-\usepackage{imakeidx}
-
-\usepackage{amsmath}
-\usepackage{amsfonts}
-
-\usepackage{geometry}
-\geometry{letterpaper}
-
 \usepackage{fancyvrb}
 \usepackage{fancybox}
-
+%
+\usepackage{lastpage}
+\usepackage{imakeidx}
+%
+\usepackage{amsmath}
+\usepackage{amsfonts}
+%
+\usepackage{geometry}
+\geometry{letterpaper}
+%
 \usepackage{url}
+\usepackage{gensymb}
 \usepackage{multicol}
+%
+\usepackage[pdf]{pstricks}
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.pdf}
+\DeclareGraphicsRule{.pdf}{pdf}{.pdf}{}
 %
 % Rules to allow import of graphics files in EPS format
 %
@@ -39,15 +48,36 @@
 \newcommand{\datatype}[1]{\texttt{#1}}
 \newcommand{\tl}{Tiny-Lisp}
 \newcommand{\cl}{Common Lisp}
+\newcommand{\docname}{Users's Manual for \\ Tiny Lisp Interpreter}
 %
 % Front Matter
 %
-\title{Tiny Lisp Interpreter}
+\title{\docname}
 \author{Brent Seidel \\ Phoenix, AZ}
 \date{ \today }
 %========================================================
 %%% BEGIN DOCUMENT
 \begin{document}
+%
+%  Header's and Footers
+%
+\fancypagestyle{plain}{
+  \fancyhead[L]{}%
+  \fancyhead[R]{}%
+  \fancyfoot[C]{Page \thepage\ of \pageref{LastPage}}%
+  \fancyfoot[L]{Ada Programming}
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+}
+\fancypagestyle{myfancy}{
+  \fancyhead[L]{\docname}%
+  \fancyhead[R]{\leftmark}
+  \fancyfoot[C]{Page \thepage\ of \pageref{LastPage}}%
+  \fancyfoot[L]{Ada Programming}
+  \renewcommand{\headrulewidth}{0.4pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+}
+\pagestyle{myfancy}
 %
 % Produce the front matter
 %
@@ -61,7 +91,7 @@ This document is \copyright 2024 Brent Seidel.  All rights reserved.
 \tableofcontents
 
 \mainmatter
-%----------------------------------------------------------
+%========================================================
 \chapter{Introduction}
 This document provides a definition of a \tl\ interpreter written in Ada.  Without such a definition, it is difficult to determine if the language is actually doing what it should be doing.  This makes debugging more complicated.
 
@@ -79,10 +109,244 @@ Why not?  My first thought was to use some flavor of Tiny BASIC which would have
 \subsection{Why Ada?}
 Again, why not?  I have developed an interest in Ada, especially for programming embedded systems.  It has features, such as strong typing, which can help to catch errors early, thus saving time debugging.  I would not claim to be the world's greatest programmer, so I need all the help that I can get.
 
-%----------------------------------------------------------
+%========================================================
+\chapter{How To Obtain}
+This package is currently available on GitHub at \url{https://github.com/BrentSeidel/Ada-Lisp}
+
+\section{Dependencies}
+\subsection{Ada Libraries}
+The following Ada packages are used:
+\begin{itemize}
+  \item \package{Ada.Real\_Time}
+  \item \package{Ada.Unchecked\_Conversion}
+\end{itemize}
+
+\subsection{Other Libraries}
+This library depends on the root package \package{BBS} available at \url{https://github.com/BrentSeidel/BBS-Ada}.  Packages external to this library are marked with an asterisk.
+\begin{itemize}
+  \item \package{BBS.lisp.conses}
+  \item \package{BBS.lisp.evaluate}
+  \item \package{BBS.lisp.evaluate.bool}
+  \item \package{BBS.lisp.evaluate.char}
+  \item \package{BBS.lisp.evaluate.cond}
+  \item \package{BBS.lisp.evaluate.func}
+  \item \package{BBS.lisp.evaluate.io}
+  \item \package{BBS.lisp.evaluate.list}
+  \item \package{BBS.lisp.evaluate.loops}
+  \item \package{BBS.lisp.evaluate.math}
+  \item \package{BBS.lisp.evaluate.mem}
+  \item \package{BBS.lisp.evaluate.misc}
+  \item \package{BBS.lisp.evaluate.pred}
+  \item \package{BBS.lisp.evaluate.str}
+  \item \package{BBS.lisp.evaluate.symb}
+  \item \package{BBS.lisp.evaluate.vars}
+  \item \package{BBS.lisp.global}
+  \item \package{BBS.lisp.memory}
+  \item \package{BBS.lisp.parser}
+  \item \package{BBS.lisp.parser.stdio}
+  \item \package{BBS.lisp.parser.string}
+  \item \package{BBS.lisp.stack}
+  \item \package{BBS.lisp.strings}
+  \item \package{BBS.lisp.symbols}
+\end{itemize}
+
+%========================================================
+\chapter{Usage Instructions}
+This is a library of routines intended to be used by some program.  To use these in your program, edit your *\keyword{.gpr} file to include a line to \keyword{with} the path to \keyword{bbs\_lisp.gpr}.  Then in your Ada code \keyword{with} in the package(s) you need and use the routines.
+
+This is also available as a standalone program with a command line interface (CLI).  This can be used for development, debugging, or exploring the language.  To build the CLI, just build the \keyword{lispq.gpr} project file, after making sure that the dependencies are in the expected places.
+
+%========================================================
+\chapter{API Description}
+This chapter describes the main routines used to embed \tl{} in an application.  There are a number of functions that are available for use when embedding and extending \tl{}.  These are primarily only in a few packages and they may be moved to improve organization.
+
+
+%--------------------------------------------------------------------------------------------------
+\section{\package{BBS.lisp}}
+The functions available here are primarily concerned with the overall operation of the interpreter.  The first procedure to call is:
+\begin{lstlisting}
+procedure init(p_put_line : t_put_line; p_put : t_put_line;
+                  p_new_line : t_newline; p_get_line : t_get_line)
+     with Global => (Output => (input_stream, pvt_first_char_flag));
+\end{lstlisting}
+\begin{itemize}
+  \item \keyword{p\_put\_line} - A pointer to a routine to write a line (typically \function{Ada.Text\_IO.Put\_Line} is used, if available).
+  \item \keyword{p\_put} - A pointer to a routine to write characters (typically \function{Ada.Text\_IO.Put} is used, if available).
+  \item \keyword{p\_new\_line} - A pointer to a routine that writes a new line.  \function{Ada.Text\_IO.New\_Line} can't be used for this.\footnote{\function{Ada.Text\_IO.New\_Line} contains an optional parameter indicating the number of lines to skip.  The type of this parameter is defined in \package{Ada.Text\_IO}.  This makes it awkward to define a function prototype that can be used both when \package{Ada.Text\_IO} is available and when it isn't.}
+
+  \item \keyword{p\_get\_line} -A pointer to a routine to get a line (typically \function{Ada.Text\_IO.Get\_Line} is used, if available).
+\end{itemize}
+This routine is used to establish pointers to the I/O functions used and to define the symbols for builtin and special functions.  This is needed because \tl{} is designed to work on platforms that may not have access to \package{Ada.Text\_IO}.  After this symbols for custom functions can be added.  The following procedure is used for that:
+\begin{lstlisting}
+procedure add_builtin(n : String; f : execute_function);
+\end{lstlisting}
+\begin{itemize}
+  \item \keyword{n} - The name of the \tl{} function to add.
+  \item \keyword{f} - A pointer to the function to be called by \tl{} to process the \keyword{n} function.
+\end{itemize}
+To pass control to the \tl{} read-execute-print-loop, the following procedure is used:
+\begin{lstlisting}
+procedure repl;
+\end{lstlisting}
+If more control is needed, the read-execute-print-loop can be broken out using the following functions and procedure:
+\begin{lstlisting}
+function read return Element_Type
+     with Global => (Input => (input_stream));
+\end{lstlisting}
+\begin{itemize}
+  \item Reads input, parses it, and returns the parsed value
+\end{itemize}
+\begin{lstlisting}
+function eval(e : element_type) return element_type;
+\end{lstlisting}
+\begin{itemize}
+  \item \keyword{e} - An element to evaluate.
+  \item Returns the result of evaluating \keyword{e}.
+\end{itemize}
+\begin{lstlisting}
+procedure print(e : element_type; d : Boolean; nl : Boolean)
+     with Global => (output => output_stream);
+\end{lstlisting}
+\begin{itemize}
+  \item \keyword{e} - The element to print.
+  \item \keyword{d} - If \keyword{true}, the element \keyword{e} is to be dereffed after printing.
+  \item \keyword{nl} - if \keyword{true}, print a new-line at the end.
+\end{itemize}
+\begin{lstlisting}
+function exit_lisp return Boolean
+     with Global => (Input => pvt_exit_flag);
+\end{lstlisting}
+\begin{itemize}
+  \item Returns \keyword{true} if the \tl{} program is requesting an exit.
+\end{itemize}
+These would be used in a loop as follows:
+\begin{lstlisting}
+   procedure repl is
+      e : element_type;
+      r : element_type;
+   begin
+      exit_flag := False;
+      break_flag := false;
+      while True loop
+         BBS.lisp.stack.reset;
+         e := read;
+         if e.kind /= E_ERROR then
+            r := eval(e);
+            if not first_char_flag then
+               new_line;
+            end if;
+            print(r, True, True);
+         end if;
+         exit when exit_lisp;
+      end loop;
+   end;
+\end{lstlisting}
+For writing custom functions, the following functions may be useful:
+\begin{lstlisting}
+procedure error(f : String; m : String);
+\end{lstlisting}
+\begin{itemize}
+  \item \keyword{f} - A \datatype{String} indicating the type of error.
+  \item \keyword{m} - A \datatype{String} containing the error message.
+\end{itemize}
+\begin{lstlisting}
+procedure msg(f : String; m : String);
+\end{lstlisting}
+\begin{itemize}
+  \item \keyword{f} - A \datatype{String} indicating the type of message.
+  \item \keyword{m} - A \datatype{String} containing the message.
+\end{itemize}
+
+%--------------------------------------------------------------------------------------------------
+\section{Embedding}
+This section covers how too embed the list interpreter in another program.  
+It's fairly simple.  Initialize the interpreter and call it.  The only wrinkle is the need to define \function{new\_line}.  The Ada version has an optional parameter of a type defined in \package{Ada.Text\_IO}.  This is a problem when trying to eliminate dependencies on \package{Ada.Text\_IO}.  A more complex example of embedding is found in the \url{https://github.com/BrentSeidel/Ada-Lisp-Embedded} repository.  This repository contains code that runs on an Arduino Due and includes the definition of several \tl{} operations to access attached hardware.  Here is a minimal host program:
+\begin{lstlisting}
+with Ada.Text_IO;
+with bbs.lisp;
+with new_line;
+--
+--  This is a simple shell routine to call the embedded lisp
+--  interpreter.
+--
+procedure Lisp is
+begin
+   Ada.Text_IO.Put_Line("Tiny lisp interpreter written in Ada.");
+   bbs.lisp.init(Ada.Text_IO.Put_Line'Access, Ada.Text_IO.Put'Access,
+                new_line.New_Line'Access, Ada.Text_IO.Get_Line'Access);
+   bbs.lisp.repl;
+end Lisp;
+\end{lstlisting}
+
+Here is an example \function{New\_Line} that has no parameters and uses the \package{Ada.Text\_IO} \function{New\_Line} with the default value.
+
+\begin{lstlisting}
+package new_line is
+   procedure new_line;
+end new_line;
+
+with Ada.Text_IO;
+package body new_line is
+
+   procedure new_line is
+   begin
+      Ada.Text_IO.New_Line;
+   end;
+
+end new_line;
+\end{lstlisting}
+
+\subsection{Adding Custom Operations}
+The Ada functions that implement the \tl{} operations are defined using one of the two function types:
+
+Type for access to function that implement normal lisp operations.
+\begin{lstlisting}
+type execute_function is access procedure(e : out element_type;
+             s : cons_index);
+\end{lstlisting}
+Type for access to functions that implement lisp special operations
+\begin{lstlisting}
+type special_function is access procedure(e : out element_type;
+             s : cons_index; p : phase);
+\end{lstlisting}
+In most cases, an \datatype{execute\_function} is the type to use and \datatype{special\_function} is defined in the \keyword{private} section to discourage use.  To install the operation, add something like the following line after the main \tl{} initialization function is called.
+\begin{lstlisting}
+BBS.lisp.add_builtin(``due-flash'', due_flash'Access);
+\end{lstlisting}
+The first parameter to \keyword{add\_builtin} is a string giving the \tl{} operation name.  The second parameter is an access to the Ada function to call.
+
+In the function that you write, the parameter \keyword{s} is an index pointing to the start of the parameter list in the \datatype{cons} array.  Thus a \tl{} expression like:
+\lstset{language=[Tiny]Lisp}
+\begin{lstlisting}
+(some-function 1 2 3)
+\end{lstlisting}
+is translated into a linked list approximately like:
+\begin{lstlisting}
+symbol.builtin(``some-function'')->
+  value.integer(1)->
+    value.integer(2)->
+      value.integer(3)->
+        NIL_CONS
+\end{lstlisting}
+The first element is turned into the Ada function call with \keyword(s) pointing to the second element (value.integer(1)).  The Ada function can then traverse the list and extract the \tl{} parameters.
+\lstset{language=Ada}
+
+\subsection{\package{BBS.lisp.evaluate}}
+This package contains functions useful in the evaluation of \tl{} operations.  The most useful, when adding custom operations, is:
+\begin{lstlisting}
+function first_value(s : in out cons_index) return element_type;
+\end{lstlisting}
+\begin{itemize}
+  \item \keyword{s} - A list that gets its first element removed.
+  \item Returns the first element that was removed from the list \keyword{s}.
+\end{itemize}
+It extracts the first element from the list pointed to by \keyword{s} and updates \keyword{s} to point to the next element in the list.  If the first element is a variable, the value of the variable is returned.  If the first element is a \tl{} operation, it is evaluated and the result of the evaluation is returned.
+
+%========================================================
 \chapter{The Language}
 As a ``\tl'', some (many) of the features of \cl\ are not available.  Some of the lacks may be temporary while others will be permanent, and some may be added by the host program.
 
+%--------------------------------------------------------------------------------------------------
 \section{User Interface}
 The interpreter reads text from an input device, parses it, and and executes it.  The function used to read the input must match the signature for \function{Ada.Text\_IO.Get\_Line()} and this will probably be used if that is available.  On an embedded system without \package{Ada.Text\_IO}, the user must provide a suitable function.
 
@@ -92,9 +356,11 @@ A comment starts with a semicolon character, ``;'', and extends to the end of th
 \subsubsection{Continuation}
 If a list isn't closed (number of open parentheses matches the number of close parentheses) by the end of the line, the interpreter will ask for more text.  This will continue until the list is closed.
 
+%--------------------------------------------------------------------------------------------------
 \section{Optimization}
 None.  Some could possibly be added, but right now the focus has been on getting things to work correctly.
 
+%--------------------------------------------------------------------------------------------------
 \section{Reserved Tokens}
 The following tokens are defined as fixed symbols by \tl{} and cannot be redefined.
 \begin{multicols}{4}
@@ -197,6 +463,7 @@ The following tokens are defined as fixed symbols by \tl{} and cannot be redefin
   \keyword{VECTORP}\\
 \end{multicols}
 
+%--------------------------------------------------------------------------------------------------
 \section{Syntax}
 
 \subsection{Special Characters}
@@ -227,6 +494,7 @@ A final example:
 \end{lstlisting}
 This list consists of only two elements.  The first is the symbol \function{print}.  The second is the string ``Hello World!''.  With strings, everything from the starting quotation mark to the next quotation mark is part of the string.  This means that you can't have a string that contains a quotation mark (at some point, a work-around may be available).
 
+%--------------------------------------------------------------------------------------------------
 \section{Symbols and Variables}
 Elements that are not numbers, strings, or lists are symbols or variables.  In determining what the element represents, the search order is:
 \begin{enumerate}
@@ -250,6 +518,7 @@ Another thing to be aware of is that if a function is defined within a function 
 
 The first call \operation{(test 5)} produces ``Sum is  15''.  The second \operation{(test 6)} and fourth \operation{(test 8)} calls produce an error.  The third call \operation{(test 7)} produces ``Sum is  27''.
 
+%--------------------------------------------------------------------------------------------------
 \section{Operations}
 A limited number of operations are defined.  Note that this list will probably be expanded.
 
@@ -523,6 +792,7 @@ The \function{exit} operation just exits the interpreter.  It should mainly be u
 
 The \function{sleep} operation suspends program execution for the specified number of milliseconds.  This is different from \cl, where the parameter is a float in units of seconds.  Since \tl{} is integer only, this doesn't work well, thus the difference.
 
+%--------------------------------------------------------------------------------------------------
 \section{Data Types}
 A limited selection of data types is provided.  Think of the old Applesoft Integer BASIC.
 
@@ -604,9 +874,10 @@ The defined \datatype{error} values listed in Table \ref{tbl:Error}.  The error 
   \end{tabular}
 \end{table}
 
-%----------------------------------------------------------
+%========================================================
 \chapter{Operation Reference}
 This is an alphabetical list of all the operations.
+%--------------------------------------------------------------------------------------------------
 \section{Template}
 This is the template for each operation.
 \subsection{Inputs}
@@ -620,6 +891,7 @@ This describes the operation.  In many cases, it will be fairly simple.
 \subsection{Common Lisp Compatibility}
 This subsection discusses compatibility with \cl.  Usually, this will be a subset of \cl.  In some cases, it may be a superset.  For example the comparison operators work on more types than \cl{} supports.
 
+%--------------------------------------------------------------------------------------------------
 \section{+}
 Addition
 \subsection{Inputs}
@@ -636,6 +908,7 @@ This operation adds a series of \datatype{integers}.  Note that there is a possi
 \subsection{Common Lisp Compatibility}
 This is a subset of \cl{} in that it only works on \datatype{integers}.
 
+%--------------------------------------------------------------------------------------------------
 \section{-}
 Subtraction
 \subsection{Inputs}
@@ -652,6 +925,7 @@ This operation subtracts a series of \datatype{integers}.  This is done by start
 \subsection{Common Lisp Compatibility}
 This is a subset of \cl{} in that it only works on \datatype{integers}.
 
+%--------------------------------------------------------------------------------------------------
 \section{*}
 Multiplication
 \subsection{Inputs}
@@ -668,6 +942,7 @@ This operation multiplies a series of \datatype{integers}.
 \subsection{Common Lisp Compatibility}
 This is a subset of \cl{} in that it only works on \datatype{integers}.
 
+%--------------------------------------------------------------------------------------------------
 \section{/}
 Division
 \subsection{Inputs}
@@ -684,6 +959,7 @@ This operation divides a series of \datatype{integers}.  This is done by startin
 \subsection{Common Lisp Compatibility}
 This is a subset of \cl{} in that it only works on \datatype{integers}.
 
+%--------------------------------------------------------------------------------------------------
 \section{=}
 Equals
 \subsection{Inputs}
@@ -700,6 +976,7 @@ This operation compares two values of the same type for equality.
 \subsection{Common Lisp Compatibility}
 This operation works on \datatype{integers}, \datatype{booleans}, \datatype{strings}, \datatype{symbols}, quoted \datatype{symbols}, and \datatype{errors}.  For comparison purposes, \datatype{symbols} and quoted \datatype{symbols} are considered to be the same type.
 
+%--------------------------------------------------------------------------------------------------
 \section{/=}
 Not-equals
 \subsection{Inputs}
@@ -716,6 +993,7 @@ This operation compares two values of the same type for not equality.
 \subsection{Common Lisp Compatibility}
 This operation works on \datatype{integers}, \datatype{booleans}, \datatype{strings}, \datatype{symbols}, quoted \datatype{symbols}, and \datatype{errors}.  For comparison purposes, \datatype{symbols} and quoted \datatype{symbols} are considered to be the same type.
 
+%--------------------------------------------------------------------------------------------------
 \section{$<$}
 Less Than
 \subsection{Inputs}
@@ -732,6 +1010,7 @@ This operation compares two values of the same type for less than.
 \subsection{Common Lisp Compatibility}
 This operation works on \datatype{integers}, \datatype{booleans}, and \datatype{strings}.
 
+%--------------------------------------------------------------------------------------------------
 \section{$>$}
 Greater Than
 \subsection{Inputs}
@@ -748,6 +1027,7 @@ This operation compares two values of the same type for greater than.
 \subsection{Common Lisp Compatibility}
 This operation works on \datatype{integers}, \datatype{booleans}, and \datatype{strings}.
 
+%--------------------------------------------------------------------------------------------------
 \section{and}
 Logical or bitwise \operation{and}.
 \subsection{Inputs}
@@ -764,6 +1044,7 @@ If the two parameters are \datatype{boolean}, the result is the logical and of t
 \subsection{Common Lisp Compatibility}
 This operation performs a bitwise \keyword{and} for integers.  This is probably more useful for embedded systems.
 
+%--------------------------------------------------------------------------------------------------
 \section{arrayp}
 Is parameter an \datatype{array}?
 \subsection{Inputs}
@@ -780,6 +1061,7 @@ Since \datatype{arrays} are not a supported datatype, this always returns \const
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{atomp}
 Is parameter an atom?
 \subsection{Inputs}
@@ -796,6 +1078,7 @@ Returns \constant{T} if the first value is an atom.  Returns \constant{NIL} othe
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{bit-vector-p}
 Is parameter a \datatype{bit vector}?
 \subsection{Inputs}
@@ -812,6 +1095,7 @@ Since \datatype{bit vectors} are not a supported datatype, this always returns \
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{car}
 Returns the first element of a list
 \subsection{Inputs}
@@ -828,6 +1112,7 @@ Returns the first value of a list.  If the first value passed is a list, then re
 \subsection{Common Lisp Compatibility}
 If multiple parameters are passed, the first one is returned.  Compatible with \cl{} if only one parameter is passed.
 
+%--------------------------------------------------------------------------------------------------
 \section{cdr}
 Returns all but the first element of a list
 \subsection{Inputs}
@@ -844,6 +1129,7 @@ Returns all but the first value of a list.  If the first value passed is a list,
 \subsection{Common Lisp Compatibility}
 If multiple parameters are passed, all but the first one is returned.  Compatible with \cl{} if only one parameter is passed.
 
+%--------------------------------------------------------------------------------------------------
 \section{char}
 Returns a specified character in a string.
 \subsection{Inputs}
@@ -860,6 +1146,7 @@ Returns the specified character in a string where the first character is number 
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{char-code}
 Returns the integer ASCII value of a character.
 \subsection{Inputs}
@@ -876,6 +1163,7 @@ This returns the integer ASCII (you might be able to find some odd systems where
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{char-downcase}
 Converts a character to lower case.
 \subsection{Inputs}
@@ -892,6 +1180,7 @@ If the character passed is uppercase, convert it to lowercase and return it.  Ot
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{char-upcase}
 Converts a character to upper case.
 \subsection{Inputs}
@@ -908,6 +1197,7 @@ If the character passed is lowercase, convert it to uppercase and return it.  Ot
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{characterp}
 Is parameter a \datatype{character}?
 \subsection{Inputs}
@@ -924,6 +1214,7 @@ Returns \constant{T} if the first value is a character.  Otherwise it returns \c
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{code-char}
 Converts an integer to a character where the integer is the ASCII representation of the character.  The integer is limited to the range 0-255.
 \subsection{Inputs}
@@ -940,6 +1231,7 @@ This can be used to generate any 8 bit ASCII character.
 \subsection{Common Lisp Compatibility}
 \cl{} allows a larger range than 0-255 since Unicode is supported.
 
+%--------------------------------------------------------------------------------------------------
 \section{coerce}
 Converts a value of one type to another type
 \subsection{Inputs}
@@ -964,6 +1256,7 @@ Only the following coercions are supported:
   \item integer $\rightarrow$ boolean (0 $\rightarrow$ \constant{NIL}, $\neq$ 0 $\rightarrow$ \constant{T})
 \end{itemize}
 
+%--------------------------------------------------------------------------------------------------
 \section{compiled-function-p}
 Is parameter a compiled function?
 \subsection{Inputs}
@@ -980,6 +1273,7 @@ Returns \constant{T} if the first value is a compiled function.  Otherwise it re
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{complexp}
 Is parameter a \datatype{complex number}?
 \subsection{Inputs}
@@ -996,6 +1290,7 @@ Since \datatype{complex numbers} are not a supported datatype, this always retur
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{concatenate}
 Concatenates strings or lists.
 \subsection{Inputs}
@@ -1012,6 +1307,7 @@ Concatenates either string or lists.  The first parameter is a symbol that speci
 \subsection{Common Lisp Compatibility}
 This is probably a subset of the \cl{} function.  Normal cases will operate the same, but error handling is different.
 
+%--------------------------------------------------------------------------------------------------
 \section{cond}
 Evaluates the first list that starts with a \constant{T} condition.
 \subsection{Inputs}
@@ -1038,6 +1334,7 @@ This is similar to an if-then-elsif chain in other programming languages.  It is
 \subsection{Common Lisp Compatibility}
 This is similar to \cl{}.
 
+%--------------------------------------------------------------------------------------------------
 \section{cons}
 Combines elements into a list.
 \subsection{Inputs}
@@ -1054,6 +1351,7 @@ The \function{cons} operation creates a \constant{cons} cell and sets the \const
 \subsection{Common Lisp Compatibility}
 There is a subtle difference between \tl{} and \cl.  In \tl, \constant{NIL} is a constant of boolean type, while in \cl, it also represents an empty list.  Thus \operation{(cons 1 NIL)} produce slightly different results, \operation{(1 . NIL)} for \tl{} or \operation{(1)} for \cl.  If you wish to produce the \cl{} results, where the \constant{car} points to a value and the \constant{cdr} is an empty pointer, you can use \operation{(cons 1 ())} or \operation{(cons 1)}.  The former is preferred as it is compatible with \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{consp}
 Is parameter a \datatype{cons}?
 \subsection{Inputs}
@@ -1070,6 +1368,7 @@ If the supplied parameter is a \datatype{cons} (a list), return \constant{T}, ot
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{defun}
 Defines a function.
 \subsection{Inputs}
@@ -1086,6 +1385,7 @@ This creates a user defined function.
 \subsection{Common Lisp Compatibility}
 This is more or less a subset of \cl, except that there are probably many corner cases where things don't quite match..
 
+%--------------------------------------------------------------------------------------------------
 \section{dolist}
 Repeats a series of statements for each element in a list.
 \subsection{Inputs}
@@ -1106,6 +1406,7 @@ On each pass through the loop, the local variable is set to the next value in th
 \subsection{Common Lisp Compatibility}
 The declarations and tags are not supported.
 
+%--------------------------------------------------------------------------------------------------
 \section{dotimes}
 Repeats a series of statements a specific number of times.
 \subsection{Inputs}
@@ -1126,6 +1427,7 @@ On each pass through the loop, the local variable is set to the next value in th
 \subsection{Common Lisp Compatibility}
 The declarations and tags are not supported.
 
+%--------------------------------------------------------------------------------------------------
 \section{dowhile}
 Repeats a series of statements while a condition is \constant{T}.
 \subsection{Inputs}
@@ -1147,6 +1449,7 @@ The condition is evaluated on each pass through the loop.  If the condition eval
 \subsection{Common Lisp Compatibility}
 This doesn't appear to exist in \cl.  It is similar to the \cl{} \keyword{do} loop, except that the condition comes first.
 
+%--------------------------------------------------------------------------------------------------
 \section{dump}
 Prints out some internal tables.
 \subsection{Inputs}
@@ -1163,6 +1466,7 @@ This is intended for debugging purposes.  It prints the contents of the cons, sy
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{errorp}
 Is parameter a \datatype{error}?
 \subsection{Inputs}
@@ -1179,6 +1483,7 @@ If the parameter represents an error condition, return \constant{T}, otherwise r
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.  \cl{} provides more comprehensive error handling, signaling, and trapping.
 
+%--------------------------------------------------------------------------------------------------
 \section{eval}
 Evaluates a \tl{} element.
 \subsection{Inputs}
@@ -1195,6 +1500,7 @@ This passes the first parameter to the \tl{} evaluator.  If the parameter is a l
 \subsection{Common Lisp Compatibility}
 This is mostly compatible with \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{exit}
 Exits the \tl{} interpreter.
 \subsection{Inputs}
@@ -1211,6 +1517,7 @@ This is a way to exit the \tl{} interpreter.
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl, but some implementations (i.e. SBCL) do have it.
 
+%--------------------------------------------------------------------------------------------------
 \section{floatp}
 Is parameter a \datatype{floating point number}?
 \subsection{Inputs}
@@ -1227,6 +1534,7 @@ Since \datatype{floating point numbers} are not a supported datatype, this alway
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{fresh-line}
 Prints a newline if not already at the start of a line.
 \subsection{Inputs}
@@ -1243,6 +1551,7 @@ Checks if the internal first character flag is set.  If not, prints a newline, o
 \subsection{Common Lisp Compatibility}
 There is no optional output-stream parameter as \tl{} only has one output stream.  It also always returns \constant{NIL}.
 
+%--------------------------------------------------------------------------------------------------
 \section{functionp}
 Is parameter a function?
 \subsection{Inputs}
@@ -1259,6 +1568,7 @@ Returns \constant{T} if the value is a builtin function, a user defined function
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{if}
 Conditionally executes a statement.
 \subsection{Inputs}
@@ -1277,6 +1587,7 @@ Evaluates the condition and then depending on the condition, evaluates one of th
 \subsection{Common Lisp Compatibility}
 This seems to be mostly compatible with \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{integerp}
 Is the parameter an integer?
 \subsection{Inputs}
@@ -1293,6 +1604,7 @@ This is used to check if a parameter is of integer type or not.  Currently the o
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{lambda}
 Creates a variable record that can be assigned to a variable or passed as a parameter to a function.
 \subsection{Inputs}
@@ -1309,6 +1621,7 @@ Creates a function that can be assigned to a variable or passed as a parameter. 
 \subsection{Common Lisp Compatibility}
 This is mostly a subset of \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{length}
 Returns the length of an object.
 \subsection{Inputs}
@@ -1325,6 +1638,7 @@ Returns the length of an object.  For \datatype{strings} this is the number of c
 \subsection{Common Lisp Compatibility}
 This is mostly compatible with \cl, except that errors are not thrown if the parameter is not a sequence.
 
+%--------------------------------------------------------------------------------------------------
 \section{let}
 Creates local variables.
 \subsection{Inputs}
@@ -1347,6 +1661,7 @@ Creates a stack frame containing variables that are local to the statements in t
 \subsection{Common Lisp Compatibility}
 Closures are not supported.
 
+%--------------------------------------------------------------------------------------------------
 \section{list}
 Creates a list
 \subsection{Inputs}
@@ -1363,6 +1678,7 @@ Creates a list of the passed parameters.
 \subsection{Common Lisp Compatibility}
 Unlike \cl{}, the \keyword{list} operation is optional in \tl{}.
 
+%--------------------------------------------------------------------------------------------------
 \section{listp}
 Is the parameter a list?
 \subsection{Inputs}
@@ -1379,6 +1695,7 @@ This is used to check if a parameter is a list or not.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{msg}
 Turns display of debugging messages on or off.
 \subsection{Inputs}
@@ -1395,6 +1712,7 @@ This is intended for use in debugging the interpreter to turn the display of som
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{not}
 Logical or bitwise \keyword{not}.
 \subsection{Inputs}
@@ -1411,6 +1729,7 @@ If the parameter is \datatype{boolean}, perform a logical \keyword{not} operatio
 \subsection{Common Lisp Compatibility}
 This operation performs a bitwise \keyword{not} for integers.  This is probably more useful for embedded systems.
 
+%--------------------------------------------------------------------------------------------------
 \section{null}
 Is the parameter null?
 \subsection{Inputs}
@@ -1427,6 +1746,7 @@ This is used to check if a parameter is null or not.  The empty list is consider
 \subsection{Common Lisp Compatibility}
 In \tl{} only the empty list () is treated as null, while \cl{} also treats \constant{NIL} as null.  This may be changed in \tl{} to make it more compatible.
 
+%--------------------------------------------------------------------------------------------------
 \section{numberp}
 Is the parameter a number?
 \subsection{Inputs}
@@ -1443,6 +1763,7 @@ This is used to check if a parameter is of number type or not.  Currently the on
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{or}
 Logical or bitwise \operation{or}.
 \subsection{Inputs}
@@ -1459,6 +1780,7 @@ If the two parameters are \datatype{boolean}, the result is the logical and of t
 \subsection{Common Lisp Compatibility}
 This operation performs a bitwise \keyword{or} for integers.  This is probably more useful for embedded systems.
 
+%--------------------------------------------------------------------------------------------------
 \section{packagep}
 Is parameter a \datatype{package}?
 \subsection{Inputs}
@@ -1474,7 +1796,8 @@ Returns the value \constant{NIL}.
 Since \datatype{packages} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
-\\
+
+%--------------------------------------------------------------------------------------------------
 \section{parse-integer}
 Parses a \datatype{string} containing an integer as text to an \datatype{integer} value.
 \subsection{Inputs}
@@ -1491,6 +1814,7 @@ This is used to get an integer value from a string containing the digits of an i
 \subsection{Common Lisp Compatibility}
 The \tl{} version is a subset of the \cl{} version.  None of the \cl{} optional parameters are allowed.  It operates similarly to having \keyword{:junk-allowed} set to \constant{T}. Leading spaces are not allowed.  A leading plus sign ('+`) is not allowed.  Only a single value is returned.
 
+%--------------------------------------------------------------------------------------------------
 \section{peek8}
 Reads an 8 bit byte from the specified address in memory.
 \subsection{Inputs}
@@ -1507,6 +1831,7 @@ This is used to read memory locations.  It is intended to be used with memory ma
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{peek16}
 Reads a 16 bit word from the specified address in memory.
 \subsection{Inputs}
@@ -1523,6 +1848,7 @@ This is used to read memory locations.  It is intended to be used with memory ma
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{peek32}
 Reads a 32 bit word from the specified address in memory.
 \subsection{Inputs}
@@ -1539,6 +1865,7 @@ This is used to read memory locations.  It is intended to be used with memory ma
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{poke8}
 Writes an 8 bit byte to the specified address in memory.
 \subsection{Inputs}
@@ -1555,6 +1882,7 @@ This is used to write to memory locations.  It is intended to be used with memor
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{poke16}
 Writes a 16 bit word to the specified address in memory.
 \subsection{Inputs}
@@ -1571,6 +1899,7 @@ This is used to write to memory locations.  It is intended to be used with memor
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{poke32}
 Writes a 32 bit word to the specified address in memory.
 \subsection{Inputs}
@@ -1587,6 +1916,7 @@ This is used to write to memory locations.  It is intended to be used with memor
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{print}
 Prints objects.
 \subsection{Inputs}
@@ -1603,6 +1933,7 @@ This loops through the provided parameters and prints each one with no newline o
 \subsection{Common Lisp Compatibility}
 The output is not preceded by a newline and followed by a space.  The optional \keyword{output-stream} parameter is not available as there is only one output stream.  Multiple parameters are permitted.  And, there is no implicit binding of parameters to values.
 
+%--------------------------------------------------------------------------------------------------
 \section{print-hex}
 Prints numbers in unsigned hexadecimal notation.
 \subsection{Inputs}
@@ -1619,6 +1950,7 @@ The number is internally converted to an unsigned integer and truncated to the s
 \subsection{Common Lisp Compatibility}
 This operation does not exist in \cl.  It was added for convenience when working with embedded systems.
 
+%--------------------------------------------------------------------------------------------------
 \section{progn}
 Collects operations into a block.
 \subsection{Inputs}
@@ -1637,6 +1969,7 @@ This is used when multiple operations are needed in a place where only a single 
 \subsection{Common Lisp Compatibility}
 This is basically compatible with \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{quote}
 Returns a list created from the supplied parameters.
 \subsection{Inputs}
@@ -1653,6 +1986,7 @@ Returns a list generated from the passed parameters.  Internally, this returns t
 \subsection{Common Lisp Compatibility}
 Mostly compatible with \cl, except that multiple parameters are permitted.
 
+%--------------------------------------------------------------------------------------------------
 \section{rationalp}
 Is parameter a \datatype{rational number}?
 \subsection{Inputs}
@@ -1669,6 +2003,7 @@ Since \datatype{rational numbers} are not a supported datatype, this always retu
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{read}
 Reads text from a \datatype{string} and attempts to parse it as a \tl{} expression.
 \subsection{Inputs}
@@ -1685,6 +2020,7 @@ Redirects the parser input to read from a \datatype{string} in order to parse it
 \subsection{Common Lisp Compatibility}
 None of the \cl{} optional parameters are supported and input can only come from a \datatype{string}.
 
+%--------------------------------------------------------------------------------------------------
 \section{read-line}
 Reads a line of text from the input stream.
 \subsection{Inputs}
@@ -1701,6 +2037,7 @@ Reads input into a \datatype{string} and returns the \datatype{string}.  The new
 \subsection{Common Lisp Compatibility}
 None of the \cl{} optional parameters are supported.
 
+%--------------------------------------------------------------------------------------------------
 \section{realp}
 Is parameter a \datatype{real number}?
 \subsection{Inputs}
@@ -1717,6 +2054,7 @@ Since \datatype{real numbers} are not a supported datatype, this always returns 
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{return}
 Exits a block and returns a value
 \subsection{Inputs}
@@ -1736,6 +2074,7 @@ This is used to provide an early exit from a block.  A common use would be to ex
 \subsection{Common Lisp Compatibility}
 This is basically compatible with \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{rplaca}
 Replaces the \operation{car} of a \datatype{cons} cell with the specified value.
 \subsection{Inputs}
@@ -1753,6 +2092,7 @@ This is used to modify a \datatype{cons} cell.  The \keyword{car} slot is change
 \subsection{Common Lisp Compatibility}
 This is basically compatible with \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{rplacd}
 Replaces the \operation{cdr} of a \datatype{cons} cell with the specified value.
 \subsection{Inputs}
@@ -1770,6 +2110,7 @@ This is used to modify a \datatype{cons} cell.  The \keyword{cdr} slot is change
 \subsection{Common Lisp Compatibility}
 This is basically compatible with \cl.
 
+%--------------------------------------------------------------------------------------------------
 \section{setq}
 Assigns a value to a variable.
 \subsection{Inputs}
@@ -1786,6 +2127,7 @@ This provides a way to assign values to symbols or stack variables.  The previou
 \subsection{Common Lisp Compatibility}
 Only one variable can be set at a time.  It returns \constant{NIL}, not the value set.
 
+%--------------------------------------------------------------------------------------------------
 \section{simple-bit-vector-p}
 Is parameter a \datatype{simple bit vector}?
 \subsection{Inputs}
@@ -1802,6 +2144,7 @@ Since \datatype{bit vectors} (simple or otherwise) are not a supported datatype,
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{simple-string-p}
 Is the parameter a simple string?
 \subsection{Inputs}
@@ -1818,6 +2161,7 @@ This is used to check if a parameter is a simple string or not.  All strings in 
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{simple-vector-p}
 Is parameter a \datatype{simple vector}?
 \subsection{Inputs}
@@ -1834,6 +2178,7 @@ Since \datatype{vectors} (simple or otherwise) are not a supported datatype, thi
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{sleep}
 Suspend execution for the specified number of milliseconds.
 \subsection{Inputs}
@@ -1850,6 +2195,7 @@ Suspends execution for the specified number of milliseconds.  Since \tl{} only s
 \subsection{Common Lisp Compatibility}
 The delay value is in milliseconds, not seconds.
 
+%--------------------------------------------------------------------------------------------------
 \section{string-downcase}
 Converts a string to lowercase ASCII.
 \subsection{Inputs}
@@ -1866,6 +2212,7 @@ Creates a copy of the input \datatype{string} converting any uppercase character
 \subsection{Common Lisp Compatibility}
 The optional \keyword{start} and \keyword{end} parameters are not supported.  Only ASCII characters are supported and only the characters `A' through `Z' are converted.
 
+%--------------------------------------------------------------------------------------------------
 \section{string-upcase}
 Converts a string to uppercase ASCII.
 \subsection{Inputs}
@@ -1882,6 +2229,7 @@ Creates a copy of the input \datatype{string} converting any lowercase character
 \subsection{Common Lisp Compatibility}
 The optional \keyword{start} and \keyword{end} parameters are not supported.  Only ASCII characters are supported and only the characters `a' through `z' are converted.
 
+%--------------------------------------------------------------------------------------------------
 \section{stringp}
 Is the parameter a string?
 \subsection{Inputs}
@@ -1898,6 +2246,7 @@ This is used to check if a parameter is a string or not..
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{subseq}
 Return a subsequence of the input.
 \subsection{Inputs}
@@ -1914,6 +2263,7 @@ Copies the selected text from the input string and returns it.
 \subsection{Common Lisp Compatibility}
 In \tl, \keyword{subseq} only works on \datatype{strings}.  At some point, it may be extended to also work on \datatype{lists}.
 
+%--------------------------------------------------------------------------------------------------
 \section{symbolp}
 Is the parameter a symbol?
 \subsection{Inputs}
@@ -1930,6 +2280,7 @@ This is used to check if a parameter is a symbol or not.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{terpri}
 Prints a newline.
 \subsection{Inputs}
@@ -1946,6 +2297,7 @@ Prints a newline to the output stream.
 \subsection{Common Lisp Compatibility}
 \tl() has only one output stream so the optional output stream designator is ignored.
 
+%--------------------------------------------------------------------------------------------------
 \section{vectorp}
 Is parameter a \datatype{vector}?
 \subsection{Inputs}
@@ -1961,10 +2313,12 @@ Returns the value \constant{NIL}.
 Since \datatype{vectors} are not a supported datatype, this always returns \constant{NIL}.
 \subsection{Common Lisp Compatibility}
 This is compatible with \cl, except that no error is thrown with extra parameters.  They are just silently ignored.
-%----------------------------------------------------------
+
+%========================================================
 \chapter{Internals}
 \textbf{As the interpreter is under active development, this section is subject to change without notice.}
 
+%--------------------------------------------------------------------------------------------------
 \section{Operation}
 Processing consists of four phases.
 
@@ -1980,6 +2334,7 @@ The list from the parse phase is evaluated.  If the first in the list is not a s
 \subsection{Print}
 The value returned from the evaluation is printed.  Once this is done, the read phase is reentered and more text requested.
 
+%--------------------------------------------------------------------------------------------------
 \section{Package Organization}
 In order to help modularize and organize the code, it has been divided into several packages.  The root package for \tl{} is \package{BBS.lisp}.  The \package{BBS} package is basically a bucket for my projects to help prevent name collisions with any other packages.
 
@@ -2033,7 +2388,7 @@ This package contains definitions for symbols and functions for operating on the
 \subsubsection{\package{BBS.lisp.utilities}}
 This package contains some general utility functions.
 
-
+%--------------------------------------------------------------------------------------------------
 \section{Data Structures}
 Most of the data structures are defined in the \package{BBS.lisp} package, except for the stack, which is defined in \package{BBS.lisp.stack}.
 
@@ -2269,152 +2624,7 @@ Note that all the arrays have a lower bound of \constant{\ldots'first+1}.  This 
 \subsection{Memory Management}
 Memory management is done by reference counting.  When the number of references goes to zero, the item is deallocated.  Items in the cons table and the strings table are reference counted.
 
-\section{Utility Functions}
-There are a number of functions that are available for use when embedding and extending \tl{}.  These are primarily only in a few packages and they may be moved to improve organization.
-\subsection{\package{BBS.lisp}}
-The functions available here are primarily concerned with the overall operation of the interpreter.  The first procedure to call is:
-\begin{lstlisting}
-   procedure init(p_put_line : t_put_line; p_put : t_put_line;
-                  p_new_line : t_newline; p_get_line : t_get_line);
-\end{lstlisting}
-This routine is used to establish pointers to the I/O functions used and to define the symbols for builtin and special functions.  After this symbols for custom functions can be added.  The following procedure is used for that:
-\begin{lstlisting}
-   procedure add_builtin(n : String; f : execute_function);
-\end{lstlisting}
-To pass control to the \tl{} read-execute-print-loop, the following procedure is used:
-\begin{lstlisting}
-   procedure repl;
-\end{lstlisting}
-If more control is needed, the read-execute-print-loop can be broken out using the following functions and procedure:
-\begin{lstlisting}
-   function read return Element_Type;
-   function eval(e : element_type) return element_type;
-   procedure print(e : element_type; d : Boolean; nl : Boolean);
-   function exit_lisp return Boolean;
-\end{lstlisting}
-These would be used in a loop as follows:
-\begin{lstlisting}
-   procedure repl is
-      e : element_type;
-      r : element_type;
-   begin
-      exit_flag := False;
-      break_flag := false;
-      while True loop
-         BBS.lisp.stack.reset;
-         e := read;
-         if e.kind /= E_ERROR then
-            r := eval(e);
-            if not first_char_flag then
-               new_line;
-            end if;
-            print(r, True, True);
-         end if;
-         exit when exit_lisp;
-      end loop;
-   end;
-\end{lstlisting}
-For writing custom functions, the following functions may be useful:
-\begin{lstlisting}
-   procedure error(f : String; m : String);
-   procedure msg(f : String; m : String);
-   procedure print(e : element_type; d : Boolean; nl : Boolean);
-\end{lstlisting}
-These support printing error and informational messages as well as printing \tl{} elements.  There are other useful functions in some other packages as well.
-\subsection{\package{BBS.lisp.evaluate}}
-This package contains functions useful in the evaluation of \tl{} operations.  The most useful, when adding custom operations, is:
-\begin{lstlisting}
-   function first_value(s : in out cons_index) return element_type;
-\end{lstlisting}
-It extracts the first element from the list pointed to by \keyword{s} and updates \keyword{s} to point to the next element in the list.  If the first element is a variable, the value of the variable is returned.  If the first element is a \tl{} operation, it is evaluated and the result of the evaluation is returned.
-
-\subsection{\package{BBS.lisp.utilities}}
-
-\section{Embedding}
-This section covers how too embed the list interpreter in another program.  Here is a minimal host program:
-\begin{lstlisting}
-with Ada.Text_IO;
-with bbs.lisp;
-with new_line;
---
---  This is a simple shell routine to call the embedded lisp
---  interpreter.
---
-procedure Lisp is
-begin
-   Ada.Text_IO.Put_Line("Tiny lisp interpreter written in Ada.");
-   bbs.lisp.init(Ada.Text_IO.Put_Line'Access, Ada.Text_IO.Put'Access,
-                new_line.New_Line'Access, Ada.Text_IO.Get_Line'Access);
-   bbs.lisp.repl;
-end Lisp;
-\end{lstlisting}
-
-With \function{new\_line} defined as:
-\begin{lstlisting}
---
---  The text_io version of newline contains an optional parameter
---  indicating the number of lines to skip.  The type of this parameter
---  is defined in Ada.Text_IO.  This makes it awkward to define a
---  function prototype that can be used both when Ada.Text_IO is
---  available and when it isn't.  This is a crude hack to define
---  locally a new_line that has no parameters and uses the
---  Ada.Text_IO new_line with the default value.
---
-package new_line is
-   procedure new_line;
-end new_line;
-
-with Ada.Text_IO;
-package body new_line is
-
-   procedure new_line is
-   begin
-      Ada.Text_IO.New_Line;
-   end;
-
-end new_line;
-\end{lstlisting}
-
-It's fairly simple.  Initialize the interpreter and call it.  The only wrinkle is the need to define \function{new\_line}.  The Ada version has an optional parameter of a type defined in \package{Ada.Text\_IO}.  This is a problem when trying to eliminate dependencies on \package{Ada.Text\_IO}.  A more complex example of embedding is found in the \url{https://github.com/BrentSeidel/Ada-Lisp-Embedded} repository.  This repository contains code that runs on an Arduino Due and includes the definition of several \tl{} operations to access attached hardware.
-
-\subsection{Adding Custom Operations}
-The Ada functions that implement the \tl{} operations are defined using one of the two following prototypes:
-\begin{lstlisting}
-   --
-   --  Type for access to function that implement lisp operations.
-   --
-   type execute_function is access procedure(e : out element_type;
-             s : cons_index);
-   --
-   --  Type for access to functions that implement lisp special
-   --  operations
-   --
-   type special_function is access procedure(e : out element_type;
-             s : cons_index; p : phase);
-\end{lstlisting}
-In most cases, an \datatype{execute\_function} is the type to use and \datatype{special\_function} is defined in the \keyword{private} section to discourage use.  To install the operation, add something like the following line after the main \tl{} initialization function is called.
-\begin{lstlisting}
-      BBS.lisp.add_builtin("due-flash", due_flash'Access);
-\end{lstlisting}
-The first parameter to \keyword{add\_builtin} is a string giving the \tl{} operation name.  The second parameter is an access to the Ada function to call.
-
-In the function that you write, the parameter \keyword{s} is an index pointing to the start of the parameter list.  Thus a \tl{} expression like:
-\lstset{language=[Tiny]Lisp}
-\begin{lstlisting}
-(some-function 1 2 3)
-\end{lstlisting}
-is translated into a linked list approximately like:
-\begin{lstlisting}
-symbol.builtin("some-function")->
-  value.integer(1)->
-    value.integer(2)->
-      value.integer(3)->
-        NIL_CONS
-\end{lstlisting}
-The first element is turned into the Ada function call with \keyword(s) pointing to the second element (value.integer(1)).  The Ada function can then traverse the list and extract the \tl{} parameters.
-\lstset{language=Ada}
-
-
+%--------------------------------------------------------------------------------------------------
 \section{Opportunities for Optimizing}
 No big effort has gone into optimizing the interpreter.  Should the need arise, there are a few places where things could be optimized.
 
