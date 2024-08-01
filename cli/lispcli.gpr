@@ -1,7 +1,7 @@
-with "../BBS-Ada/bbs.gpr";
-with "bbs_lisp.gpr";
+with "../../BBS-Ada/bbs.gpr";
+with "../bbs_lisp.gpr";
 
-project Lispq is
+project lispcli is
 
    for Source_Dirs use (".");
    for Object_Dir use "obj";
@@ -9,7 +9,7 @@ project Lispq is
    for Exec_Dir use ".";
 
    package Builder is
-      for Switches ("ada") use ("-g", "-s", "-j4");
+      for Switches ("ada") use ("-g", "-s", "-j0");
    end Builder;
 
    package Compiler is
@@ -25,8 +25,8 @@ project Lispq is
    end Linker;
 
    package Prove is
-      for Switches use ("--level=0", "--codepeer=on", "-j4");
+      for Switches use ("--level=0", "--codepeer=on", "-j0");
    end Prove;
 
-end Lispq;
+end lispcli;
 

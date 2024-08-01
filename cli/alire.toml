@@ -1,5 +1,5 @@
-name = "bbs_lisp"
-description = "Embedable tiny lisp interpreter"
+name = "lispcli"
+description = "Simple program for exploring tiny lisp"
 version = "0.1.0-dev"
 
 authors = ["Brent Seidel"]
@@ -8,6 +8,8 @@ maintainers-logins = ["BrentSeidel"]
 licenses = "GPL-3.0-or-later"
 website = "https://github.com/BrentSeidel/Ada-Lisp"
 tags = ["lisp"]
+
+executables = ["lispcli"]
 
 [[depends-on]]
 bbs = "~0.1.0"

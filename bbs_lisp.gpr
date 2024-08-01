@@ -13,11 +13,11 @@ library project Bbs_Lisp is
    end Compiler;
 
    package Prove is
-      for Switches use ("--codepeer=on", "-j4");
+      for Switches use ("--codepeer=on", "-j0");
    end Prove;
 
    package Builder is
-      for Switches ("ada") use ("-s", "-j4");
+      for Switches ("ada") use ("-s", "-j0");
    end Builder;
 
 end Bbs_Lisp;
