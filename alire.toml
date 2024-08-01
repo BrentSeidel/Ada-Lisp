@@ -1,6 +1,6 @@
 name = "bbs_lisp"
 description = "Embedable tiny lisp interpreter"
-version = "0.1.0-dev"
+version = "0.1.0"
 
 authors = ["Brent Seidel"]
 maintainers = ["Brent Seidel <brentseidel@mac.com>"]
