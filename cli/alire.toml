@@ -13,3 +13,6 @@ executables = ["lispcli"]
 
 [[depends-on]]
 bbs = "~0.1.0"
+
+[[depends-on]]
+bbs_lisp = "~0.1.0"

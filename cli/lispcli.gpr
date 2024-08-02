@@ -1,5 +1,4 @@
-with "../../BBS-Ada/bbs.gpr";
-with "../bbs_lisp.gpr";
+with "config/lispcli_config.gpr";
 
 project lispcli is
 
