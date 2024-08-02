@@ -4,7 +4,7 @@ project lispcli is
 
    for Source_Dirs use (".");
    for Object_Dir use "obj";
-   for Main use ("lisp.adb");
+   for Main use ("lispcli.adb");
    for Exec_Dir use ".";
 
    package Builder is
