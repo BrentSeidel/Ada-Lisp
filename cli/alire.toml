@@ -1,6 +1,6 @@
 name = "lispcli"
 description = "Simple program for exploring tiny lisp"
-version = "0.1.0-dev"
+version = "0.1.0"
 
 authors = ["Brent Seidel"]
 maintainers = ["Brent Seidel <brentseidel@mac.com>"]
