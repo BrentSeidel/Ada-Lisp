@@ -11,11 +11,11 @@ rm *.gcov
 #  Build the application for code coverage
 #
 scripts/make_info
-gnatmake -P lispq.gpr -f --create-map-file -cargs -fprofile-arcs -ftest-coverage -largs -fprofile-arcs
+gnatmake -P ./cli/lispcli.gpr -f --create-map-file -cargs -fprofile-arcs -ftest-coverage -largs -fprofile-arcs
 #
 #  Run the application with the test input
 #
-./lisp < test/$1.lisp
+./cli/lispcli < test/$1.lisp
 #
 #  Process the code coverage results
 #

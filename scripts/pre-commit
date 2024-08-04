@@ -6,16 +6,25 @@ echo "Building software"
 scripts/make_info
 if alr build
 then
-  echo "Build succeeded"
+  echo "Library Build succeeded"
 else
   echo "Error occured during build - Aborting"
   exit 1
 fi
+cd cli
+if alr build
+then
+  echo "CLI Build succeeded"
+else
+  echo "Error occured during build - Aborting"
+  exit 1
+fi
+cd ..
 #
 #  Next run the tests and see if there are any failures
 #
 echo "Running tests"
-if ./lisp < test/test.lisp | grep '^...FAIL'
+if ./cli/lispcli < test/test.lisp | grep '^...FAIL'
 then
   echo "Test failures detected"
   exit 1
