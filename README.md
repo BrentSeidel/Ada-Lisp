@@ -11,6 +11,15 @@ I'm pleased with how well that it's actually turned out.  This is still under
 active development so most things are subject to change, especially the program
 internals.
 
+
+[![Alire](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/bbs_lisp.json)]
+(https://alire.ada.dev/crates/bbs_lisp.html)
+
+
+[![Alire](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/lispcli.json)]
+(https://alire.ada.dev/crates/lispcli.html)
+
+
 ## Dependencies and Building
 First, this (obviously) depends on having Ada installed.  I am using the
 AdaCore community edition, available here, https://www.adacore.com/download/more
