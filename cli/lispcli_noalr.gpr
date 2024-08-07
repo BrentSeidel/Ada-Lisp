@@ -1,0 +1,31 @@
+with "../../BBS-Ada/bbs.gpr";
+with "../bbs_lisp_noalr.gpr";
+project lispcli_noalr is
+
+   for Source_Dirs use (".");
+   for Object_Dir use "obj";
+   for Main use ("lispcli.adb");
+   for Exec_Dir use ".";
+
+   package Builder is
+      for Switches ("ada") use ("-g", "-s", "-j0");
+   end Builder;
+
+   package Compiler is
+      for Switches ("ada") use ("-g", "-gnato", "-gnatp", "-fstack-check", "-gnatf", "-gnat12", "-gnata", "-gnatVa", "-gnatw.X.d.f.g.h.k.l.n.o.s.u.wadhlt", "-gnatybdfh");
+   end Compiler;
+
+   package Binder is
+      for Switches ("ada") use ("-E", "-r");
+   end Binder;
+
+   package Linker is
+      for Switches ("ada") use ("-g");
+   end Linker;
+
+   package Prove is
+      for Switches use ("--level=0", "--codepeer=on", "-j0");
+   end Prove;
+
+end lispcli_noalr;
+

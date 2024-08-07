@@ -1,0 +1,24 @@
+with "../BBS-Ada/bbs.gpr";
+
+library project bbs_lisp_noalr is
+
+   for Languages use ("Ada");
+   for Library_Name use "Bbs-Lisp";
+   for Source_Dirs use ("src");
+   for Object_Dir use "obj";
+   for Library_Dir use "lib";
+
+   package Compiler is
+      for Switches ("ada") use ("-gnata", "-gnatf", "-gnat12", "-g", "-O", "-gnatVa", "-gnatw.Xa");
+   end Compiler;
+
+   package Prove is
+      for Switches use ("--codepeer=on", "-j0");
+   end Prove;
+
+   package Builder is
+      for Switches ("ada") use ("-s", "-j0");
+   end Builder;
+
+end bbs_lisp_noalr;
+

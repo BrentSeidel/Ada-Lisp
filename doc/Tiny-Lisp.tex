@@ -157,9 +157,14 @@ This library depends on the root package \package{BBS} available at \url{https:/
 
 %========================================================
 \chapter{Usage Instructions}
-This is a library of routines intended to be used by some program.  To use these in your program, edit your *\keyword{.gpr} file to include a line to \keyword{with} the path to \keyword{bbs\_lisp.gpr}.  Then in your Ada code \keyword{with} in the package(s) you need and use the routines.
 
-This is also available as a standalone program with a command line interface (CLI).  This can be used for development, debugging, or exploring the language.  To build the CLI, just build the \keyword{lispcli.gpr} project file in the \keyword{cli} directory, after making sure that the dependencies are in the expected places.
+\section{Using Alire}
+Alire automatically handles dependencies.  To use this in your project, just issue the command ``\keyword{alr with bbs\_lisp}'' in your project directory.  To build the standalone CLI program, first obtain the cli using ``\keyword{alr get lispcli}''.  Change to the appropriate directory and use ``\keyword{alr build}'' and ``\keyword{alr run}''.
+
+\section{Using \keyword{gprbuild}}
+This is a library of routines intended to be used by some program.  To use these in your program, edit your *\keyword{.gpr} file to include a line to \keyword{with} the path to \keyword{bbs\_lisp\_noalr.gpr}.  Then in your Ada code \keyword{with} in the package(s) you need and use the routines.
+
+This is also available as a standalone program with a command line interface (CLI).  This can be used for development, debugging, or exploring the language.  To build the CLI, just build the \keyword{lispcli\_noalr.gpr} project file in the \keyword{cli} directory, after making sure that the dependencies are in the expected places.
 
 %========================================================
 \chapter{API Description}
