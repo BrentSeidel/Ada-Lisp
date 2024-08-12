@@ -1,6 +1,6 @@
 name = "lispcli"
 description = "Simple program for exploring tiny lisp"
-version = "0.1.0"
+version = "0.1.1"
 
 long-description = """
 This is a simple example of embedding Lisp to provide a REPL where you
