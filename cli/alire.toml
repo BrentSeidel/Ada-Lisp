@@ -17,9 +17,8 @@ tags = ["lisp"]
 
 executables = ["lispcli"]
 
-[available."case(distribution)"]
-"suse" = false
-"..." = true
+[[depends-on]]
+gnat = ">7.5"
 
 [[depends-on]]
 bbs = "~0.1.0"
