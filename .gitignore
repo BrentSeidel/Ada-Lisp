@@ -1,6 +1,8 @@
 # Object file
 *.o
 
+cli/lispcli
+
 # Code coverage
 *.gcov
 *.gcda
@@ -22,12 +24,20 @@ lisp.exe
 b__lisp.ad*
 lib/*
 obj/*
+*/lib/*
+*/obj/*
 *.cswi
 *.lexch
 
+# Alire directories
+alire/*
+*/alire/*
+config/*
+*/config/*
+
 # Latex auxiliary files
-documentation/*.aux
-documentation/*.log
-documentation/*.synctex.gz
-documentation/*.toc
+*.aux
+*.log
+*.synctex.gz
+*.toc
 

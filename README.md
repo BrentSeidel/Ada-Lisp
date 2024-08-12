@@ -21,27 +21,10 @@ internals.
 
 
 ## Dependencies and Building
-First, this (obviously) depends on having Ada installed.  I am using the
-AdaCore community edition, available here, https://www.adacore.com/download/more
-AdaCore also provides lots of documentation and tutorial material about Ada.
+This is available using alire (alr get bbs_lisp).  This will handle all
+of the dependencies.  Alire is available from https://alire.ada.dev.
 
-Second, you will also need to get the following repository,
-https://github.com/BrentSeidel/BBS-Ada  It should be installed next to
-the Ada-Lisp directory.
-
-> -\
->  + - BBS-Ada
->  + - Ada-Lisp
->  ...
-
-In Ada-Lisp, you will also need to create two subdirectories: "lib" and "obj" that are used by the build process.  Since they don't contain source artifacts, I didn't include them in the repository, but the compiler complains if they are missing.
-
-Once all this is done, you can either open lispq.gpr in the GPS (Gnat
-Programming Studio) IDE and build it that way, or you can used gprbuild
-on the command line:
-
-> gprbuild lispq.gpr
-
+If you do not with to use alire, you will need to fetch https://github.com/BrentSeidel/BBS-Ada.
 
 ## Interpreter/Compiler
 I am calling this an interpreter, though the boundaries are a bit fuzzy.  The input text is
