@@ -7,9 +7,7 @@ let me know.
 
 Note that this is my first attempt at writing a programming language, so I'm sure
 that things could have been done better.  It has been a learning experience and
-I'm pleased with how well that it's actually turned out.  This is still under
-active development so most things are subject to change, especially the program
-internals.
+I'm pleased with how well that it's actually turned out.
 
 
 [![Alire](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/bbs_lisp.json)]
@@ -50,7 +48,10 @@ finished, they can be translated into Ada and compiled.
 While the only guarentee is that this contains bugs and is missing features, it
 is usable.  I've been able to write some small programs in it both on the Mac and
 on the Arduino Due.  It is nice to be able to change what the Arduino Due is doing
-without having to do a whole compile-load cycle.
+without having to do a whole compile-load cycle.  I have also used it for automated
+testing on my [SimCPU](https://github.com/BrentSeidel/Sim-CPU) project and it has
+worked quite well.  Execution of the simulator can be scripted also allowing
+testing and debugging of code running on the simulator.
 
 A set of test cases have been written and code coverage checked.  The
 tests are useful verify that code changes still work and have helped to
