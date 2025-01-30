@@ -14,7 +14,7 @@
 --  Public License for more details.
 --
 --  You should have received a copy of the GNU General Public License along
---  with Tiny-Lisp. If not, see <https://www.gnu.org/licenses/>.--
+--  with Tiny-Lisp. If not, see <https://www.gnu.org/licenses/>.
 --
 package body bbs.lisp.parser.stdio is
    --
@@ -58,5 +58,13 @@ package body bbs.lisp.parser.stdio is
       Get_Line(self.buff, self.last);
       self.ptr := self.buff'First;
       return True;
+   end;
+   --
+   --  Check for input end of file
+   --
+   overriding
+   function is_eof(self : in out parser_stdio) return Boolean is
+   begin
+      return  (self.ptr <= self.last) and then (self.buff(self.ptr + 1) = eof_char);
    end;
 end;

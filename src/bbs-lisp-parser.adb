@@ -56,6 +56,12 @@ package body BBS.lisp.parser is
       head : cons_index;
       qtemp : constant Boolean := False;
    begin
+      --
+      --  Swallow any blank lines.
+      --
+      if buff.is_end then
+         return False;
+      end if;
       if list(buff, head, qtemp, True) then
          e := NIL_ELEM;
          if head /= NIL_CONS then

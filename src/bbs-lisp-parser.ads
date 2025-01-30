@@ -14,7 +14,7 @@
 --  Public License for more details.
 --
 --  You should have received a copy of the GNU General Public License along
---  with Tiny-Lisp. If not, see <https://www.gnu.org/licenses/>.--
+--  with Tiny-Lisp. If not, see <https://www.gnu.org/licenses/>.
 --
 --  This package handles the parsing of input.  Input can be a list, an atom
 --  of either a symbol or integer, or a comment.
@@ -35,6 +35,7 @@ private package BBS.lisp.parser is
    function is_end(self : parser_buffer) return Boolean is abstract;
    procedure next_line(self : in out parser_buffer) is abstract;
    function request_more(self : in out parser_buffer) return Boolean is abstract;
+   function is_eof(self : in out parser_buffer) return Boolean is abstract;
    --
    --  The main parser function.  Returns True if parsing is successful.
    --

@@ -76,8 +76,14 @@ package bbs.lisp.parser.stdio is
    overriding
    function request_more(self : in out parser_stdio) return Boolean;
    --
+   --  Check for input end of file
+   --
+   overriding
+   function is_eof(self : in out parser_stdio) return Boolean;
+   --
    --  Initializes the object to contain valid values
    --
    procedure init(self : in out parser_stdio);
-
+private
+   eof_char : constant Character := Character'Val(26);  --  Control-Z
 end;

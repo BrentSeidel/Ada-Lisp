@@ -70,6 +70,11 @@ package BBS.lisp.parser.string is
    overriding
    function request_more(self : in out parser_string) return Boolean is (False);
    --
+   --  Check for input end of file.  This is the same as an end of string.
+   --
+   overriding
+   function is_eof(self : in out parser_string) return Boolean is (BBS.lisp.strings.is_end(self.s));
+   --
    --  Initializes the object to contain valid values
    --
    procedure init(self : in out parser_string; s : string_index);
