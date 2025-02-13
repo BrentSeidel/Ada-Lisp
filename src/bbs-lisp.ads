@@ -27,6 +27,7 @@
 --  different, these will have to be customized for each target.
 --
 with Ada.Unchecked_Conversion;
+--limited with BBS.lisp.parser;
 package BBS.lisp
 with Abstract_State => (pvt_exit_flag, pvt_break_flag,
                         pvt_msg_flag, pvt_first_char_flag,
@@ -92,6 +93,7 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
                         ERR_ALLOCCONS,   --  Unable to allocate a cons
                         ERR_ALLOCSTR,    --  Unable to allocate a string
                         ERR_ALLOCSYM,    --  Unable to allocate a symbol
+                        ERR_END,         --  End of input
                         ERR_FEWPARAM,    --  Too few parameters
                         ERR_FIXSYM,      --  Attempt to change a fixed symbol
                         ERR_HARDWARE,    --  A hardware related error
@@ -159,6 +161,23 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    type t_newline is access procedure;
    type t_get_line is access procedure(Item : out String; Last : out Natural);
    --
+   --  Define an abstract class for providing data to the parser
+   --
+   type parser_buffer is abstract tagged limited null record;
+   type parser_ptr is access all parser_buffer'Class;
+   --
+   --  Methods that need to be provided by the parser_buffer.
+   --
+   function get_char(self : parser_buffer) return Character is abstract;
+   function is_next_digit(self : parser_buffer) return Boolean is abstract;
+   procedure next_char(self : in out parser_buffer) is abstract;
+   function not_end(self : parser_buffer) return Boolean is abstract;
+   function is_end(self : parser_buffer) return Boolean is abstract;
+   procedure next_line(self : in out parser_buffer) is abstract;
+   function request_more(self : in out parser_buffer) return Boolean is abstract;
+   function is_eof(self : in out parser_buffer) return Boolean is abstract;
+   procedure get_line(self : in out parser_buffer) is abstract;
+   --
    --  Type for access to function that implement lisp operations.
    --
    type execute_function is access procedure(e : out element_type; s : cons_index);
@@ -173,11 +192,24 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
                   p_new_line : t_newline; p_get_line : t_get_line)
      with Global => (Output => (input_stream, pvt_first_char_flag));
    --
+   --  Do initialization and define text I/O routines for a specific parser.  The
+   --  parser must be initialized, as needed, before use.
+   --
+   procedure init(p_put_line : t_put_line; p_put : t_put_line;
+                  p_new_line : t_newline; p_get_line : t_get_line; p : parser_ptr);
+   --
+   --  Select a different parser to use
+   --
+   procedure set_parser(p : parser_ptr);
+   --
    --  The read procedure/function reads the complete text of an s-expression
    --  from some input device.  The string is then parsed into a binary form
-   --  that can be evaluated.
+   --  that can be evaluated.  The versions with the prmpt parameter allows the
+   --  prompt not to be printed.
    --
    function read return Element_Type
+     with Global => (Input => (input_stream));
+   function read(prmpt : Boolean) return Element_Type
      with Global => (Input => (input_stream));
    --
    --  This procedure evaluates a binary s-expression and returns the results.
@@ -185,8 +217,10 @@ with Abstract_State => (pvt_exit_flag, pvt_break_flag,
    function eval(e : element_type) return element_type;
    --
    --  For ease of embedding, this implements the full read-evaluate-print loop.
-   --
+   --  The versions with the prmpt parameter allows the prompt not to be printed.
+   --  If prmpt is False, printing of results is also supressed.
    procedure repl;
+   procedure repl(prmpt : Boolean);
    --
    --  This function checks if the lisp read-eval-print loop should exit
    --

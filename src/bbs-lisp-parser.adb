@@ -111,7 +111,16 @@ package body BBS.lisp.parser is
          --  Check for the end of the list
          --
          test_char := buff.get_char;
-         if test_char = ')' then
+         --
+         --  Check for a comment
+         --
+         if test_char = ';' then
+            buff.next_line;
+            qtemp := False;
+         --
+         --  Check for end if list
+         --
+         elsif test_char = ')' then
             list_end := true;
             item := 0;
             if special_flag then
@@ -267,12 +276,6 @@ package body BBS.lisp.parser is
                BBS.lisp.conses.deref(head);
                return False;
             end if;
-            qtemp := False;
-         --
-         --  Check for a comment
-         --
-         elsif test_char = ';' then
-            buff.next_line;
             qtemp := False;
          --
          --  Quote the next element.

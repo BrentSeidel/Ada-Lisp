@@ -75,6 +75,11 @@ package BBS.lisp.parser.string is
    overriding
    function is_eof(self : in out parser_string) return Boolean is (BBS.lisp.strings.is_end(self.s));
    --
+   --  Nothing to do for a string
+   --
+   overriding
+   procedure get_line(self : in out parser_string) is null;
+   --
    --  Initializes the object to contain valid values
    --
    procedure init(self : in out parser_string; s : string_index);

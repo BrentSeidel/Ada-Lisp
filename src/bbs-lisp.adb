@@ -14,7 +14,7 @@
 --  Public License for more details.
 --
 --  You should have received a copy of the GNU General Public License along
---  with Tiny-Lisp. If not, see <https://www.gnu.org/licenses/>.--
+--  with Tiny-Lisp. If not, see <https://www.gnu.org/licenses/>.
 --
 with BBS.lisp.conses;
 use type BBS.lisp.conses.cons_ref_count;
@@ -35,11 +35,12 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                        pvt_first_char_flag => first_char_flag,
                        output_stream => (io_put_line, io_put, io_new_line),
                        input_stream => io_get_line,
-                       parse => parse_buff) is
+                       parse => (parse_buff, parse_ptr)) is
    --
    --  Buffer for keyboard input to parser
    --
    parse_buff : aliased BBS.lisp.parser.stdio.parser_stdio;
+   parse_ptr  : parser_ptr;
    --
    --  Initialize the data structures used in the lisp interpreter.  It resets
    --  the tables and adds the builtin operations to the symbol table.
@@ -55,23 +56,29 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       io_new_line := p_new_line;
       io_get_line := p_get_line;
       BBS.lisp.memory.reset_tables;
+      parse_ptr := parse_buff'Access;
       parse_buff.init;
-      --
-      --  Before element/value merge
-      --  init: cons size is  36 bytes
-      --  init: cons_table size is  18036 bytes
-      --  init: element size is  16 bytes
-      --  init: symbol size is  32 bytes
-      --  init: fixed symbol size is  40 bytes
-      --  init: symbol body size is  24 bytes
-      --
-      --  After element/value merge
-      --  init: cons size is  28 bytes
-      --  init: cons_table size is  14028 bytes
-      --  init: element size is  12 bytes
-      --  init: symbol size is  32 bytes
-      --  init: fixed symbol size is  40 bytes
-      --  init: symbol body size is  20 bytes
+   end;
+   --
+   --  Do initialization and define text I/O routines for a specific parser.  The
+   --  parser must be initialized, as needed, before use.
+   --
+   procedure init(p_put_line : t_put_line; p_put : t_put_line;
+                  p_new_line : t_newline; p_get_line : t_get_line; p : parser_ptr) is
+   begin
+      io_put_line := p_put_line;
+      io_put      := p_put;
+      io_new_line := p_new_line;
+      io_get_line := p_get_line;
+      BBS.lisp.memory.reset_tables;
+      parse_ptr := p;
+   end;
+   --
+   --  Select a different parser to use
+   --
+   procedure set_parser(p : parser_ptr) is
+   begin
+      parse_ptr := p;
    end;
    --
    --  Replacements for Text_IO to make porting to embedded systems easier.
@@ -110,8 +117,33 @@ with Refined_State => (pvt_exit_flag => exit_flag,
       el : element_type;
    begin
       Put(prompt1);
-      parse_buff.get_line;
-      dummy := BBS.lisp.parser.parse(parse_buff'Access, el);
+      if parse_ptr.is_eof then
+         exit_flag := True;
+         el := make_error(ERR_END);
+      else
+         parse_ptr.get_line;
+         dummy := BBS.lisp.parser.parse(parse_ptr, el);
+      end if;
+      return el;
+   end;
+   --
+   --  The read procedure reads text from an input device and parses it into
+   --  a S-expression.
+   --
+   function read(prmpt : Boolean) return Element_Type is
+      dummy : Boolean;
+      el : element_type;
+   begin
+      if prmpt then
+         Put(prompt1);
+      end if;
+      if parse_ptr.is_eof then
+         exit_flag := True;
+         el := make_error(ERR_END);
+      else
+         parse_ptr.get_line;
+         dummy := BBS.lisp.parser.parse(parse_ptr, el);
+      end if;
       return el;
    end;
    --
@@ -312,6 +344,28 @@ with Refined_State => (pvt_exit_flag => exit_flag,
                new_line;
             end if;
             print(r, True, True);
+         end if;
+         exit when exit_lisp;
+      end loop;
+   end;
+   --
+   procedure repl(prmpt : Boolean) is
+      e : element_type;
+      r : element_type;
+   begin
+      exit_flag := False;
+      break_flag := false;
+      while True loop
+         BBS.lisp.evaluate.set_exit_block(0);
+         e := read(prmpt);
+         if e.kind /= V_ERROR then
+            r := eval(e);
+            if not first_char_flag then
+               new_line;
+            end if;
+            if prmpt then
+               print(r, True, True);
+            end if;
          end if;
          exit when exit_lisp;
       end loop;

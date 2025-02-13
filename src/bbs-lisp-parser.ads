@@ -19,23 +19,24 @@
 --  This package handles the parsing of input.  Input can be a list, an atom
 --  of either a symbol or integer, or a comment.
 --
-private package BBS.lisp.parser is
+package BBS.lisp.parser is
    --
    --  Define an abstract class for providing data to the parser
    --
-   type parser_buffer is abstract tagged limited null record;
-   type parser_ptr is access all parser_buffer'Class;
+--   type parser_buffer is abstract tagged limited null record;
+--   type parser_ptr is access all parser_buffer'Class;
    --
    --  Methods that need to be provided by the parser_buffer.
    --
-   function get_char(self : parser_buffer) return Character is abstract;
-   function is_next_digit(self : parser_buffer) return Boolean is abstract;
-   procedure next_char(self : in out parser_buffer) is abstract;
-   function not_end(self : parser_buffer) return Boolean is abstract;
-   function is_end(self : parser_buffer) return Boolean is abstract;
-   procedure next_line(self : in out parser_buffer) is abstract;
-   function request_more(self : in out parser_buffer) return Boolean is abstract;
-   function is_eof(self : in out parser_buffer) return Boolean is abstract;
+--   function get_char(self : parser_buffer) return Character is abstract;
+--   function is_next_digit(self : parser_buffer) return Boolean is abstract;
+--   procedure next_char(self : in out parser_buffer) is abstract;
+--   function not_end(self : parser_buffer) return Boolean is abstract;
+--   function is_end(self : parser_buffer) return Boolean is abstract;
+--   procedure next_line(self : in out parser_buffer) is abstract;
+--   function request_more(self : in out parser_buffer) return Boolean is abstract;
+--   function is_eof(self : in out parser_buffer) return Boolean is abstract;
+--   procedure get_line(self : in out parser_buffer) is abstract;
    --
    --  The main parser function.  Returns True if parsing is successful.
    --
