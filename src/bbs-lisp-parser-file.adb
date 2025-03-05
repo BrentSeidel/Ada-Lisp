@@ -17,6 +17,7 @@
 --  with Tiny-Lisp. If not, see <https://www.gnu.org/licenses/>.
 --
 with Ada.Exceptions;
+with Ada.IO_Exceptions;
 with Ada.Strings.Unbounded.Text_IO;
 package body bbs.lisp.parser.file is
    --
@@ -31,6 +32,9 @@ package body bbs.lisp.parser.file is
       self.valid := True;
       self.ptr := 1;
    exception
+      when ADA.IO_EXCEPTIONS.NAME_ERROR =>
+         Ada.Text_IO.Put_Line("Unable to open file: " & name);
+         self.valid := False;
       when e : others =>
          Ada.Text_IO.Put_Line("Error opening file: " & name);
          Ada.Text_IO.Put_Line("Exception: " & Ada.Exceptions.Exception_Message(e));
