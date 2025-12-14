@@ -77,6 +77,19 @@ package BBS.lisp.parser is
    function hexDigit(c : Character) return uint32
      with Global => Null;
    pragma Pure_Function(hexDigit);
+   --
+   -- Is character an octal digit?
+   --
+   function isOct(c : Character) return Boolean is
+     (c >= '0' and c <= '7')
+     with Global => Null;
+   pragma Pure_Function(isOct);
+   --
+   --  Return the octal digit
+   --
+   function octDigit(c : Character) return uint32
+     with Global => Null;
+   pragma Pure_Function(octDigit);
 private
    --
    --  Utilities to assist in parsing
@@ -111,6 +124,12 @@ private
    procedure hex(buff : parser_ptr; value : out int32)
      with Global => Null;
    --
+   --  Octal numbers are read in as 32 bit unsigned integers and conerted
+   --  to signed 32 bit integers using an unchecked conversion.
+   --
+   procedure oct(buff : parser_ptr; value : out int32)
+     with Global => Null;
+   --
    --  Parse strings
    --
    function parse_str(buff : parser_ptr; s : out string_index) return Boolean;
@@ -120,4 +139,3 @@ private
    function parse_char(buff : parser_ptr; c : out Character) return Boolean
      with Global => Null;
 end;
-

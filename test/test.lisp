@@ -341,7 +341,7 @@
 (test-block)
 (setq test-block 0)
 ;
-;  Test Hex number representation
+;  Test Hexidecimal number representation
 ;
 (print "===> Testing hexidecimal numbers")
 (terpri)
@@ -364,6 +364,26 @@
   (verify-equal #xF 15 "Digit F")
   (verify-equal #xFF 255 "Hex FF")
   (verify-equal #x1000 4096 "Hex 1000"))
+(test-hex)
+(setq test-hex 0)
+;
+;  Test octal number representation
+;
+(print "===> Testing octal numbers")
+(terpri)
+(defun test-hex ()
+  (verify-equal #o0 0 "Digit 0")
+  (verify-equal #o1 1 "Digit 1")
+  (verify-equal #o2 2 "Digit 2")
+  (verify-equal #o3 3 "Digit 3")
+  (verify-equal #o4 4 "Digit 4")
+  (verify-equal #o5 5 "Digit 5")
+  (verify-equal #o6 6 "Digit 6")
+  (verify-equal #o7 7 "Digit 7")
+  (verify-equal #o10 8 "Octal 10")
+  (verify-equal #o377 255 "Octal 377")
+  (verify-equal #o777 511 "Octal 777")
+  (verify-equal #o1000 512 "Octal 1000"))
 (test-hex)
 (setq test-hex 0)
 ;

@@ -225,6 +225,21 @@ package body BBS.lisp.parser is
                      return False;
                   end if;
                end if;
+            elsif (buff.get_char = 'o') or (buff.get_char = 'O') then
+               --
+               --  Octal number
+               --
+               oct(buff, value);
+               e := (kind => V_INTEGER, i => value);
+               if BBS.lisp.conses.get_car(head) = NIL_ELEM then
+                  BBS.lisp.conses.set_car(head, e);
+               else
+                  if not append_to_list(head, e) then
+                     error("parse list", "Failed appending hexidecimal integer to list");
+                     BBS.lisp.conses.deref(head);
+                     return False;
+                  end if;
+               end if;
             elsif buff.get_char = '\' then
                --
                --  Character literal
@@ -428,6 +443,19 @@ package body BBS.lisp.parser is
       value := uint32_to_int32(accumulate);
    end;
    --
+   --  Parse an integer in octal notation.
+   --
+   procedure oct(buff : parser_ptr; value : out int32) is
+      accumulate : uint32 := 0;
+   begin
+      buff.next_char;
+      while isoct(buff.get_char) and buff.not_end loop
+         accumulate := accumulate*8 + octDigit(buff.get_char);
+         buff.next_char;
+      end loop;
+      value := uint32_to_int32(accumulate);
+   end;
+   --
    --  Parse strings.  Note that currently strings cannot be broken across lines.
    --  An end of line probably has the same effect as a closing quotation mark.
    --
@@ -541,6 +569,32 @@ package body BBS.lisp.parser is
             return 14;
          when 'F' | 'f' =>
             return 15;
+         when others =>
+            return 0;
+      end case;
+   end;
+   --
+   --  Return the octal digit
+   --
+   function octDigit(c : Character) return uint32 is
+   begin
+      case c is
+         when '0' =>
+            return 0;
+         when '1' =>
+            return 1;
+         when '2' =>
+            return 2;
+         when '3' =>
+            return 3;
+         when '4' =>
+            return 4;
+         when '5' =>
+            return 5;
+         when '6' =>
+            return 6;
+         when '7' =>
+            return 7;
          when others =>
             return 0;
       end case;
